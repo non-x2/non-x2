@@ -173,4 +173,69 @@
 
 ---
 
+---
+
+## 12. 看板エピソード 絵コンテ風ビート（A/Bパート構成）
+
+各話22分想定。Aパート（〜中CM）／Bパート（中CM〜EDイン）で起伏を設計。
+
+### 第1話「風が止んだ日」（つかみの回）
+**Aパート**
+1. アバン：30年前。暁の4戦士がエクスデスを封じ、世界が2つに裂ける幻想的なモノローグ（詳細は伏せる）。
+2. OP明け：風来坊バッツとチョコボのボコ、隕石の落下を目撃。
+3. 隕石の地でレナ（父=タイクーン王を捜索中）、記憶喪失の老人ガラフと遭遇。三者三様の動機が交差。
+**Bパート**
+4. 風の神殿へ。ゴブリン等とのファースト・バトルで“ジョブの片鱗”を提示。
+5. クライマックス：**風のクリスタルが砕ける**。崩壊スペクタクル＋初ジョブ獲得の高揚。
+6. 引き：海賊船の影、ボコとの一時の別れ。次回への期待で締める。
+
+### 第10話「受け継ぐ意志」（ガラフの最期・最大の山場）
+**Aパート**
+1. アバン：第2世界、ガラフの故郷。彼の真の素性（暁の4戦士の一人）が判明。
+2. クルル登場。祖父と孫の温かな掛け合いで“失う前の幸福”を積む（落差設計）。
+**Bパート**
+3. エクスデスとの絶望的な戦い。仲間が次々倒れる。
+4. **クライマックス：ガラフ、HP0でもなお立ち上がる**。理屈を超えた意志の作画。BGM「親愛なる友へ」。
+5. 力尽きる直前、クルルに意志と力を託す。静かな“継承”のカット。
+6. 引き：涙をこらえるクルルの「私が、おじいちゃんの代わりに戦う」。
+
+### 第12話「ギルガメッシュ、次元の彼方へ」（ビッグブリッヂの死闘）
+**Aパート**
+1. コメディ基調。橋の上、自称・武人ギルガメッシュが大見得を切って立ちはだかる。
+2. 軽妙な口上バトル。名曲「ビッグブリッヂの死闘」フル尺で。
+**Bパート**
+3. 形勢逆転、エクスデスにあっさり切り捨てられるギルガメッシュ（憎めない小物の悲哀）。
+4. 次元の彼方へ飛ばされる——が、終盤への伏線として“また会う”空気を残す。
+5. 引き：笑いと余韻の同居。シリアス一辺倒にしない緩急の代表回。
+
+---
+
+## 13. キービジュアル用 AI画像生成プロンプト集
+
+> のんラボの「AI 画像生成のプロンプト研究」テーマに沿った、キービジュアル/PV用のプロンプト試案。各画像生成AI（Midjourney / Stable Diffusion / DALL·E 等）向けに英語プロンプトを用意。日本語は意図メモ。
+
+### KV-1：メインキービジュアル（4人＋世界）
+- **意図**：青年バッツ中心に4人が並び立つ王道アニメKV。背後に2つに裂けた世界とクリスタル。
+- **Prompt（EN）**:
+  `anime key visual, four adventurers standing together on a windswept cliff, a cheerful young wanderer with a chocobo, a kind princess, a dashing pirate captain, an old knight, four glowing elemental crystals (wind blue, water teal, fire red, earth amber) floating in a fractured sky split into two worlds, epic JRPG fantasy, cinematic lighting, painterly 2D cel anime style, ultra detailed, dramatic composition --ar 16:9`
+
+### KV-2：ガラフの最期（情念の1枚）
+- **意図**：第10話の山場。満身創痍で立つ老騎士のシルエット、背後に巨大な樹の魔物。
+- **Prompt（EN）**:
+  `dramatic anime still, an old wounded knight standing defiantly with a broken sword, glowing with inner willpower, facing a colossal evil tree wizard silhouette, embers and light particles, tearful young girl reaching out in the foreground, somber heroic atmosphere, golden rim light, 2D cel anime, emotional cinematic key frame --ar 16:9`
+
+### KV-3：ギルガメッシュ参上（コメディ＆熱血）
+- **意図**：橋の上の名物バトル。ハイテンションな構図。
+- **Prompt（EN）**:
+  `dynamic anime action shot, a flamboyant multi-armed samurai-like warrior posing heroically on a long stone bridge over a misty chasm, comedic bravado expression, wind blowing his cape, speed lines, vivid colors, energetic shounen battle anime style, 2D cel shading --ar 16:9`
+
+### KV-4：ネオエクスデス／無（ラスボスの威圧）
+- **意図**：終盤の絶望。虚無に呑まれる空間。
+- **Prompt（EN）**:
+  `apocalyptic anime key visual, a monstrous fusion entity of tree, void and chaos looming over tiny heroes, swirling nothingness consuming the landscape, eerie green and violet palette, cosmic horror meets JRPG final boss, highly detailed, dramatic scale contrast, 2D cinematic anime --ar 16:9`
+
+> ⚠️ 生成画像はあくまで企画イメージ用。商用利用・公式キャラの再現を目的とせず、原作 © SQUARE ENIX の権利を尊重すること。
+
+---
+
 *Document by のんラボ / non-x2 — 「個人が AI で何ができるか」の実証実験の一環として作成。原作設定はネット上の公開資料を参照して確認。*
