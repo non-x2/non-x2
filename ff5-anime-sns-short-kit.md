@@ -2,6 +2,9 @@
 
 > ※ファンメイドの「もしアニメ化したら」企画の試作素材。公式企画ではありません。原作 © SQUARE ENIX を尊重した非営利の創作メモです。
 > 関連：[TVシリーズ企画書](./ff5-anime-adaptation.md) ／ [劇場版＆設定資料集](./ff5-anime-movie-and-worldbook.md) ／ [第1話アバン試作キット](./ff5-anime-scene01-pilot-kit.md)
+>
+> 🎨 **縦型ビジュアル絵コンテ（30秒版・AI静止画つき・Gamma）**：https://gamma.app/generations/ynDq6zKTyksoUI0eNygq3
+> ※30秒版（§2）の10カットを縦構図のキーフレームで可視化した試作ビジュアル。
 
 ---
 
