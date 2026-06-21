@@ -2,6 +2,9 @@
 
 > ※ファンメイドの「もしアニメ化したら」企画の試作素材。公式企画ではありません。原作 © SQUARE ENIX を尊重した非営利の創作メモです。
 > 関連：[TVシリーズ企画書](./ff5-anime-adaptation.md) ／ [劇場版＆設定資料集](./ff5-anime-movie-and-worldbook.md)
+>
+> 🎨 **ビジュアル絵コンテ（AI静止画つき・Gamma）**：https://gamma.app/docs/cc93a9blitvt2x1
+> ※10カットのキーフレームを2Dセルアニメ調で可視化した試作ビジュアル。本キットの§1絵コンテと対応。
 
 ---
 
