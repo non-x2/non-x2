@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>台風の今の状況｜のんラボ</title>
+<style>
+  :root {
+    --navy: #1a3c6e;
+    --sky: #4a90d9;
+    --accent: #ff6b35;
+    --green: #2f9e6e;
+    --bg: #f4f7fb;
+    --card: #ffffff;
+    --text: #22303f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+  }
+  header {
+    background: linear-gradient(135deg, var(--navy), var(--sky));
+    color: #fff;
+    padding: 2.2rem 1.2rem 1.8rem;
+    text-align: center;
+  }
+  header h1 {
+    margin: 0 0 0.4rem;
+    font-size: 1.5rem;
+  }
+  header p {
+    margin: 0;
+    font-size: 0.85rem;
+    opacity: 0.9;
+  }
+  nav.tabs {
+    max-width: 720px;
+    margin: -0.9rem auto 0;
+    padding: 0 1.2rem;
+    display: flex;
+    gap: 0.5rem;
+    position: relative;
+  }
+  nav.tabs a {
+    flex: 1;
+    text-align: center;
+    text-decoration: none;
+    font-size: 0.82rem;
+    padding: 0.6rem 0.5rem;
+    border-radius: 10px;
+    background: #fff;
+    color: var(--navy);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    font-weight: bold;
+  }
+  nav.tabs a.active {
+    background: var(--navy);
+    color: #fff;
+  }
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 1.6rem 1.2rem 1.2rem;
+  }
+  .snapshot {
+    background: #fff3ec;
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+    font-size: 0.85rem;
+    margin: 0 0 1.6rem;
+  }
+  .snapshot strong { color: var(--accent); }
+  section {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 1.2rem 1.3rem;
+    margin-bottom: 1.2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  section h2 {
+    font-size: 1.05rem;
+    margin: 0 0 0.9rem;
+    color: var(--navy);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .status-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.8rem;
+  }
+  .status-item {
+    border-left: 4px solid var(--sky);
+    padding: 0.2rem 0 0.2rem 0.9rem;
+  }
+  .status-item.done {
+    border-left-color: #9aa7b5;
+  }
+  .status-item.watch {
+    border-left-color: var(--accent);
+  }
+  .status-item .tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    margin-bottom: 0.3rem;
+    font-weight: bold;
+  }
+  .tag.done { background: #eceff2; color: #5a6673; }
+  .tag.watch { background: #fff0e8; color: var(--accent); }
+  .status-item h3 {
+    margin: 0 0 0.3rem;
+    font-size: 0.95rem;
+  }
+  .status-item p {
+    margin: 0;
+    font-size: 0.86rem;
+    color: #445;
+  }
+  ul.links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.6rem;
+  }
+  ul.links a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-decoration: none;
+    color: var(--text);
+    background: #f0f5fb;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    font-size: 0.92rem;
+  }
+  ul.links a .arrow { color: var(--sky); font-weight: bold; }
+  .sources {
+    font-size: 0.78rem;
+    color: #7a8a9a;
+  }
+  .sources li { margin-bottom: 0.3rem; }
+  .sources a { color: var(--sky); }
+  footer {
+    text-align: center;
+    font-size: 0.75rem;
+    color: #7a8a9a;
+    padding: 1.5rem 1rem 2.5rem;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🌀 台風の今の状況</h1>
+  <p>2026年7月1日時点のスナップショット</p>
+</header>
+
+<nav class="tabs">
+  <a href="index.html">📡 リンク集・備え</a>
+  <a href="status.html" class="active">📝 今の状況</a>
+</nav>
+
+<main>
+
+  <div class="snapshot">
+    <strong>⚠️ これはスナップショットです。</strong>
+    Web検索時点（2026年7月1日）の情報をまとめたもので、リアルタイム更新はされません。
+    最新情報は必ずページ下部の公式リンクでご確認ください。
+  </div>
+
+  <section>
+    <h2>🕐 現在の状況</h2>
+    <ul class="status-list">
+      <li class="status-item">
+        <span class="tag" style="background:#e8f6ee;color:var(--green);">現在</span>
+        <h3>アクティブな台風は確認されず</h3>
+        <p>7月1日時点で「台風◯号」として発生中のものは確認できませんでした。ただし後述の「たまご」に注意。</p>
+      </li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>✅ すでに通過した台風</h2>
+    <ul class="status-list">
+      <li class="status-item done">
+        <span class="tag done">通過済み</span>
+        <h3>台風7号（メーカラー）</h3>
+        <p>6月27日21時に温帯低気圧へ変化し、台風情報は終了。関東接近時は太平洋側で非常に激しい雨をもたらした。地盤がゆるんでいる可能性があり、少しの雨でも土砂災害に注意。</p>
+      </li>
+      <li class="status-item done">
+        <span class="tag done">通過済み</span>
+        <h3>台風8号（ヒーゴス）</h3>
+        <p>同じく6月27日に伊豆半島の南〜房総半島の東を通過し、関東の東で温帯低気圧化。台風7号と連続通過し、関東・静岡で大雨警戒となった。</p>
+      </li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>👀 これから注意すべき動き（台風のたまご）</h2>
+    <ul class="status-list">
+      <li class="status-item watch">
+        <span class="tag watch">要注意</span>
+        <h3>フィリピン東・南東海上の2つの低圧部</h3>
+        <p>6月28〜29日ごろにそれぞれ熱帯低気圧へ変わる見込みとの気象予報士解説あり。東側は発達しながら西寄りに進む可能性があり、南西諸島で風が強まるおそれ。台風9号・10号となる可能性が指摘されている。</p>
+      </li>
+      <li class="status-item watch">
+        <span class="tag watch">要注意</span>
+        <h3>7月上旬〜中旬、日本への影響の可能性</h3>
+        <p>上記の熱帯低気圧（台風候補）が発達しながら日本へ近づく可能性が報じられている。あわせて7月1〜3日ごろは梅雨前線の活動も活発で、台風とは別に大雨リスクがある。</p>
+      </li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>📡 最新情報はこちらで確認</h2>
+    <ul class="links">
+      <li><a href="https://www.jma.go.jp/bosai/map.html#7/34.253/138.658/&elem=root&typhoon=all&contents=typhoon" target="_blank" rel="noopener noreferrer"><span>気象庁｜台風情報</span><span class="arrow">→</span></a></li>
+      <li><a href="https://tenki.jp/bousai/typhoon/" target="_blank" rel="noopener noreferrer"><span>tenki.jp｜台風情報</span><span class="arrow">→</span></a></li>
+      <li><a href="https://weathernews.jp/onebox/typhoon/" target="_blank" rel="noopener noreferrer"><span>ウェザーニュース｜台風情報</span><span class="arrow">→</span></a></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>🔎 情報源</h2>
+    <ul class="sources">
+      <li><a href="https://tenki.jp/bousai/typhoon/2607/" target="_blank" rel="noopener noreferrer">台風7号(2026年) / 最新位置・進路予想 - tenki.jp</a></li>
+      <li><a href="https://tenki.jp/bousai/typhoon/2608/" target="_blank" rel="noopener noreferrer">台風8号(2026年) / 最新位置・進路予想 - tenki.jp</a></li>
+      <li><a href="https://weathernews.jp/news/202606/270021/" target="_blank" rel="noopener noreferrer">台風8号・台風7号が南岸を通過 - ウェザーニュース</a></li>
+      <li><a href="https://weathernews.jp/news/202606/270071/" target="_blank" rel="noopener noreferrer">台風8号は関東の東へ - ウェザーニュース</a></li>
+      <li><a href="https://news.livedoor.com/article/detail/31676734/" target="_blank" rel="noopener noreferrer">7月上旬に発生予想の台風9号・10号候補を徹底解説 - livedoor NEWS</a></li>
+      <li><a href="https://news.yahoo.co.jp/expert/articles/ab5317991a280d4611e14dd3b62ee930d4012173" target="_blank" rel="noopener noreferrer">台風9号発生でまたもや台風と熱帯低気圧が渋滞 - Yahoo!ニュース</a></li>
+    </ul>
+  </section>
+
+</main>
+
+<footer>
+  のんラボ制作｜このページは更新されないスナップショットです。避難行動は必ず気象庁・自治体の最新の公式発表に従ってください。
+</footer>
+
+</body>
+</html>

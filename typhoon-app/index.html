@@ -36,10 +36,34 @@
     font-size: 0.9rem;
     opacity: 0.9;
   }
+  nav.tabs {
+    max-width: 720px;
+    margin: -0.9rem auto 0;
+    padding: 0 1.2rem;
+    display: flex;
+    gap: 0.5rem;
+    position: relative;
+  }
+  nav.tabs a {
+    flex: 1;
+    text-align: center;
+    text-decoration: none;
+    font-size: 0.82rem;
+    padding: 0.6rem 0.5rem;
+    border-radius: 10px;
+    background: #fff;
+    color: var(--navy);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    font-weight: bold;
+  }
+  nav.tabs a.active {
+    background: var(--navy);
+    color: #fff;
+  }
   main {
     max-width: 720px;
     margin: 0 auto;
-    padding: 1.2rem;
+    padding: 1.6rem 1.2rem 1.2rem;
   }
   .notice {
     background: #fff3ec;
@@ -143,6 +167,11 @@
   <h1>🌀 台風情報まとめ</h1>
   <p>公式の最新情報はリンク先で確認してください</p>
 </header>
+
+<nav class="tabs">
+  <a href="index.html" class="active">📡 リンク集・備え</a>
+  <a href="status.html">📝 今の状況</a>
+</nav>
 
 <main>
 
