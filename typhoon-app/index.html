@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>台風情報まとめ｜のんラボ</title>
+<style>
+  :root {
+    --navy: #1a3c6e;
+    --sky: #4a90d9;
+    --accent: #ff6b35;
+    --bg: #f4f7fb;
+    --card: #ffffff;
+    --text: #22303f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+  }
+  header {
+    background: linear-gradient(135deg, var(--navy), var(--sky));
+    color: #fff;
+    padding: 2.2rem 1.2rem 1.8rem;
+    text-align: center;
+  }
+  header h1 {
+    margin: 0 0 0.4rem;
+    font-size: 1.6rem;
+  }
+  header p {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.9;
+  }
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 1.2rem;
+  }
+  .notice {
+    background: #fff3ec;
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+    font-size: 0.85rem;
+    margin: 1rem 0 1.6rem;
+  }
+  section {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 1.2rem 1.3rem;
+    margin-bottom: 1.2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  section h2 {
+    font-size: 1.05rem;
+    margin: 0 0 0.8rem;
+    color: var(--navy);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  ul.links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.6rem;
+  }
+  ul.links a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-decoration: none;
+    color: var(--text);
+    background: #f0f5fb;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    font-size: 0.92rem;
+    transition: background 0.15s ease;
+  }
+  ul.links a:hover, ul.links a:active {
+    background: #dbe9fa;
+  }
+  ul.links a .arrow {
+    color: var(--sky);
+    font-weight: bold;
+  }
+  .trivia {
+    border-left: 4px solid var(--sky);
+    padding-left: 0.9rem;
+    margin-bottom: 0.9rem;
+  }
+  .trivia:last-child { margin-bottom: 0; }
+  .trivia dt {
+    font-weight: bold;
+    margin-bottom: 0.25rem;
+    color: var(--navy);
+    font-size: 0.95rem;
+  }
+  .trivia dd {
+    margin: 0;
+    font-size: 0.88rem;
+    color: #445;
+  }
+  .checklist {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.5rem;
+  }
+  .checklist li {
+    font-size: 0.9rem;
+    padding: 0.6rem 0.8rem;
+    background: #f0f5fb;
+    border-radius: 8px;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .checklist li::before {
+    content: "☐";
+    color: var(--sky);
+    font-size: 1.05rem;
+    line-height: 1.2;
+  }
+  footer {
+    text-align: center;
+    font-size: 0.75rem;
+    color: #7a8a9a;
+    padding: 1.5rem 1rem 2.5rem;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🌀 台風情報まとめ</h1>
+  <p>公式の最新情報はリンク先で確認してください</p>
+</header>
+
+<main>
+
+  <div class="notice">
+    ⚠️ このページはリアルタイムの台風進路・気象データを独自に取得するものではありません。<br>
+    最新・正確な情報は、下記の気象庁など公式サイトを必ずご確認ください。
+  </div>
+
+  <section>
+    <h2>📡 公式・最新情報リンク</h2>
+    <ul class="links">
+      <li><a href="https://www.jma.go.jp/bosai/map.html#5/34.5/139/&elem=typhoon&contents=typhoon" target="_blank" rel="noopener noreferrer"><span>気象庁｜台風情報</span><span class="arrow">→</span></a></li>
+      <li><a href="https://www.jma.go.jp/bosai/warning/" target="_blank" rel="noopener noreferrer"><span>気象庁｜警報・注意報</span><span class="arrow">→</span></a></li>
+      <li><a href="https://www.nhk.or.jp/kishou-saigai/" target="_blank" rel="noopener noreferrer"><span>NHK｜気象・災害情報</span><span class="arrow">→</span></a></li>
+      <li><a href="https://tenki.jp/bousai/typhoon/" target="_blank" rel="noopener noreferrer"><span>tenki.jp｜台風情報</span><span class="arrow">→</span></a></li>
+      <li><a href="https://typhoon.weathernews.com/" target="_blank" rel="noopener noreferrer"><span>ウェザーニュース｜台風情報</span><span class="arrow">→</span></a></li>
+      <li><a href="https://www.kkr.mlit.go.jp/river/" target="_blank" rel="noopener noreferrer"><span>国土交通省｜川の防災情報</span><span class="arrow">→</span></a></li>
+      <li><a href="https://www.bousai.go.jp/updates/" target="_blank" rel="noopener noreferrer"><span>内閣府防災｜お知らせ</span><span class="arrow">→</span></a></li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>🎒 来る前にやることチェックリスト</h2>
+    <ul class="checklist">
+      <li>ベランダ・庭の飛びそうなものを室内にしまう</li>
+      <li>窓に養生テープや雨戸で補強する</li>
+      <li>断水・停電に備えて水と充電を確保する</li>
+      <li>非常持ち出し袋の中身を確認する</li>
+      <li>お住まいの自治体のハザードマップ・避難場所を確認する</li>
+      <li>不要不急の外出予定を前倒し・中止する</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>📘 台風の豆知識</h2>
+    <dl>
+      <div class="trivia">
+        <dt>台風の「強さ」と「大きさ」は別物</dt>
+        <dd>「強さ」は最大風速による分類（強い・非常に強い・猛烈な）、「大きさ」は強風域の半径による分類（大型・超大型）。両方をあわせて発表される。</dd>
+      </div>
+      <div class="trivia">
+        <dt>進路予報円の意味</dt>
+        <dd>天気図の丸い円は「この中に台風の中心が入る確率70%」を示す範囲。円が大きいほど予測の不確実性が高い。</dd>
+      </div>
+      <div class="trivia">
+        <dt>「暴風域」と「強風域」の違い</dt>
+        <dd>暴風域は平均風速25m/s以上、強風域は15m/s以上の範囲。暴風域に入ると外出が危険なレベルになる。</dd>
+      </div>
+      <div class="trivia">
+        <dt>台風の右側は要注意</dt>
+        <dd>台風の進行方向に対して右側は、台風自体の風と周囲の風が重なり風が強まりやすい（危険半円）。</dd>
+      </div>
+    </dl>
+  </section>
+
+</main>
+
+<footer>
+  のんラボ制作｜このページはブラウザだけで動く簡易まとめです。避難行動は必ず自治体・気象庁の公式発表に従ってください。
+</footer>
+
+</body>
+</html>
