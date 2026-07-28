@@ -3,235 +3,851 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="台風接近時の備えチェックリストと、最新状況・進路の模式図をまとめたページ。">
+<meta name="color-scheme" content="light dark">
 <title>台風情報まとめ｜のんラボ</title>
+</head>
+<body>
 <style>
+  /* ライト（既定）。ダークは下で同じ変数だけを上書きする。
+     ダークの指定は「OSがダーク かつ 手動でライト指定していない」場合と、
+     「手動でダーク指定」の場合の2つをまとめて書いている。 */
   :root {
     --navy: #1a3c6e;
     --sky: #4a90d9;
     --accent: #ff6b35;
+    --green: #2f9e6e;
     --bg: #f4f7fb;
     --card: #ffffff;
     --text: #22303f;
+    --text-dim: #58697a;
+    --pill-bg: #f0f5fb;
+    --pill-bg-hover: #dbe9fa;
+    --notice-bg: #fff3ec;
+    --notice-border: #ff6b35;
+    --border-soft: rgba(26, 60, 110, 0.08);
+    --shadow: 0 2px 10px rgba(20, 40, 70, 0.07);
+    --sev-strong: #c4841a;
+    --sev-vstrong: #ff6b35;
+    --sev-violent: #d6402f;
+    --tab-active-bg: #1a3c6e;
+    --tab-active-fg: #ffffff;
+    --accent-ink: #c0431a;
+    --sev-strong-ink: #8a5a0a;
+    --sev-vstrong-ink: #c0431a;
+    --sev-violent-ink: #b5301f;
+    --green-ink: #1e7a55;
+    --link-ink: #1f5fa8;
+    --header-from: #1a3c6e;
+    --header-to: #4a90d9;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --navy: #7fb1ec;
+      --sky: #5aa4ef;
+      --accent: #ff8a5c;
+      --green: #4bc190;
+      --bg: #12161d;
+      --card: #1b212b;
+      --text: #e7edf5;
+      --text-dim: #9aa8b8;
+      --pill-bg: #232b37;
+      --pill-bg-hover: #2c3949;
+      --notice-bg: #2c2115;
+      --notice-border: #ff8a5c;
+      --border-soft: rgba(255, 255, 255, 0.08);
+      --shadow: 0 2px 14px rgba(0, 0, 0, 0.35);
+      --sev-strong: #e0a636;
+      --sev-vstrong: #ff8a5c;
+      --sev-violent: #ff6a56;
+      --tab-active-bg: #2a4a72;
+      --tab-active-fg: #eaf2fd;
+      --accent-ink: #ff9d73;
+      --sev-strong-ink: #e8b44a;
+      --sev-vstrong-ink: #ff9d73;
+      --sev-violent-ink: #ff8271;
+      --green-ink: #58cf9c;
+      --link-ink: #7fc0ff;
+      --header-from: #152a45;
+      --header-to: #1f4570;
+    }
+  }
+  :root[data-theme="dark"] {
+    --navy: #7fb1ec;
+    --sky: #5aa4ef;
+    --accent: #ff8a5c;
+    --green: #4bc190;
+    --bg: #12161d;
+    --card: #1b212b;
+    --text: #e7edf5;
+    --text-dim: #9aa8b8;
+    --pill-bg: #232b37;
+    --pill-bg-hover: #2c3949;
+    --notice-bg: #2c2115;
+    --notice-border: #ff8a5c;
+    --border-soft: rgba(255, 255, 255, 0.08);
+    --shadow: 0 2px 14px rgba(0, 0, 0, 0.35);
+    --sev-strong: #e0a636;
+    --sev-vstrong: #ff8a5c;
+    --sev-violent: #ff6a56;
+    --tab-active-bg: #2a4a72;
+    --tab-active-fg: #eaf2fd;
+    --accent-ink: #ff9d73;
+    --sev-strong-ink: #e8b44a;
+    --sev-vstrong-ink: #ff9d73;
+    --sev-violent-ink: #ff8271;
+    --green-ink: #58cf9c;
+    --link-ink: #7fc0ff;
+    --header-from: #152a45;
+    --header-to: #1f4570;
   }
   * { box-sizing: border-box; }
+  html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+  }
   body {
     margin: 0;
-    font-family: "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+    font-family: "Hiragino Sans", "Yu Gothic", "Meiryo", -apple-system, sans-serif;
     background: var(--bg);
     color: var(--text);
     line-height: 1.7;
+    transition: background 0.2s ease, color 0.2s ease;
   }
   header {
-    background: linear-gradient(135deg, var(--navy), var(--sky));
+    background: linear-gradient(135deg, var(--header-from), var(--header-to));
     color: #fff;
-    padding: 2.2rem 1.2rem 1.8rem;
+    padding: 2rem 1.2rem 1.7rem;
     text-align: center;
   }
   header h1 {
-    margin: 0 0 0.4rem;
-    font-size: 1.6rem;
+    margin: 0 0 0.35rem;
+    font-size: 1.5rem;
+    text-wrap: balance;
   }
   header p {
     margin: 0;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     opacity: 0.9;
   }
+  header p.updated-badge {
+    display: inline-block;
+    margin-top: 0.6rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    background: rgba(255,255,255,0.16);
+    padding: 0.25rem 0.7rem;
+    border-radius: 999px;
+    opacity: 1;
+  }
   nav.tabs {
-    max-width: 720px;
-    margin: -0.9rem auto 0;
-    padding: 0 1.2rem;
+    max-width: 640px;
+    margin: -0.85rem auto 0;
+    padding: 0 1.1rem;
     display: flex;
     gap: 0.5rem;
-    position: relative;
   }
-  nav.tabs a {
+  nav.tabs button {
     flex: 1;
     text-align: center;
-    text-decoration: none;
+    font: inherit;
     font-size: 0.82rem;
-    padding: 0.6rem 0.5rem;
+    font-weight: 700;
+    padding: 0.65rem 0.5rem;
     border-radius: 10px;
-    background: #fff;
+    border: none;
+    background: var(--card);
     color: var(--navy);
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    font-weight: bold;
+    box-shadow: var(--shadow);
+    cursor: pointer;
   }
-  nav.tabs a.active {
-    background: var(--navy);
-    color: #fff;
+  nav.tabs button:focus-visible {
+    outline: 2px solid var(--sky);
+    outline-offset: 2px;
+  }
+  nav.tabs button[aria-selected="true"] {
+    background: var(--tab-active-bg);
+    color: var(--tab-active-fg);
   }
   main {
-    max-width: 720px;
+    max-width: 640px;
     margin: 0 auto;
-    padding: 1.6rem 1.2rem 1.2rem;
+    padding: 1.5rem 1.1rem 1.1rem;
+    display: grid;
+    gap: 1.1rem;
   }
-  .notice {
-    background: #fff3ec;
-    border: 1px solid var(--accent);
+  .panel:focus-visible { outline: 2px solid var(--sky); outline-offset: 4px; }
+  .panel { display: grid; gap: 1.1rem;
+    background: none; border: 0; padding: 0; box-shadow: none; border-radius: 0; }
+  .panel[hidden] { display: none; }
+  .snapshot {
+    background: var(--notice-bg);
+    border: 1px solid var(--notice-border);
     border-radius: 10px;
     padding: 0.9rem 1rem;
     font-size: 0.85rem;
-    margin: 1rem 0 1.6rem;
   }
+  .snapshot strong { color: var(--accent-ink); }
+  .inline-cta {
+    display: inline-block;
+    margin-top: 0.5rem;
+    font-weight: 700;
+    font-size: 0.84rem;
+    color: var(--tab-active-fg);
+    background: var(--tab-active-bg);
+    padding: 0.5rem 0.9rem;
+    border-radius: 8px;
+    text-decoration: none;
+    min-height: 44px;
+    line-height: 1.6;
+  }
+  .inline-cta:focus-visible { outline: 2px solid var(--sky); outline-offset: 2px; }
+  .snapshot.is-stale { border-width: 2px; }
   section {
     background: var(--card);
+    border: 1px solid var(--border-soft);
     border-radius: 14px;
-    padding: 1.2rem 1.3rem;
-    margin-bottom: 1.2rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    padding: 1.15rem 1.25rem;
+    box-shadow: var(--shadow);
   }
   section h2 {
-    font-size: 1.05rem;
-    margin: 0 0 0.8rem;
+    font-size: 1.02rem;
+    margin: 0 0 0.85rem;
     color: var(--navy);
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
+    text-wrap: balance;
   }
-  ul.links {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 0.6rem;
-  }
+  ul.links { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.55rem; }
   ul.links a {
     display: flex;
     justify-content: space-between;
     align-items: center;
     text-decoration: none;
     color: var(--text);
-    background: #f0f5fb;
-    padding: 0.75rem 1rem;
+    background: var(--pill-bg);
+    padding: 0.7rem 0.95rem;
     border-radius: 10px;
-    font-size: 0.92rem;
-    transition: background 0.15s ease;
-  }
-  ul.links a:hover, ul.links a:active {
-    background: #dbe9fa;
-  }
-  ul.links a .arrow {
-    color: var(--sky);
-    font-weight: bold;
-  }
-  .trivia {
-    border-left: 4px solid var(--sky);
-    padding-left: 0.9rem;
-    margin-bottom: 0.9rem;
-  }
-  .trivia:last-child { margin-bottom: 0; }
-  .trivia dt {
-    font-weight: bold;
-    margin-bottom: 0.25rem;
-    color: var(--navy);
-    font-size: 0.95rem;
-  }
-  .trivia dd {
-    margin: 0;
-    font-size: 0.88rem;
-    color: #445;
-  }
-  .checklist {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    gap: 0.5rem;
-  }
-  .checklist li {
     font-size: 0.9rem;
-    padding: 0.6rem 0.8rem;
-    background: #f0f5fb;
+  }
+  ul.links a:hover { background: var(--pill-bg-hover); }
+  ul.links a .arrow { color: var(--sky); font-weight: bold; }
+  .checklist { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.5rem; }
+  .checklist li { display: block; }
+  .checklist label {
+    font-size: 0.88rem;
+    padding: 0.65rem 0.8rem;
+    background: var(--pill-bg);
     border-radius: 8px;
     display: flex;
+    gap: 0.6rem;
     align-items: flex-start;
-    gap: 0.5rem;
+    cursor: pointer;
+    min-height: 44px;
   }
-  .checklist li::before {
-    content: "☐";
-    color: var(--sky);
-    font-size: 1.05rem;
-    line-height: 1.2;
+  .checklist input {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    margin: 0.15rem 0 0;
+    accent-color: var(--sky);
+    cursor: pointer;
   }
+  .checklist input:focus-visible { outline: 2px solid var(--sky); outline-offset: 2px; }
+  .checklist input:checked + span { color: var(--text-dim); text-decoration: line-through; }
+  .trivia { border-left: 3px solid var(--sky); padding-left: 0.85rem; margin-bottom: 0.85rem; }
+  .trivia:last-child { margin-bottom: 0; }
+  .trivia dt { font-weight: 700; margin-bottom: 0.2rem; color: var(--navy); font-size: 0.92rem; }
+  .trivia dd { margin: 0; font-size: 0.86rem; color: var(--text-dim); }
+  .status-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.75rem; }
+  .status-item { border-left: 3px solid var(--sky); padding-left: 0.85rem; }
+  .status-item.done { border-left-color: var(--text-dim); opacity: 0.85; }
+  .status-item.watch { border-left-color: var(--accent); }
+  .status-item .tag {
+    display: inline-block;
+    font-size: 0.75rem;
+    padding: 0.12rem 0.5rem;
+    border-radius: 999px;
+    margin-bottom: 0.3rem;
+    font-weight: 700;
+  }
+  .tag.now { background: rgba(47,158,110,0.15); color: var(--green-ink); }
+  .tag.done { background: rgba(88,105,122,0.15); color: var(--text-dim); }
+  .tag.watch { background: rgba(255,107,53,0.15); color: var(--accent-ink); }
+  .status-item h3 { margin: 0 0 0.25rem; font-size: 0.92rem; }
+  .status-item p { margin: 0; font-size: 0.84rem; color: var(--text-dim); }
+  .sources { font-size: 0.8rem; color: var(--text-dim); padding-left: 1.1rem; margin: 0; }
+  .sources li { margin-bottom: 0.3rem; }
+  .sources a { color: var(--link-ink); }
   footer {
     text-align: center;
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    padding: 1.4rem 1rem 2.2rem;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .panel { animation: fade 0.18s ease; }
+  }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+
+  /* --- マップタブ --- */
+  .map-note {
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    margin: -0.3rem 0 0.2rem;
+  }
+  .map-note-spaced { margin: 0.9rem 0 0; }
+  .map-card > .map-svg { margin-top: 0.2rem; }
+  .map-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    /* 地図は写真と同じ扱い：テーマで反転させない固定色 */
+    background: linear-gradient(180deg, #2d6ba8 0%, #14395f 100%);
+  }
+  .map-svg .land { fill: #e8eef6; }
+  .map-svg .label {
+    font-size: 11px;
+    font-weight: 700;
+    fill: #ffffff;
+    paint-order: stroke fill;
+    stroke: #0d2c4d;
+    stroke-width: 3px;
+    stroke-linejoin: round;
+  }
+  .map-svg .track {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.1;
+    stroke-dasharray: 3 2.2;
+  }
+  .map-svg .track-13 { stroke: #ff6b35; stroke-width: 2.2; }
+  .map-svg .track-unsure {
+    stroke: #cfe0f0;
+    stroke-width: 2;
+    stroke-dasharray: 2 3;
+    opacity: 0.85;
+  }
+  .map-svg .arrow-head { fill: #cfe0f0; opacity: 0.85; }
+  .map-svg .waypoint { fill: #ffffff; stroke: #ff6b35; stroke-width: 1.4; }
+  .map-svg .now-pos {
+    fill: #ffffff;
+    stroke: #0d2c4d;
+    stroke-width: 1.6;
+  }
+  .map-svg .now-pos-13 { stroke: #ff6b35; stroke-width: 2.4; }
+  .map-svg .okinawa-dot {
+    fill: #e8eef6;
+    stroke: #0d2c4d;
+    stroke-width: 0.6;
+  }
+  .map-svg .label-dim { fill: #d7e4f2; }
+  .map-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1rem;
+    font-size: 0.76rem;
+    color: var(--text-dim);
+    margin-top: 0.7rem;
+  }
+  .map-legend span { display: inline-flex; align-items: center; gap: 0.35rem; }
+  .swatch { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+  .scale-key {
+    margin: 1rem 0 0;
+    padding: 0.8rem 0.9rem;
+    background: var(--pill-bg);
+    border-radius: 10px;
+    font-size: 0.82rem;
+  }
+  .scale-key > div { display: flex; gap: 0.6rem; margin-bottom: 0.4rem; }
+  .scale-key > div:last-child { margin-bottom: 0; }
+  .scale-key dt {
+    flex: none;
+    width: 5.5em;
+    font-weight: 700;
+    color: var(--sev-vstrong-ink);
+  }
+  .scale-key dd { margin: 0; color: var(--text-dim); }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+
+  /* --- 地図アニメーション：進路の流れ＋現在地の脈動 --- */
+  .map-svg .now-pos-pulse {
+    fill: none;
+    stroke-width: 2;
+  }
+  .map-svg .now-pos-pulse-13 { stroke: #ff6b35; }
+  @media (prefers-reduced-motion: no-preference) {
+    .map-svg .track {
+      animation: dash-flow 2.6s linear infinite;
+    }
+    .map-svg .now-pos-pulse {
+      animation: pulse-ring 2.4s ease-out infinite;
+    }
+  }
+  @keyframes dash-flow {
+    to { stroke-dashoffset: -20.8; }
+  }
+  @keyframes pulse-ring {
+    0%   { r: 6;  stroke-opacity: 0.9; }
+    70%  { r: 16; stroke-opacity: 0; }
+    100% { r: 16; stroke-opacity: 0; }
+  }
+
+  /* --- 予想タイムライン --- */
+  .forecast-timeline {
+    list-style: none;
+    margin: 0.2rem 0 0;
+    padding: 0;
+    display: grid;
+    gap: 0;
+  }
+  .tl-item {
+    position: relative;
+    padding: 0 0 1.15rem 1.9rem;
+    opacity: 1;
+    transform: none;
+  }
+  .tl-item:last-child { padding-bottom: 0.1rem; }
+  .tl-item::before {
+    content: "";
+    position: absolute;
+    left: 0.32rem;
+    top: 0.32rem;
+    bottom: -0.15rem;
+    width: 2px;
+    background: var(--border-soft);
+  }
+  .tl-item:last-child::before { display: none; }
+  .tl-item .tl-dot {
+    position: absolute;
+    left: 0;
+    top: 0.15rem;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--card);
+    border: 2px solid var(--sev-strong);
+    box-sizing: border-box;
+  }
+  .tl-item.sev-vstrong .tl-dot { border-color: var(--sev-vstrong); }
+  .tl-item.sev-violent .tl-dot { border-color: var(--sev-violent); }
+  .tl-item.is-now .tl-dot {
+    background: var(--sev-vstrong);
+    border-color: var(--sev-vstrong);
+    box-shadow: 0 0 0 3px rgba(255,107,53,0.22);
+  }
+  .tl-item.is-now::before,
+  .tl-item.is-forecast::before {
+    background: repeating-linear-gradient(to bottom, var(--border-soft) 0 4px, transparent 4px 8px);
+  }
+  .tl-item.is-forecast .tl-dot { opacity: 0.75; }
+  /* 可視性はJSに依存させない：既定は常に表示。.play が付いたときだけ
+     いったん隠してフェードインさせる（JSが動かなければ最初から見える）。 */
+  .tl-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.15rem;
+  }
+  .tl-date {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+  }
+  .tl-badge {
     font-size: 0.75rem;
-    color: #7a8a9a;
-    padding: 1.5rem 1rem 2.5rem;
+    font-weight: 700;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    background: rgba(196,132,26,0.15);
+    color: var(--sev-strong-ink);
+  }
+  .tl-item.sev-vstrong .tl-badge { background: rgba(255,107,53,0.15); color: var(--sev-vstrong-ink); }
+  .tl-item.sev-violent .tl-badge { background: rgba(214,64,47,0.15); color: var(--sev-violent-ink); }
+  .tl-body { font-size: 0.87rem; color: var(--text); margin: 0; }
+  .tl-item.is-forecast .tl-body { color: var(--text-dim); }
+
+  .forecast-timeline.play .tl-item {
+    opacity: 0;
+    animation: tl-in 0.45s ease forwards;
+  }
+  .forecast-timeline.play .tl-item:nth-child(1) { animation-delay: 0.02s; }
+  .forecast-timeline.play .tl-item:nth-child(2) { animation-delay: 0.14s; }
+  .forecast-timeline.play .tl-item:nth-child(3) { animation-delay: 0.26s; }
+  .forecast-timeline.play .tl-item:nth-child(4) { animation-delay: 0.38s; }
+  .forecast-timeline.play .tl-item:nth-child(5) { animation-delay: 0.50s; }
+  .forecast-timeline.play .tl-item:nth-child(6) { animation-delay: 0.62s; }
+  @keyframes tl-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .tl-item, .forecast-timeline.play .tl-item {
+      opacity: 1 !important;
+      transform: none !important;
+      animation: none !important;
+    }
   }
 </style>
-</head>
-<body>
 
 <header>
   <h1>🌀 台風情報まとめ</h1>
   <p>公式の最新情報はリンク先で確認してください</p>
+  <p class="updated-badge">🕐 最終更新：<time id="updated-at" datetime="2026-07-28T15:00+09:00">2026年7月28日</time><span id="stale-age"></span></p>
 </header>
 
-<nav class="tabs">
-  <a href="index.html" class="active">📡 リンク集・備え</a>
-  <a href="status.html">📝 今の状況</a>
+<nav class="tabs" role="tablist" aria-label="表示切り替え">
+  <button type="button" role="tab" id="tab-links" aria-selected="true" aria-controls="panel-links">📡 リンク集・備え</button>
+  <button type="button" role="tab" id="tab-status" aria-selected="false" aria-controls="panel-status" tabindex="-1">📝 今の状況</button>
+  <button type="button" role="tab" id="tab-map" aria-selected="false" aria-controls="panel-map" tabindex="-1">🗺️ マップ</button>
 </nav>
 
 <main>
+  <section class="panel" id="panel-links" role="tabpanel" tabindex="0" aria-labelledby="tab-links">
+    <div class="snapshot">
+      ⚠️ <strong>このページは自動更新されません。</strong>
+      最新・正確な情報は、下記の気象庁など公式サイトを必ずご確認ください。
+    </div>
 
-  <div class="notice">
-    ⚠️ このページはリアルタイムの台風進路・気象データを独自に取得するものではありません。<br>
-    最新・正確な情報は、下記の気象庁など公式サイトを必ずご確認ください。
-  </div>
+    <section>
+      <h2>📡 公式・最新情報リンク</h2>
+      <ul class="links">
+        <li><a href="https://www.jma.go.jp/bosai/map.html#5/34.5/139/&elem=typhoon&contents=typhoon" target="_blank" rel="noopener noreferrer"><span>気象庁｜台風情報</span><span class="sr-only">（新しいタブで開きます）</span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="https://www.jma.go.jp/bosai/warning/" target="_blank" rel="noopener noreferrer"><span>気象庁｜警報・注意報</span><span class="sr-only">（新しいタブで開きます）</span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="https://www.nhk.or.jp/kishou-saigai/" target="_blank" rel="noopener noreferrer"><span>NHK｜気象・災害情報</span><span class="sr-only">（新しいタブで開きます）</span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="https://tenki.jp/bousai/typhoon/" target="_blank" rel="noopener noreferrer"><span>tenki.jp｜台風情報</span><span class="sr-only">（新しいタブで開きます）</span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="https://typhoon.weathernews.com/" target="_blank" rel="noopener noreferrer"><span>ウェザーニュース｜台風情報</span><span class="sr-only">（新しいタブで開きます）</span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="https://www.kkr.mlit.go.jp/river/" target="_blank" rel="noopener noreferrer"><span>国土交通省｜川の防災情報</span><span class="sr-only">（新しいタブで開きます）</span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="https://www.bousai.go.jp/updates/" target="_blank" rel="noopener noreferrer"><span>内閣府防災｜お知らせ</span><span class="sr-only">（新しいタブで開きます）</span><span class="arrow" aria-hidden="true">→</span></a></li>
+      </ul>
+    </section>
 
-  <section>
-    <h2>📡 公式・最新情報リンク</h2>
-    <ul class="links">
-      <li><a href="https://www.jma.go.jp/bosai/map.html#5/34.5/139/&elem=typhoon&contents=typhoon" target="_blank" rel="noopener noreferrer"><span>気象庁｜台風情報</span><span class="arrow">→</span></a></li>
-      <li><a href="https://www.jma.go.jp/bosai/warning/" target="_blank" rel="noopener noreferrer"><span>気象庁｜警報・注意報</span><span class="arrow">→</span></a></li>
-      <li><a href="https://www.nhk.or.jp/kishou-saigai/" target="_blank" rel="noopener noreferrer"><span>NHK｜気象・災害情報</span><span class="arrow">→</span></a></li>
-      <li><a href="https://tenki.jp/bousai/typhoon/" target="_blank" rel="noopener noreferrer"><span>tenki.jp｜台風情報</span><span class="arrow">→</span></a></li>
-      <li><a href="https://typhoon.weathernews.com/" target="_blank" rel="noopener noreferrer"><span>ウェザーニュース｜台風情報</span><span class="arrow">→</span></a></li>
-      <li><a href="https://www.kkr.mlit.go.jp/river/" target="_blank" rel="noopener noreferrer"><span>国土交通省｜川の防災情報</span><span class="arrow">→</span></a></li>
-      <li><a href="https://www.bousai.go.jp/updates/" target="_blank" rel="noopener noreferrer"><span>内閣府防災｜お知らせ</span><span class="arrow">→</span></a></li>
-    </ul>
+    <section>
+      <h2>🚨 避難を判断するとき</h2>
+      <ul class="links">
+        <li><a href="https://disaportal.gsi.go.jp/" target="_blank" rel="noopener noreferrer"><span>ハザードマップポータル（自宅の危険度）</span><span class="sr-only">（新しいタブで開きます）</span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="https://www.jma.go.jp/bosai/risk/" target="_blank" rel="noopener noreferrer"><span>気象庁｜キキクル（危険度分布）</span><span class="sr-only">（新しいタブで開きます）</span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="https://www.jma.go.jp/bosai/warning/" target="_blank" rel="noopener noreferrer"><span>気象庁｜警報・注意報（お住まいの地域）</span><span class="sr-only">（新しいタブで開きます）</span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="https://www.nhk.or.jp/kishou-saigai/" target="_blank" rel="noopener noreferrer"><span>NHK｜避難情報・ライフライン</span><span class="sr-only">（新しいタブで開きます）</span><span class="arrow" aria-hidden="true">→</span></a></li>
+      </ul>
+      <p class="map-note map-note-spaced">🏠 <strong>お住まいの自治体の避難情報</strong>は「（市区町村名）＋避難情報」で検索するのが最短です。<br>
+      📞 家族の安否確認には <strong>災害用伝言ダイヤル「171」</strong>。停電・断水・運休の情報は、各電力会社・水道局・鉄道会社の公式サイトで確認してください。</p>
+    </section>
+
+    <section>
+      <h2>🎒 来る前にやることチェックリスト</h2>
+      <ul class="checklist">
+        <li><label><input type="checkbox" data-ck="p0"><span>ベランダ・庭の飛びそうなものを室内にしまう</span></label></li>
+        <li><label><input type="checkbox" data-ck="p1"><span>窓に養生テープや雨戸で補強する</span></label></li>
+        <li><label><input type="checkbox" data-ck="p2"><span>断水・停電に備えて水と充電を確保する</span></label></li>
+        <li><label><input type="checkbox" data-ck="p3"><span>非常持ち出し袋の中身を確認する</span></label></li>
+        <li><label><input type="checkbox" data-ck="p4"><span>お住まいの自治体のハザードマップ・避難場所を確認する</span></label></li>
+        <li><label><input type="checkbox" data-ck="p5"><span>不要不急の外出予定を前倒し・中止する</span></label></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>📘 台風の豆知識</h2>
+      <dl>
+        <div class="trivia">
+          <dt>台風の「強さ」と「大きさ」は別物</dt>
+          <dd>「強さ」は最大風速による分類（強い・非常に強い・猛烈な）、「大きさ」は強風域の半径による分類（大型・超大型）。両方をあわせて発表される。</dd>
+        </div>
+        <div class="trivia">
+          <dt>進路予報円の意味</dt>
+          <dd>天気図の丸い円は「この中に台風の中心が入る確率70%」を示す範囲。円が大きいほど予測の不確実性が高い。</dd>
+        </div>
+        <div class="trivia">
+          <dt>「暴風域」と「強風域」の違い</dt>
+          <dd>暴風域は平均風速25m/s以上、強風域は15m/s以上の範囲。暴風域に入ると外出が危険なレベルになる。</dd>
+        </div>
+        <div class="trivia">
+          <dt>警戒レベルは「4」で全員避難</dt>
+          <dd>自治体が出す5段階の目安。レベル3で高齢者等は避難、<strong>レベル4「避難指示」で対象地域の全員が避難</strong>。レベル5は既に災害が起きている状態なので、4のうちに動くのが原則。</dd>
+        </div>
+        <div class="trivia">
+          <dt>台風の右側は要注意</dt>
+          <dd>台風の進行方向に対して右側は、台風自体の風と周囲の風が重なり風が強まりやすい（危険半円）。</dd>
+        </div>
+      </dl>
+    </section>
   </section>
 
-  <section>
-    <h2>🎒 来る前にやることチェックリスト</h2>
-    <ul class="checklist">
-      <li>ベランダ・庭の飛びそうなものを室内にしまう</li>
-      <li>窓に養生テープや雨戸で補強する</li>
-      <li>断水・停電に備えて水と充電を確保する</li>
-      <li>非常持ち出し袋の中身を確認する</li>
-      <li>お住まいの自治体のハザードマップ・避難場所を確認する</li>
-      <li>不要不急の外出予定を前倒し・中止する</li>
-    </ul>
+  <section class="panel" id="panel-status" role="tabpanel" tabindex="0" aria-labelledby="tab-status" hidden>
+    <div class="snapshot">
+      <strong>⚠️ これはスナップショットです。</strong>
+      Web検索時点（2026年7月28日）の情報をまとめたもので、自動更新はされません。
+      <strong id="stale-note"></strong>
+      最新の発表は必ず気象庁でご確認ください。
+      <a class="inline-cta" href="https://www.jma.go.jp/bosai/map.html#5/34.5/139/&elem=typhoon&contents=typhoon" target="_blank" rel="noopener noreferrer">気象庁の台風情報を開く →</a>
+    </div>
+
+    <section>
+      <h2>🕐 いま日本はどうなの？</h2>
+      <ul class="status-list">
+        <li class="status-item">
+          <span class="tag now">7/28時点</span>
+          <h3>数日以内に日本が暴風域に入る予報は出ていません</h3>
+          <p>ただし台風13号が猛烈な勢力に発達しながら日本へ向かう可能性があり、<strong>8月上旬に影響が出るおそれ</strong>があります。今のうちに「リンク集・備え」タブのチェックリストを進めておくと安心です。</p>
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>🌀 発生中の台風</h2>
+      <ul class="status-list">
+        <li class="status-item watch">
+          <span class="tag watch">急発達中</span>
+          <h3>台風13号（ドルフィン）</h3>
+          <p>7月28日15時現在、マーシャル諸島付近を西〜西南西へ時速20kmで進行。同日中に急速に発達して「強い」勢力になりました。今後さらに発達し「猛烈な」勢力になる予想です。まだ日本からはかなり遠い位置にあります。</p>
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>👀 今後の見通し（台風13号ドルフィン）</h2>
+      <p class="map-note">気象庁・米軍JTWC・各社予報をもとにした流れです。実線＝観測済み、点線＝予報（先になるほど不確実）。</p>
+      <ol class="forecast-timeline" id="forecast-main">
+        <li class="tl-item sev-strong is-now">
+          <span class="tl-dot"></span>
+          <div class="tl-head"><span class="tl-date">7/28 15時（現在）</span><span class="tl-badge">強い</span></div>
+          <p class="tl-body">マーシャル諸島付近を西南西へ時速20km。急速に発達して「強い」勢力に。</p>
+        </li>
+        <li class="tl-item sev-vstrong is-forecast">
+          <span class="tl-dot"></span>
+          <div class="tl-head"><span class="tl-date">7/29 18時（予報）</span><span class="tl-badge">非常に強い</span></div>
+          <p class="tl-body">発達を続け「非常に強い」勢力になる見込み。</p>
+        </li>
+        <li class="tl-item sev-violent is-forecast">
+          <span class="tl-dot"></span>
+          <div class="tl-head"><span class="tl-date">7/30 15時（予報）</span><span class="tl-badge">猛烈な</span></div>
+          <p class="tl-body">最も強い階級「猛烈な」勢力に到達する予想。</p>
+        </li>
+        <li class="tl-item sev-violent is-forecast">
+          <span class="tl-dot"></span>
+          <div class="tl-head"><span class="tl-date">7/31（予報）</span><span class="tl-badge">猛烈な</span></div>
+          <p class="tl-body">ウェーク島近海へ。猛烈な勢力を維持する見込み。</p>
+        </li>
+        <li class="tl-item sev-violent is-forecast">
+          <span class="tl-dot"></span>
+          <div class="tl-head"><span class="tl-date">8/1 15時（予報）</span><span class="tl-badge">猛烈な</span></div>
+          <p class="tl-body">猛烈な勢力を保ったまま<strong>南鳥島近海</strong>まで進む見込み。米軍JTWCは8/2時点で最大風速72m/s・最大瞬間風速75m/s程度と予想（<b>木造家屋が倒壊しうるレベル</b>）。</p>
+        </li>
+        <li class="tl-item sev-violent is-forecast">
+          <span class="tl-dot"></span>
+          <div class="tl-head"><span class="tl-date">8月上旬〜（要注意）</span><span class="tl-badge">不確実</span></div>
+          <p class="tl-body">日本に向かうように北西寄りへ進む見込みで、国内に影響が出る可能性が否定できません。進路の発表を継続してチェックしてください。</p>
+        </li>
+      </ol>
+      <dl class="scale-key">
+        <div><dt>強い</dt><dd>最大風速 33〜44m/s。屋根瓦が飛び、走行中のトラックが横転しはじめる。</dd></div>
+        <div><dt>非常に強い</dt><dd>44〜54m/s。固定の不十分な家屋が倒れ、電柱や街灯が倒れることがある。</dd></div>
+        <div><dt>猛烈な</dt><dd>54m/s以上（最上級）。多くの家屋が損壊し、外にいると命に危険が及ぶ。</dd></div>
+      </dl>
+    </section>
+
+    <section>
+      <h2>✅ すでに通過した台風</h2>
+      <ul class="status-list">
+        <li class="status-item done">
+          <span class="tag done">通過済み</span>
+          <h3>台風9号（バービー）</h3>
+          <p>猛烈な勢力でグアム・サイパンを直撃。7月11日午前に石垣島など先島諸島へ最接近し、沖縄本島にも暴風域がかかりました。ピーク時の最大瞬間風速は80m/sに達する予想でした（<b>走行中のトラックが横転するのが50m/s前後</b>）。7月15日9時に温帯低気圧へ変化し、監視情報は終了。</p>
+        </li>
+        <li class="status-item done">
+          <span class="tag done">通過済み</span>
+          <h3>台風10号（メイサーク）</h3>
+          <p>華南に到達したのち熱帯低気圧に変化。日本への直接的な影響はありませんでした。</p>
+        </li>
+        <li class="status-item done">
+          <span class="tag done">通過済み</span>
+          <h3>台風7号（メーカラー）・8号（ヒーゴス）</h3>
+          <p>6月27日に関東付近を連続して通過し、いずれも同日中に温帯低気圧化。関東・静岡で大雨警戒となりました。</p>
+        </li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>📡 最新情報はこちらで確認</h2>
+      <ul class="links">
+        <li><a href="https://www.jma.go.jp/bosai/map.html#7/34.253/138.658/&elem=root&typhoon=all&contents=typhoon" target="_blank" rel="noopener noreferrer"><span>気象庁｜台風情報</span><span class="sr-only">（新しいタブで開きます）</span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="https://tenki.jp/bousai/typhoon/" target="_blank" rel="noopener noreferrer"><span>tenki.jp｜台風情報</span><span class="sr-only">（新しいタブで開きます）</span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="https://weathernews.jp/onebox/typhoon/" target="_blank" rel="noopener noreferrer"><span>ウェザーニュース｜台風情報</span><span class="sr-only">（新しいタブで開きます）</span><span class="arrow" aria-hidden="true">→</span></a></li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>📢 判断に迷ったら</h2>
+      <p style="margin:0;font-size:0.9rem;">避難するかどうかの最終判断は、このページではなく<strong>お住まいの自治体と気象庁の最新発表</strong>に従ってください。迷ったら早めに動くほうが安全です。</p>
+    </section>
+
+    <section>
+      <h2>🔎 情報源</h2>
+      <ul class="sources">
+        <li><a href="https://tenki.jp/bousai/typhoon/2613/" target="_blank" rel="noopener noreferrer">台風13号(2026年) / 最新位置・進路予想 - tenki.jp</a></li>
+        <li><a href="https://weathernews.jp/news/202607/280221/" target="_blank" rel="noopener noreferrer">台風13号(ドルフィン) 急速に発達し「強い」勢力に - ウェザーニュース</a></li>
+        <li><a href="https://weathernews.jp/news/202607/280101/" target="_blank" rel="noopener noreferrer">台風13号(ドルフィン) 今後は猛烈な勢力に発達予想 日本に影響する可能性も - ウェザーニュース</a></li>
+        <li><a href="https://www.fukuishimbun.co.jp/articles/-/2660468" target="_blank" rel="noopener noreferrer">台風13号…気象庁の予想進路、米軍・ヨーロッパの見方 - 福井新聞ONLINE</a></li>
+        <li><a href="https://news.yahoo.co.jp/articles/1511cea13493417d712abcddc2fe121d4204db08" target="_blank" rel="noopener noreferrer">台風13号「強い」→「猛烈な」勢力に発達する予想 - Yahoo!ニュース（MBS）</a></li>
+        <li><a href="https://weathernews.jp/news/202607/050121/" target="_blank" rel="noopener noreferrer">台風9号(バービー) 猛烈な勢力でグアムやサイパンを襲う 沖縄へ - ウェザーニュース</a></li>
+      </ul>
+    </section>
   </section>
 
-  <section>
-    <h2>📘 台風の豆知識</h2>
-    <dl>
-      <div class="trivia">
-        <dt>台風の「強さ」と「大きさ」は別物</dt>
-        <dd>「強さ」は最大風速による分類（強い・非常に強い・猛烈な）、「大きさ」は強風域の半径による分類（大型・超大型）。両方をあわせて発表される。</dd>
-      </div>
-      <div class="trivia">
-        <dt>進路予報円の意味</dt>
-        <dd>天気図の丸い円は「この中に台風の中心が入る確率70%」を示す範囲。円が大きいほど予測の不確実性が高い。</dd>
-      </div>
-      <div class="trivia">
-        <dt>「暴風域」と「強風域」の違い</dt>
-        <dd>暴風域は平均風速25m/s以上、強風域は15m/s以上の範囲。暴風域に入ると外出が危険なレベルになる。</dd>
-      </div>
-      <div class="trivia">
-        <dt>台風の右側は要注意</dt>
-        <dd>台風の進行方向に対して右側は、台風自体の風と周囲の風が重なり風が強まりやすい（危険半円）。</dd>
-      </div>
-    </dl>
-  </section>
+  <section class="panel" id="panel-map" role="tabpanel" tabindex="0" aria-labelledby="tab-map" hidden>
+    <div class="snapshot">
+      <strong>⚠️ これは模式図（イメージ図）です。</strong>
+      衛星GPSの実測データではありません。おおよその位置関係をつかむための図です。
+      実際の進路・現在位置は気象庁の公式マップでご確認ください。
+      <a class="inline-cta" href="https://www.jma.go.jp/bosai/map.html#5/34.5/139/&elem=typhoon&contents=typhoon" target="_blank" rel="noopener noreferrer">気象庁の台風情報を開く →</a>
+    </div>
 
+    <section class="map-card">
+      <h2>🗾 台風13号の動き（模式図）</h2>
+      <svg class="map-svg" viewBox="0 0 300 250" role="img" aria-label="日本周辺の模式図。台風13号ドルフィンが、日本のはるか南東にあるマーシャル諸島付近から、ウェーク島近海を経て南鳥島近海へ北西進する予想経路を示す。経路は日本本土には達していない。">
+        <path class="land" d="M55,165 Q70,148 92,158 Q100,168 88,178 Q68,182 55,165 Z"></path>
+        <path class="land" d="M95,150 Q108,140 120,148 Q118,158 104,158 Q96,156 95,150 Z"></path>
+        <path class="land" d="M100,140 Q130,108 165,95 Q195,86 222,90 Q235,94 232,104
+                              Q222,100 205,104 Q210,112 200,116 Q196,108 186,112
+                              Q170,112 150,124 Q128,138 110,150 Q100,148 100,140 Z"></path>
+        <circle class="okinawa-dot" cx="56" cy="203" r="2.4"></circle>
+        <circle class="okinawa-dot" cx="64" cy="210" r="2.1"></circle>
+        <circle class="okinawa-dot" cx="72" cy="216" r="1.8"></circle>
+
+        <!-- 台風13号：マーシャル諸島 → ウェーク島近海 → 南鳥島近海（日本本土には達していない） -->
+        <path class="track track-13" d="M283,214 Q262,206 250,192 Q238,176 228,162 Q222,153 218,146"></path>
+        <circle class="waypoint" cx="250" cy="192" r="3"></circle>
+        <circle class="waypoint" cx="218" cy="146" r="3"></circle>
+        <circle class="now-pos-pulse now-pos-pulse-13" cx="283" cy="214" r="6"></circle>
+        <circle class="now-pos now-pos-13" cx="283" cy="214" r="6"></circle>
+
+        <!-- 8月上旬以降は不確実：方向だけを示す矢印 -->
+        <path class="track track-unsure" d="M214,141 Q206,130 199,121"></path>
+        <path class="arrow-head" d="M199,121 l6.4,2.1 l-1.6,-6.0 z"></path>
+
+        <text class="label" x="140" y="86">本州</text>
+        <text class="label" x="52" y="176">九州</text>
+        <text class="label" x="196" y="80">関東</text>
+        <text class="label" x="80" y="222">沖縄</text>
+        <text class="label" x="214" y="240">マーシャル諸島</text>
+        <text class="label" x="196" y="200">ウェーク島</text>
+        <text class="label" x="166" y="150">南鳥島</text>
+        <text class="label label-dim" x="150" y="118">8月上旬〜？</text>
+      </svg>
+      <div class="map-legend">
+        <span><i class="swatch" style="background:#ff6b35"></i>台風13号 予想経路</span>
+        <span><i class="swatch" style="background:#fff;border:2px solid #ff6b35;border-radius:50%;width:11px;height:11px"></i>現在位置（7/28 15時）</span>
+        <span><i class="swatch" style="background:#cfe0f0;opacity:.75"></i>その先は未確定</span>
+      </div>
+      <p class="map-note map-note-spaced">台風13号は日本のはるか南東にあり、<strong>7月28日時点で日本本土に達する予報は出ていません</strong>。南鳥島近海まで進んだあと、8月上旬に日本へ近づく可能性があるという段階です（矢印から先は未確定）。</p>
+    </section>
+
+    <section>
+      <h2>📡 本物の地図で見る</h2>
+      <ul class="links">
+        <li><a href="https://www.jma.go.jp/bosai/map.html#7/34.253/138.658/&elem=root&typhoon=all&contents=typhoon" target="_blank" rel="noopener noreferrer"><span>気象庁｜台風情報マップ（実測・進路予想）</span><span class="sr-only">（新しいタブで開きます）</span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="https://www.jma.go.jp/bosai/map.html#5/34.5/139/&elem=wind&contents=earth" target="_blank" rel="noopener noreferrer"><span>気象庁｜風の実況マップ</span><span class="sr-only">（新しいタブで開きます）</span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="https://weathernews.jp/onebox/typhoon/" target="_blank" rel="noopener noreferrer"><span>ウェザーニュース｜台風進路図</span><span class="sr-only">（新しいタブで開きます）</span><span class="arrow" aria-hidden="true">→</span></a></li>
+      </ul>
+    </section>
+  </section>
 </main>
 
 <footer>
   のんラボ制作｜このページはブラウザだけで動く簡易まとめです。避難行動は必ず自治体・気象庁の公式発表に従ってください。
 </footer>
 
+<script>
+  (function () {
+    var tabs = [
+      { btn: document.getElementById('tab-links'), panel: document.getElementById('panel-links') },
+      { btn: document.getElementById('tab-status'), panel: document.getElementById('panel-status') },
+      { btn: document.getElementById('tab-map'), panel: document.getElementById('panel-map') }
+    ];
+    var playTimer;
+    function replayTimeline(el) {
+      if (!el) return;
+      clearTimeout(playTimer);
+      el.classList.remove('play');
+      void el.offsetWidth; /* force reflow so the animation can restart */
+      el.classList.add('play');
+      /* 演出が終わったら .play を外す。アニメーションが何らかの理由で
+         走らなかった場合でも、ここで必ず既定の「表示」状態に戻る。 */
+      playTimer = setTimeout(function () { el.classList.remove('play'); }, 1400);
+    }
+    function select(active) {
+      tabs.forEach(function (t) {
+        var isActive = t === active;
+        t.btn.setAttribute('aria-selected', String(isActive));
+        t.btn.tabIndex = isActive ? 0 : -1;
+        t.panel.hidden = !isActive;
+      });
+      active.btn.focus();
+      if (active.panel && active.panel.id === 'panel-status') {
+        replayTimeline(document.getElementById('forecast-main'));
+      }
+    }
+    tabs.forEach(function (t, i) {
+      t.btn.addEventListener('click', function () { select(t); });
+      t.btn.addEventListener('keydown', function (e) {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+          e.preventDefault();
+          var next = e.key === 'ArrowRight' ? (i + 1) % tabs.length : (i - 1 + tabs.length) % tabs.length;
+          select(tabs[next]);
+        } else if (e.key === 'Home') {
+          e.preventDefault(); select(tabs[0]);
+        } else if (e.key === 'End') {
+          e.preventDefault(); select(tabs[tabs.length - 1]);
+        }
+      });
+    });
+
+    /* 備えチェックリスト：チェック状態を端末に保存（台風前に何度も開き直す前提） */
+    try {
+      var KEY = 'typhoon-prep-v1';
+      var saved = JSON.parse(localStorage.getItem(KEY) || '{}');
+      var boxes = document.querySelectorAll('.checklist input[data-ck]');
+      Array.prototype.forEach.call(boxes, function (box) {
+        if (saved[box.dataset.ck]) box.checked = true;
+        box.addEventListener('change', function () {
+          saved[box.dataset.ck] = box.checked;
+          try { localStorage.setItem(KEY, JSON.stringify(saved)); } catch (e) {}
+        });
+      });
+    } catch (e) { /* localStorage が使えなくてもチェック自体は動く */ }
+
+    /* 情報の古さを相対表示。古いほど強く警告する */
+    (function () {
+      var t = document.getElementById('updated-at');
+      if (!t) return;
+      var then = new Date(t.getAttribute('datetime'));
+      if (isNaN(then)) return;
+      var hours = (Date.now() - then.getTime()) / 36e5;
+      if (hours < 0) return;
+      var days = Math.floor(hours / 24);
+      var age = document.getElementById('stale-age');
+      if (age) {
+        age.textContent = hours < 24
+          ? '（' + Math.max(1, Math.floor(hours)) + '時間前）'
+          : '（' + days + '日前）';
+      }
+      var note = document.getElementById('stale-note');
+      var box = note && note.closest('.snapshot');
+      if (hours >= 72) {
+        if (note) note.textContent = 'この情報は' + days + '日前のもので、古すぎます。必ず公式サイトを開いてください。';
+        if (box) box.classList.add('is-stale');
+      } else if (hours >= 24) {
+        if (note) note.textContent = 'この情報は' + days + '日前のものです。';
+        if (box) box.classList.add('is-stale');
+      }
+    })();
+  })();
+</script>
 </body>
 </html>
