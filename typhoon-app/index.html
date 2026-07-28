@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="台風接近時の備えチェックリストと、最新状況・進路の模式図をまとめたページ。">
+<meta name="description" content="台風接近時の備えチェックリストと、最新状況・日本列島との位置関係をまとめたページ。">
 <meta name="color-scheme" content="light dark">
 <title>台風情報まとめ｜のんラボ</title>
 </head>
@@ -305,7 +305,7 @@
     /* 地図は写真と同じ扱い：テーマで反転させない固定色 */
     background: linear-gradient(180deg, #2d6ba8 0%, #14395f 100%);
   }
-  .map-svg .land { fill: #e8eef6; }
+  .map-svg .land { fill: #e8eef6; stroke: #0b2742; stroke-width: 0.8; stroke-linejoin: round; }
   .map-svg .label {
     font-size: 11px;
     font-weight: 700;
@@ -709,43 +709,55 @@
     </div>
 
     <section class="map-card">
-      <h2>🗾 台風13号の動き（模式図）</h2>
-      <svg class="map-svg" viewBox="0 0 300 250" role="img" aria-label="日本周辺の模式図。台風13号ドルフィンが、日本のはるか南東にあるマーシャル諸島付近から、ウェーク島近海を経て南鳥島近海へ北西進する予想経路を示す。経路は日本本土には達していない。">
-        <path class="land" d="M55,165 Q70,148 92,158 Q100,168 88,178 Q68,182 55,165 Z"></path>
-        <path class="land" d="M95,150 Q108,140 120,148 Q118,158 104,158 Q96,156 95,150 Z"></path>
-        <path class="land" d="M100,140 Q130,108 165,95 Q195,86 222,90 Q235,94 232,104
-                              Q222,100 205,104 Q210,112 200,116 Q196,108 186,112
-                              Q170,112 150,124 Q128,138 110,150 Q100,148 100,140 Z"></path>
-        <circle class="okinawa-dot" cx="56" cy="203" r="2.4"></circle>
-        <circle class="okinawa-dot" cx="64" cy="210" r="2.1"></circle>
-        <circle class="okinawa-dot" cx="72" cy="216" r="1.8"></circle>
+      <h2>🗾 日本と台風13号の位置関係</h2>
+      <p class="map-note">北海道から沖縄まで、実際の緯度・経度どおりに配置しています。</p>
+      <svg class="map-svg" viewBox="0 0 340 262" role="img" aria-label="日本列島（北海道・本州・四国・九州・南西諸島）と、その南東の海域を示した模式図。台風13号ドルフィンはマーシャル諸島付近からウェーク島近海を経て南鳥島近海へ北西に進む予想で、経路は日本列島には達していない。">
+        <path class="land" d="M135,17 Q151,22 158,28 Q151,34 145,36 Q135,39 129,37 Q126,31 127,28 Z"></path>
+        <path class="land" d="M131,42 Q133,50 132,58 Q129,66 125,73
+                              Q117,75 109,76 Q104,77 100,78
+                              Q91,79 83,80 Q78,82 74,83
+                              Q79,78 86,74 Q96,71 107,68
+                              Q114,64 120,60 Q124,55 127,50 Q129,46 131,42 Z"></path>
+        <path class="land" d="M81,82 Q89,81 96,83 Q95,88 90,89 Q83,88 81,82 Z"></path>
+        <path class="land" d="M74,83 Q79,86 79,91 Q76,97 71,99 Q66,96 66,90 Q68,85 74,83 Z"></path>
+        <circle class="okinawa-dot" cx="63" cy="103" r="2.1"></circle>
+        <circle class="okinawa-dot" cx="59" cy="109" r="2"></circle>
+        <circle class="okinawa-dot" cx="55" cy="116" r="2.2"></circle>
+        <circle class="okinawa-dot" cx="51" cy="123" r="1.9"></circle>
+        <circle class="okinawa-dot" cx="46" cy="129" r="1.8"></circle>
+        <circle class="okinawa-dot" cx="40" cy="134" r="1.7"></circle>
+        <circle class="okinawa-dot" cx="35" cy="137" r="1.7"></circle>
+        <circle class="okinawa-dot" cx="208" cy="137" r="2"></circle>
+        <circle class="okinawa-dot" cx="281" cy="165" r="2"></circle>
 
-        <!-- 台風13号：マーシャル諸島 → ウェーク島近海 → 南鳥島近海（日本本土には達していない） -->
-        <path class="track track-13" d="M283,214 Q262,206 250,192 Q238,176 228,162 Q222,153 218,146"></path>
-        <circle class="waypoint" cx="250" cy="192" r="3"></circle>
-        <circle class="waypoint" cx="218" cy="146" r="3"></circle>
-        <circle class="now-pos-pulse now-pos-pulse-13" cx="283" cy="214" r="6"></circle>
-        <circle class="now-pos now-pos-13" cx="283" cy="214" r="6"></circle>
+        <path class="track track-13" d="M309,233 Q299,200 281,165 Q248,146 208,137"></path>
+        <circle class="waypoint" cx="281" cy="165" r="3.2"></circle>
+        <circle class="waypoint" cx="208" cy="137" r="3.2"></circle>
+        <circle class="now-pos-pulse now-pos-pulse-13" cx="309" cy="233" r="6"></circle>
+        <circle class="now-pos now-pos-13" cx="309" cy="233" r="6"></circle>
 
-        <!-- 8月上旬以降は不確実：方向だけを示す矢印 -->
-        <path class="track track-unsure" d="M214,141 Q206,130 199,121"></path>
-        <path class="arrow-head" d="M199,121 l6.4,2.1 l-1.6,-6.0 z"></path>
+        <path class="track track-unsure" d="M203,135 Q186,128 170,121"></path>
+        <path class="arrow-head" d="M168,120 L177.6,120.6 L174.6,127.2 Z"></path>
 
-        <text class="label" x="140" y="86">本州</text>
-        <text class="label" x="52" y="176">九州</text>
-        <text class="label" x="196" y="80">関東</text>
-        <text class="label" x="80" y="222">沖縄</text>
-        <text class="label" x="214" y="240">マーシャル諸島</text>
-        <text class="label" x="196" y="200">ウェーク島</text>
-        <text class="label" x="166" y="150">南鳥島</text>
-        <text class="label label-dim" x="150" y="118">8月上旬〜？</text>
+        <text class="label" x="164" y="27">北海道</text>
+        <text class="label" x="137" y="59">本州</text>
+        <text class="label" x="129" y="82">関東</text>
+        <text class="label" x="93" y="99">四国</text>
+        <text class="label" x="42" y="97">九州</text>
+        <text class="label" x="22" y="128">沖縄</text>
+        <text class="label label-dim" x="168" y="132">南鳥島</text>
+        <text class="label label-dim" x="226" y="158">ウェーク島</text>
+        <text class="label label-dim" x="228" y="250">マーシャル諸島</text>
+        <text class="label" x="246" y="221">台風13号</text>
+        <text class="label label-dim" x="150" y="112">8月上旬〜？</text>
       </svg>
       <div class="map-legend">
-        <span><i class="swatch" style="background:#ff6b35"></i>台風13号 予想経路</span>
-        <span><i class="swatch" style="background:#fff;border:2px solid #ff6b35;border-radius:50%;width:11px;height:11px"></i>現在位置（7/28 15時）</span>
-        <span><i class="swatch" style="background:#cfe0f0;opacity:.75"></i>その先は未確定</span>
+        <span><i class="swatch" style="background:#ff6b35"></i>台風13号の予想経路</span>
+        <span><i class="swatch" style="background:#fff;border:2px solid #ff6b35;border-radius:50%;width:11px;height:11px"></i>いまの位置（7/28 15時）</span>
+        <span><i class="swatch" style="background:#fff;border:2px solid #ff6b35;border-radius:50%;width:8px;height:8px"></i>通過予想地点</span>
+        <span><i class="swatch" style="background:#cfe0f0;opacity:.8"></i>この先は未確定</span>
       </div>
-      <p class="map-note map-note-spaced">台風13号は日本のはるか南東にあり、<strong>7月28日時点で日本本土に達する予報は出ていません</strong>。南鳥島近海まで進んだあと、8月上旬に日本へ近づく可能性があるという段階です（矢印から先は未確定）。</p>
+      <p class="map-note map-note-spaced">台風13号は<strong>日本のはるか南東</strong>、図の右下あたりにいます。関東からおよそ3,000km離れていて、<strong>7月28日時点で日本本土に達する予報は出ていません</strong>。ウェーク島近海 → 南鳥島近海と北西に進んだあと、8月上旬に日本へ近づく可能性があるという段階です（薄い矢印から先は、まだ決まっていません）。</p>
     </section>
 
     <section>
