@@ -1,0 +1,5 @@
+# JANバーコードExcel生成ツールに必要な部品（ライブラリ）
+# 手動で入れる場合： pip3 install -r requirements.txt
+python-barcode
+openpyxl
+pillow
