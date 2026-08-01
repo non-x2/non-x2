@@ -1228,11 +1228,40 @@
         if (intensity.indexOf('非常に強い') >= 0) return 'sev-vstrong';
         return 'sev-strong';
       }
-      function strengthWord(p) {
+      /* 気象庁は「まだ台風になっていない熱帯低気圧」も混ぜて発表する。
+         そのとき番号は数字ではなく記号（例：b）、名前は空で届くので、
+         「台風b号（）」という変な表示にならないように分けて扱う。 */
+      function isTyphoon(t) {
+        return /^[0-9]+$/.test(String(t && t.numberShort || ''));
+      }
+      function tcName(t) {
+        if (!isTyphoon(t)) return t.category || '熱帯低気圧';
+        return '台風' + t.numberShort + '号' + (t.name ? '（' + t.name + '）' : '');
+      }
+      function tcShort(t) {
+        return isTyphoon(t) ? t.numberShort + '号' : (t.category || '熱帯低気圧');
+      }
+      /* 気象庁は「値なし」を "-" で送ってくることがある。そのまま出すと画面に「-」と出てしまう */
+      function val(v) {
+        return v && String(v) !== '-' ? String(v) : '';
+      }
+      /* 「◯◯を西北西へ時速25kmで進行中」の部分を作る。
+         気象庁は進む向きが決まらないとき course に「不定」と入れてくるので、
+         「◯◯を不定へ」という変な日本語にならないよう言い方を変える */
+      function moveText(p) {
+        var c = val(p.course), sp = val(p.speedKmh);
+        if (!c || c.indexOf('不定') >= 0) {
+          return sp ? 'で時速' + esc(sp) + 'kmで進んでいます（進む向きは定まっていません）'
+            : 'でほとんど停滞しています';
+        }
+        return 'を' + esc(c) + 'へ' + (sp ? '時速' + esc(sp) + 'kmで進行中' : 'ゆっくり進行中');
+      }
+      function strengthWord(p, t) {
         var s = [];
-        if (p.scale) s.push(p.scale);
-        if (p.intensity) s.push(p.intensity);
-        return s.length ? s.join('・') : '台風';
+        if (val(p.scale)) s.push(val(p.scale));
+        if (val(p.intensity)) s.push(val(p.intensity));
+        if (s.length) return s.join('・');
+        return val(p.category) || (t && t.category) || '台風';
       }
 
       /* 台風が日本のどこに・いつ・どれくらい近づくかを計算する */
@@ -1269,7 +1298,7 @@
         data.typhoons.forEach(function (t) {
           var hit = closest(t), tier = tierOf(hit);
           var head, body, tag, tagCls;
-          var nm = '台風' + esc(t.numberShort) + '号' + (t.name ? '（' + esc(t.name) + '）' : '');
+          var nm = esc(tcName(t));
           if (!hit) {
             tag = '情報'; tagCls = 'now';
             head = nm + 'の位置情報がまだありません';
@@ -1308,28 +1337,29 @@
 
       function sectionActive(data) {
         if (!data.typhoons.length) return '';
-        var html = '<section><h2>🌀 発生中の台風<span class="auto-tag">自動</span></h2><ul class="status-list">';
+        var hasTd = data.typhoons.some(function (t) { return !isTyphoon(t); });
+        var html = '<section><h2>🌀 発生中の台風' + (hasTd ? '・熱帯低気圧' : '') +
+          '<span class="auto-tag">自動</span></h2><ul class="status-list">';
         data.typhoons.forEach(function (t) {
           var a = t.analysis;
           var last = (t.forecast || [])[t.forecast.length - 1];
           html += '<li class="status-item watch"><span class="tag watch">' +
-            esc(a && a.intensity ? a.intensity : t.category) + '</span>' +
-            '<h3>台風' + esc(t.numberShort) + '号' + (t.name ? '（' + esc(t.name) + '）' : '') + '</h3>';
+            esc(isTyphoon(t) ? (a ? strengthWord(a, t) : '台風') : '台風のたまご') + '</span>' +
+            '<h3>' + esc(tcName(t)) + '</h3>';
           if (a) {
-            html += '<p>' + esc(fmtShort(a.validTime)) + '現在、<strong>' + esc(a.location) + '</strong>を' +
-              (a.course ? esc(a.course) + 'へ' : '') +
-              (a.speedKmh ? '時速' + esc(a.speedKmh) + 'kmで進行中' : 'ゆっくり進行中') + '。' +
+            html += '<p>' + esc(fmtShort(a.validTime)) + '現在、<strong>' + esc(a.location) + '</strong>' +
+              moveText(a) + '。' +
               (a.pressure ? '中心気圧' + a.pressure + 'hPa、' : '') +
               (a.windMs ? '最大風速' + a.windMs + 'm/s' : '') +
               (a.gustMs ? '（最大瞬間' + a.gustMs + 'm/s）' : '') +
-              '、強さは<strong>「' + esc(strengthWord(a)) + '」</strong>です。' +
+              (isTyphoon(t) ? '、強さは<strong>「' + esc(strengthWord(a, t)) + '」</strong>です。' : '。') +
               (a.stormRadiusKm ? '暴風域は半径およそ' + Math.round(a.stormRadiusKm) + 'km、' : '') +
               (a.galeRadiusKm ? '強風域は半径およそ' + Math.round(a.galeRadiusKm) + 'kmです。' : '') +
               '</p>';
           }
           if (last) {
             html += '<p>気象庁の予報では、<strong>' + fmtDay(last.validTime) + 'ごろ' + esc(last.location) +
-              '</strong>に進み、そのときの強さは「' + esc(strengthWord(last)) + '」の見込みです。</p>';
+              '</strong>に進み、そのときの見込みは「' + esc(strengthWord(last, t)) + '」です。</p>';
           }
           html += '</li>';
         });
@@ -1339,8 +1369,8 @@
       function sectionTimeline(t) {
         var pts = [].concat(t.analysis ? [t.analysis] : [], t.forecast || []);
         if (!pts.length) return '';
-        var html = '<section><h2>👀 今後の見通し（台風' + esc(t.numberShort) + '号' +
-          (t.name ? esc(t.name) : '') + '）<span class="auto-tag">自動</span></h2>' +
+        var html = '<section><h2>👀 今後の見通し（' + esc(tcName(t)) +
+          '）<span class="auto-tag">自動</span></h2>' +
           '<p class="map-note">気象庁の発表そのままです。先の予報ほど、予報円（中心が来る範囲）が大きくなります。</p>' +
           '<ol class="forecast-timeline">';
         pts.forEach(function (p) {
@@ -1348,10 +1378,9 @@
           html += '<li class="tl-item ' + sevClass(p.intensity) + (isNow ? ' is-now' : ' is-forecast') + '">' +
             '<span class="tl-dot"></span><div class="tl-head">' +
             '<span class="tl-date">' + esc(fmtShort(p.validTime)) + (isNow ? '（現在）' : '（予報）') + '</span>' +
-            '<span class="tl-badge">' + esc(strengthWord(p)) + '</span></div>' +
+            '<span class="tl-badge">' + esc(strengthWord(p, t)) + '</span></div>' +
             '<p class="tl-body">' + (isNow ? '<strong>' : '') + esc(p.location) + (isNow ? '</strong>' : '') +
-            (p.course ? 'を' + esc(p.course) + 'へ' : '') +
-            (p.speedKmh ? '時速' + esc(p.speedKmh) + 'km' : '') + '。' +
+            moveText(p) + '。' +
             (p.pressure ? '中心気圧' + p.pressure + 'hPa・' : '') +
             (p.windMs ? '最大風速' + p.windMs + 'm/s' : '') +
             (p.circleKm ? '。予報円の半径は約' + Math.round(p.circleKm) + 'km' : '') +
@@ -1497,7 +1526,7 @@
           }));
 
           /* 文字は少なめに。現在地と、24時間後・72時間後・いちばん先だけ */
-          var labels = [{ p: a, text: '🌀 ' + t.numberShort + '号 いまここ' }];
+          var labels = [{ p: a, text: '🌀 ' + tcShort(t) + ' いまここ' }];
           var wanted = [24, 72];
           fc.forEach(function (p, i) {
             if (wanted.indexOf(p.hours) >= 0 || i === fc.length - 1) {
@@ -1528,7 +1557,7 @@
         /* ④ 地図まわりの説明・凡例も、いまのデータに合わせて書き換える */
         var first = ts[0];
         if (title) {
-          title.textContent = '🗾 日本地図と台風' + first.numberShort + '号' +
+          title.textContent = '🗾 日本地図と' + tcName(first) +
             (ts.length > 1 ? 'ほか' + (ts.length - 1) + '個' : '');
         }
         if (legend) {
@@ -1542,7 +1571,7 @@
         if (note) {
           var hit = closest(first);
           note.innerHTML = '気象庁の発表値をそのまま描いています（' + esc(fmtShort(first.analysis.validTime)) +
-            '現在）。台風' + esc(first.numberShort) + '号は<strong>' + esc(first.analysis.location) +
+            '現在）。' + esc(tcName(first)) + 'は<strong>' + esc(first.analysis.location) +
             '</strong>にあり、白い線が通ってきた道、オレンジの点線がこれからの進路、' +
             '点線の丸が<strong>予報円</strong>（この中に中心が来る確率70%）です。先の予報ほど丸が大きい＝まだ決まっていない、という意味です。' +
             (hit ? '<br>いちばん近づくのは<strong>' + fmtDay(hit.point.validTime) + 'ごろ、' + esc(hit.spot.name) +
@@ -1550,8 +1579,12 @@
         }
         if (mb) mb.hidden = false;
         if (ms) ms.hidden = true;
-        svg.setAttribute('aria-label', '気象庁のデータで描いた台風' + first.numberShort + '号の経路図。' +
-          first.analysis.location + 'を' + first.analysis.course + 'へ進んでいる。');
+        var courseTxt = val(first.analysis.course);
+        svg.setAttribute('aria-label', '気象庁のデータで描いた' + tcName(first) + 'の経路図。' +
+          first.analysis.location +
+          (courseTxt && courseTxt.indexOf('不定') < 0
+            ? 'を' + courseTxt + 'へ進んでいる。'
+            : 'にあり、進む向きは定まっていない。'));
         return true;
       }
 
@@ -1562,6 +1595,12 @@
         var banner = document.getElementById('live-banner');
         var snapBanner = document.getElementById('snapshot-banner');
         if (!liveBox) return;
+
+        /* 台風を先に、まだ台風になっていない熱帯低気圧をあとに並べる
+           （地図の見出しや発表時刻は、先頭のものを使うため） */
+        data.typhoons = (data.typhoons || []).slice().sort(function (a, b) {
+          return (isTyphoon(b) ? 1 : 0) - (isTyphoon(a) ? 1 : 0);
+        });
 
         var html = sectionNow(data) + sectionActive(data);
         data.typhoons.forEach(function (t) { html += sectionTimeline(t); });
