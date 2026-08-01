@@ -13,6 +13,10 @@
 .
 ├── README.md                       # のんラボ プロフィール
 ├── CLAUDE.md                       # ← この案内
+├── index.html                      # 🌐 公開サイトの入口ページ（GitHub Pages用）
+├── .github/workflows/              # ⚙️ 自動で動くもの
+│   ├── typhoon-update.yml          #    毎時25分：気象庁から台風データを取得
+│   └── pages-deploy.yml            #    Pagesを自動でオンにして公開しなおす
 ├── .claude/                        # 🤖 Claudeの設定（クラウド・ローカル共通で効く）
 │   ├── settings.json               #    セッション開始フックの登録＋権限の許可リスト
 │   ├── hooks/session-start.sh      #    開始時に状態表示＋クラウドなら道具を自動準備
@@ -27,6 +31,7 @@
 │   ├── 指示書_Claudeへの指示テンプレ.md
 │   ├── 指示書_Git操作手順書.md
 │   ├── トラブル解決記録.md         # 🛠 過去のトラブルと解決策（再発防止メモ）
+│   ├── 手順書_台風ページの公開と自動更新.md # 📗 公開・自動更新の確認と困ったときの対処
 │   ├── クラウドとローカルの使い分け.md # ☁️💻 どっちで何をやるかの地図
 │   ├── Claude最新情報_2026-06-26.md # 🆕 Claudeモデル＆Claude Codeの定点メモ
 │   └── 作業ログ_*.md               # セッションごとの作業記録（引き継ぎ用）
@@ -46,8 +51,11 @@
    - 「今の状況」「マップ」は①②のときJSが**全部組み立て直す**（発生中の台風・見通しの時系列・経路図・予報円・暴風域・日本への最接近距離）。
    - 部品：`scripts/fetch_typhoon.py`（Python標準機能のみ）＋ `.github/workflows/typhoon-update.yml`（毎時25分／変化が無い回はコミットしない／1個でも取得失敗したら上書きしない安全装置つき）。
    - **予備の文章（③）だけは手書き**。直すときは「予備の文章を更新して」と頼み、冒頭の `<time datetime="...">` も更新する。
-   - ⚠️ 定期実行は**mainに入ってから**動く。要設定：Actionsに書き込み権限／GitHub Pages有効化／60日放置でGitHubが自動停止（Actionsタブから再開可）。
-   - GitHub Pages：Settings → Pages → `main` / `/ (root)` → https://non-x2.github.io/non-x2/typhoon-app/
+   - **公開も自動**：`.github/workflows/pages-deploy.yml` が GitHub Pages を**オフなら自動でオン**にして公開（`enablement: true`）。mainの更新時＋データ自動更新の完了時＋手動。**のんさんの設定作業は不要**。
+   - 公開URL：https://non-x2.github.io/non-x2/typhoon-app/ ／ 入口ページ：ルートの `index.html`
+   - 🔒 **Webに出すのは `index.html` と `typhoon-app/` だけ**（作業ログ・脚本・YouTubeの型は公開対象外。検索に載る範囲を最小限にするため）。リポジトリ自体はpublic＝GitHub上では元から誰でも閲覧可。
+   - ⚠️ 定期実行は**mainに入ってから**動く。60日放置でGitHubが自動停止（Actionsタブから再開可）。
+   - 📗 確認のしかた・困ったときの対処 → [`docs/手順書_台風ページの公開と自動更新.md`](docs/手順書_台風ページの公開と自動更新.md)
 5. **JANバーコードExcelツール** — `excel-jan-barcode/`。完成・main反映済み（PR #18）。**クラウドでも実行可**（セッション開始フックが部品を自動導入。2026-07-28 に動作確認済み）。実機スキャナーでの読み取り確認が残課題（＝ここだけローカル）。
 
 ## のんさんへの対応の型（★どの環境でも必ず守る）

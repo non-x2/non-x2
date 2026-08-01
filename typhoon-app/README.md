@@ -45,18 +45,25 @@ python3 typhoon-app/scripts/fetch_typhoon.py
 > 🛡 **安全装置**：気象庁から1個でも取れなかったときは、ファイルを**書き換えません**。
 > 通信が一瞬切れただけで「台風はありません」と上書きされると危ないためです。
 
-### 動かすために必要な設定（最初の1回だけ）
+### 🌐 インターネットへの公開も自動です
 
-1. **GitHub Pages を有効にする**
-   Settings → Pages → Source「Deploy from a branch」→ Branch `main` / `/ (root)`
-   公開後のURL： https://non-x2.github.io/non-x2/typhoon-app/
-2. **Actions に書き込み権限を与える**
-   Settings → Actions → General → Workflow permissions を「Read and write permissions」に
-3. **定期実行は `main` に入ってから動きます**（GitHubの仕様で、予約実行は既定のブランチのものだけが動きます）
+公開URL： https://non-x2.github.io/non-x2/typhoon-app/
+
+**設定画面を開いてオンにする作業は要りません。** `.github/workflows/pages-deploy.yml` が、
+GitHub Pages が**まだオフなら自動でオンにして**、そのまま公開します。
+
+- **いつ公開しなおすか**：`main` が新しくなったとき／台風データの自動更新が終わったとき／手動ボタン
+- **公開するもの**：🔒 **入口ページ（`index.html`）と `typhoon-app/` だけ**。
+  作業ログ・脚本・YouTubeの型などはGitHub上に置いたままで、ホームページとしては公開しません
+  （検索に載る範囲を必要最小限にするためです）
+
+> 定期実行（毎時25分）は **`main` に入ってから**動きます。GitHubの仕様で、予約実行は既定のブランチのものだけが動くためです。
 
 > 💤 **60日ルール**：リポジトリに60日間なにも動きがないと、GitHubが定期実行を自動で止めます。
 > 止まったらメールが届くので、Actions タブから「Enable workflow」を押せば再開します。
 > （①のブラウザ直接取得は、これとは関係なく動き続けます）
+
+📗 詳しい確認のしかた・困ったときの対処 → [`../docs/手順書_台風ページの公開と自動更新.md`](../docs/手順書_台風ページの公開と自動更新.md)
 
 ## そのほかの特徴
 

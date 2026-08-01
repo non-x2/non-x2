@@ -215,7 +215,15 @@ def main() -> int:
     )
 
     if typhoons:
-        names = "、".join(f"{t['numberShort']}号（{t['name']}）" for t in typhoons)
+        # 気象庁は「まだ台風になっていない熱帯低気圧」も混ぜて発表する。
+        # そのとき番号は数字ではなく記号（例：b）、名前は空なので「b号（）」と出さない。
+        def label(t):
+            num = str(t.get("numberShort") or "")
+            if not num.isdigit():
+                return t.get("category") or "熱帯低気圧"
+            return f"{num}号（{t['name']}）" if t.get("name") else f"{num}号"
+
+        names = "、".join(label(t) for t in typhoons)
         print(f"✅ {len(typhoons)}個ぶん保存しました: {names} → {OUT_PATH}")
     else:
         print(f"✅ 発生中の台風はありません → {OUT_PATH}")
