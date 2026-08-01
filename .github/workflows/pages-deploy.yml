@@ -1,0 +1,58 @@
+# 🌐 ページをインターネットに公開（GitHub Pages）
+#
+# ふだんは何もしなくて大丈夫です。main が新しくなるたび、
+# ここが自動で「公開しなおし」をします。
+#
+# ポイント：Pages がまだオンになっていない場合、この仕掛けが
+# 「オンにするところから」自動でやります（enablement: true）。
+# → のんさんが Settings 画面を開いて設定する必要はありません。
+#
+# 公開後のURL： https://non-x2.github.io/non-x2/typhoon-app/
+
+name: 🌐 ページを公開（GitHub Pages）
+
+on:
+  push:
+    branches: [main] # main が更新されたら公開しなおす
+  workflow_run:
+    # 台風データの自動更新が終わったあとにも公開しなおす。
+    # （GitHubの仕様で、自動更新が行うコミットは push 扱いにならないため必要）
+    workflows: ['🌀 台風情報の自動更新']
+    types: [completed]
+  workflow_dispatch: # 手動実行用のボタン
+
+permissions:
+  contents: read
+  pages: write # Pages をオンにする＋公開するために必要
+  id-token: write # 公開時の本人確認に必要
+
+# 公開作業が重ならないようにする（あとから来たほうを待たせる）
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    # 台風データの更新が失敗した回は、公開しなおさない
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: リポジトリを取得
+        uses: actions/checkout@v4
+
+      - name: Pagesの準備（まだオフなら自動でオンにする）
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: 公開するファイルをまとめる
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.' # リポジトリ全体（.git と .github は自動で除外されます）
+
+      - name: 公開する
+        id: deployment
+        uses: actions/deploy-pages@v4
