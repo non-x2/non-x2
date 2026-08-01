@@ -53,6 +53,7 @@
    - **予備の文章（③）だけは手書き**。直すときは「予備の文章を更新して」と頼み、冒頭の `<time datetime="...">` も更新する。
    - **公開も自動**：`.github/workflows/pages-deploy.yml` が GitHub Pages を**オフなら自動でオン**にして公開（`enablement: true`）。mainの更新時＋データ自動更新の完了時＋手動。**のんさんの設定作業は不要**。
    - 公開URL：https://non-x2.github.io/non-x2/typhoon-app/ ／ 入口ページ：ルートの `index.html`
+   - 🔒 **Webに出すのは `index.html` と `typhoon-app/` だけ**（作業ログ・脚本・YouTubeの型は公開対象外。検索に載る範囲を最小限にするため）。リポジトリ自体はpublic＝GitHub上では元から誰でも閲覧可。
    - ⚠️ 定期実行は**mainに入ってから**動く。60日放置でGitHubが自動停止（Actionsタブから再開可）。
    - 📗 確認のしかた・困ったときの対処 → [`docs/手順書_台風ページの公開と自動更新.md`](docs/手順書_台風ページの公開と自動更新.md)
 5. **JANバーコードExcelツール** — `excel-jan-barcode/`。完成・main反映済み（PR #18）。**クラウドでも実行可**（セッション開始フックが部品を自動導入。2026-07-28 に動作確認済み）。実機スキャナーでの読み取り確認が残課題（＝ここだけローカル）。

@@ -8,6 +8,9 @@
 # → のんさんが Settings 画面を開いて設定する必要はありません。
 #
 # 公開後のURL： https://non-x2.github.io/non-x2/typhoon-app/
+#
+# 🔒 公開するのは「入口ページ（index.html）」と「台風ページ（typhoon-app/）」だけです。
+#    作業ログ・脚本・YouTubeの型などは、ホームページとしては公開しません。
 
 name: 🌐 ページを公開（GitHub Pages）
 
@@ -48,10 +51,21 @@ jobs:
         with:
           enablement: true
 
+      # 🔒 公開するのは「入口ページ」と「台風ページ」だけ。
+      #    作業ログ・脚本・YouTubeの型などはGitHub上に置いたままにして、
+      #    ホームページとしては出しません（検索に載る範囲を必要最小限にするため）。
+      - name: 公開するファイルだけを集める
+        run: |
+          mkdir -p _site
+          cp index.html _site/
+          cp -r typhoon-app _site/
+          echo "--- 公開されるファイル ---"
+          find _site -type f | sort
+
       - name: 公開するファイルをまとめる
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.' # リポジトリ全体（.git と .github は自動で除外されます）
+          path: '_site'
 
       - name: 公開する
         id: deployment
