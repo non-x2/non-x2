@@ -100,7 +100,7 @@ OFFICES = {
     "430000": ("熊本県", "九州"),
     "440000": ("大分県", "九州"),
     "450000": ("宮崎県", "九州"),
-    "460100": ("鹿児島県", "九州"),
+    "460100": ("鹿児島県（奄美地方除く）", "九州"),
     "460040": ("奄美地方", "九州"),
     "471000": ("沖縄本島地方", "沖縄"),
     "472000": ("大東島地方", "沖縄"),
@@ -186,27 +186,60 @@ def build_quakes(raw_list) -> list[dict]:
             q["depthKm"] = parse_depth_km(entry.get("cod"))
     quakes = [by_event[eid] for eid in order if by_event[eid]["time"]]
     quakes.sort(key=lambda q: q["time"], reverse=True)
-    return quakes[:QUAKE_MAX]
+
+    # 「震度速報」（震源がまだ分からない第一報）は別IDで届くので、
+    # 5分以内に震源つきの情報がある場合は同じ地震とみなして省く。
+    def minutes(t):
+        try:
+            return datetime.fromisoformat(t).timestamp() / 60
+        except (TypeError, ValueError):
+            return None
+
+    result = []
+    for q in quakes:
+        if not q["place"]:
+            m = minutes(q["time"])
+            if m is not None and any(
+                other["place"]
+                and (lambda om: om is not None and abs(om - m) <= 5)(minutes(other["time"]))
+                for other in quakes
+            ):
+                continue  # 震源つきの続報があるので、この速報は省く
+        result.append(q)
+    return result[:QUAKE_MAX]
 
 
 # ---------------------------------------------------------------- 津波
 
 
 def walk_tsunami_items(node, found: list):
-    """津波の詳細データの中から「地域名＋警報の種類」の組を探す（形が多少違っても拾えるように）。"""
+    """津波の詳細データの中から「地域名＋警報の種類」の組を探す。
+
+    実データは Body→Tsunami→Forecast→Item の中に
+    {"Area": {"Name": …}, "Category": {"Kind": {"Name": …, "Code": …}}} という形
+    （頭文字が大文字。2026-08-02 の観察モードで確認）。
+    形が多少違っても拾えるよう、大文字・小文字の両方に対応しておく。
+    """
+
+    def get(dic, *names):
+        for n in names:
+            if isinstance(dic, dict) and n in dic:
+                return dic[n]
+        return None
+
     if isinstance(node, list):
         for item in node:
             walk_tsunami_items(item, found)
         return
     if not isinstance(node, dict):
         return
-    area = node.get("area")
-    category = node.get("category")
+    area = get(node, "Area", "area")
+    category = get(node, "Category", "category")
     if isinstance(area, dict) and isinstance(category, dict):
-        name = area.get("name") or ""
-        kind = category.get("kind") or {}
-        kind_name = kind.get("name") or "" if isinstance(kind, dict) else ""
-        kind_code = str(kind.get("code") or "") if isinstance(kind, dict) else ""
+        name = get(area, "Name", "name") or ""
+        kind = get(category, "Kind", "kind") or {}
+        kind_name = (get(kind, "Name", "name") or "") if isinstance(kind, dict) else ""
+        kind_code = str(get(kind, "Code", "code") or "") if isinstance(kind, dict) else ""
         if name:
             found.append({"name": name, "kind": kind_name, "code": kind_code})
         return  # この枝はもう見た
@@ -216,6 +249,29 @@ def walk_tsunami_items(node, found: list):
 
 # 「解除」「なし」を表すとされるコード。名前も見るので、コードは補助扱い。
 TSUNAMI_INACTIVE_CODES = {"00", "50", "60", "71", "72", "73"}
+
+
+def latest_tsunami_report(entries):
+    """津波の「警報・注意報・予報」の電文（VTSE41）でいちばん新しいものを返す。
+
+    ⚠️ 題名で探してはいけない：注意報が解除されると、解除のお知らせは
+    「津波予報」という題名で届くため、題名に「注意報」を含むものを探すと
+    解除前の古い発表を最新と勘違いしてしまう（2026-08-02 の観察モードで確認）。
+    """
+    for e in entries:
+        if "VTSE41" in (e.get("json") or ""):
+            return e
+    # 念のための控え：ファイル名の形式が変わったら題名で探す
+    return next(
+        (
+            e
+            for e in entries
+            if "津波警報" in (e.get("ttl") or "")
+            or "津波注意報" in (e.get("ttl") or "")
+            or "津波予報" in (e.get("ttl") or "")
+        ),
+        None,
+    )
 
 
 def tsunami_item_active(item: dict) -> bool:
@@ -240,14 +296,7 @@ def build_tsunami(raw_list) -> dict:
     ]
 
     # 「津波警報・注意報・予報」という種類の、いちばん新しい発表を探す
-    latest = next(
-        (
-            e
-            for e in entries
-            if "津波警報" in (e.get("ttl") or "") or "津波注意報" in (e.get("ttl") or "")
-        ),
-        None,
-    )
+    latest = latest_tsunami_report(entries)
 
     status = "none"  # 見つからない＝直近に発表そのものが無い
     issued = None
@@ -371,14 +420,7 @@ def probe() -> int:
     tsunami_list = fetch_json(TSUNAMI_LIST)
     print(f"\n津波一覧: {len(tsunami_list)}件")
     show("津波一覧の先頭3件（生データ）", tsunami_list[:3], 2000)
-    latest = next(
-        (
-            e
-            for e in tsunami_list
-            if "津波警報" in (e.get("ttl") or "") or "津波注意報" in (e.get("ttl") or "")
-        ),
-        None,
-    )
+    latest = latest_tsunami_report([e for e in tsunami_list if isinstance(e, dict)])
     if latest and latest.get("json"):
         detail = fetch_json(f"{BASE}/tsunami/data/{latest['json']}")
         show(f"いちばん新しい津波発表の詳細（{latest['json']}）", detail, 4000)

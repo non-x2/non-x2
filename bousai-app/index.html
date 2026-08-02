@@ -477,7 +477,7 @@
     ['430000', '熊本県', '九州'],
     ['440000', '大分県', '九州'],
     ['450000', '宮崎県', '九州'],
-    ['460100', '鹿児島県', '九州'],
+    ['460100', '鹿児島県（奄美地方除く）', '九州'],
     ['460040', '奄美地方', '九州'],
     ['471000', '沖縄本島地方', '沖縄'],
     ['472000', '大東島地方', '沖縄'],
@@ -568,24 +568,44 @@
     var quakes = order.map(function (eid) { return byEvent[eid]; })
       .filter(function (q) { return q.time; });
     quakes.sort(function (a, b) { return a.time < b.time ? 1 : -1; });
+    /* 「震度速報」（震源がまだ分からない第一報）は別IDで届くので、
+       5分以内に震源つきの情報がある場合は同じ地震とみなして省く */
+    function mins(t) { var d = new Date(t); return isNaN(d) ? null : d.getTime() / 60000; }
+    quakes = quakes.filter(function (q) {
+      if (q.place) return true;
+      var m = mins(q.time);
+      if (m === null) return true;
+      return !quakes.some(function (o) {
+        var om = mins(o.time);
+        return o.place && om !== null && Math.abs(om - m) <= 5;
+      });
+    });
     return quakes.slice(0, 15);
   }
 
   /* --- 津波 --- */
+  /* 実データは Body→Tsunami→Forecast→Item の中に
+     {"Area":{"Name":…},"Category":{"Kind":{"Name":…,"Code":…}}} という形（頭文字が大文字）。
+     形が多少違っても拾えるよう、大文字・小文字の両方に対応しておく。 */
+  function pick2(dic, a, b) {
+    if (!dic || typeof dic !== 'object') return null;
+    return dic[a] !== undefined ? dic[a] : dic[b];
+  }
   function walkTsunamiItems(node, found) {
     if (Array.isArray(node)) {
       node.forEach(function (n) { walkTsunamiItems(n, found); });
       return;
     }
     if (!node || typeof node !== 'object') return;
-    var area = node.area, category = node.category;
+    var area = pick2(node, 'Area', 'area'), category = pick2(node, 'Category', 'category');
     if (area && typeof area === 'object' && category && typeof category === 'object') {
-      var kind = category.kind || {};
-      if (area.name) {
+      var kind = pick2(category, 'Kind', 'kind') || {};
+      var name = pick2(area, 'Name', 'name');
+      if (name) {
         found.push({
-          name: area.name,
-          kind: (kind && kind.name) || '',
-          code: String((kind && kind.code) || '')
+          name: name,
+          kind: pick2(kind, 'Name', 'name') || '',
+          code: String(pick2(kind, 'Code', 'code') || '')
         });
       }
       return;
@@ -599,19 +619,28 @@
     if (kind.indexOf('大津波警報') >= 0 || kind.indexOf('津波警報') >= 0 || kind.indexOf('津波注意報') >= 0) return true;
     return !!code && !TSUNAMI_INACTIVE_CODES[code];
   }
-  function isTsunamiWarningTitle(ttl) {
-    ttl = ttl || '';
-    return ttl.indexOf('津波警報') >= 0 || ttl.indexOf('津波注意報') >= 0;
+  /* 津波の「警報・注意報・予報」の電文（VTSE41）でいちばん新しいものを探す。
+     ⚠️ 題名で探してはいけない：注意報が解除されると、解除のお知らせは
+     「津波予報」という題名で届くため、題名に「注意報」を含むものを探すと
+     解除前の古い発表を最新と勘違いしてしまう。 */
+  function latestTsunamiReport(entries) {
+    for (var i = 0; i < entries.length; i++) {
+      if (((entries[i].json) || '').indexOf('VTSE41') >= 0) return entries[i];
+    }
+    for (var j = 0; j < entries.length; j++) {
+      var ttl = entries[j].ttl || '';
+      if (ttl.indexOf('津波警報') >= 0 || ttl.indexOf('津波注意報') >= 0 || ttl.indexOf('津波予報') >= 0) {
+        return entries[j];
+      }
+    }
+    return null;
   }
   function buildTsunami(rawList) {
     var entries = (rawList || []).filter(function (e) { return e && typeof e === 'object'; });
     var recent = entries.slice(0, 5).map(function (e) {
       return { time: e.rdt || e.at, title: e.ttl || '' };
     });
-    var latest = null;
-    for (var i = 0; i < entries.length; i++) {
-      if (isTsunamiWarningTitle(entries[i].ttl)) { latest = entries[i]; break; }
-    }
+    var latest = latestTsunamiReport(entries);
     var base = { status: 'none', issued: null, areas: [], recent: recent };
     if (!latest) return Promise.resolve(base);
     base.issued = latest.rdt || latest.at;
@@ -704,7 +733,7 @@
       if (q.time) meta.push(fmtShort(q.time));
       if (q.magnitude !== null && q.magnitude !== undefined) meta.push('M' + q.magnitude.toFixed(1));
       if (q.depthKm !== null && q.depthKm !== undefined) {
-        meta.push('深さ約' + Math.round(q.depthKm) + 'km');
+        meta.push(q.depthKm < 1 ? 'ごく浅い' : '深さ約' + Math.round(q.depthKm) + 'km');
       }
       html += '<li>' +
         '<span class="shindo ' + cls + '">' + (label ? '震度<br>' + esc(label) : '調査中') + '</span>' +
@@ -765,8 +794,7 @@
     if (!hit.length) {
       html += '<div class="status-box status-ok">✅ 現在、雷注意報は出ていません（全国）</div>';
     } else {
-      html += '<div class="status-box status-warn">⚡ ' + hit.length + 'つの予報区に雷注意報が出ています' +
-        (w.reportTime ? '<span class="sub">気象庁 ' + esc(fmtShort(w.reportTime)) + ' 時点</span>' : '') + '</div>';
+      html += '<div class="status-box status-warn">⚡ ' + hit.length + 'つの予報区に雷注意報が出ています</div>';
       groupByRegion(hit).forEach(function (g) {
         html += '<div class="region-group"><p class="region-name">' + esc(g.region) + '</p><div class="chips">';
         g.items.forEach(function (o) {
@@ -792,14 +820,12 @@
     var floodOnly = hit.filter(function (o) { return !o.rain && o.flood; });
 
     if (emergency.length) {
-      html += '<div class="status-box status-alert">🚨 大雨特別警報が出ています！ 命を守る行動を' +
-        (w.reportTime ? '<span class="sub">気象庁 ' + esc(fmtShort(w.reportTime)) + ' 時点</span>' : '') + '</div>';
+      html += '<div class="status-box status-alert">🚨 大雨特別警報が出ています！ 命を守る行動を</div>';
     } else {
       var head = warning.length
         ? '☔ 大雨警報が' + warning.length + 'つの予報区に出ています'
         : '☂️ 大雨・洪水の注意報が出ている地域があります';
-      html += '<div class="status-box ' + (warning.length ? 'status-alert' : 'status-warn') + '">' + head +
-        (w.reportTime ? '<span class="sub">気象庁 ' + esc(fmtShort(w.reportTime)) + ' 時点</span>' : '') + '</div>';
+      html += '<div class="status-box ' + (warning.length ? 'status-alert' : 'status-warn') + '">' + head + '</div>';
     }
 
     function block(title, list, chipClass, withFlood) {
