@@ -1,8 +1,71 @@
 {
- "generatedAt": "2026-08-02T16:06:59+09:00",
+ "generatedAt": "2026-08-02T18:30:34+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
  "count": 2,
  "typhoons": [
+  {
+   "id": "TC2616",
+   "number": "b",
+   "numberShort": "b",
+   "name": "",
+   "nameEn": "",
+   "category": "熱帯低気圧",
+   "issue": "2026-08-02T16:15:00+09:00",
+   "analysis": {
+    "hours": 0,
+    "label": "実況",
+    "validTime": "2026-08-02T15:00:00+09:00",
+    "category": "熱帯低気圧",
+    "intensity": "-",
+    "scale": "",
+    "location": "フィリピンの東",
+    "course": "北西",
+    "speedKmh": null,
+    "pressure": 1002.0,
+    "windMs": 15.0,
+    "gustMs": 23.0,
+    "lat": 15.3,
+    "lon": 124.7,
+    "circleKm": null
+   },
+   "forecast": [
+    {
+     "hours": 24,
+     "label": "予報　２４時間後",
+     "validTime": "2026-08-03T15:00:00+09:00",
+     "category": "台風",
+     "intensity": "-",
+     "scale": "",
+     "location": "フィリピンの東",
+     "course": "北西",
+     "speedKmh": null,
+     "pressure": 1000.0,
+     "windMs": 18.0,
+     "gustMs": 25.0,
+     "lat": 16.8,
+     "lon": 123.5,
+     "circleKm": 110.0
+    },
+    {
+     "hours": 48,
+     "label": "予報　４８時間後",
+     "validTime": "2026-08-04T15:00:00+09:00",
+     "category": "熱帯低気圧",
+     "intensity": "-",
+     "scale": "",
+     "location": "フィリピンの東",
+     "course": "不定",
+     "speedKmh": null,
+     "pressure": 1002.0,
+     "windMs": 0.0,
+     "gustMs": 0.0,
+     "lat": 17.1,
+     "lon": 123.1,
+     "circleKm": 200.0
+    }
+   ],
+   "track": []
+  },
   {
    "id": "TC2615",
    "number": "2613",
@@ -338,69 +401,6 @@
      152.3
     ]
    ]
-  },
-  {
-   "id": "TC2616",
-   "number": "b",
-   "numberShort": "b",
-   "name": "",
-   "nameEn": "",
-   "category": "熱帯低気圧",
-   "issue": "2026-08-02T13:15:00+09:00",
-   "analysis": {
-    "hours": 0,
-    "label": "実況",
-    "validTime": "2026-08-02T12:00:00+09:00",
-    "category": "熱帯低気圧",
-    "intensity": "-",
-    "scale": "",
-    "location": "フィリピンの東",
-    "course": "西北西",
-    "speedKmh": null,
-    "pressure": 1002.0,
-    "windMs": 15.0,
-    "gustMs": 23.0,
-    "lat": 15.1,
-    "lon": 124.7,
-    "circleKm": null
-   },
-   "forecast": [
-    {
-     "hours": 24,
-     "label": "予報　２４時間後",
-     "validTime": "2026-08-03T12:00:00+09:00",
-     "category": "台風",
-     "intensity": "-",
-     "scale": "",
-     "location": "フィリピンの東",
-     "course": "北北西",
-     "speedKmh": null,
-     "pressure": 1000.0,
-     "windMs": 18.0,
-     "gustMs": 25.0,
-     "lat": 16.3,
-     "lon": 124.1,
-     "circleKm": 110.0
-    },
-    {
-     "hours": 45,
-     "label": "予報　４５時間後",
-     "validTime": "2026-08-04T09:00:00+09:00",
-     "category": "熱帯低気圧",
-     "intensity": "-",
-     "scale": "",
-     "location": "フィリピンの東",
-     "course": "北北西",
-     "speedKmh": null,
-     "pressure": 1002.0,
-     "windMs": 0.0,
-     "gustMs": 0.0,
-     "lat": 16.9,
-     "lon": 123.8,
-     "circleKm": 165.0
-    }
-   ],
-   "track": []
   }
  ]
 }
