@@ -6,6 +6,7 @@
 <meta name="description" content="台風接近時の備えチェックリストと、最新状況・正確な日本地図をまとめたページ。">
 <meta name="color-scheme" content="light dark">
 <title>台風情報まとめ｜のんラボ</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='90'%3E%F0%9F%8C%80%3C/text%3E%3C/svg%3E">
 </head>
 <body>
 <style>
@@ -211,6 +212,22 @@
   }
   .snapshot.is-live strong { color: var(--green-ink); }
   header p.updated-badge.is-live { background: rgba(75, 220, 160, 0.28); }
+  #refresh-btn {
+    font: inherit;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #fff;
+    background: rgba(255,255,255,0.16);
+    border: 1px solid rgba(255,255,255,0.35);
+    border-radius: 999px;
+    padding: 0.4rem 1rem;
+    min-height: 44px;
+    cursor: pointer;
+  }
+  #refresh-btn:hover:not(:disabled) { background: rgba(255,255,255,0.28); }
+  #refresh-btn:disabled { opacity: 0.6; cursor: default; }
+  #refresh-btn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+  header > p:last-of-type { margin-top: 0.55rem; }
   .live-note {
     display: block;
     margin-top: 0.45rem;
@@ -608,6 +625,8 @@
   <h1>🌀 台風情報まとめ</h1>
   <p>公式の最新情報はリンク先で確認してください</p>
   <p class="updated-badge"><span id="updated-label">🕐 最終更新：</span><time id="updated-at" datetime="2026-08-01T09:00+09:00">2026年8月1日</time><span id="stale-age"></span></p>
+  <!-- JSが動くときだけ表示される手動更新ボタン（30分ごとの自動更新もある） -->
+  <p><button type="button" id="refresh-btn" hidden>🔄 いま更新する</button></p>
 </header>
 
 <nav class="tabs" role="tablist" aria-label="表示切り替え">
@@ -1064,6 +1083,8 @@
       }
     }
     refreshStale();
+    /* 開きっぱなしでも「◯時間前」の表示が古くならないよう、1分ごとに数え直す */
+    setInterval(refreshStale, 60 * 1000);
 
     /* ============================================================
        🌀 気象庁の台風データを自動で取ってきて、ページを新しくする
@@ -1620,10 +1641,19 @@
               : '気象庁の最新発表';
           }
           banner.hidden = false;
-          if (via === 'local') {
+          /* 更新のたびに注意書きが増えないよう、前回の分を消してから付け直す */
+          Array.prototype.forEach.call(banner.querySelectorAll('.live-note'), function (n) {
+            banner.removeChild(n);
+          });
+          var noteText = via === 'local'
+            ? '※ 気象庁へ直接つながらなかったため、1時間ごとに保存している控えのデータを表示しています。'
+            : via === 'cache'
+              ? '⚠️ いまはインターネットにつながらないため、この端末に残っていた前回のデータを表示しています。表示が古い可能性があります。'
+              : '';
+          if (noteText) {
             var n = document.createElement('span');
             n.className = 'live-note';
-            n.textContent = '※ 気象庁へ直接つながらなかったため、1時間ごとに保存している控えのデータを表示しています。';
+            n.textContent = noteText;
             banner.appendChild(n);
           }
         }
@@ -1640,22 +1670,87 @@
         refreshStale();
 
         renderMap(data);
+
+        /* 取得に成功した内容を端末に保存しておく。
+           次に開いたときネットが全滅でも「最後に見たデータ」を出せる（④の保険） */
+        if (via !== 'cache') {
+          try {
+            localStorage.setItem(CACHE_KEY, JSON.stringify({
+              stamp: stamp,
+              generatedAt: data.generatedAt || null,
+              typhoons: data.typhoons
+            }));
+          } catch (e) {}
+        }
       }
 
-      /* --- 実行：気象庁 → 控えのファイル → あきらめてスナップショット --- */
-      function start() {
-        fromJma().then(function (d) {
-          apply(d, 'jma');
-        })['catch'](function () {
-          return getJSON(LOCAL, 6000).then(function (d) {
-            apply({ generatedAt: d.generatedAt, typhoons: d.typhoons || [] }, 'local');
-          });
-        })['catch'](function () {
-          /* どちらもダメ。手で書いたスナップショットをそのまま出す（何もしない） */
+      /* --- 実行：①気象庁 → ②控えのファイル → ③この端末に残った前回分 → ④スナップショット --- */
+      var CACHE_KEY = 'typhoon-last-data-v1';
+      var lastFetchedAt = 0;
+      var fetching = false;
+
+      function fromCache() {
+        return new Promise(function (resolve, reject) {
+          var raw = null;
+          try { raw = localStorage.getItem(CACHE_KEY); } catch (e) {}
+          if (!raw) { reject(new Error('保存データなし')); return; }
+          var d;
+          try { d = JSON.parse(raw); } catch (e) { reject(e); return; }
+          if (!d || !Array.isArray(d.typhoons)) { reject(new Error('形式が違います')); return; }
+          resolve(d);
         });
       }
 
-      if (typeof fetch === 'function' && typeof Promise === 'function') start();
+      function start() {
+        if (fetching) return;
+        fetching = true;
+        var btn = document.getElementById('refresh-btn');
+        var btnLabel = btn ? btn.textContent : '';
+        if (btn) { btn.disabled = true; btn.textContent = '⏳ 更新中…'; }
+        function finish() {
+          fetching = false;
+          if (btn) { btn.disabled = false; btn.textContent = btnLabel; }
+        }
+        fromJma().then(function (d) {
+          lastFetchedAt = Date.now();
+          apply(d, 'jma');
+        })['catch'](function () {
+          return getJSON(LOCAL, 6000).then(function (d) {
+            lastFetchedAt = Date.now();
+            apply({ generatedAt: d.generatedAt, typhoons: d.typhoons || [] }, 'local');
+          });
+        })['catch'](function () {
+          /* ネットが全滅。この端末に残っている前回のデータがあれば、それを出す */
+          return fromCache().then(function (d) {
+            apply({ generatedAt: d.generatedAt || d.stamp, typhoons: d.typhoons }, 'cache');
+          });
+        })['catch'](function () {
+          /* 何もかもダメ。手で書いたスナップショットをそのまま出す（何もしない） */
+        }).then(finish, finish);
+      }
+
+      if (typeof fetch === 'function' && typeof Promise === 'function') {
+        start();
+
+        /* 台風のときはページを開きっぱなしにしがちなので、
+           30分ごとに自動でデータを取り直す（気象庁の発表は約3時間おき） */
+        setInterval(start, 30 * 60 * 1000);
+
+        /* 別のアプリから戻ってきたとき、10分以上たっていたら取り直す */
+        document.addEventListener('visibilitychange', function () {
+          if (document.visibilityState === 'visible' &&
+              Date.now() - lastFetchedAt > 10 * 60 * 1000) {
+            start();
+          }
+        });
+
+        /* 手動の「いま更新する」ボタン */
+        var rb = document.getElementById('refresh-btn');
+        if (rb) {
+          rb.hidden = false;
+          rb.addEventListener('click', start);
+        }
+      }
     })();
   })();
 </script>
