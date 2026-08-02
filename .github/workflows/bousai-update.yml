@@ -15,9 +15,6 @@ on:
     # UTCで毎時35分＝日本時間の毎時35分に実行
     - cron: '35 * * * *'
   workflow_dispatch: # 手動実行用のボタン
-  push:
-    branches:
-      - 'claude/earthquake-tsunami-lightning-rain-info-pgblla' # 開発中の動作確認用（完成したら消す）
 
 permissions:
   contents: write # data/latest.json を書き戻すために必要
