@@ -1,0 +1,59 @@
+# ⚡ 防災情報（地震・津波・雷・大雨）の自動更新
+#
+# 気象庁の公式データを1時間ごとに取ってきて、bousai-app/data/latest.json を書き換えます。
+# これが動いていれば、Claude を開かなくても公開ページ（GitHub Pages）が新しくなります。
+#
+# 発表内容に変わりがない回はコミットしません（履歴が無駄に増えないように）。
+# 手で今すぐ動かしたいときは、GitHubの Actions タブ →「⚡ 防災情報の自動更新」→「Run workflow」。
+#
+# ※ 台風の自動更新（毎時25分）とぶつからないよう、こちらは毎時35分にしています。
+
+name: ⚡ 防災情報の自動更新
+
+on:
+  schedule:
+    # UTCで毎時35分＝日本時間の毎時35分に実行
+    - cron: '35 * * * *'
+  workflow_dispatch: # 手動実行用のボタン
+  push:
+    branches:
+      - 'claude/earthquake-tsunami-lightning-rain-info-pgblla' # 開発中の動作確認用（完成したら消す）
+
+permissions:
+  contents: write # data/latest.json を書き戻すために必要
+
+concurrency:
+  group: bousai-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: リポジトリを取得
+        uses: actions/checkout@v4
+
+      - name: データの生の形を確認（観察モード・記録用。毎時の定期実行では省略）
+        if: github.event_name != 'schedule'
+        run: python3 bousai-app/scripts/fetch_bousai.py --probe
+
+      - name: 気象庁から防災情報を取得
+        run: python3 bousai-app/scripts/fetch_bousai.py
+
+      - name: 変わっていればコミットして反映
+        run: |
+          if [ -z "$(git status --porcelain bousai-app/data)" ]; then
+            echo "変更なし。コミットはしません。"
+            exit 0
+          fi
+          git config user.name  'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add bousai-app/data
+          git commit -m '⚡ 防災情報データを自動更新（気象庁）'
+          # 同時刻に他の更新が入っていた場合に備えて、取り込んでから押す
+          for i in 1 2 3; do
+            git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && exit 0
+            echo "リトライ $i"
+            sleep 5
+          done
+          exit 1

@@ -1,0 +1,9 @@
+{
+ "placeholder": true,
+ "note": "これは仮のファイルです。GitHub Actions（bousai-update.yml）が最初に動いたとき、本物のデータに置き換わります。ページ側は placeholder が true のあいだ、このファイルを使いません。",
+ "generatedAt": null,
+ "source": "気象庁（https://www.jma.go.jp/）",
+ "quakes": [],
+ "tsunami": null,
+ "warnings": null
+}
