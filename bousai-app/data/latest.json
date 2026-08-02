@@ -1,9 +1,242 @@
 {
- "placeholder": true,
- "note": "これは仮のファイルです。GitHub Actions（bousai-update.yml）が最初に動いたとき、本物のデータに置き換わります。ページ側は placeholder が true のあいだ、このファイルを使いません。",
- "generatedAt": null,
+ "generatedAt": "2026-08-02T16:10:47+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
- "quakes": [],
- "tsunami": null,
- "warnings": null
+ "quakes": [
+  {
+   "id": "20260802134745",
+   "time": "2026-08-02T13:47:00+09:00",
+   "place": "熊本県熊本地方",
+   "magnitude": 2.4,
+   "maxIntensity": "2",
+   "depthKm": 0.0
+  },
+  {
+   "id": "20260802122900",
+   "time": "2026-08-02T12:29:00+09:00",
+   "place": "トカラ列島近海",
+   "magnitude": 2.5,
+   "maxIntensity": "1",
+   "depthKm": 20.0
+  },
+  {
+   "id": "20260802103853",
+   "time": "2026-08-02T10:38:00+09:00",
+   "place": "福島県沖",
+   "magnitude": 3.9,
+   "maxIntensity": "2",
+   "depthKm": 50.0
+  },
+  {
+   "id": "20260802094806",
+   "time": "2026-08-02T09:48:00+09:00",
+   "place": "熊本県熊本地方",
+   "magnitude": 3.1,
+   "maxIntensity": "1",
+   "depthKm": 10.0
+  },
+  {
+   "id": "20260802094543",
+   "time": "2026-08-02T09:45:00+09:00",
+   "place": "岩手県沖",
+   "magnitude": 4.6,
+   "maxIntensity": "2",
+   "depthKm": 30.0
+  },
+  {
+   "id": "20260802091945",
+   "time": "2026-08-02T09:19:00+09:00",
+   "place": "熊本県天草・芦北地方",
+   "magnitude": 3.5,
+   "maxIntensity": "2",
+   "depthKm": 10.0
+  },
+  {
+   "id": "20260802081741",
+   "time": "2026-08-02T08:17:00+09:00",
+   "place": "岩手県沖",
+   "magnitude": 3.1,
+   "maxIntensity": "1",
+   "depthKm": 50.0
+  },
+  {
+   "id": "20260802081247",
+   "time": "2026-08-02T08:12:00+09:00",
+   "place": "熊本県熊本地方",
+   "magnitude": 1.9,
+   "maxIntensity": "1",
+   "depthKm": 0.0
+  },
+  {
+   "id": "20260802080452",
+   "time": "2026-08-02T08:04:00+09:00",
+   "place": "熊本県熊本地方",
+   "magnitude": 2.1,
+   "maxIntensity": "2",
+   "depthKm": 0.0
+  },
+  {
+   "id": "20260802063641",
+   "time": "2026-08-02T06:36:00+09:00",
+   "place": "熊本県熊本地方",
+   "magnitude": 2.5,
+   "maxIntensity": "1",
+   "depthKm": 10.0
+  },
+  {
+   "id": "20260802061804",
+   "time": "2026-08-02T06:18:00+09:00",
+   "place": "熊本県天草・芦北地方",
+   "magnitude": 2.6,
+   "maxIntensity": "1",
+   "depthKm": 10.0
+  },
+  {
+   "id": "20260802045251",
+   "time": "2026-08-02T04:52:00+09:00",
+   "place": "熊本県熊本地方",
+   "magnitude": 2.0,
+   "maxIntensity": "1",
+   "depthKm": 0.0
+  },
+  {
+   "id": "20260802043453",
+   "time": "2026-08-02T04:34:00+09:00",
+   "place": "熊本県熊本地方",
+   "magnitude": 3.3,
+   "maxIntensity": "2",
+   "depthKm": 10.0
+  },
+  {
+   "id": "20260802041034",
+   "time": "2026-08-02T04:10:00+09:00",
+   "place": "日向灘",
+   "magnitude": 5.3,
+   "maxIntensity": "3",
+   "depthKm": 10.0
+  },
+  {
+   "id": "20260802041104",
+   "time": "2026-08-02T04:10:00+09:00",
+   "place": "",
+   "magnitude": null,
+   "maxIntensity": "3",
+   "depthKm": null
+  }
+ ],
+ "tsunami": {
+  "status": "unknown",
+  "issued": "2026-07-28T16:29:00+09:00",
+  "areas": [],
+  "recent": [
+   {
+    "time": "2026-07-28T18:10:00+09:00",
+    "title": "津波予報"
+   },
+   {
+    "time": "2026-07-28T16:29:00+09:00",
+    "title": "各地の満潮時刻・津波到達予想時刻に関する情報"
+   },
+   {
+    "time": "2026-07-28T16:29:00+09:00",
+    "title": "津波注意報・津波予報"
+   },
+   {
+    "time": "2026-07-03T13:14:00+09:00",
+    "title": "津波予報"
+   }
+  ]
+ },
+ "warnings": {
+  "reportTime": "2026-05-28T11:31:00+09:00",
+  "offices": [
+   {
+    "code": "011000",
+    "name": "宗谷地方",
+    "region": "北海道",
+    "rain": null,
+    "flood": null,
+    "thunder": true
+   },
+   {
+    "code": "012000",
+    "name": "上川・留萌地方",
+    "region": "北海道",
+    "rain": null,
+    "flood": null,
+    "thunder": true
+   },
+   {
+    "code": "016000",
+    "name": "石狩・空知・後志地方",
+    "region": "北海道",
+    "rain": null,
+    "flood": null,
+    "thunder": true
+   },
+   {
+    "code": "020000",
+    "name": "青森県",
+    "region": "東北",
+    "rain": null,
+    "flood": null,
+    "thunder": true
+   },
+   {
+    "code": "030000",
+    "name": "岩手県",
+    "region": "東北",
+    "rain": null,
+    "flood": null,
+    "thunder": true
+   },
+   {
+    "code": "050000",
+    "name": "秋田県",
+    "region": "東北",
+    "rain": null,
+    "flood": null,
+    "thunder": true
+   },
+   {
+    "code": "060000",
+    "name": "山形県",
+    "region": "東北",
+    "rain": null,
+    "flood": null,
+    "thunder": true
+   },
+   {
+    "code": "130000",
+    "name": "東京都",
+    "region": "関東・甲信",
+    "rain": null,
+    "flood": null,
+    "thunder": true
+   },
+   {
+    "code": "200000",
+    "name": "長野県",
+    "region": "関東・甲信",
+    "rain": null,
+    "flood": null,
+    "thunder": true
+   },
+   {
+    "code": "471000",
+    "name": "沖縄本島地方",
+    "region": "沖縄",
+    "rain": null,
+    "flood": null,
+    "thunder": true
+   },
+   {
+    "code": "472000",
+    "name": "大東島地方",
+    "region": "沖縄",
+    "rain": null,
+    "flood": null,
+    "thunder": true
+   }
+  ]
+ }
 }
