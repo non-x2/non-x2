@@ -1,0 +1,1006 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>防災情報まとめ｜地震・津波・雷・大雨</title>
+<meta name="description" content="気象庁の発表をもとに、最近の地震・津波の状況・雷注意報・大雨の警報注意報を1ページにまとめた防災ページ。開くたびに自動で最新になります。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='90'%3E%F0%9F%9B%9F%EF%B8%8F%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f4f6f8;
+    --card: #ffffff;
+    --text: #1b1f24;
+    --text-dim: #5b6472;
+    --border: #d9dee4;
+    --border-soft: #e6eaee;
+    --accent: #0b6bcb;
+    --tab-active-bg: #1a3c6e;
+    --tab-active-fg: #ffffff;
+    --ok-bg: #e7f5ec; --ok-ink: #1d6b3a; --ok-line: #bfe3cd;
+    --warn-bg: #fdf3e0; --warn-ink: #8a5a0a; --warn-line: #f0ddb4;
+    --alert-bg: #fdeaea; --alert-ink: #a02725; --alert-line: #f3c6c5;
+    --unknown-bg: #eef1f5; --unknown-ink: #47505c; --unknown-line: #d7dde5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12151a;
+      --card: #1a1f26;
+      --text: #e8ecf1;
+      --text-dim: #9aa5b4;
+      --border: #313a45;
+      --border-soft: #262e38;
+      --accent: #6db3ff;
+      --tab-active-bg: #2a4a72;
+      --tab-active-fg: #eaf2fd;
+      --ok-bg: #16281d; --ok-ink: #7ecf9c; --ok-line: #23503a;
+      --warn-bg: #2c2413; --warn-ink: #e8bb62; --warn-line: #55461f;
+      --alert-bg: #301718; --alert-ink: #f2918f; --alert-line: #5c2a2a;
+      --unknown-bg: #21262e; --unknown-ink: #aab4c2; --unknown-line: #39424e;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { overflow-x: hidden; }
+  body {
+    margin: 0;
+    padding: 1.5rem 1rem 3rem;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+    line-height: 1.75;
+    overflow-x: hidden;
+  }
+  main, header, nav { max-width: 44rem; margin-left: auto; margin-right: auto; }
+  header h1 { font-size: 1.35rem; margin: 0 0 0.2rem; }
+  header .lead { color: var(--text-dim); font-size: 0.9rem; margin: 0; }
+  .updated-badge {
+    display: inline-block;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.15rem 0.8rem;
+    margin: 0.6rem 0 0;
+  }
+  .updated-badge.is-live { border-color: var(--accent); }
+  #refresh-btn {
+    font: inherit;
+    font-size: 0.85rem;
+    padding: 0.3rem 0.9rem;
+    border-radius: 999px;
+    border: 1px solid var(--accent);
+    background: var(--card);
+    color: var(--accent);
+    cursor: pointer;
+  }
+  #refresh-btn:disabled { opacity: 0.6; cursor: wait; }
+  header p { margin: 0.6rem 0 0; }
+
+  /* --- タブ --- */
+  .tabs {
+    display: flex;
+    gap: 0.35rem;
+    margin: 1.1rem auto 0.9rem;
+    flex-wrap: wrap;
+  }
+  .tabs button {
+    font: inherit;
+    font-size: 0.92rem;
+    font-weight: 700;
+    flex: 1 1 auto;
+    padding: 0.45rem 0.6rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .tabs button[aria-selected="true"] {
+    background: var(--tab-active-bg);
+    color: var(--tab-active-fg);
+    border-color: var(--tab-active-bg);
+  }
+  .panel[hidden] { display: none; }
+
+  /* --- カード・状態表示 --- */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1rem 1.1rem;
+    margin: 0 0 0.9rem;
+  }
+  .card h2 { font-size: 1.05rem; margin: 0 0 0.5rem; }
+  .card h3 { font-size: 0.95rem; margin: 1rem 0 0.4rem; }
+  .status-box {
+    border-radius: 12px;
+    padding: 0.7rem 0.9rem;
+    font-weight: 700;
+    margin: 0 0 0.7rem;
+    border: 1px solid;
+  }
+  .status-ok { background: var(--ok-bg); color: var(--ok-ink); border-color: var(--ok-line); }
+  .status-warn { background: var(--warn-bg); color: var(--warn-ink); border-color: var(--warn-line); }
+  .status-alert { background: var(--alert-bg); color: var(--alert-ink); border-color: var(--alert-line); }
+  .status-unknown { background: var(--unknown-bg); color: var(--unknown-ink); border-color: var(--unknown-line); }
+  .status-box .sub { display: block; font-weight: 400; font-size: 0.82rem; margin-top: 0.15rem; }
+  .source-note { font-size: 0.78rem; color: var(--text-dim); margin: 0.4rem 0 0; }
+
+  /* --- 地震リスト --- */
+  .quake-list { list-style: none; margin: 0; padding: 0; }
+  .quake-list li {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.55rem 0.1rem;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .quake-list li:last-child { border-bottom: none; }
+  .shindo {
+    flex: 0 0 auto;
+    min-width: 3.2rem;
+    text-align: center;
+    font-weight: 800;
+    font-size: 0.86rem;
+    color: #fff;
+    border-radius: 8px;
+    padding: 0.25rem 0.3rem;
+    line-height: 1.3;
+  }
+  .shindo.s-na { background: #8a93a0; }
+  .shindo.s-1 { background: #7d8794; }
+  .shindo.s-2 { background: #3d7cc9; }
+  .shindo.s-3 { background: #2c9a4b; }
+  .shindo.s-4 { background: #c4841a; }
+  .shindo.s-5m { background: #e07a2f; }
+  .shindo.s-5p { background: #d35400; }
+  .shindo.s-6m { background: #d6402f; }
+  .shindo.s-6p { background: #a41c1c; }
+  .shindo.s-7 { background: #7b1fa2; }
+  .quake-main { flex: 1 1 auto; min-width: 0; }
+  .quake-place { font-weight: 700; font-size: 0.95rem; }
+  .quake-meta { font-size: 0.8rem; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+
+  /* --- 警報・注意報の地域一覧 --- */
+  .region-group { margin: 0 0 0.6rem; }
+  .region-name { font-size: 0.8rem; font-weight: 700; color: var(--text-dim); margin: 0 0 0.25rem; }
+  .chips { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+  .chip {
+    font-size: 0.85rem;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 0.15rem 0.7rem;
+    border: 1px solid;
+  }
+  .chip-advisory { background: var(--warn-bg); color: var(--warn-ink); border-color: var(--warn-line); }
+  .chip-warning { background: var(--alert-bg); color: var(--alert-ink); border-color: var(--alert-line); }
+  .chip-emergency { background: #6a0f2f; color: #fff; border-color: #6a0f2f; }
+  @media (prefers-color-scheme: dark) {
+    .chip-emergency { background: #8c1b41; border-color: #8c1b41; }
+  }
+  .legend { font-size: 0.78rem; color: var(--text-dim); margin: 0.6rem 0 0; }
+
+  /* --- 発表一覧（津波） --- */
+  .plain-list { list-style: none; margin: 0; padding: 0; font-size: 0.88rem; }
+  .plain-list li { padding: 0.35rem 0; border-bottom: 1px solid var(--border-soft); }
+  .plain-list li:last-child { border-bottom: none; }
+  .plain-list .t { color: var(--text-dim); font-size: 0.8rem; margin-right: 0.5rem; font-variant-numeric: tabular-nums; }
+
+  /* --- リンク集 --- */
+  .link-list { list-style: none; margin: 0; padding: 0; }
+  .link-list li { margin: 0; }
+  .link-list a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 0.2rem;
+    border-bottom: 1px solid var(--border-soft);
+    text-decoration: none;
+    color: var(--accent);
+    font-size: 0.92rem;
+  }
+  .link-list li:last-child a { border-bottom: none; }
+  .link-list .arrow { color: var(--text-dim); }
+
+  .fallback-note {
+    background: var(--unknown-bg);
+    color: var(--unknown-ink);
+    border: 1px solid var(--unknown-line);
+    border-radius: 12px;
+    padding: 0.7rem 0.9rem;
+    font-size: 0.86rem;
+    margin: 0 0 0.7rem;
+  }
+  footer {
+    max-width: 44rem;
+    margin: 2rem auto 0;
+    color: var(--text-dim);
+    font-size: 0.8rem;
+    border-top: 1px solid var(--border);
+    padding-top: 0.9rem;
+  }
+  footer a { color: var(--accent); }
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🛟 防災情報まとめ（地震・津波・雷・大雨）</h1>
+  <p class="lead">気象庁の発表をもとに自動でまとめています。防災の判断は必ず公式の最新発表で。</p>
+  <p><span class="updated-badge"><span id="updated-label">🕐 最終確認：</span><time id="updated-at" datetime="2026-08-02T09:00+09:00">まだ確認できていません</time></span></p>
+  <!-- JSが動くときだけ表示される手動更新ボタン（10分ごとの自動更新もある） -->
+  <p><button type="button" id="refresh-btn" hidden>🔄 いま更新する</button></p>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="表示切り替え">
+  <button type="button" role="tab" id="tab-quake" aria-selected="true" aria-controls="panel-quake">🌏 地震</button>
+  <button type="button" role="tab" id="tab-tsunami" aria-selected="false" aria-controls="panel-tsunami" tabindex="-1">🌊 津波</button>
+  <button type="button" role="tab" id="tab-thunder" aria-selected="false" aria-controls="panel-thunder" tabindex="-1">⚡ 雷</button>
+  <button type="button" role="tab" id="tab-rain" aria-selected="false" aria-controls="panel-rain" tabindex="-1">☔ 大雨</button>
+</nav>
+
+<main>
+
+  <!-- ==================== 🌏 地震 ==================== -->
+  <section class="panel" id="panel-quake" role="tabpanel" tabindex="0" aria-labelledby="tab-quake">
+    <div class="card">
+      <h2>🌏 最近の地震</h2>
+      <div class="fallback-note" id="quake-fallback">
+        ⏳ 最新の地震情報を確認しています…<br>
+        この表示のまま変わらないときは自動取得ができていません。お手数ですが、下の「気象庁｜地震情報」で最新をご確認ください。
+      </div>
+      <div id="quake-live" hidden></div>
+      <p class="source-note" id="quake-note" hidden></p>
+    </div>
+    <div class="card">
+      <h2>📡 地震の公式リンク</h2>
+      <ul class="link-list">
+        <li><a href="https://www.jma.go.jp/bosai/map.html#5/34.5/137/&elem=int&contents=earthquake_map" target="_blank" rel="noopener noreferrer"><span>気象庁｜地震情報（震度マップ）</span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="https://www.nhk.or.jp/kishou-saigai/earthquake/" target="_blank" rel="noopener noreferrer"><span>NHK｜地震情報</span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="https://www.jma.go.jp/bosai/nankai/" target="_blank" rel="noopener noreferrer"><span>気象庁｜南海トラフ地震関連情報</span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="https://www.data.jma.go.jp/multi/quake/index.html?lang=jp" target="_blank" rel="noopener noreferrer"><span>気象庁｜地震情報（多言語・やさしい日本語）</span><span class="arrow" aria-hidden="true">→</span></a></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>🧠 見方のヒント</h2>
+      <p style="font-size:0.88rem; margin:0;">
+        「震度」は<strong>その場所の揺れの強さ</strong>、「M（マグニチュード）」は<strong>地震そのものの規模</strong>です。
+        震度4くらいから棚の物が落ち始め、震度5弱以上は身の安全の確保が最優先になります。
+        <strong>強い揺れのあとは津波タブも確認</strong>してください。
+      </p>
+    </div>
+  </section>
+
+  <!-- ==================== 🌊 津波 ==================== -->
+  <section class="panel" id="panel-tsunami" role="tabpanel" tabindex="0" aria-labelledby="tab-tsunami" hidden>
+    <div class="card">
+      <h2>🌊 津波警報・注意報のいま</h2>
+      <div class="fallback-note" id="tsunami-fallback">
+        ⏳ 最新の津波情報を確認しています…<br>
+        この表示のまま変わらないときは自動取得ができていません。<strong>強い地震のあとは、下の「気象庁｜津波情報」を必ず確認してください。</strong>
+      </div>
+      <div id="tsunami-live" hidden></div>
+      <p class="source-note" id="tsunami-note" hidden></p>
+    </div>
+    <div class="card">
+      <h2>📡 津波の公式リンク</h2>
+      <ul class="link-list">
+        <li><a href="https://www.jma.go.jp/bosai/map.html#5/34.5/137/&elem=warn&contents=tsunami" target="_blank" rel="noopener noreferrer"><span>気象庁｜津波警報・注意報</span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="https://www.nhk.or.jp/kishou-saigai/tsunami/" target="_blank" rel="noopener noreferrer"><span>NHK｜津波情報</span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="https://disaportal.gsi.go.jp/" target="_blank" rel="noopener noreferrer"><span>ハザードマップポータル（浸水の危険度）</span><span class="arrow" aria-hidden="true">→</span></a></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>🧠 見方のヒント</h2>
+      <p style="font-size:0.88rem; margin:0;">
+        津波は<strong>第1波がいちばん大きいとは限らず</strong>、何時間も繰り返し来ます。
+        「大津波警報・津波警報」が出たら<strong>ためらわず高い場所へ</strong>。
+        解除されるまで海岸や川の河口には近づかないでください。
+      </p>
+    </div>
+  </section>
+
+  <!-- ==================== ⚡ 雷 ==================== -->
+  <section class="panel" id="panel-thunder" role="tabpanel" tabindex="0" aria-labelledby="tab-thunder" hidden>
+    <div class="card">
+      <h2>⚡ 雷注意報が出ている地域</h2>
+      <div class="fallback-note" id="thunder-fallback">
+        ⏳ 全国の雷注意報を確認しています…<br>
+        この表示のまま変わらないときは自動取得ができていません。下の「気象庁｜雷ナウキャスト」で最新をご確認ください。
+      </div>
+      <div id="thunder-live" hidden></div>
+      <p class="source-note" id="thunder-note" hidden></p>
+    </div>
+    <div class="card">
+      <h2>📡 雷の公式リンク</h2>
+      <ul class="link-list">
+        <li><a href="https://www.jma.go.jp/bosai/nowc/#zoom:5/lat:35.5/lon:136/colordepth:normal/elements:thns" target="_blank" rel="noopener noreferrer"><span>気象庁｜雷ナウキャスト（いまの雷の場所）</span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="https://www.jma.go.jp/bosai/warning/" target="_blank" rel="noopener noreferrer"><span>気象庁｜警報・注意報（お住まいの地域）</span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="https://tenki.jp/thunder/" target="_blank" rel="noopener noreferrer"><span>tenki.jp｜雷（落雷）情報</span><span class="arrow" aria-hidden="true">→</span></a></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>🧠 見方のヒント</h2>
+      <p style="font-size:0.88rem; margin:0;">
+        雷の音が聞こえたら、もう<strong>落雷の危険範囲の中</strong>です。
+        建物の中か車の中へ。木の下での雨宿りはかえって危険です。
+        ゴロゴロが止んでも<strong>20〜30分は待ってから</strong>外に出るのが安全です。
+      </p>
+    </div>
+  </section>
+
+  <!-- ==================== ☔ 大雨 ==================== -->
+  <section class="panel" id="panel-rain" role="tabpanel" tabindex="0" aria-labelledby="tab-rain" hidden>
+    <div class="card">
+      <h2>☔ 大雨の警報・注意報が出ている地域</h2>
+      <div class="fallback-note" id="rain-fallback">
+        ⏳ 全国の大雨情報を確認しています…<br>
+        この表示のまま変わらないときは自動取得ができていません。下の「気象庁｜キキクル」で最新をご確認ください。
+      </div>
+      <div id="rain-live" hidden></div>
+      <p class="source-note" id="rain-note" hidden></p>
+    </div>
+    <div class="card">
+      <h2>📡 大雨の公式リンク</h2>
+      <ul class="link-list">
+        <li><a href="https://www.jma.go.jp/bosai/risk/" target="_blank" rel="noopener noreferrer"><span>気象庁｜キキクル（土砂・浸水・洪水の危険度マップ）</span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="https://www.jma.go.jp/bosai/nowc/" target="_blank" rel="noopener noreferrer"><span>気象庁｜雨雲の動き（レーダー）</span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="https://www.jma.go.jp/bosai/warning/" target="_blank" rel="noopener noreferrer"><span>気象庁｜警報・注意報（お住まいの地域）</span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="https://www.river.go.jp/" target="_blank" rel="noopener noreferrer"><span>国土交通省｜川の防災情報（水位・ライブカメラ）</span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="https://www.nhk.or.jp/kishou-saigai/" target="_blank" rel="noopener noreferrer"><span>NHK｜気象・災害情報</span><span class="arrow" aria-hidden="true">→</span></a></li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>🧠 見方のヒント</h2>
+      <p style="font-size:0.88rem; margin:0;">
+        危険度は <strong>注意報 → 警報 → 特別警報</strong> の順に上がります。
+        <strong>大雨特別警報は「すでに災害が起きていてもおかしくない」レベル</strong>——出る前の警報の段階で避難の準備を。
+        実際の避難は、お住まいの市区町村が出す「避難情報（高齢者等避難・避難指示）」に従ってください。
+      </p>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  データ元：<a href="https://www.jma.go.jp/" target="_blank" rel="noopener noreferrer">気象庁</a>（このページは約10分ごとに自動確認します）<br>
+  ⚠️ このページは個人が作った補助ツールです。防災の判断は、必ず気象庁とお住まいの自治体の最新の発表に従ってください。<br>
+  <a href="../">← のんラボのトップへ</a>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ============================================================
+     タブ切り替え（前回開いていたタブを覚えておく）
+     ============================================================ */
+  var tabs = ['quake', 'tsunami', 'thunder', 'rain'].map(function (key) {
+    return {
+      key: key,
+      btn: document.getElementById('tab-' + key),
+      panel: document.getElementById('panel-' + key)
+    };
+  });
+  function selectTab(key) {
+    tabs.forEach(function (t) {
+      var on = t.key === key;
+      t.btn.setAttribute('aria-selected', on ? 'true' : 'false');
+      t.btn.tabIndex = on ? 0 : -1;
+      t.panel.hidden = !on;
+    });
+    try { localStorage.setItem('bousai-tab-v1', key); } catch (e) {}
+  }
+  tabs.forEach(function (t) {
+    t.btn.addEventListener('click', function () { selectTab(t.key); });
+  });
+  try {
+    var last = localStorage.getItem('bousai-tab-v1');
+    if (last && tabs.some(function (t) { return t.key === last; })) selectTab(last);
+  } catch (e) {}
+
+  /* ============================================================
+     気象庁のデータを取ってきて表示する
+     ① 気象庁から直接（開いた瞬間の最新）
+     ② ダメなら data/latest.json（GitHub Actionsが1時間ごとに更新）
+     ③ どちらもダメなら、この端末に残っていた前回のデータ
+     ④ それもなければ、最初から出ている案内文＋公式リンク
+     ※ 4つの話題（地震・津波・雷・大雨）は別々に切り替わります。
+        たとえば地震だけ①で、雷は②……ということも起こります。
+     ============================================================ */
+  var JMA = 'https://www.jma.go.jp/bosai';
+  var LOCAL = './data/latest.json';
+  var CACHE_KEY = 'bousai-last-data-v1';
+  var WD = ['日', '月', '火', '水', '木', '金', '土'];
+
+  /* 全国の予報区（府県など）。[コード, 名前, 地方ブロック]
+     ※ scripts/fetch_bousai.py の OFFICES と同じ内容。直すときは両方そろえること。 */
+  var OFFICES = [
+    ['011000', '宗谷地方', '北海道'],
+    ['012000', '上川・留萌地方', '北海道'],
+    ['013000', '網走・北見・紋別地方', '北海道'],
+    ['014030', '十勝地方', '北海道'],
+    ['014100', '釧路・根室地方', '北海道'],
+    ['015000', '胆振・日高地方', '北海道'],
+    ['016000', '石狩・空知・後志地方', '北海道'],
+    ['017000', '渡島・檜山地方', '北海道'],
+    ['020000', '青森県', '東北'],
+    ['030000', '岩手県', '東北'],
+    ['040000', '宮城県', '東北'],
+    ['050000', '秋田県', '東北'],
+    ['060000', '山形県', '東北'],
+    ['070000', '福島県', '東北'],
+    ['080000', '茨城県', '関東・甲信'],
+    ['090000', '栃木県', '関東・甲信'],
+    ['100000', '群馬県', '関東・甲信'],
+    ['110000', '埼玉県', '関東・甲信'],
+    ['120000', '千葉県', '関東・甲信'],
+    ['130000', '東京都', '関東・甲信'],
+    ['140000', '神奈川県', '関東・甲信'],
+    ['190000', '山梨県', '関東・甲信'],
+    ['200000', '長野県', '関東・甲信'],
+    ['150000', '新潟県', '北陸'],
+    ['160000', '富山県', '北陸'],
+    ['170000', '石川県', '北陸'],
+    ['180000', '福井県', '北陸'],
+    ['210000', '岐阜県', '東海'],
+    ['220000', '静岡県', '東海'],
+    ['230000', '愛知県', '東海'],
+    ['240000', '三重県', '東海'],
+    ['250000', '滋賀県', '近畿'],
+    ['260000', '京都府', '近畿'],
+    ['270000', '大阪府', '近畿'],
+    ['280000', '兵庫県', '近畿'],
+    ['290000', '奈良県', '近畿'],
+    ['300000', '和歌山県', '近畿'],
+    ['310000', '鳥取県', '中国'],
+    ['320000', '島根県', '中国'],
+    ['330000', '岡山県', '中国'],
+    ['340000', '広島県', '中国'],
+    ['350000', '山口県', '中国'],
+    ['360000', '徳島県', '四国'],
+    ['370000', '香川県', '四国'],
+    ['380000', '愛媛県', '四国'],
+    ['390000', '高知県', '四国'],
+    ['400000', '福岡県', '九州'],
+    ['410000', '佐賀県', '九州'],
+    ['420000', '長崎県', '九州'],
+    ['430000', '熊本県', '九州'],
+    ['440000', '大分県', '九州'],
+    ['450000', '宮崎県', '九州'],
+    ['460100', '鹿児島県（奄美地方除く）', '九州'],
+    ['460040', '奄美地方', '九州'],
+    ['471000', '沖縄本島地方', '沖縄'],
+    ['472000', '大東島地方', '沖縄'],
+    ['473000', '宮古島地方', '沖縄'],
+    ['474000', '八重山地方', '沖縄']
+  ];
+  var REGION_ORDER = ['北海道', '東北', '関東・甲信', '北陸', '東海', '近畿', '中国', '四国', '九州', '沖縄'];
+  var RAIN_CODES = { '33': '特別警報', '03': '警報', '10': '注意報' };
+  var FLOOD_CODES = { '04': '警報', '18': '注意報' };
+  var THUNDER_CODE = '14';
+  var ACTIVE_STATUS = { '発表': 1, '継続': 1 };
+
+  /* --- 小道具 --- */
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+  /* どの端末で見ても日本時間で表示する */
+  function jst(iso) {
+    var d = new Date(iso);
+    if (isNaN(d)) return null;
+    return new Date(d.getTime() + (9 * 60 + d.getTimezoneOffset()) * 60000);
+  }
+  function fmtShort(iso) {
+    var d = jst(iso);
+    if (!d) return '';
+    return (d.getMonth() + 1) + '/' + d.getDate() + '（' + WD[d.getDay()] + '）' +
+      d.getHours() + ':' + ('0' + d.getMinutes()).slice(-2);
+  }
+  function getJSON(url, ms) {
+    return new Promise(function (resolve, reject) {
+      if (typeof fetch !== 'function') { reject(new Error('fetchが使えません')); return; }
+      var ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+      var done = false;
+      var timer = setTimeout(function () {
+        if (done) return;
+        done = true;
+        if (ctrl) ctrl.abort();
+        reject(new Error('時間切れ'));
+      }, ms || 10000);
+      fetch(url, ctrl ? { signal: ctrl.signal } : undefined).then(function (r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      }).then(function (d) {
+        if (done) return;
+        done = true; clearTimeout(timer); resolve(d);
+      })['catch'](function (e) {
+        if (done) return;
+        done = true; clearTimeout(timer); reject(e);
+      });
+    });
+  }
+
+  /* ============================================================
+     気象庁の生データを、このページが使いやすい形に整える
+     （Pythonの fetch_bousai.py と同じ形にそろえてある）
+     ============================================================ */
+
+  /* --- 地震 --- */
+  function parseDepthKm(cod) {
+    if (typeof cod !== 'string') return null;
+    var m = cod.replace(/\/$/, '').match(/^([+-][0-9.]+)([+-][0-9.]+)([+-][0-9.]+)?/);
+    if (!m || !m[3]) return null;
+    var depth = parseFloat(m[3]);
+    return isNaN(depth) ? null : Math.abs(depth) / 1000;
+  }
+  function buildQuakes(rawList) {
+    var byEvent = {}, order = [];
+    (rawList || []).forEach(function (e) {
+      if (!e || typeof e !== 'object') return;
+      var eid = e.eid || e.ctt;
+      if (!eid) return;
+      if (!byEvent[eid]) {
+        byEvent[eid] = { id: eid, time: null, place: '', magnitude: null, maxIntensity: '', depthKm: null };
+        order.push(eid);
+      }
+      var q = byEvent[eid];
+      if (!q.time) q.time = e.at || e.rdt;
+      if (!q.place && e.anm) q.place = e.anm;
+      if (q.magnitude === null) {
+        var mag = parseFloat(e.mag);
+        if (!isNaN(mag)) q.magnitude = mag;
+      }
+      if (!q.maxIntensity && e.maxi) q.maxIntensity = String(e.maxi);
+      if (q.depthKm === null) q.depthKm = parseDepthKm(e.cod);
+    });
+    var quakes = order.map(function (eid) { return byEvent[eid]; })
+      .filter(function (q) { return q.time; });
+    quakes.sort(function (a, b) { return a.time < b.time ? 1 : -1; });
+    /* 「震度速報」（震源がまだ分からない第一報）は別IDで届くので、
+       5分以内に震源つきの情報がある場合は同じ地震とみなして省く */
+    function mins(t) { var d = new Date(t); return isNaN(d) ? null : d.getTime() / 60000; }
+    quakes = quakes.filter(function (q) {
+      if (q.place) return true;
+      var m = mins(q.time);
+      if (m === null) return true;
+      return !quakes.some(function (o) {
+        var om = mins(o.time);
+        return o.place && om !== null && Math.abs(om - m) <= 5;
+      });
+    });
+    return quakes.slice(0, 15);
+  }
+
+  /* --- 津波 --- */
+  /* 実データは Body→Tsunami→Forecast→Item の中に
+     {"Area":{"Name":…},"Category":{"Kind":{"Name":…,"Code":…}}} という形（頭文字が大文字）。
+     形が多少違っても拾えるよう、大文字・小文字の両方に対応しておく。 */
+  function pick2(dic, a, b) {
+    if (!dic || typeof dic !== 'object') return null;
+    return dic[a] !== undefined ? dic[a] : dic[b];
+  }
+  function walkTsunamiItems(node, found) {
+    if (Array.isArray(node)) {
+      node.forEach(function (n) { walkTsunamiItems(n, found); });
+      return;
+    }
+    if (!node || typeof node !== 'object') return;
+    var area = pick2(node, 'Area', 'area'), category = pick2(node, 'Category', 'category');
+    if (area && typeof area === 'object' && category && typeof category === 'object') {
+      var kind = pick2(category, 'Kind', 'kind') || {};
+      var name = pick2(area, 'Name', 'name');
+      if (name) {
+        found.push({
+          name: name,
+          kind: pick2(kind, 'Name', 'name') || '',
+          code: String(pick2(kind, 'Code', 'code') || '')
+        });
+      }
+      return;
+    }
+    Object.keys(node).forEach(function (k) { walkTsunamiItems(node[k], found); });
+  }
+  var TSUNAMI_INACTIVE_CODES = { '00': 1, '50': 1, '60': 1, '71': 1, '72': 1, '73': 1 };
+  function tsunamiItemActive(item) {
+    var kind = item.kind || '', code = item.code || '';
+    if (kind.indexOf('解除') >= 0 || kind.indexOf('なし') >= 0) return false;
+    if (kind.indexOf('大津波警報') >= 0 || kind.indexOf('津波警報') >= 0 || kind.indexOf('津波注意報') >= 0) return true;
+    return !!code && !TSUNAMI_INACTIVE_CODES[code];
+  }
+  /* 津波の「警報・注意報・予報」の電文（VTSE41）でいちばん新しいものを探す。
+     ⚠️ 題名で探してはいけない：注意報が解除されると、解除のお知らせは
+     「津波予報」という題名で届くため、題名に「注意報」を含むものを探すと
+     解除前の古い発表を最新と勘違いしてしまう。 */
+  function latestTsunamiReport(entries) {
+    for (var i = 0; i < entries.length; i++) {
+      if (((entries[i].json) || '').indexOf('VTSE41') >= 0) return entries[i];
+    }
+    for (var j = 0; j < entries.length; j++) {
+      var ttl = entries[j].ttl || '';
+      if (ttl.indexOf('津波警報') >= 0 || ttl.indexOf('津波注意報') >= 0 || ttl.indexOf('津波予報') >= 0) {
+        return entries[j];
+      }
+    }
+    return null;
+  }
+  function buildTsunami(rawList) {
+    var entries = (rawList || []).filter(function (e) { return e && typeof e === 'object'; });
+    var recent = entries.slice(0, 5).map(function (e) {
+      return { time: e.rdt || e.at, title: e.ttl || '' };
+    });
+    var latest = latestTsunamiReport(entries);
+    var base = { status: 'none', issued: null, areas: [], recent: recent };
+    if (!latest) return Promise.resolve(base);
+    base.issued = latest.rdt || latest.at;
+    if (!latest.json) { base.status = 'unknown'; return Promise.resolve(base); }
+    return getJSON(JMA + '/tsunami/data/' + latest.json, 10000).then(function (detail) {
+      if (detail && detail.cancelled === true) { base.status = 'none'; return base; }
+      var found = [];
+      walkTsunamiItems(detail, found);
+      var active = found.filter(tsunamiItemActive);
+      if (active.length) {
+        base.status = 'active';
+        var seen = {};
+        active.forEach(function (it) {
+          var key = it.name + '|' + it.kind;
+          if (seen[key]) return;
+          seen[key] = 1;
+          base.areas.push({ name: it.name, kind: it.kind || '津波情報' });
+        });
+      } else {
+        base.status = found.length ? 'none' : 'unknown';
+      }
+      return base;
+    })['catch'](function () {
+      /* 発表があったのに中身が読めない → 「不明」として安全側に倒す */
+      base.status = 'unknown';
+      return base;
+    });
+  }
+
+  /* --- 警報・注意報（雷・大雨・洪水） --- */
+  var RANK = { '特別警報': 3, '警報': 2, '注意報': 1 };
+  function scanOfficeWarnings(data) {
+    var rain = null, flood = null, thunder = false;
+    ((data && data.areaTypes) || []).forEach(function (at) {
+      ((at && at.areas) || []).forEach(function (area) {
+        ((area && area.warnings) || []).forEach(function (w) {
+          if (!w || !ACTIVE_STATUS[w.status]) return;
+          var code = String(w.code || '');
+          if (RAIN_CODES[code]) {
+            if (!rain || RANK[RAIN_CODES[code]] > RANK[rain]) rain = RAIN_CODES[code];
+          } else if (FLOOD_CODES[code]) {
+            if (!flood || RANK[FLOOD_CODES[code]] > RANK[flood]) flood = FLOOD_CODES[code];
+          } else if (code === THUNDER_CODE) {
+            thunder = true;
+          }
+        });
+      });
+    });
+    return { rain: rain, flood: flood, thunder: thunder };
+  }
+  function buildWarnings() {
+    /* 全国の予報区をぜんぶ確認。1つでも取れなければ失敗扱い
+       （欠けた県を「何も出ていない」と誤表示しないため） */
+    return Promise.all(OFFICES.map(function (o) {
+      return getJSON(JMA + '/warning/data/warning/' + o[0] + '.json', 12000);
+    })).then(function (results) {
+      var offices = [], reportTime = null;
+      results.forEach(function (data, i) {
+        if (data && data.reportDatetime && (!reportTime || data.reportDatetime > reportTime)) {
+          reportTime = data.reportDatetime;
+        }
+        var r = scanOfficeWarnings(data);
+        if (r.rain || r.flood || r.thunder) {
+          offices.push({
+            code: OFFICES[i][0], name: OFFICES[i][1], region: OFFICES[i][2],
+            rain: r.rain, flood: r.flood, thunder: r.thunder
+          });
+        }
+      });
+      return { reportTime: reportTime, offices: offices };
+    });
+  }
+
+  /* ============================================================
+     画面に表示する
+     ============================================================ */
+  var SHINDO_LABEL = { '1': '1', '2': '2', '3': '3', '4': '4', '5-': '5弱', '5+': '5強', '6-': '6弱', '6+': '6強', '7': '7' };
+  var SHINDO_CLASS = { '1': 's-1', '2': 's-2', '3': 's-3', '4': 's-4', '5-': 's-5m', '5+': 's-5p', '6-': 's-6m', '6+': 's-6p', '7': 's-7' };
+
+  function renderQuakes(quakes) {
+    if (!quakes.length) {
+      return '<div class="status-box status-ok">✅ 最近の地震情報はありません' +
+        '<span class="sub">気象庁の「震度1以上の地震」一覧が空の状態です。</span></div>';
+    }
+    var html = '<ul class="quake-list">';
+    quakes.forEach(function (q) {
+      var label = SHINDO_LABEL[q.maxIntensity] || null;
+      var cls = SHINDO_CLASS[q.maxIntensity] || 's-na';
+      var meta = [];
+      if (q.time) meta.push(fmtShort(q.time));
+      if (q.magnitude !== null && q.magnitude !== undefined) meta.push('M' + q.magnitude.toFixed(1));
+      if (q.depthKm !== null && q.depthKm !== undefined) {
+        meta.push(q.depthKm < 1 ? 'ごく浅い' : '深さ約' + Math.round(q.depthKm) + 'km');
+      }
+      html += '<li>' +
+        '<span class="shindo ' + cls + '">' + (label ? '震度<br>' + esc(label) : '調査中') + '</span>' +
+        '<span class="quake-main">' +
+        '<span class="quake-place">' + esc(q.place || '震源調査中') + '</span><br>' +
+        '<span class="quake-meta">' + esc(meta.join('　')) + '</span>' +
+        '</span></li>';
+    });
+    html += '</ul>';
+    html += '<p class="legend">最近の地震（新しい順・最大15件）。「震度」はいちばん強く揺れた場所の震度です。</p>';
+    return html;
+  }
+
+  function tsunamiKindClass(kind) {
+    if (kind.indexOf('大津波') >= 0) return 'chip-emergency';
+    if (kind.indexOf('警報') >= 0) return 'chip-warning';
+    return 'chip-advisory';
+  }
+  function renderTsunami(t) {
+    var html = '';
+    if (t.status === 'active') {
+      html += '<div class="status-box status-alert">🚨 津波の警報・注意報が発表されています' +
+        (t.issued ? '<span class="sub">気象庁 ' + esc(fmtShort(t.issued)) + ' 発表。対象の沿岸から離れ、高い場所へ。</span>' : '') +
+        '</div><div class="chips" style="margin-bottom:0.7rem;">';
+      t.areas.forEach(function (a) {
+        html += '<span class="chip ' + tsunamiKindClass(a.kind) + '">' + esc(a.name) + '：' + esc(a.kind) + '</span>';
+      });
+      html += '</div>';
+    } else if (t.status === 'none') {
+      html += '<div class="status-box status-ok">✅ 現在、津波警報・注意報は出ていません' +
+        '<span class="sub">強い地震の直後は、発表まで数分かかることがあります。揺れたらまず高い場所へ。</span></div>';
+    } else {
+      html += '<div class="status-box status-unknown">❓ 津波の状況を自動では確認できませんでした' +
+        '<span class="sub">お手数ですが、下の「気象庁｜津波警報・注意報」で直接ご確認ください。</span></div>';
+    }
+    if (t.recent && t.recent.length) {
+      html += '<h3>最近の津波関連の発表</h3><ul class="plain-list">';
+      t.recent.forEach(function (r) {
+        html += '<li><span class="t">' + esc(fmtShort(r.time)) + '</span>' + esc(r.title) + '</li>';
+      });
+      html += '</ul>';
+    }
+    return html;
+  }
+
+  function groupByRegion(offices) {
+    var groups = {};
+    offices.forEach(function (o) {
+      (groups[o.region] = groups[o.region] || []).push(o);
+    });
+    return REGION_ORDER.filter(function (r) { return groups[r]; })
+      .map(function (r) { return { region: r, items: groups[r] }; });
+  }
+
+  function renderThunder(w) {
+    var hit = w.offices.filter(function (o) { return o.thunder; });
+    var html = '';
+    if (!hit.length) {
+      html += '<div class="status-box status-ok">✅ 現在、雷注意報は出ていません（全国）</div>';
+    } else {
+      html += '<div class="status-box status-warn">⚡ ' + hit.length + 'つの予報区に雷注意報が出ています</div>';
+      groupByRegion(hit).forEach(function (g) {
+        html += '<div class="region-group"><p class="region-name">' + esc(g.region) + '</p><div class="chips">';
+        g.items.forEach(function (o) {
+          html += '<span class="chip chip-advisory">' + esc(o.name) + '</span>';
+        });
+        html += '</div></div>';
+      });
+      html += '<p class="legend">県名は「その県のどこかに出ている」という意味です。細かい地域は気象庁のページで確認できます。</p>';
+    }
+    return html;
+  }
+
+  function renderRain(w) {
+    var hit = w.offices.filter(function (o) { return o.rain || o.flood; });
+    var html = '';
+    if (!hit.length) {
+      html += '<div class="status-box status-ok">✅ 現在、大雨・洪水の警報・注意報は出ていません（全国）</div>';
+      return html;
+    }
+    var emergency = hit.filter(function (o) { return o.rain === '特別警報'; });
+    var warning = hit.filter(function (o) { return o.rain === '警報'; });
+    var advisory = hit.filter(function (o) { return o.rain === '注意報'; });
+    var floodOnly = hit.filter(function (o) { return !o.rain && o.flood; });
+
+    if (emergency.length) {
+      html += '<div class="status-box status-alert">🚨 大雨特別警報が出ています！ 命を守る行動を</div>';
+    } else {
+      var head = warning.length
+        ? '☔ 大雨警報が' + warning.length + 'つの予報区に出ています'
+        : '☂️ 大雨・洪水の注意報が出ている地域があります';
+      html += '<div class="status-box ' + (warning.length ? 'status-alert' : 'status-warn') + '">' + head + '</div>';
+    }
+
+    function block(title, list, chipClass, withFlood) {
+      if (!list.length) return '';
+      var h = '<h3>' + title + '</h3>';
+      groupByRegion(list).forEach(function (g) {
+        h += '<div class="region-group"><p class="region-name">' + esc(g.region) + '</p><div class="chips">';
+        g.items.forEach(function (o) {
+          var extra = withFlood && o.flood ? '＋洪水' + o.flood : '';
+          h += '<span class="chip ' + chipClass + '">' + esc(o.name + extra) + '</span>';
+        });
+        h += '</div></div>';
+      });
+      return h;
+    }
+    html += block('🟣 大雨特別警報', emergency, 'chip-emergency', true);
+    html += block('🔴 大雨警報', warning, 'chip-warning', true);
+    html += block('🟡 大雨注意報', advisory, 'chip-advisory', true);
+    html += block('🌊 洪水のみ（警報・注意報）', floodOnly, 'chip-advisory', false);
+    html += '<p class="legend">県名は「その県のどこかに出ている」という意味です。「＋洪水」は川の増水にも注意が必要な地域。細かい地域は気象庁のページで確認できます。</p>';
+    return html;
+  }
+
+  /* ============================================================
+     4つの話題それぞれの「①→②→③→④」の流れ
+     ============================================================ */
+  var latestStamp = null;
+  function noteText(via, stamp) {
+    if (via === 'jma') return '⚡ 気象庁から直接取得（' + fmtShort(stamp) + ' 確認）';
+    if (via === 'local') return '※ 気象庁へ直接つながらなかったため、1時間ごとに保存している控えのデータを表示しています（' + fmtShort(stamp) + ' 取得分）。';
+    return '⚠️ いまはインターネットにつながらないため、この端末に残っていた前回のデータを表示しています（' + fmtShort(stamp) + ' 取得分）。表示が古い可能性があります。';
+  }
+  function updateBadge(stamp) {
+    if (!stamp) return;
+    if (latestStamp && stamp <= latestStamp) return;
+    latestStamp = stamp;
+    var label = document.getElementById('updated-label');
+    var timeEl = document.getElementById('updated-at');
+    if (label) label.textContent = '⚡ 最終確認：';
+    if (timeEl) {
+      timeEl.setAttribute('datetime', stamp);
+      timeEl.textContent = fmtShort(stamp);
+      var badge = timeEl.closest ? timeEl.closest('.updated-badge') : null;
+      if (badge) badge.classList.add('is-live');
+    }
+  }
+
+  function readCache() {
+    try {
+      var raw = localStorage.getItem(CACHE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) { return {}; }
+  }
+  function writeCache(section, data, stamp) {
+    try {
+      var all = readCache();
+      all[section] = { data: data, stamp: stamp };
+      localStorage.setItem(CACHE_KEY, JSON.stringify(all));
+    } catch (e) {}
+  }
+
+  /* ②のファイルは1回だけ読んで、4つの話題で共有する */
+  var localPromise = null;
+  function loadLocal() {
+    if (!localPromise) {
+      localPromise = getJSON(LOCAL, 6000).then(function (d) {
+        if (!d || d.placeholder) throw new Error('まだ本物のデータが入っていません');
+        return d;
+      });
+      /* 失敗したら次回また読み直せるようにする */
+      localPromise['catch'](function () { localPromise = null; });
+    }
+    return localPromise;
+  }
+
+  function applySection(section, html, via, stamp, data) {
+    var live = document.getElementById(section + '-live');
+    var fallback = document.getElementById(section + '-fallback');
+    var note = document.getElementById(section + '-note');
+    if (!live) return;
+    live.innerHTML = html;
+    live.hidden = false;
+    if (fallback) fallback.hidden = true;
+    if (note) {
+      note.textContent = noteText(via, stamp);
+      note.hidden = false;
+    }
+    updateBadge(stamp);
+    if (via !== 'cache') writeCache(section, data, stamp);
+  }
+
+  /* section: 画面の場所の名前 / direct: ①のやり方 / fromLocal: ②のファイルから取り出す係 /
+     render: 整えたデータ→HTML */
+  function runSection(section, direct, fromLocal, render) {
+    var nowIso = new Date().toISOString();
+    return direct().then(function (data) {
+      applySection(section, render(data), 'jma', nowIso, data);
+    })['catch'](function () {
+      return loadLocal().then(function (local) {
+        var data = fromLocal(local);
+        if (data == null) throw new Error('控えのファイルにこの情報がありません');
+        applySection(section, render(data), 'local', local.generatedAt || nowIso, data);
+      });
+    })['catch'](function () {
+      var saved = readCache()[section];
+      if (!saved || !saved.data) return; /* ④ 最初から出ている案内文のまま */
+      try {
+        applySection(section, render(saved.data), 'cache', saved.stamp || nowIso, saved.data);
+      } catch (e) {}
+    });
+  }
+
+  /* 雷タブと大雨タブは同じ「全国の警報・注意報」を使うので、1回だけ取って共有する */
+  var warningsPromise = null;
+  function getWarningsShared() {
+    if (!warningsPromise) {
+      warningsPromise = buildWarnings();
+      warningsPromise['catch'](function () { warningsPromise = null; });
+    }
+    return warningsPromise;
+  }
+
+  var fetching = false;
+  var lastFetchedAt = 0;
+  function startAll() {
+    if (fetching) return;
+    fetching = true;
+    warningsPromise = null; /* 更新のたびに取り直す */
+    localPromise = null;
+    var btn = document.getElementById('refresh-btn');
+    var btnLabel = btn ? btn.textContent : '';
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ 更新中…'; }
+
+    var jobs = [
+      runSection('quake',
+        function () { return getJSON(JMA + '/quake/data/list.json', 10000).then(buildQuakes); },
+        function (local) { return Array.isArray(local.quakes) ? local.quakes : null; },
+        renderQuakes),
+      runSection('tsunami',
+        function () { return getJSON(JMA + '/tsunami/data/list.json', 10000).then(buildTsunami); },
+        function (local) { return local.tsunami || null; },
+        renderTsunami),
+      runSection('thunder',
+        getWarningsShared,
+        function (local) { return local.warnings || null; },
+        renderThunder),
+      runSection('rain',
+        getWarningsShared,
+        function (local) { return local.warnings || null; },
+        renderRain)
+    ];
+    Promise.all(jobs).then(function () {
+      fetching = false;
+      lastFetchedAt = Date.now();
+      if (btn) { btn.disabled = false; btn.textContent = btnLabel; }
+    });
+  }
+
+  if (typeof fetch === 'function' && typeof Promise === 'function') {
+    startAll();
+    /* 10分ごとに自動で取り直す（地震・警報は動きが速いので台風より短め） */
+    setInterval(startAll, 10 * 60 * 1000);
+    /* 別のアプリから戻ってきたとき、5分以上たっていたら取り直す */
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'visible' && Date.now() - lastFetchedAt > 5 * 60 * 1000) {
+        startAll();
+      }
+    });
+    var rb = document.getElementById('refresh-btn');
+    if (rb) {
+      rb.hidden = false;
+      rb.addEventListener('click', startAll);
+    }
+  }
+})();
+</script>
+</body>
+</html>
