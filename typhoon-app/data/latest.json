@@ -1,7 +1,7 @@
 {
- "generatedAt": "2026-08-04T01:00:35+09:00",
+ "generatedAt": "2026-08-04T03:14:55+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
- "count": 2,
+ "count": 1,
  "typhoons": [
   {
    "id": "TC2615",
@@ -382,34 +382,6 @@
      145.1
     ]
    ]
-  },
-  {
-   "id": "TC2616",
-   "number": "b",
-   "numberShort": "b",
-   "name": "",
-   "nameEn": "",
-   "category": "熱帯低気圧",
-   "issue": "2026-08-03T04:05:00+09:00",
-   "analysis": {
-    "hours": 0,
-    "label": "実況",
-    "validTime": "2026-08-03T03:00:00+09:00",
-    "category": "熱帯低気圧",
-    "intensity": "-",
-    "scale": "",
-    "location": "フィリピンの東",
-    "course": "西北西",
-    "speedKmh": null,
-    "pressure": 1002.0,
-    "windMs": null,
-    "gustMs": null,
-    "lat": 16.0,
-    "lon": 124.0,
-    "circleKm": null
-   },
-   "forecast": [],
-   "track": []
   }
  ]
 }
