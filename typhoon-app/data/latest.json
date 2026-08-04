@@ -1,8 +1,94 @@
 {
- "generatedAt": "2026-08-05T04:04:58+09:00",
+ "generatedAt": "2026-08-05T05:48:58+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
  "count": 2,
  "typhoons": [
+  {
+   "id": "TC2616",
+   "number": "2614",
+   "numberShort": "14",
+   "name": "クジラ",
+   "nameEn": "Kujira",
+   "category": "台風",
+   "issue": "2026-08-05T04:15:00+09:00",
+   "analysis": {
+    "hours": 0,
+    "label": "実況",
+    "validTime": "2026-08-05T03:00:00+09:00",
+    "category": "台風",
+    "intensity": "-",
+    "scale": "",
+    "location": "南シナ海",
+    "course": "不定",
+    "speedKmh": null,
+    "pressure": 998.0,
+    "windMs": 18.0,
+    "gustMs": 25.0,
+    "lat": 16.8,
+    "lon": 118.7,
+    "circleKm": null,
+    "galeRadiusKm": 220.0
+   },
+   "forecast": [
+    {
+     "hours": 12,
+     "label": "予報　１２時間後",
+     "validTime": "2026-08-05T15:00:00+09:00",
+     "category": "台風",
+     "intensity": "-",
+     "scale": "",
+     "location": "南シナ海",
+     "course": "東北東",
+     "speedKmh": null,
+     "pressure": 994.0,
+     "windMs": 20.0,
+     "gustMs": 30.0,
+     "lat": 17.1,
+     "lon": 119.4,
+     "circleKm": 55.0
+    },
+    {
+     "hours": 24,
+     "label": "予報　２４時間後",
+     "validTime": "2026-08-06T03:00:00+09:00",
+     "category": "台風",
+     "intensity": "-",
+     "scale": "",
+     "location": "ルソン島",
+     "course": "東",
+     "speedKmh": null,
+     "pressure": 996.0,
+     "windMs": 18.0,
+     "gustMs": 25.0,
+     "lat": 17.1,
+     "lon": 120.5,
+     "circleKm": 80.0
+    },
+    {
+     "hours": 48,
+     "label": "予報　４８時間後",
+     "validTime": "2026-08-07T03:00:00+09:00",
+     "category": "熱帯低気圧",
+     "intensity": "-",
+     "scale": "",
+     "location": "ルソン島",
+     "course": "東",
+     "speedKmh": null,
+     "pressure": 1000.0,
+     "windMs": 0.0,
+     "gustMs": 0.0,
+     "lat": 17.0,
+     "lon": 121.6,
+     "circleKm": 155.0
+    }
+   ],
+   "track": [
+    [
+     16.8,
+     118.7
+    ]
+   ]
+  },
   {
    "id": "TC2615",
    "number": "2613",
@@ -450,69 +536,6 @@
      139.3
     ]
    ]
-  },
-  {
-   "id": "TC2616",
-   "number": "b",
-   "numberShort": "b",
-   "name": "",
-   "nameEn": "",
-   "category": "熱帯低気圧",
-   "issue": "2026-08-05T01:05:00+09:00",
-   "analysis": {
-    "hours": 0,
-    "label": "実況",
-    "validTime": "2026-08-05T00:00:00+09:00",
-    "category": "熱帯低気圧",
-    "intensity": "-",
-    "scale": "",
-    "location": "南シナ海",
-    "course": "東",
-    "speedKmh": null,
-    "pressure": 1000.0,
-    "windMs": 15.0,
-    "gustMs": 23.0,
-    "lat": 16.6,
-    "lon": 118.6,
-    "circleKm": null
-   },
-   "forecast": [
-    {
-     "hours": 24,
-     "label": "予報　２４時間後",
-     "validTime": "2026-08-06T00:00:00+09:00",
-     "category": "台風",
-     "intensity": "-",
-     "scale": "",
-     "location": "南シナ海",
-     "course": "東北東",
-     "speedKmh": null,
-     "pressure": 998.0,
-     "windMs": 18.0,
-     "gustMs": 25.0,
-     "lat": 17.3,
-     "lon": 119.9,
-     "circleKm": 150.0
-    },
-    {
-     "hours": 45,
-     "label": "予報　４５時間後",
-     "validTime": "2026-08-06T21:00:00+09:00",
-     "category": "熱帯低気圧",
-     "intensity": "-",
-     "scale": "",
-     "location": "ルソン島",
-     "course": "東南東",
-     "speedKmh": null,
-     "pressure": 1002.0,
-     "windMs": 0.0,
-     "gustMs": 0.0,
-     "lat": 17.0,
-     "lon": 120.9,
-     "circleKm": 240.0
-    }
-   ],
-   "track": []
   }
  ]
 }
