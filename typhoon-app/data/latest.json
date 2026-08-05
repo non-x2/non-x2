@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-06T00:36:21+09:00",
+ "generatedAt": "2026-08-06T03:01:15+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
  "count": 3,
  "typhoons": [
@@ -10,22 +10,22 @@
    "name": "チャンホン",
    "nameEn": "Chan-hom",
    "category": "台風",
-   "issue": "2026-08-05T22:20:00+09:00",
+   "issue": "2026-08-06T01:05:00+09:00",
    "analysis": {
     "hours": 0,
     "label": "実況",
-    "validTime": "2026-08-05T21:00:00+09:00",
+    "validTime": "2026-08-06T00:00:00+09:00",
     "category": "台風",
     "intensity": "-",
     "scale": "大型",
     "location": "ウェーク島近海",
     "course": "北",
-    "speedKmh": "35",
+    "speedKmh": "40",
     "pressure": 996.0,
     "windMs": 18.0,
     "gustMs": 25.0,
-    "lat": 23.5,
-    "lon": 166.1,
+    "lat": 23.3,
+    "lon": 165.7,
     "circleKm": null,
     "galeRadiusKm": 750.0
    },
@@ -33,24 +33,24 @@
     {
      "hours": 12,
      "label": "予報　１２時間後",
-     "validTime": "2026-08-06T09:00:00+09:00",
+     "validTime": "2026-08-06T12:00:00+09:00",
      "category": "台風",
      "intensity": "-",
      "scale": "",
      "location": "ウェーク島近海",
      "course": "北北西",
-     "speedKmh": "25",
+     "speedKmh": "30",
      "pressure": 994.0,
      "windMs": 20.0,
      "gustMs": 30.0,
-     "lat": 25.9,
-     "lon": 165.0,
+     "lat": 26.4,
+     "lon": 164.4,
      "circleKm": 75.0
     },
     {
      "hours": 24,
      "label": "予報　２４時間後",
-     "validTime": "2026-08-06T21:00:00+09:00",
+     "validTime": "2026-08-07T00:00:00+09:00",
      "category": "台風",
      "intensity": "-",
      "scale": "",
@@ -60,13 +60,13 @@
      "pressure": 990.0,
      "windMs": 23.0,
      "gustMs": 35.0,
-     "lat": 27.9,
-     "lon": 162.8,
+     "lat": 28.3,
+     "lon": 162.4,
      "circleKm": 105.0
     },
     {
-     "hours": 48,
-     "label": "予報　４８時間後",
+     "hours": 45,
+     "label": "予報　４５時間後",
      "validTime": "2026-08-07T21:00:00+09:00",
      "category": "台風",
      "intensity": "-",
@@ -82,8 +82,8 @@
      "circleKm": 185.0
     },
     {
-     "hours": 72,
-     "label": "予報　７２時間後",
+     "hours": 69,
+     "label": "予報　６９時間後",
      "validTime": "2026-08-08T21:00:00+09:00",
      "category": "台風",
      "intensity": "-",
@@ -99,8 +99,8 @@
      "circleKm": 260.0
     },
     {
-     "hours": 96,
-     "label": "予報　９６時間後",
+     "hours": 93,
+     "label": "予報　９３時間後",
      "validTime": "2026-08-09T21:00:00+09:00",
      "category": "台風",
      "intensity": "-",
@@ -116,8 +116,8 @@
      "circleKm": 370.0
     },
     {
-     "hours": 120,
-     "label": "予報　１２０時間後",
+     "hours": 117,
+     "label": "予報　１１７時間後",
      "validTime": "2026-08-10T21:00:00+09:00",
      "category": "台風",
      "intensity": "-",
@@ -145,6 +145,10 @@
     [
      23.5,
      166.1
+    ],
+    [
+     23.3,
+     165.7
     ]
    ]
   },
@@ -155,22 +159,22 @@
    "name": "クジラ",
    "nameEn": "Kujira",
    "category": "台風",
-   "issue": "2026-08-05T21:55:00+09:00",
+   "issue": "2026-08-06T00:55:00+09:00",
    "analysis": {
     "hours": 0,
     "label": "実況",
-    "validTime": "2026-08-05T21:00:00+09:00",
+    "validTime": "2026-08-06T00:00:00+09:00",
     "category": "台風",
     "intensity": "-",
     "scale": "",
     "location": "南シナ海",
-    "course": "北東",
+    "course": "東北東",
     "speedKmh": null,
-    "pressure": 994.0,
+    "pressure": 996.0,
     "windMs": 20.0,
     "gustMs": 30.0,
-    "lat": 17.9,
-    "lon": 119.5,
+    "lat": 18.0,
+    "lon": 119.9,
     "circleKm": null,
     "galeRadiusKm": 280.0
    },
@@ -178,24 +182,24 @@
     {
      "hours": 12,
      "label": "予報　１２時間後",
-     "validTime": "2026-08-06T09:00:00+09:00",
+     "validTime": "2026-08-06T12:00:00+09:00",
      "category": "台風",
      "intensity": "-",
      "scale": "",
      "location": "ルソン島",
      "course": "東南東",
-     "speedKmh": "10",
-     "pressure": 996.0,
+     "speedKmh": null,
+     "pressure": 998.0,
      "windMs": 18.0,
      "gustMs": 25.0,
      "lat": 17.4,
-     "lon": 120.6,
+     "lon": 120.8,
      "circleKm": 75.0
     },
     {
      "hours": 24,
      "label": "予報　２４時間後",
-     "validTime": "2026-08-06T21:00:00+09:00",
+     "validTime": "2026-08-07T00:00:00+09:00",
      "category": "熱帯低気圧",
      "intensity": "-",
      "scale": "",
@@ -205,8 +209,8 @@
      "pressure": 1002.0,
      "windMs": 0.0,
      "gustMs": 0.0,
-     "lat": 17.0,
-     "lon": 121.4,
+     "lat": 16.9,
+     "lon": 121.6,
      "circleKm": 120.0
     }
    ],
@@ -238,6 +242,10 @@
     [
      17.9,
      119.5
+    ],
+    [
+     18.0,
+     119.9
     ]
    ]
   },
@@ -248,22 +256,22 @@
    "name": "ドルフィン",
    "nameEn": "Dolphin",
    "category": "台風",
-   "issue": "2026-08-05T21:45:00+09:00",
+   "issue": "2026-08-06T00:45:00+09:00",
    "analysis": {
     "hours": 0,
     "label": "実況",
-    "validTime": "2026-08-05T21:00:00+09:00",
+    "validTime": "2026-08-06T00:00:00+09:00",
     "category": "台風",
-    "intensity": "非常に強い",
+    "intensity": "強い",
     "scale": "大型",
     "location": "日本の南",
     "course": "西",
     "speedKmh": "20",
-    "pressure": 945.0,
-    "windMs": 45.0,
+    "pressure": 950.0,
+    "windMs": 40.0,
     "gustMs": 60.0,
-    "lat": 26.0,
-    "lon": 136.1,
+    "lat": 25.9,
+    "lon": 135.7,
     "circleKm": null,
     "stormRadiusKm": 220.0,
     "galeRadiusKm": 700.0
@@ -272,42 +280,42 @@
     {
      "hours": 12,
      "label": "予報　１２時間後",
-     "validTime": "2026-08-06T09:00:00+09:00",
+     "validTime": "2026-08-06T12:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
      "scale": "",
-     "location": "南大東島の東約260km",
+     "location": "南大東島の東約220km",
      "course": "西",
      "speedKmh": "20",
      "pressure": 950.0,
      "windMs": 40.0,
      "gustMs": 60.0,
-     "lat": 26.1,
-     "lon": 133.8,
+     "lat": 26.2,
+     "lon": 133.4,
      "circleKm": 45.0,
      "stormRadiusKm": 270.0
     },
     {
      "hours": 24,
      "label": "予報　２４時間後",
-     "validTime": "2026-08-06T21:00:00+09:00",
+     "validTime": "2026-08-07T00:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
      "scale": "",
-     "location": "南大東島の北北東約70km",
+     "location": "南大東島の北北西約90km",
      "course": "西",
      "speedKmh": "20",
      "pressure": 950.0,
      "windMs": 40.0,
      "gustMs": 60.0,
-     "lat": 26.4,
-     "lon": 131.4,
+     "lat": 26.5,
+     "lon": 130.8,
      "circleKm": 65.0,
      "stormRadiusKm": 290.0
     },
     {
-     "hours": 48,
-     "label": "予報　４８時間後",
+     "hours": 45,
+     "label": "予報　４５時間後",
      "validTime": "2026-08-07T21:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
@@ -324,8 +332,8 @@
      "stormRadiusKm": 320.0
     },
     {
-     "hours": 72,
-     "label": "予報　７２時間後",
+     "hours": 69,
+     "label": "予報　６９時間後",
      "validTime": "2026-08-08T21:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
@@ -342,8 +350,8 @@
      "stormRadiusKm": 370.0
     },
     {
-     "hours": 96,
-     "label": "予報　９６時間後",
+     "hours": 93,
+     "label": "予報　９３時間後",
      "validTime": "2026-08-09T21:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
@@ -360,8 +368,8 @@
      "stormRadiusKm": 370.0
     },
     {
-     "hours": 120,
-     "label": "予報　１２０時間後",
+     "hours": 117,
+     "label": "予報　１１７時間後",
      "validTime": "2026-08-10T21:00:00+09:00",
      "category": "台風",
      "intensity": "-",
@@ -709,6 +717,10 @@
     [
      26.0,
      136.1
+    ],
+    [
+     25.9,
+     135.7
     ]
    ]
   }
