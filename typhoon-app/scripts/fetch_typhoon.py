@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import sys
+import time
 import urllib.error
 import urllib.request
 from datetime import datetime, timedelta, timezone
@@ -52,7 +53,23 @@ WARNING_CODES = {
 }
 KIND_ORDER = ["wind", "wave", "surge", "rain", "flood"]  # 並べる順番（危ない順）
 RANK = {"注意報": 1, "警報": 2, "特別警報": 3}  # 数が大きいほど重い
-ACTIVE_STATUS = {"発表", "継続"}  # この状態のものだけ「いま出ている」と数える
+
+# 「出ていない」を表す言葉。これが入っていたら数えない。
+# 逆に言うと、それ以外はぜんぶ「まだ出ている」とみなす。
+#
+# ⚠️ ここを「発表・継続だけを数える」という作りにしてはいけない。
+# 気象庁は「警報から注意報」「特別警報から警報」のような“格下げ”の書き方もするため、
+# 決め打ちにすると、まだ出ている警報を見落として「警報なし」と表示してしまう。
+# 知らない言葉が来たときは「出ている」側に倒すのが安全。
+INACTIVE_WORDS = ("解除", "なし")
+
+
+def is_active(status) -> bool:
+    """その警報が「いま出ている」かどうか。"""
+    s = str(status or "")
+    if not s:
+        return False
+    return not any(word in s for word in INACTIVE_WORDS)
 
 # 全国の予報区（府県など）。code: (名前, 地方ブロック)
 # ※ index.html の OFFICES、bousai-app 側の同名の表と同じ内容。直すときはそろえること。
@@ -118,11 +135,24 @@ OFFICES = {
 }
 
 
-def fetch_json(url: str):
-    """URLからJSONを取ってくる。失敗したら例外を投げる。"""
-    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(req, timeout=TIMEOUT) as res:
-        return json.loads(res.read().decode("utf-8"))
+def fetch_json(url: str, tries: int = 3):
+    """URLからJSONを取ってくる。何度か試して、それでもダメなら例外を投げる。
+
+    警報を足したことで1回の実行で60回以上の通信をするようになった。
+    1本でも失敗すると全部やめる作りなので、たまたまの失敗で更新が止まらないよう、
+    少し間をあけて2回まで取り直す。
+    """
+    last = None
+    for i in range(tries):
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+            with urllib.request.urlopen(req, timeout=TIMEOUT) as res:
+                return json.loads(res.read().decode("utf-8"))
+        except Exception as err:  # noqa: BLE001 - 何で失敗しても取り直す
+            last = err
+            if i < tries - 1:
+                time.sleep(2**i)  # 1秒 → 2秒と間をあける
+    raise last
 
 
 def pick(dic, *keys, default=None):
@@ -264,7 +294,7 @@ def scan_office_warnings(data: dict) -> dict:
             for w in area.get("warnings") or []:
                 if not isinstance(w, dict):
                     continue
-                if (w.get("status") or "") not in ACTIVE_STATUS:
+                if not is_active(w.get("status")):
                     continue
                 hit = WARNING_CODES.get(str(w.get("code") or ""))
                 if not hit:
@@ -284,8 +314,11 @@ def build_warnings() -> dict:
     report_times = []
     for code, (name, region) in OFFICES.items():
         data = fetch_json(f"{WARNING_DIR}/{code}.json")
-        if not isinstance(data, dict):
-            raise ValueError(f"{code} のデータが想定した形ではありません")
+        # ⚠️ 形の確認は必ずやる。
+        # 「通信は成功したが中身がエラーの文章」だったとき、確認しないと
+        # 全58予報区が「警報なし」になり、堂々と「出ていません」と保存してしまうため。
+        if not isinstance(data, dict) or not isinstance(data.get("areaTypes"), list) or not data["areaTypes"]:
+            raise ValueError(f"{name}（{code}）のデータが想定した形ではありません")
         kinds = scan_office_warnings(data)
         if not kinds:
             continue  # 何も出ていない予報区は載せない（一覧が長くなるだけなので）

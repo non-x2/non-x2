@@ -1042,6 +1042,10 @@
       { btn: document.getElementById('tab-warn'), panel: document.getElementById('panel-warn') },
       { btn: document.getElementById('tab-map'), panel: document.getElementById('panel-map') }
     ];
+    /* ⚠️タブが表示されたときに呼ばれる係。中身は下のほう（データを取る部分）で入れる。
+       クリックだけでなく、キーボード操作や「前回開いていたタブの復元」でも
+       ここを通るようにして、取りこぼしを防いでいる。 */
+    var onWarnShown = null;
     var playTimer;
     function replayTimeline(el) {
       if (!el) return;
@@ -1064,6 +1068,7 @@
       if (active.panel && active.panel.id === 'panel-status') {
         replayTimeline(document.getElementById('forecast-main'));
       }
+      if (active.panel && active.panel.id === 'panel-warn' && onWarnShown) onWarnShown();
     }
     tabs.forEach(function (t, i) {
       t.btn.addEventListener('click', function () { select(t); });
@@ -1933,15 +1938,25 @@
         ['474000', '八重山地方', '沖縄'],
       ];
 
+      /* その警報が「いま出ている」かどうか。
+         ⚠️「発表・継続だけを数える」という作りにしてはいけない。
+         気象庁は「警報から注意報」「特別警報から警報」のような“格下げ”の書き方もするため、
+         決め打ちにすると、まだ出ている警報を見落として「警報なし」と表示してしまう。
+         知らない言葉が来たときは「出ている」側に倒すのが安全。
+         ※ scripts/fetch_typhoon.py の is_active と同じ考え。直すときは両方そろえること。 */
+      function isActiveStatus(status) {
+        var s = status == null ? '' : String(status);
+        if (!s) return false;
+        return s.indexOf('解除') < 0 && s.indexOf('なし') < 0;
+      }
+
       /* --- 1つの予報区から、5種類それぞれの「いちばん重い状態」を拾う --- */
       function scanOffice(data) {
         var found = {};
         ((data && data.areaTypes) || []).forEach(function (at) {
           ((at && at.areas) || []).forEach(function (a) {
             ((a && a.warnings) || []).forEach(function (w) {
-              if (!w) return;
-              /* 「解除」されたものは数えない */
-              if (w.status !== '発表' && w.status !== '継続') return;
+              if (!w || !isActiveStatus(w.status)) return;
               var hit = WARN_CODES[String(w.code == null ? '' : w.code)];
               if (!hit) return; /* 台風に関係しない種類は無視 */
               if (!found[hit[0]] || hit[1] > found[hit[0]]) found[hit[0]] = hit[1];
@@ -1951,54 +1966,102 @@
         return found;
       }
 
-      /* --- ①気象庁から直接：全国ぶんをまとめて取る --- */
+      /* --- ①気象庁から直接：全国ぶんを取る ---
+         58本を一度に投げると、ブラウザは同じ相手に6本ずつしかつなげないので、
+         後ろのほうは「順番待ち」だけで時間切れになってしまう。
+         そこで10本ずつの組に分けて順に取る。 */
+      function fetchInBatches(urls, size, ms, totalMs) {
+        var results = new Array(urls.length);
+        var limit = Date.now() + totalMs;
+        function step(i) {
+          if (i >= urls.length) return Promise.resolve(results);
+          if (Date.now() > limit) return Promise.reject(new Error('全体の時間切れ'));
+          return Promise.all(urls.slice(i, i + size).map(function (u, j) {
+            return getJSON(u, ms).then(function (d) { results[i + j] = d; });
+          })).then(function () { return step(i + size); });
+        }
+        return step(0);
+      }
+
       function warningsFromJma() {
-        return Promise.all(OFFICES.map(function (o) {
-          return getJSON(WARN_DIR + '/' + o[0] + '.json', 12000);
-        })).then(function (list) {
+        var urls = OFFICES.map(function (o) { return WARN_DIR + '/' + o[0] + '.json'; });
+        return fetchInBatches(urls, 10, 12000, 40000).then(function (list) {
           var offices = [], times = [];
           list.forEach(function (d, i) {
+            /* ⚠️ 形の確認は必ずやる。
+               「HTTPは成功したが中身がエラー」のとき、確認しないと全58予報区が
+               「警報なし」になり、堂々と「出ていません」と表示してしまうため。 */
+            if (!d || !Array.isArray(d.areaTypes) || !d.areaTypes.length) {
+              throw new Error(OFFICES[i][1] + ' のデータの形が想定と違います');
+            }
             var kinds = scanOffice(d);
             var keys = KIND_ORDER.filter(function (k) { return kinds[k]; });
             if (!keys.length) return; /* 何も出ていない予報区は載せない */
-            if (d && d.reportDatetime) times.push(d.reportDatetime);
+            if (d.reportDatetime) times.push(d.reportDatetime);
             var top = 0;
             keys.forEach(function (k) { if (kinds[k] > top) top = kinds[k]; });
-            offices.push({ name: OFFICES[i][1], region: OFFICES[i][2], kinds: kinds, keys: keys, top: top });
+            offices.push({ name: OFFICES[i][1], region: OFFICES[i][2], kinds: kinds, keys: keys, unknown: [], top: top });
           });
           times.sort();
-          return { reportTime: times.length ? times[times.length - 1] : null, offices: offices };
+          return { reportTime: times.length ? times[times.length - 1] : null, offices: offices, at: Date.now() };
         });
       }
 
       /* --- ②控えのファイル（latest.json）の形をそろえる --- */
       function warningsFromLocal(d) {
         var w = d && d.warnings;
-        if (!w || !w.offices || typeof w.offices.length !== 'number') {
-          throw new Error('控えに警報のデータがありません');
-        }
+        if (!w || !Array.isArray(w.offices)) throw new Error('控えに警報のデータがありません');
         return {
           reportTime: w.reportTime || null,
+          /* いつ保存されたファイルかを持ち回る。古い控えで「警報なし」と
+             断言しないために必要（自動更新が止まっていても気づけるように）。 */
+          generatedAt: d.generatedAt || null,
           offices: w.offices.map(function (o) {
-            var kinds = {}, keys = [];
-            KIND_ORDER.forEach(function (k) {
-              var lv = LEVEL_NUM[(o.kinds || {})[k]];
-              if (lv) { kinds[k] = lv; keys.push(k); }
+            var raw = (o && o.kinds && typeof o.kinds === 'object') ? o.kinds : {};
+            var kinds = {}, keys = [], unknown = [];
+            Object.keys(raw).forEach(function (k) {
+              var lv = LEVEL_NUM[raw[k]];
+              if (lv && KIND_ORDER.indexOf(k) >= 0) { kinds[k] = lv; }
+              else unknown.push(k); /* 想定外の言葉。消さずに残す（消えると「警報なし」に見えて危ない） */
             });
-            return { name: o.name, region: o.region, kinds: kinds, keys: keys, top: LEVEL_NUM[o.top] || 1 };
-          }).filter(function (o) { return o.keys.length; })
+            keys = KIND_ORDER.filter(function (k) { return kinds[k]; });
+            var top = 0;
+            keys.forEach(function (k) { if (kinds[k] > top) top = kinds[k]; });
+            /* ⚠️ top は必ず中身から計算する。書いてある top をそのまま信じると、
+               それが欠けていたときに特別警報を「注意報」と軽く表示してしまう。
+               書いてある top のほうが重ければ、重いほうを採る。 */
+            var declared = LEVEL_NUM[o && o.top] || 0;
+            if (declared > top) top = declared;
+            if (unknown.length && top < 2) top = 2; /* 読み取れないものは警報あつかい（軽く見せない） */
+            return {
+              name: (o && o.name) || '（地域が分かりません）',
+              region: (o && o.region) || '',
+              kinds: kinds, keys: keys, unknown: unknown, top: top
+            };
+          }).filter(function (o) { return o.keys.length || o.unknown.length; })
         };
       }
 
-      /* --- 画面に出す --- */
+      /* --- 画面に出す ---
+         via は 'jma'（気象庁から直接）／'local'（つながらず控えに切替）／
+         'light'（起動時。はじめから控えだけを読む軽い経路）の3種類。 */
+      var warnShownFromJma = false;
+
+      function agoText(hours) {
+        if (hours < 1) return 'さっき';
+        if (hours < 24) return Math.floor(hours) + '時間前';
+        return Math.floor(hours / 24) + '日前';
+      }
+
       function renderWarnings(w, via) {
         var box = document.getElementById('warn-live');
         var fb = document.getElementById('warn-fallback');
         if (!box) return;
+        /* 気象庁から取れた表示を、あとから届いた控えの表示で上書きしない */
+        if (via === 'light' && warnShownFromJma) return;
 
         var offices = (w.offices || []).slice();
-        /* 重い順 → 同じ重さなら北から南の順 */
-        offices.sort(function (a, b) { return b.top - a.top; });
+        offices.sort(function (a, b) { return b.top - a.top; }); /* 重い順 */
 
         var maxLv = 0, warnCount = 0;
         offices.forEach(function (o) {
@@ -2006,10 +2069,37 @@
           if (o.top >= 2) warnCount++;
         });
 
+        /* ⚠️ 控えがどれだけ古いかを見る。
+           自動更新が止まっているのに「警報は出ていません」と緑で断言すると、
+           本当に警報が出ているときに危ないため。 */
+        var live = (via === 'jma');
+        var age = null;
+        if (!live && w.generatedAt) {
+          var t = new Date(w.generatedAt);
+          if (!isNaN(t)) age = (Date.now() - t.getTime()) / 36e5;
+        }
+        var stale = !live && (age === null || age >= 6);
+
+        /* 気象庁の「発表時刻」自体が古いこともある。
+           そのときは、いま出ている内容として見せてしまわないよう一言そえる。 */
+        var reportAge = null;
+        if (w.reportTime) {
+          var rt = new Date(w.reportTime);
+          if (!isNaN(rt)) reportAge = (Date.now() - rt.getTime()) / 36e5;
+        }
+        var reportOld = reportAge !== null && reportAge >= 24;
+
         var html = '';
 
-        /* まとめの一言 */
-        if (!offices.length) {
+        if (!offices.length && stale) {
+          /* 古い控えしか無いときは「出ていません」と言い切らない */
+          html += '<div class="warn-summary is-lv1">⚠️ いまの状況を確認できていません' +
+            '<span class="warn-sub">' +
+            (age === null
+              ? '控えのデータがいつのものか分かりません。'
+              : '控えのデータが' + esc(agoText(age)) + 'のもので古いため、「出ていません」とは言い切れません。') +
+            '⚠️タブを開き直すか、下の気象庁のページで必ず確認してください。</span></div>';
+        } else if (!offices.length) {
           html += '<div class="warn-summary">✅ いま、台風に関係する警報・注意報は出ていません' +
             '<span class="warn-sub">暴風・波浪・高潮・大雨・洪水のどれも、全国で出ていない状態です。</span></div>';
         } else {
@@ -2020,14 +2110,30 @@
               : '🟡 注意報が' + offices.length + '予報区に出ています';
           html += '<div class="warn-summary is-lv' + maxLv + '">' + head +
             '<span class="warn-sub">台風に関係する5種類（暴風・波浪・高潮・大雨・洪水）だけを数えています。' +
-            'ぜんぶで' + offices.length + '予報区。</span></div>';
+            'ぜんぶで' + offices.length + '予報区。' +
+            (stale ? '<br>⚠️ ただし控えのデータが' + esc(age === null ? '不明な時点' : agoText(age)) +
+              'のものです。最新は気象庁のページで確認してください。' : '') +
+            (reportOld ? '<br>⚠️ 気象庁の発表が' + esc(agoText(reportAge)) +
+              'と古いため、いまの状況とは違う可能性があります。' : '') +
+            '</span></div>';
         }
 
-        /* 発表時刻・どこから取ってきたか */
+        /* どこから取ってきたか・いつのものか */
         var meta = [];
-        if (w.reportTime) meta.push('気象庁 ' + fmtShort(w.reportTime) + ' 発表');
-        if (via === 'local') meta.push('気象庁へ直接つながらなかったため、1時間ごとに保存している控えを表示しています');
-        if (meta.length) html += '<p class="warn-meta">🕐 ' + esc(meta.join('／')) + '</p>';
+        if (w.reportTime) {
+          meta.push('気象庁 ' + fmtShort(w.reportTime) + ' 発表' +
+            (reportAge === null ? '' : '（' + agoText(reportAge) + '）'));
+        }
+        if (live) {
+          meta.push('気象庁から直接読み込みました');
+        } else if (w.generatedAt) {
+          meta.push('控えのデータ（' + fmtShort(w.generatedAt) + ' 時点・' + agoText(age === null ? 0 : age) + '）');
+        } else {
+          meta.push('控えのデータ（いつのものか不明）');
+        }
+        if (via === 'light') meta.push('⚠️タブを開くと気象庁から直接取り直します');
+        else if (via === 'local') meta.push('気象庁へ直接つながらなかったため控えを表示しています');
+        html += '<p class="warn-meta">🕐 ' + esc(meta.join('／')) + '</p>';
 
         /* 重さごとにまとめて並べる */
         [3, 2, 1].forEach(function (lv) {
@@ -2044,6 +2150,9 @@
               var name = WARN_NAME[k + '-' + lvK] || (LEVEL_NAME[lvK] || '');
               html += '<span class="warn-chip warn-lv' + lvK + '">' + esc(name) + '</span>';
             });
+            (o.unknown || []).forEach(function () {
+              html += '<span class="warn-chip warn-lv2">内容を読み取れません</span>';
+            });
             html += '</li>';
           });
           html += '</ul></div>';
@@ -2052,6 +2161,7 @@
         box.innerHTML = html;
         box.hidden = false;
         if (fb) fb.hidden = true;
+        if (live) warnShownFromJma = true;
 
         /* 警報以上が出ているときは、タブの見出しでも分かるようにする */
         var tb = document.getElementById('tab-warn');
@@ -2059,7 +2169,9 @@
       }
 
       /* --- 実行 ---
-         全国58予報区ぶんは合計800KBほどあり、台風のときのスマホには重い。
+         全国58予報区は「58回の通信」になる。データ量そのものは実測で
+         圧縮なし407KB・ブラウザが実際に受け取るのは約34KB（gzip）と大したことはないが、
+         ブラウザは同じ相手に6本ずつしかつなげないため、回線が細いと順番待ちで時間がかかる。
          そこで通信を2段階に分けている：
 
            ページを開いた直後  → ②控えのファイルだけ（通信1回・軽い）
@@ -2067,26 +2179,27 @@
            「いま更新する」    → ①気象庁から直接
 
          これで「開くだけの人」には軽く、「実際に警報を見たい人」には最新が届く。 */
-      var warnFetching = false;
-      var warnJmaAt = 0; /* 最後に気象庁から直接取れた時刻 */
-
-      function warnDone() { warnFetching = false; }
+      var warnLightBusy = false;  /* 軽いほうと重いほうでフラグを分ける。 */
+      var warnJmaBusy = false;    /* 一緒にすると、軽いほうの最中に押した分が捨てられるため。 */
+      var warnJmaAt = 0;          /* 最後に気象庁から直接取れた時刻 */
 
       /* 軽いほう：控えのファイル（GitHub Actionsが1時間ごとに更新）だけ読む */
       function loadWarningsLight() {
-        if (warnFetching) return;
-        warnFetching = true;
+        if (warnLightBusy) return;
+        warnLightBusy = true;
+        function done() { warnLightBusy = false; }
         getJSON(LOCAL, 6000).then(function (d) {
-          renderWarnings(warningsFromLocal(d), 'local');
+          renderWarnings(warningsFromLocal(d), 'light');
         })['catch'](function () {
           /* ダメなら案内文のまま（何もしない） */
-        }).then(warnDone, warnDone);
+        }).then(done, done);
       }
 
       /* 正確なほう：気象庁から直接。ダメなら控えのファイルで埋める */
       function loadWarningsFromJma() {
-        if (warnFetching) return;
-        warnFetching = true;
+        if (warnJmaBusy) return;
+        warnJmaBusy = true;
+        function done() { warnJmaBusy = false; }
         warningsFromJma().then(function (w) {
           warnJmaAt = Date.now();
           renderWarnings(w, 'jma');
@@ -2096,24 +2209,33 @@
           });
         })['catch'](function () {
           /* どちらもダメ。案内文をそのまま出しておく（何もしない） */
-        }).then(warnDone, warnDone);
-      }
-
-      /* ⚠️タブを開いたら最新を取りにいく（10分以内に取れていれば、そのまま使う） */
-      var warnTabBtn = document.getElementById('tab-warn');
-      if (warnTabBtn) {
-        warnTabBtn.addEventListener('click', function () {
-          if (Date.now() - warnJmaAt > 10 * 60 * 1000) loadWarningsFromJma();
-        });
+        }).then(done, done);
       }
 
       if (typeof fetch === 'function' && typeof Promise === 'function') {
         start();
         loadWarningsLight();
 
+        /* ⚠️タブが表示されたら最新を取りにいく（10分以内に取れていれば、そのまま使う）。
+           Promise が使えない環境で動き出さないよう、登録はこのガードの中に置いている。 */
+        onWarnShown = function () {
+          if (Date.now() - warnJmaAt > 10 * 60 * 1000) loadWarningsFromJma();
+        };
+        /* 「前回開いていたタブ」の復元で、最初から⚠️タブが開いている場合は
+           クリックが起きないので、ここで一度だけ呼んでおく。 */
+        var warnPanel = document.getElementById('panel-warn');
+        if (warnPanel && !warnPanel.hidden) onWarnShown();
+
         /* 台風のときはページを開きっぱなしにしがちなので、
            30分ごとに自動でデータを取り直す（気象庁の発表は約3時間おき） */
-        function startAll() { start(); loadWarningsFromJma(); }
+        /* 警報は58回の通信をするので、⚠️タブを一度も見ていない人には取り直さない。
+           開きっぱなしにしているだけの人の通信量を無駄にしないため。
+           （タブを開けば onWarnShown が呼ばれて、そこで取りにいく） */
+        function startAll() {
+          start();
+          var wp = document.getElementById('panel-warn');
+          if (warnJmaAt || (wp && !wp.hidden)) loadWarningsFromJma();
+        }
         setInterval(startAll, 30 * 60 * 1000);
 
         /* 別のアプリから戻ってきたとき、10分以上たっていたら取り直す */
