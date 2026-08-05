@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-05T17:00:15+09:00",
+ "generatedAt": "2026-08-05T16:40:42+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
  "count": 3,
  "typhoons": [
@@ -689,5 +689,29 @@
     ]
    ]
   }
- ]
+ ],
+ "warnings": {
+  "reportTime": "2026-05-28T10:16:00+09:00",
+  "offices": [
+   {
+    "code": "011000",
+    "name": "宗谷地方",
+    "region": "北海道",
+    "kinds": {
+     "wind": "注意報"
+    },
+    "top": "注意報"
+   },
+   {
+    "code": "130000",
+    "name": "東京都",
+    "region": "関東・甲信",
+    "kinds": {
+     "wind": "注意報",
+     "wave": "注意報"
+    },
+    "top": "注意報"
+   }
+  ]
+ }
 }

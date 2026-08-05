@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import json
 import sys
+import time
 import urllib.error
 import urllib.request
 from datetime import datetime, timedelta, timezone
@@ -21,17 +22,137 @@ from pathlib import Path
 
 BASE = "https://www.jma.go.jp/bosai/typhoon/data"
 TARGET_URL = f"{BASE}/targetTc.json"
+WARNING_DIR = "https://www.jma.go.jp/bosai/warning/data/warning"
 OUT_PATH = Path(__file__).resolve().parent.parent / "data" / "latest.json"
 JST = timezone(timedelta(hours=9))
 TIMEOUT = 30
 USER_AGENT = "non-x2-typhoon-app/1.0 (+https://github.com/non-x2/non-x2)"
 
+# ------------------------------------------------------------------ 警報・注意報の決まりごと
+#
+# 台風のときに気をつける5種類だけを拾います（雷や乾燥などの平常時の注意報は
+# 防災ページ bousai-app/ の担当なので、ここでは扱いません）。
+#
+# 数字は気象庁が決めているコード。「35」なら暴風特別警報、という具合です。
+# コード → (種類のキー, 重さ, 正式な呼び名)
+WARNING_CODES = {
+    "35": ("wind", "特別警報", "暴風特別警報"),
+    "05": ("wind", "警報", "暴風警報"),
+    "15": ("wind", "注意報", "強風注意報"),  # 暴風の注意報は「強風注意報」という名前
+    "37": ("wave", "特別警報", "波浪特別警報"),
+    "07": ("wave", "警報", "波浪警報"),
+    "16": ("wave", "注意報", "波浪注意報"),
+    "38": ("surge", "特別警報", "高潮特別警報"),
+    "08": ("surge", "警報", "高潮警報"),
+    "19": ("surge", "注意報", "高潮注意報"),
+    "33": ("rain", "特別警報", "大雨特別警報"),
+    "03": ("rain", "警報", "大雨警報"),
+    "10": ("rain", "注意報", "大雨注意報"),
+    "04": ("flood", "警報", "洪水警報"),  # 洪水に特別警報はない
+    "18": ("flood", "注意報", "洪水注意報"),
+}
+KIND_ORDER = ["wind", "wave", "surge", "rain", "flood"]  # 並べる順番（危ない順）
+RANK = {"注意報": 1, "警報": 2, "特別警報": 3}  # 数が大きいほど重い
 
-def fetch_json(url: str):
-    """URLからJSONを取ってくる。失敗したら例外を投げる。"""
-    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
-    with urllib.request.urlopen(req, timeout=TIMEOUT) as res:
-        return json.loads(res.read().decode("utf-8"))
+# 「出ていない」を表す言葉。これが入っていたら数えない。
+# 逆に言うと、それ以外はぜんぶ「まだ出ている」とみなす。
+#
+# ⚠️ ここを「発表・継続だけを数える」という作りにしてはいけない。
+# 気象庁は「警報から注意報」「特別警報から警報」のような“格下げ”の書き方もするため、
+# 決め打ちにすると、まだ出ている警報を見落として「警報なし」と表示してしまう。
+# 知らない言葉が来たときは「出ている」側に倒すのが安全。
+INACTIVE_WORDS = ("解除", "なし")
+
+
+def is_active(status) -> bool:
+    """その警報が「いま出ている」かどうか。"""
+    s = str(status or "")
+    if not s:
+        return False
+    return not any(word in s for word in INACTIVE_WORDS)
+
+# 全国の予報区（府県など）。code: (名前, 地方ブロック)
+# ※ index.html の OFFICES、bousai-app 側の同名の表と同じ内容。直すときはそろえること。
+OFFICES = {
+    "011000": ("宗谷地方", "北海道"),
+    "012000": ("上川・留萌地方", "北海道"),
+    "013000": ("網走・北見・紋別地方", "北海道"),
+    "014030": ("十勝地方", "北海道"),
+    "014100": ("釧路・根室地方", "北海道"),
+    "015000": ("胆振・日高地方", "北海道"),
+    "016000": ("石狩・空知・後志地方", "北海道"),
+    "017000": ("渡島・檜山地方", "北海道"),
+    "020000": ("青森県", "東北"),
+    "030000": ("岩手県", "東北"),
+    "040000": ("宮城県", "東北"),
+    "050000": ("秋田県", "東北"),
+    "060000": ("山形県", "東北"),
+    "070000": ("福島県", "東北"),
+    "080000": ("茨城県", "関東・甲信"),
+    "090000": ("栃木県", "関東・甲信"),
+    "100000": ("群馬県", "関東・甲信"),
+    "110000": ("埼玉県", "関東・甲信"),
+    "120000": ("千葉県", "関東・甲信"),
+    "130000": ("東京都", "関東・甲信"),
+    "140000": ("神奈川県", "関東・甲信"),
+    "190000": ("山梨県", "関東・甲信"),
+    "200000": ("長野県", "関東・甲信"),
+    "150000": ("新潟県", "北陸"),
+    "160000": ("富山県", "北陸"),
+    "170000": ("石川県", "北陸"),
+    "180000": ("福井県", "北陸"),
+    "210000": ("岐阜県", "東海"),
+    "220000": ("静岡県", "東海"),
+    "230000": ("愛知県", "東海"),
+    "240000": ("三重県", "東海"),
+    "250000": ("滋賀県", "近畿"),
+    "260000": ("京都府", "近畿"),
+    "270000": ("大阪府", "近畿"),
+    "280000": ("兵庫県", "近畿"),
+    "290000": ("奈良県", "近畿"),
+    "300000": ("和歌山県", "近畿"),
+    "310000": ("鳥取県", "中国"),
+    "320000": ("島根県", "中国"),
+    "330000": ("岡山県", "中国"),
+    "340000": ("広島県", "中国"),
+    "350000": ("山口県", "中国"),
+    "360000": ("徳島県", "四国"),
+    "370000": ("香川県", "四国"),
+    "380000": ("愛媛県", "四国"),
+    "390000": ("高知県", "四国"),
+    "400000": ("福岡県", "九州"),
+    "410000": ("佐賀県", "九州"),
+    "420000": ("長崎県", "九州"),
+    "430000": ("熊本県", "九州"),
+    "440000": ("大分県", "九州"),
+    "450000": ("宮崎県", "九州"),
+    "460100": ("鹿児島県（奄美地方除く）", "九州"),
+    "460040": ("奄美地方", "九州"),
+    "471000": ("沖縄本島地方", "沖縄"),
+    "472000": ("大東島地方", "沖縄"),
+    "473000": ("宮古島地方", "沖縄"),
+    "474000": ("八重山地方", "沖縄"),
+}
+
+
+def fetch_json(url: str, tries: int = 3):
+    """URLからJSONを取ってくる。何度か試して、それでもダメなら例外を投げる。
+
+    警報を足したことで1回の実行で60回以上の通信をするようになった。
+    1本でも失敗すると全部やめる作りなので、たまたまの失敗で更新が止まらないよう、
+    少し間をあけて2回まで取り直す。
+    """
+    last = None
+    for i in range(tries):
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+            with urllib.request.urlopen(req, timeout=TIMEOUT) as res:
+                return json.loads(res.read().decode("utf-8"))
+        except Exception as err:  # noqa: BLE001 - 何で失敗しても取り直す
+            last = err
+            if i < tries - 1:
+                time.sleep(2**i)  # 1秒 → 2秒と間をあける
+    raise last
 
 
 def pick(dic, *keys, default=None):
@@ -153,6 +274,78 @@ def build_typhoon(entry: dict) -> dict | None:
     }
 
 
+# ------------------------------------------------------------------ 警報・注意報
+
+
+def scan_office_warnings(data: dict) -> dict:
+    """1つの予報区のデータから、台風に関係する5種類の「いちばん重い状態」を拾う。
+
+    1つの予報区の中には市町村がたくさん入っていて、それぞれ別々に警報が出ます。
+    ここでは「その県のどこかで暴風警報が出ているか」を知りたいので、
+    県の中でいちばん重いものを代表として採用します。
+    """
+    found: dict[str, str] = {}
+    for area_type in data.get("areaTypes") or []:
+        if not isinstance(area_type, dict):
+            continue
+        for area in area_type.get("areas") or []:
+            if not isinstance(area, dict):
+                continue
+            for w in area.get("warnings") or []:
+                if not isinstance(w, dict):
+                    continue
+                if not is_active(w.get("status")):
+                    continue
+                hit = WARNING_CODES.get(str(w.get("code") or ""))
+                if not hit:
+                    continue  # 台風に関係しない種類（雷・乾燥など）は無視
+                kind, level, _name = hit
+                if kind not in found or RANK[level] > RANK[found[kind]]:
+                    found[kind] = level
+    return found
+
+
+def build_warnings() -> dict:
+    """全国の予報区をひとつずつ確認して、台風に関係する警報が出ている所をまとめる。
+
+    1つでも取得に失敗したら例外を投げます（呼び出し元で中断＝上書きしない）。
+    """
+    offices = []
+    report_times = []
+    for code, (name, region) in OFFICES.items():
+        data = fetch_json(f"{WARNING_DIR}/{code}.json")
+        # ⚠️ 形の確認は必ずやる。
+        # 「通信は成功したが中身がエラーの文章」だったとき、確認しないと
+        # 全58予報区が「警報なし」になり、堂々と「出ていません」と保存してしまうため。
+        if not isinstance(data, dict) or not isinstance(data.get("areaTypes"), list) or not data["areaTypes"]:
+            raise ValueError(f"{name}（{code}）のデータが想定した形ではありません")
+        kinds = scan_office_warnings(data)
+        if not kinds:
+            continue  # 何も出ていない予報区は載せない（一覧が長くなるだけなので）
+        # 発表時刻は「実際に警報が出ている予報区」のものだけ見る。
+        # 全国ぶんの最大値にすると、どこかが更新されるたびに時刻が動いて
+        # 中身が変わっていないのに毎時コミットが増えてしまうため。
+        if data.get("reportDatetime"):
+            report_times.append(data["reportDatetime"])
+        top = max(kinds.values(), key=lambda lv: RANK[lv])
+        offices.append(
+            {
+                "code": code,
+                "name": name,
+                "region": region,
+                "kinds": {k: kinds[k] for k in KIND_ORDER if k in kinds},
+                "top": top,
+            }
+        )
+    # 重い順 → 同じ重さなら全国の並び順（北から南）
+    order = list(OFFICES.keys())
+    offices.sort(key=lambda o: (-RANK[o["top"]], order.index(o["code"])))
+    return {
+        "reportTime": max(report_times) if report_times else None,
+        "offices": offices,
+    }
+
+
 def main() -> int:
     now = datetime.now(JST).replace(microsecond=0)
     try:
@@ -188,11 +381,24 @@ def main() -> int:
         )
         return 1
 
+    # 警報・注意報も同じ安全装置。取れなかったら何も書き換えない。
+    # （台風だけ新しくて警報だけ古い、というちぐはぐな状態を作らないため）
+    try:
+        warnings = build_warnings()
+    except Exception as err:  # noqa: BLE001
+        print(
+            f"❌ 警報・注意報が取れませんでした: {err}"
+            "　古い情報のほうが安全なので、ファイルは書き換えません。",
+            file=sys.stderr,
+        )
+        return 1
+
     payload = {
         "generatedAt": now.isoformat(),
         "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
         "count": len(typhoons),
         "typhoons": typhoons,
+        "warnings": warnings,
     }
 
     # 中身が前回と同じなら書き換えない（取得しただけの無意味なコミットを増やさないため）。
@@ -227,6 +433,16 @@ def main() -> int:
         print(f"✅ {len(typhoons)}個ぶん保存しました: {names} → {OUT_PATH}")
     else:
         print(f"✅ 発生中の台風はありません → {OUT_PATH}")
+
+    hit = warnings["offices"]
+    if hit:
+        heavy = [o["name"] for o in hit if o["top"] != "注意報"]
+        print(
+            f"⚠️ 台風に関係する警報・注意報：{len(hit)}予報区"
+            + (f"（うち警報以上：{'、'.join(heavy)}）" if heavy else "（すべて注意報）")
+        )
+    else:
+        print("✅ 台風に関係する警報・注意報は出ていません")
     return 0
 
 
