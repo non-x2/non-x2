@@ -488,7 +488,17 @@
   var RAIN_CODES = { '33': '特別警報', '03': '警報', '10': '注意報' };
   var FLOOD_CODES = { '04': '警報', '18': '注意報' };
   var THUNDER_CODE = '14';
-  var ACTIVE_STATUS = { '発表': 1, '継続': 1 };
+  /* その警報が「いま出ている」かどうか。
+     ⚠️「発表・継続だけを数える」という作りにしてはいけない。
+     気象庁は「警報から注意報」「特別警報から警報」のような“格下げ”の書き方もするため、
+     決め打ちにすると、まだ出ている警報を見落として「警報なし」と表示してしまう。
+     知らない言葉が来たときは「出ている」側に倒すのが安全。
+     ※ scripts/fetch_bousai.py の is_active と同じ考え。直すときは両方そろえること。 */
+  function isActiveStatus(status) {
+    var s = status == null ? '' : String(status);
+    if (!s) return false;
+    return s.indexOf('解除') < 0 && s.indexOf('なし') < 0;
+  }
 
   /* --- 小道具 --- */
   function esc(s) {
@@ -677,7 +687,7 @@
     ((data && data.areaTypes) || []).forEach(function (at) {
       ((at && at.areas) || []).forEach(function (area) {
         ((area && area.warnings) || []).forEach(function (w) {
-          if (!w || !ACTIVE_STATUS[w.status]) return;
+          if (!w || !isActiveStatus(w.status)) return;
           var code = String(w.code || '');
           if (RAIN_CODES[code]) {
             if (!rain || RANK[RAIN_CODES[code]] > RANK[rain]) rain = RAIN_CODES[code];

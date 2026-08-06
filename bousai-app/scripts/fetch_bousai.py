@@ -43,7 +43,23 @@ TSUNAMI_RECENT_MAX = 5  # 保存する津波関連の発表の件数
 RAIN_CODES = {"33": "特別警報", "03": "警報", "10": "注意報"}  # 大雨
 FLOOD_CODES = {"04": "警報", "18": "注意報"}  # 洪水
 THUNDER_CODE = "14"  # 雷注意報
-ACTIVE_STATUS = {"発表", "継続"}  # この状態のものだけ「出ている」と数える
+# 「出ていない」を表す言葉。これが入っていたら数えない。
+# 逆に言うと、それ以外はぜんぶ「まだ出ている」とみなす。
+#
+# ⚠️ ここを「発表・継続だけを数える」という作りにしてはいけない。
+# 気象庁は「警報から注意報」「特別警報から警報」のような“格下げ”の書き方もするため、
+# 決め打ちにすると、まだ出ている警報を見落として「警報なし」と表示してしまう。
+# 知らない言葉が来たときは「出ている」側に倒すのが安全。
+# ※ typhoon-app 側の is_active と同じ考え。直すときは両方そろえること。
+INACTIVE_WORDS = ("解除", "なし")
+
+
+def is_active(status) -> bool:
+    """その警報が「いま出ている」かどうか。"""
+    s = str(status or "")
+    if not s:
+        return False
+    return not any(word in s for word in INACTIVE_WORDS)
 
 # 全国の予報区（府県など）。code: (名前, 地方ブロック)
 # ※ index.html の OFFICES と同じ内容。直すときは両方そろえること。
@@ -358,8 +374,7 @@ def scan_office_warnings(data: dict) -> dict:
                 if not isinstance(w, dict):
                     continue
                 code = str(w.get("code") or "")
-                status = w.get("status") or ""
-                if status not in ACTIVE_STATUS:
+                if not is_active(w.get("status")):
                     continue
                 if code in RAIN_CODES:
                     level = RAIN_CODES[code]
