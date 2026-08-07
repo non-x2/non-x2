@@ -1,7 +1,23 @@
 {
- "generatedAt": "2026-08-07T09:27:26+09:00",
+ "generatedAt": "2026-08-07T12:35:00+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20260807100434",
+   "time": "2026-08-07T10:04:00+09:00",
+   "place": "岐阜県飛騨地方",
+   "magnitude": 2.7,
+   "maxIntensity": "1",
+   "depthKm": 10.0
+  },
+  {
+   "id": "20260807100233",
+   "time": "2026-08-07T10:02:00+09:00",
+   "place": "福井県嶺北",
+   "magnitude": 3.6,
+   "maxIntensity": "2",
+   "depthKm": 10.0
+  },
   {
    "id": "20260807080807",
    "time": "2026-08-07T08:08:00+09:00",
@@ -105,22 +121,6 @@
    "magnitude": 2.4,
    "maxIntensity": "1",
    "depthKm": 0.0
-  },
-  {
-   "id": "20260806140926",
-   "time": "2026-08-06T14:09:00+09:00",
-   "place": "大隅半島東方沖",
-   "magnitude": 2.8,
-   "maxIntensity": "1",
-   "depthKm": 40.0
-  },
-  {
-   "id": "20260806131838",
-   "time": "2026-08-06T13:18:00+09:00",
-   "place": "宮城県沖",
-   "magnitude": 3.6,
-   "maxIntensity": "1",
-   "depthKm": 50.0
   }
  ],
  "tsunami": {
