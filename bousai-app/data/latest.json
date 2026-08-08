@@ -1,7 +1,15 @@
 {
- "generatedAt": "2026-08-08T22:29:59+09:00",
+ "generatedAt": "2026-08-09T00:01:15+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20260808232819",
+   "time": "2026-08-08T23:28:00+09:00",
+   "place": "安芸灘",
+   "magnitude": 2.9,
+   "maxIntensity": "1",
+   "depthKm": 50.0
+  },
   {
    "id": "20260808212343",
    "time": "2026-08-08T21:23:00+09:00",
@@ -113,14 +121,6 @@
    "magnitude": 2.9,
    "maxIntensity": "1",
    "depthKm": 10.0
-  },
-  {
-   "id": "20260807220823",
-   "time": "2026-08-07T22:08:00+09:00",
-   "place": "熊本県熊本地方",
-   "magnitude": 2.7,
-   "maxIntensity": "2",
-   "depthKm": 0.0
   }
  ],
  "tsunami": {
