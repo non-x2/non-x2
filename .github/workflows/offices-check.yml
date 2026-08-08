@@ -12,6 +12,7 @@ name: 👀 予報区リストの見張り番
 
 on:
   push:
+    branches: [main] # PR中は下のpull_request側が照合するので、pushはmainだけ（2重に走らせない）
     paths:
       - 'data/offices.json'
       - 'typhoon-app/index.html'
