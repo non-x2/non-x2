@@ -1,0 +1,42 @@
+# 👀 予報区リストの見張り番
+#
+# 予報区リスト（OFFICES）の大もとは data/offices.json の1か所だけ。
+# ただし typhoon-app と bousai-app の index.html には、
+# 「1枚だけでブラウザから直接開ける」形にするため同じ表が埋め込まれています。
+#
+# このワークフローは、関係するファイルが変わるたびに
+# tools/check_offices.py を走らせて、埋め込みが大もととズレていないか照合します。
+# ズレていたら ❌（赤いバツ）になって知らせてくれます。
+
+name: 👀 予報区リストの見張り番
+
+on:
+  push:
+    branches: [main] # PR中は下のpull_request側が照合するので、pushはmainだけ（2重に走らせない）
+    paths:
+      - 'data/offices.json'
+      - 'typhoon-app/index.html'
+      - 'bousai-app/index.html'
+      - 'tools/check_offices.py'
+      - '.github/workflows/offices-check.yml'
+  pull_request:
+    paths:
+      - 'data/offices.json'
+      - 'typhoon-app/index.html'
+      - 'bousai-app/index.html'
+      - 'tools/check_offices.py'
+      - '.github/workflows/offices-check.yml'
+  workflow_dispatch: # 手動実行用のボタン
+
+permissions:
+  contents: read # 読むだけ（書き換えはしない）
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: リポジトリを取得
+        uses: actions/checkout@v4
+
+      - name: 予報区リストを照合
+        run: python3 tools/check_offices.py
