@@ -1,0 +1,105 @@
+# 🧹 ブランチのお掃除係
+#
+# マージが終わって役目を終えた作業ブランチ（claude/〜）を自動で削除します。
+# クラウドのClaudeにはブランチを削除する権限が無い（→ docs/トラブル解決記録.md の T17）ため、
+# T13の教訓どおり「Claudeがボタンを押さなくても走り出す」きっかけをここに用意しています。
+#
+# 【消すもの】次の条件を全部満たすブランチだけ
+#   1. 名前が claude/ で始まる（手で作った枝には触らない）
+#   2. 開いているPRが無い（作業中の枝は残す）
+#   3. マージ済みPRの最後の状態と中身が完全一致（マージ後に足された変更があれば残す）
+# 【消さないもの】main・上の条件に合わないもの全部。迷ったら「残す」側に倒します。
+# 消してしまっても、各PRページの「Restore branch」ボタンでいつでも復元できます。
+
+name: 🧹 ブランチのお掃除
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/branch-cleanup.yml' # このファイルがmainに入った直後に1回目が走る
+  pull_request_target:
+    types: [closed] # PRが閉じる（＝たいていはマージ）たびに走って、そのつど片づける
+  workflow_dispatch: # 手動実行用のボタン
+
+permissions:
+  contents: write # ブランチ（ref）の削除に必要
+  pull-requests: read # 各ブランチのPRの状態を確認するのに必要
+
+concurrency:
+  group: branch-cleanup # 2つ同時に走って同じ枝を取り合わないように、1列に並ばせる
+  cancel-in-progress: false
+
+jobs:
+  cleanup:
+    # PRがマージされずに閉じただけのときは走らない（走っても害は無いが、無駄なので）
+    if: github.event_name != 'pull_request_target' || github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: マージ済みブランチを削除
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+
+            const { data: repoInfo } = await github.rest.repos.get({ owner, repo });
+            const defaultBranch = repoInfo.default_branch;
+
+            const branches = await github.paginate(github.rest.repos.listBranches, {
+              owner, repo, per_page: 100,
+            });
+
+            const deleted = []; // [ブランチ名, 理由]
+            const kept = [];    // [ブランチ名, 理由]
+
+            for (const br of branches) {
+              const name = br.name;
+              if (name === defaultBranch) continue;
+
+              if (!name.startsWith('claude/')) {
+                kept.push([name, '対象外（claude/ で始まらない）']);
+                continue;
+              }
+
+              const openPrs = await github.paginate(github.rest.pulls.list, {
+                owner, repo, state: 'open', head: `${owner}:${name}`, per_page: 100,
+              });
+              if (openPrs.length > 0) {
+                kept.push([name, `作業中（開いているPR #${openPrs[0].number} あり）`]);
+                continue;
+              }
+
+              const closedPrs = await github.paginate(github.rest.pulls.list, {
+                owner, repo, state: 'closed', head: `${owner}:${name}`, per_page: 100,
+              });
+              const merged = closedPrs.find(pr => pr.merged_at && pr.head.sha === br.commit.sha);
+              if (!merged) {
+                if (closedPrs.some(pr => pr.merged_at)) {
+                  kept.push([name, 'マージ後に新しい変更が足されている（念のため残す）']);
+                } else {
+                  kept.push([name, 'マージ済みPRが見つからない（念のため残す）']);
+                }
+                continue;
+              }
+
+              try {
+                await github.rest.git.deleteRef({ owner, repo, ref: `heads/${name}` });
+                deleted.push([name, `PR #${merged.number} でマージ済み`]);
+              } catch (e) {
+                // 直前に別の実行が消した等。失敗で全体を止めるほどのことではない
+                kept.push([name, `削除できなかった（${e.status ?? ''} ${e.message}）`]);
+              }
+            }
+
+            core.summary.addHeading('🧹 ブランチのお掃除 結果');
+            core.summary.addRaw(`\n削除 **${deleted.length}本** ／ 残した **${kept.length}本**\n\n`);
+            const table = rows => [
+              [{ data: 'ブランチ', header: true }, { data: '理由', header: true }],
+              ...rows,
+            ];
+            if (deleted.length) core.summary.addTable(table(deleted));
+            if (kept.length) core.summary.addTable(table(kept));
+            await core.summary.write();
+
+            console.log(`削除: ${deleted.map(d => d[0]).join(', ') || 'なし'}`);
+            console.log(`残した: ${kept.map(k => k[0]).join(', ') || 'なし'}`);

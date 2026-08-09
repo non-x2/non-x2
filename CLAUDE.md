@@ -18,7 +18,8 @@
 │   ├── typhoon-update.yml          #    毎時25分：気象庁から台風データを取得
 │   ├── bousai-update.yml           #    毎時35分：気象庁から地震・津波・雷・大雨データを取得
 │   ├── pages-deploy.yml            #    Pagesを自動でオンにして公開しなおす
-│   └── offices-check.yml           #    👀 予報区リストのズレを自動照合（見張り番）
+│   ├── offices-check.yml           #    👀 予報区リストのズレを自動照合（見張り番）
+│   └── branch-cleanup.yml          #    🧹 マージ済みの古いブランチを自動削除（お掃除係）
 ├── .claude/                        # 🤖 Claudeの設定（クラウド・ローカル共通で効く）
 │   ├── settings.json               #    セッション開始フックの登録＋権限の許可リスト
 │   ├── hooks/session-start.sh      #    開始時に状態表示＋クラウドなら道具を自動準備
