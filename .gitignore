@@ -4,3 +4,7 @@ __pycache__/
 
 # GitHub Pagesの公開用に一時的に作られるフォルダ
 _site/
+
+# Obsidian（ノートアプリ）が自動で作る個人設定とゴミ箱（人それぞれの設定なので保存しません）
+.obsidian/
+.trash/
