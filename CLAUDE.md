@@ -22,7 +22,7 @@
 │   └── branch-cleanup.yml          #    🧹 マージ済みの古いブランチを自動削除（お掃除係）
 ├── .claude/                        # 🤖 Claudeの設定（クラウド・ローカル共通で効く）
 │   ├── settings.json               #    セッション開始フックの登録＋権限の許可リスト
-│   ├── hooks/session-start.sh      #    開始時に状態表示＋クラウドなら道具を自動準備
+│   ├── hooks/session-start.sh      #    開始時に状態表示＋クラウドなら道具を自動準備＋ローカルならGitHubの最新を自動確認
 │   └── skills/                     #    💰 型（スキル）
 │       ├── git-guide/              #      /git-guide （Gitを教える＋実行）
 │       ├── handoff/                #      /handoff  （引き継ぎ書を作って会話を身軽にする）
