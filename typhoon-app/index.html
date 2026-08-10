@@ -686,7 +686,7 @@
 <header>
   <h1>🌀 台風情報まとめ</h1>
   <p>公式の最新情報はリンク先で確認してください</p>
-  <p class="updated-badge"><span id="updated-label">🕐 最終更新：</span><time id="updated-at" datetime="2026-08-01T09:00+09:00">2026年8月1日</time><span id="stale-age"></span></p>
+  <p class="updated-badge"><span id="updated-label">🕐 最終更新：</span><time id="updated-at" datetime="2026-08-10T08:00+09:00">2026年8月10日</time><span id="stale-age"></span></p>
   <!-- JSが動くときだけ表示される手動更新ボタン（30分ごとの自動更新もある） -->
   <p><button type="button" id="refresh-btn" hidden>🔄 いま更新する</button></p>
 </header>
@@ -784,7 +784,7 @@
 
     <div class="snapshot" id="snapshot-banner">
       <strong>⚠️ これはスナップショットです。</strong>
-      Web検索時点（2026年8月1日9時）の情報をまとめたもので、自動更新はされません。
+      気象庁発表（2026年8月10日8時ごろ）の情報をまとめたもので、自動更新はされません。
       <strong id="stale-note"></strong>
       最新の発表は必ず気象庁でご確認ください。
       <a class="inline-cta" href="https://www.jma.go.jp/bosai/map.html#5/34.5/139/&elem=typhoon&contents=typhoon" target="_blank" rel="noopener noreferrer">気象庁の台風情報を開く →</a>
@@ -797,9 +797,9 @@
       <h2>🕐 いま日本はどうなの？</h2>
       <ul class="status-list">
         <li class="status-item">
-          <span class="tag now">8/1時点</span>
-          <h3>本土（本州・四国・九州・沖縄）が暴風域に入る予報は、まだ出ていません</h3>
-          <p>ただし<strong>小笠原諸島は8月4日ごろに台風13号が最接近</strong>する見込みで、父島・母島など南部は暴風域に入る可能性が高くなっています。本土についても、台風はそのあと本州の南を西へ進む予想で、進路によっては影響が出るおそれがあります。今のうちに「リンク集・備え」タブのチェックリストを進めておくと安心です。</p>
+          <span class="tag now">8/10時点</span>
+          <h3>台風が3つ発生中。うち<strong>15号が8月12日ごろ北陸地方へ進む</strong>見込みです</h3>
+          <p>日本の東にある<strong>台風15号（チャンホン）</strong>が向きを西に変え、<strong>8月12日ごろ北陸地方へ達する予想</strong>です。勢力は強くありませんが、東日本〜北日本では雨・風・高波に注意してください。13号は中国大陸へ進んで日本への影響は終わり、16号は小笠原の東を日本から離れる方向へ進んでいます。「リンク集・備え」タブのチェックリストを進めておくと安心です。</p>
         </li>
       </ul>
     </section>
@@ -808,52 +808,46 @@
       <h2>🌀 発生中の台風</h2>
       <ul class="status-list">
         <li class="status-item watch">
-          <span class="tag watch">小笠原へ接近中</span>
-          <h3>台風13号（ドルフィン）</h3>
-          <p>8月1日9時現在、<strong>南鳥島近海</strong>（北緯20度10分・東経158度20分）を西北西へ時速20kmで進行中。中心気圧925hPa、最大風速50m/s、最大瞬間風速70m/sで、強さは<strong>「非常に強い」</strong>です。7月30日〜8月1日朝までは最上級の「猛烈な」勢力（中心気圧910hPa・最大風速55m/s）で、今年いちばん強い台風になりました。</p>
-          <p>このあとは西寄りに進み、<strong>8月4日ごろ小笠原近海、6日ごろ日本の南</strong>に達する見込みです。海水温が高いため弱まり方はゆるやかで、4日ごろまで「非常に強い」勢力を保つと予想されています。</p>
+          <span class="tag watch">日本へ接近中</span>
+          <h3>台風15号（チャンホン）</h3>
+          <p>8月10日7時現在、<strong>日本の東</strong>の海上をゆっくり（時速10km）北へ進んでいます。中心気圧990hPa・最大風速20m/s。このあと向きを西に変え、<strong>8月12日ごろ北陸地方へ達する予想</strong>です。8月13日には日本海で熱帯低気圧に変わる見込みですが、雨・風・高波はその前後にも続くことがあります。</p>
         </li>
         <li class="status-item">
-          <span class="tag now">監視中</span>
-          <h3>次の台風（14号）のたまご</h3>
-          <p>8月1日時点で台風14号はまだ発生していませんが、フィリピンの東の海上にある熱帯じょう乱（雲のかたまり）が監視されています。8月は日本に3〜6個の台風が近づく平年並み〜やや多めの見通しで、<strong>お盆ごろにかけて発生が増える可能性</strong>があります。</p>
+          <span class="tag now">日本から遠ざかる</span>
+          <h3>台風16号（ペイロー）</h3>
+          <p>8月10日6時現在、<strong>小笠原近海</strong>を東へ時速40kmで進行中。中心気圧996hPa・最大風速18m/s。このまま<strong>日本から離れる方向</strong>（南鳥島近海→ウェーク島近海）へ進み、8月13日ごろ温帯低気圧に変わる見込みです。</p>
+        </li>
+        <li class="status-item">
+          <span class="tag now">日本への影響なし</span>
+          <h3>台風13号（ドルフィン）</h3>
+          <p>7月末に「猛烈な」勢力まで発達した台風ですが、いまは<strong>中国大陸（華中）</strong>に進み、日本への影響は終わりました。8月12日ごろに熱帯低気圧へ変わる見込みです。</p>
         </li>
       </ul>
     </section>
 
     <section>
-      <h2>👀 今後の見通し（台風13号ドルフィン）</h2>
-      <p class="map-note">気象庁・米軍JTWC・各社予報をもとにした流れです。実線＝観測済み、点線＝予報（先になるほど不確実）。</p>
+      <h2>👀 今後の見通し（台風15号チャンホン）</h2>
+      <p class="map-note">気象庁の予報をもとにした流れです。実線＝観測済み、点線＝予報（先になるほど不確実）。</p>
       <ol class="forecast-timeline" id="forecast-main">
-        <li class="tl-item sev-violent">
+        <li class="tl-item sev-strong is-now">
           <span class="tl-dot"></span>
-          <div class="tl-head"><span class="tl-date">7/30〜7/31（観測済み）</span><span class="tl-badge">猛烈な</span></div>
-          <p class="tl-body">最上級の「猛烈な」勢力に到達し、ウェーク島近海を西北西へ。中心気圧910hPa・最大風速55m/s・最大瞬間風速80m/sで、今年いちばん強い勢力になりました。</p>
-        </li>
-        <li class="tl-item sev-vstrong is-now">
-          <span class="tl-dot"></span>
-          <div class="tl-head"><span class="tl-date">8/1 9時（現在）</span><span class="tl-badge">非常に強い</span></div>
-          <p class="tl-body"><strong>南鳥島近海</strong>を西北西へ時速20km。中心気圧925hPa・最大風速50m/s・最大瞬間風速70m/s。ピークをすぎて、少しだけ勢力を落としました。</p>
-        </li>
-        <li class="tl-item sev-vstrong is-forecast">
-          <span class="tl-dot"></span>
-          <div class="tl-head"><span class="tl-date">8/3（月）（予報）</span><span class="tl-badge">非常に強い</span></div>
-          <p class="tl-body">小笠原諸島で<strong>荒れた天気が始まる</strong>見込み。海はその前の週末から高い波が出はじめるため、対策は週末のうちに。</p>
-        </li>
-        <li class="tl-item sev-vstrong is-forecast">
-          <span class="tl-dot"></span>
-          <div class="tl-head"><span class="tl-date">8/4（火）（予報）</span><span class="tl-badge">非常に強い</span></div>
-          <p class="tl-body"><strong>小笠原近海に最接近。</strong>父島・母島など南部は暴風域に入る可能性が高く、暴風と大雨に厳重な警戒が必要です。海水温が高いため、この時点でもまだ「非常に強い」勢力の見込み。</p>
+          <div class="tl-head"><span class="tl-date">8/10 7時（現在）</span><span class="tl-badge">台風</span></div>
+          <p class="tl-body"><strong>日本の東</strong>の海上をゆっくり北へ（時速10km）。中心気圧990hPa・最大風速20m/s。勢力は強くありませんが、周辺の海は波が高くなっています。</p>
         </li>
         <li class="tl-item sev-strong is-forecast">
           <span class="tl-dot"></span>
-          <div class="tl-head"><span class="tl-date">8/6（木）（予報）</span><span class="tl-badge">やや弱まる</span></div>
-          <p class="tl-body"><strong>日本の南</strong>の海上に到達する見込み。少しずつ勢力を落としながら西寄りに進む予想です。</p>
+          <div class="tl-head"><span class="tl-date">8/11（火）（予報）</span><span class="tl-badge">台風</span></div>
+          <p class="tl-body">日本の東で<strong>向きを西に変える</strong>見込み。最大風速23m/s。東日本の太平洋側は海のレジャーに注意。</p>
         </li>
         <li class="tl-item sev-strong is-forecast">
           <span class="tl-dot"></span>
-          <div class="tl-head"><span class="tl-date">8/6以降（要注意）</span><span class="tl-badge">不確実</span></div>
-          <p class="tl-body">本州の南を西へ進み、<strong>奄美・沖縄方面へ向かう</strong>計算が目立っています。ただし本土への上陸の有無はまだ決まっていません。予報が発表されるたびに進路が変わるので、公式サイトを継続してチェックしてください。</p>
+          <div class="tl-head"><span class="tl-date">8/12（水）（予報）</span><span class="tl-badge">要注意</span></div>
+          <p class="tl-body"><strong>北陸地方へ達する予想。</strong>東日本〜北日本では雨・風・高波に注意してください。台風の中心から離れた場所でも大雨になることがあります。</p>
+        </li>
+        <li class="tl-item sev-strong is-forecast">
+          <span class="tl-dot"></span>
+          <div class="tl-head"><span class="tl-date">8/13（木）（予報）</span><span class="tl-badge">不確実</span></div>
+          <p class="tl-body"><strong>日本海で熱帯低気圧に変わる</strong>見込み。ただし弱まったあとも雨雲が残ることがあるので、天気予報の確認は続けてください。予報は発表のたびに変わります。必ず公式サイトで最新を確認してください。</p>
         </li>
       </ol>
       <dl class="scale-key">
@@ -948,7 +942,7 @@
 
       <ul class="links">
         <li><a href="https://www.jma.go.jp/bosai/warning/" target="_blank" rel="noopener noreferrer"><span>気象庁｜警報・注意報（お住まいの地域）</span><span class="sr-only">（新しいタブで開きます）</span><span class="arrow" aria-hidden="true">→</span></a></li>
-        <li><a href="https://www.jma.go.jp/bosai/kizu/" target="_blank" rel="noopener noreferrer"><span>気象庁｜キキクル（危険度分布・いま危ない場所が色で分かる）</span><span class="sr-only">（新しいタブで開きます）</span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="https://www.jma.go.jp/bosai/risk/" target="_blank" rel="noopener noreferrer"><span>気象庁｜キキクル（危険度分布・いま危ない場所が色で分かる）</span><span class="sr-only">（新しいタブで開きます）</span><span class="arrow" aria-hidden="true">→</span></a></li>
       </ul>
     </section>
 
