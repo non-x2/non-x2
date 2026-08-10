@@ -29,7 +29,8 @@
 │       ├── bunsan/                 #      /bunsan   （助手に手分けして任せる）
 │       ├── kaizen/                 #      /kaizen   （🌱 毎日1つ小さな改良→ドラフトPR）
 │       ├── omakase/                #      /omakase  （🚀 お任せで時間内に複数の改良→ドラフトPR）
-│       └── ai-rengo/               #      /ai-rengo （🤝 外部AI＝Codex・Gemini・ローカルLLMと連携）
+│       ├── ai-rengo/               #      /ai-rengo （🤝 外部AI＝Codex・Gemini・ローカルLLMと連携）
+│       └── mojiokoshi/             #      /mojiokoshi（💬 会話をそのまま文字起こしして保存）
 ├── youtube/                        # 🎬 YouTube動画制作の「型」（選び方特捜部）
 │   ├── README.md / 00_スタイルガイド.md
 │   ├── templates/ (01〜06)         # 企画→リサーチ→台本→サムネ→SEO→公開チェック
@@ -56,7 +57,8 @@
 ├── data/offices.json               # 🗾 全国58予報区リストの「大もと」（両アプリ共通・1か所だけの正）
 ├── tools/                          # 🧰 小さな道具箱
 │   ├── check_offices.py            #    👀 予報区リストのズレを照合する見張り番（手動でも実行可）
-│   └── shinka_metrics.py           #    📊 進化メトリクス集計（docs/進化レポート.md を自動生成）
+│   ├── shinka_metrics.py           #    📊 進化メトリクス集計（docs/進化レポート.md を自動生成）
+│   └── kaiwa_mojiokoshi.py         #    💬 会話の記録を読みやすい文字起こしに変換（/mojiokoshi の中身）
 ├── excel-jan-barcode/              # 🏷 JANコード→バーコード付きExcel生成ツール（Python）
 └── ff5-anime-*.md                  # 🎥 FINAL FANTASY V アニメ化の企画・制作キット群
 ```
@@ -118,6 +120,7 @@
 - 「ノートをPCで快適に読みたい」「Obsidianって何？」→ [`docs/手順書_Obsidian活用.md`](docs/手順書_Obsidian活用.md)（リンクは `[[ウィキリンク]]` ではなく**普通のMarkdown形式**で書く約束）。
 - 「前回の作業内容を知りたい」→ `docs/作業ログ_*.md`（最新日付）。**まずこれ1枚だけ読む**（リポジトリ全体を漁らない＝トークン節約の近道）。
 - 「会話が長くなってきた」「今日はここまで」→ **`/handoff`**。
+- 「この会話をそのまま残したい」「文字起こしして」→ **`/mojiokoshi`**（要約ではなく逐語で `docs/会話ログ/` に保存。⚠️プッシュすると公開されるので事前確認あり）。
 - 「調べ物が多い」「レビューもしてほしい」→ **`/bunsan`**。
 - 「自動で点検してほしい」→ Routine（🩺 のんラボ 月イチ健康診断・毎月1日9時）。止めたいときは「月イチ健康診断を止めて」と頼む。
 - 「まとまった時間でお任せで改良してほしい」→ **`/omakase`**（🚀 全自動お任せモード。既定2時間で複数の改良→ドラフトPR1本）。
