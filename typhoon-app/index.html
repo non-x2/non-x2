@@ -673,8 +673,11 @@
   .warn-glossary dt { margin: 10px 0 3px; }
   .warn-glossary dd { margin: 0 0 0 2px; font-size: 0.87rem; color: var(--text-dim); line-height: 1.7; }
 
-  /* 📱 スマホ幅の安全網：いまは流動レイアウトではみ出し無し。
-     将来コンテンツが増えて窮屈になったときのための保険（余白を少し詰めるだけ・見た目のみ） */
+  /* 📱 スマホ幅の安全網（レイアウト崩れの予防。挙動は最小限） */
+  @media (max-width: 480px) {
+    table { font-size: 0.85rem; }
+  }
+  /* 📱 さらに狭い画面用：余白を少し詰めて本文の場所を広げる保険（見た目のみ） */
   @media (max-width: 420px) {
     header { padding: 1.6rem 0.9rem 1.5rem; }
     nav.tabs { padding: 0 0.9rem; gap: 0.4rem; }
@@ -1035,7 +1038,9 @@
 </main>
 
 <footer>
-  のんラボ制作｜このページはブラウザだけで動く簡易まとめです。避難行動は必ず自治体・気象庁の公式発表に従ってください。
+  のんラボ制作｜このページはブラウザだけで動く簡易まとめです。避難行動は必ず自治体・気象庁の公式発表に従ってください。<br>
+  <a href="https://non-x2.github.io/non-x2/typhoon-app/" target="_blank" rel="noopener noreferrer">🌐 公開ページ（いつでも最新）</a><br>
+  <a href="../">← のんラボのトップへ</a>
 </footer>
 
 <script>
