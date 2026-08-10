@@ -593,7 +593,7 @@
     font-variant-numeric: tabular-nums;
   }
   .tl-badge {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     font-weight: 700;
     padding: 0.1rem 0.5rem;
     border-radius: 999px;
@@ -661,7 +661,7 @@
   .warn-row.is-lv1 { border-left: 4px solid var(--sev-strong); }
   .warn-area { font-weight: 700; font-size: 0.9rem; margin-right: 2px; }
   .warn-chip {
-    display: inline-block; font-size: 0.76rem; font-weight: 700;
+    display: inline-block; font-size: 0.8rem; font-weight: 700;
     padding: 3px 8px; border-radius: 999px; white-space: nowrap;
     border: 1px solid transparent;
   }
@@ -672,6 +672,11 @@
   .warn-glossary { margin: 0; }
   .warn-glossary dt { margin: 10px 0 3px; }
   .warn-glossary dd { margin: 0 0 0 2px; font-size: 0.87rem; color: var(--text-dim); line-height: 1.7; }
+
+  /* 📱 スマホ幅の安全網（レイアウト崩れの予防。挙動は最小限） */
+  @media (max-width: 480px) {
+    table { font-size: 0.85rem; }
+  }
 </style>
 
 <header>
@@ -1032,7 +1037,9 @@
 </main>
 
 <footer>
-  のんラボ制作｜このページはブラウザだけで動く簡易まとめです。避難行動は必ず自治体・気象庁の公式発表に従ってください。
+  のんラボ制作｜このページはブラウザだけで動く簡易まとめです。避難行動は必ず自治体・気象庁の公式発表に従ってください。<br>
+  <a href="https://non-x2.github.io/non-x2/typhoon-app/" target="_blank" rel="noopener noreferrer">🌐 公開ページ（いつでも最新）</a><br>
+  <a href="../">← のんラボのトップへ</a>
 </footer>
 
 <script>
