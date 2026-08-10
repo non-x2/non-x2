@@ -232,6 +232,14 @@
     padding: 0; margin: -1px; overflow: hidden;
     clip: rect(0 0 0 0); white-space: nowrap; border: 0;
   }
+
+  /* 📱 スマホ幅の安全網：いまは流動レイアウトではみ出し無し。
+     将来コンテンツが増えて窮屈になったときのための保険（余白を少し詰めるだけ・見た目のみ） */
+  @media (max-width: 420px) {
+    body { padding: 1.1rem 0.75rem 2.5rem; }
+    .card { padding: 0.9rem 0.85rem; }
+    .tabs { gap: 0.3rem; }
+  }
 </style>
 </head>
 <body>

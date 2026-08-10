@@ -593,7 +593,7 @@
     font-variant-numeric: tabular-nums;
   }
   .tl-badge {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
     font-weight: 700;
     padding: 0.1rem 0.5rem;
     border-radius: 999px;
@@ -661,7 +661,7 @@
   .warn-row.is-lv1 { border-left: 4px solid var(--sev-strong); }
   .warn-area { font-weight: 700; font-size: 0.9rem; margin-right: 2px; }
   .warn-chip {
-    display: inline-block; font-size: 0.76rem; font-weight: 700;
+    display: inline-block; font-size: 0.8rem; font-weight: 700;
     padding: 3px 8px; border-radius: 999px; white-space: nowrap;
     border: 1px solid transparent;
   }
@@ -672,6 +672,15 @@
   .warn-glossary { margin: 0; }
   .warn-glossary dt { margin: 10px 0 3px; }
   .warn-glossary dd { margin: 0 0 0 2px; font-size: 0.87rem; color: var(--text-dim); line-height: 1.7; }
+
+  /* 📱 スマホ幅の安全網：いまは流動レイアウトではみ出し無し。
+     将来コンテンツが増えて窮屈になったときのための保険（余白を少し詰めるだけ・見た目のみ） */
+  @media (max-width: 420px) {
+    header { padding: 1.6rem 0.9rem 1.5rem; }
+    nav.tabs { padding: 0 0.9rem; gap: 0.4rem; }
+    main { padding: 1.3rem 0.9rem 1rem; }
+    section { padding: 1rem 0.95rem; }
+  }
 </style>
 
 <header>
