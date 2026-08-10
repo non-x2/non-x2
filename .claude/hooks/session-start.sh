@@ -48,6 +48,8 @@ echo "- 🧰 型: /handoff（引き継ぎを作る）/ /bunsan（手分けする
 # ローカル（自分のPC）では勝手にインストールしない。環境を汚さないため。
 if [ "${CLAUDE_CODE_REMOTE:-}" = "true" ]; then
   echo "- ☁️ ここはクラウド（使い捨ての部屋）。**プッシュしないと消えます**"
+  # 🔒 個人の記憶（非公開リポ）を自動で読む合図（ルールの本体はCLAUDE.mdに記載）
+  echo "- 🔒 個人の記憶: 非公開リポ non-x2/kioku-sync も add_repo で追加して docs/共有メモリ.md を**頼まれなくても自動で読む**こと"
   if [ -f excel-jan-barcode/requirements.txt ]; then
     if python3 -m pip install --quiet --break-system-packages \
          -r excel-jan-barcode/requirements.txt 2>/dev/null; then
