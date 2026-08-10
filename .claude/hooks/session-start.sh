@@ -38,6 +38,9 @@ if [ -n "$latest_log" ]; then
   echo "     （リポジトリ全体を調べる必要はありません。これが節約のいちばんの近道）"
 fi
 
+# 🧠 共有メモリ（ローカル⇄クラウド共通の記憶）を読む合図
+[ -f docs/共有メモリ.md ] && echo "- 🧠 共有メモリ: docs/共有メモリ.md も必ず読むこと（ローカル⇄クラウド共通の記憶）"
+
 # 使える型のお知らせ（毎回1行だけ）
 echo "- 🧰 型: /handoff（引き継ぎを作る）/ /bunsan（手分けする）/ /git-guide（Git）"
 
@@ -55,6 +58,30 @@ if [ "${CLAUDE_CODE_REMOTE:-}" = "true" ]; then
   fi
 else
   echo "- 💻 ここはローカル（あなたのPC）。ファイルはそのまま残ります"
+
+  # --- ③ ローカルのときだけ：GitHubの最新（共有メモリなど）を自動で見に行く ---
+  # 自動で取り込むのは安全なときだけ：mainブランチ・保存していない変更なし・早送りできる場合。
+  # それ以外は「最新にして」と頼んでもらう案内だけ出す（勝手に壊さない）。
+  if command -v timeout >/dev/null 2>&1; then
+    fetch_cmd="timeout 10 git fetch origin main --quiet"
+  else
+    fetch_cmd="git fetch origin main --quiet"   # macOSなどtimeoutが無い環境
+  fi
+  if $fetch_cmd 2>/dev/null; then
+    behind="$(git rev-list --count HEAD..origin/main 2>/dev/null)"
+    if [ -n "$behind" ] && [ "$behind" != "0" ]; then
+      if [ "$branch" = "main" ] && [ -z "$(git status --porcelain 2>/dev/null)" ] \
+         && git merge --ff-only --quiet origin/main 2>/dev/null; then
+        echo "- 🔄 GitHubの新しい更新 ${behind}件を自動で取り込みました（🧠共有メモリも最新）"
+      else
+        echo "- ⚠️ GitHubに新しい更新が ${behind}件あります。「最新にして」と頼んでください"
+      fi
+    else
+      echo "- ✅ GitHubと同期済み（🧠共有メモリも最新です）"
+    fi
+  else
+    echo "- 📡 GitHubに接続できません（オフライン？）。メモは手元の分を使います"
+  fi
 fi
 
 exit 0
