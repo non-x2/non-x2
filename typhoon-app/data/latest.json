@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-11T20:12:24+09:00",
+ "generatedAt": "2026-08-11T21:06:11+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
  "count": 4,
  "typhoons": [
@@ -10,22 +10,22 @@
    "name": "チャンホン",
    "nameEn": "Chan-hom",
    "category": "台風",
-   "issue": "2026-08-11T19:45:00+09:00",
+   "issue": "2026-08-11T20:45:00+09:00",
    "analysis": {
     "hours": 0,
     "label": "実況",
-    "validTime": "2026-08-11T19:00:00+09:00",
+    "validTime": "2026-08-11T20:00:00+09:00",
     "category": "台風",
     "intensity": "-",
     "scale": "",
-    "location": "銚子市の北東約60km",
-    "course": "西南西",
+    "location": "茨城県鹿嶋市付近",
+    "course": "西",
     "speedKmh": "20",
     "pressure": 980.0,
     "windMs": 25.0,
     "gustMs": 35.0,
     "lat": 36.1,
-    "lon": 141.2,
+    "lon": 140.6,
     "circleKm": null,
     "galeRadiusKm": 500.0
    },
@@ -33,41 +33,24 @@
     {
      "hours": 1,
      "label": "推定　１時間後",
-     "validTime": "2026-08-11T20:00:00+09:00",
-     "category": "台風",
-     "intensity": "-",
-     "scale": "",
-     "location": "銚子市の北北東約40km",
-     "course": "西南西",
-     "speedKmh": "20",
-     "pressure": 980.0,
-     "windMs": 25.0,
-     "gustMs": 35.0,
-     "lat": 36.0,
-     "lon": 141.0,
-     "circleKm": null,
-     "galeRadiusKm": 500.0
-    },
-    {
-     "hours": 2,
-     "label": "予報　２時間後",
      "validTime": "2026-08-11T21:00:00+09:00",
      "category": "台風",
      "intensity": "-",
      "scale": "",
-     "location": "",
+     "location": "行方市付近",
      "course": "西",
-     "speedKmh": "40",
+     "speedKmh": "20",
      "pressure": 980.0,
      "windMs": 25.0,
      "gustMs": 35.0,
-     "lat": 35.9,
-     "lon": 140.2,
-     "circleKm": 45.0
+     "lat": 36.1,
+     "lon": 140.4,
+     "circleKm": null,
+     "galeRadiusKm": 500.0
     },
     {
-     "hours": 5,
-     "label": "予報　５時間後",
+     "hours": 4,
+     "label": "予報　４時間後",
      "validTime": "2026-08-12T00:00:00+09:00",
      "category": "台風",
      "intensity": "-",
@@ -83,8 +66,8 @@
      "circleKm": 50.0
     },
     {
-     "hours": 8,
-     "label": "予報　８時間後",
+     "hours": 7,
+     "label": "予報　７時間後",
      "validTime": "2026-08-12T03:00:00+09:00",
      "category": "台風",
      "intensity": "-",
@@ -100,8 +83,8 @@
      "circleKm": 55.0
     },
     {
-     "hours": 11,
-     "label": "予報　１１時間後",
+     "hours": 10,
+     "label": "予報　１０時間後",
      "validTime": "2026-08-12T06:00:00+09:00",
      "category": "台風",
      "intensity": "-",
@@ -117,8 +100,8 @@
      "circleKm": 75.0
     },
     {
-     "hours": 14,
-     "label": "予報　１４時間後",
+     "hours": 13,
+     "label": "予報　１３時間後",
      "validTime": "2026-08-12T09:00:00+09:00",
      "category": "台風",
      "intensity": "-",
@@ -134,8 +117,8 @@
      "circleKm": 80.0
     },
     {
-     "hours": 17,
-     "label": "予報　１７時間後",
+     "hours": 16,
+     "label": "予報　１６時間後",
      "validTime": "2026-08-12T12:00:00+09:00",
      "category": "台風",
      "intensity": "-",
@@ -151,8 +134,8 @@
      "circleKm": 90.0
     },
     {
-     "hours": 20,
-     "label": "予報　２０時間後",
+     "hours": 19,
+     "label": "予報　１９時間後",
      "validTime": "2026-08-12T15:00:00+09:00",
      "category": "熱帯低気圧",
      "intensity": "-",
@@ -168,8 +151,8 @@
      "circleKm": 95.0
     },
     {
-     "hours": 23,
-     "label": "予報　２３時間後",
+     "hours": 22,
+     "label": "予報　２２時間後",
      "validTime": "2026-08-12T18:00:00+09:00",
      "category": "熱帯低気圧",
      "intensity": "-",
@@ -413,6 +396,10 @@
     [
      36.1,
      141.2
+    ],
+    [
+     36.1,
+     140.6
     ]
    ]
   },
