@@ -1,8 +1,153 @@
 {
- "generatedAt": "2026-08-12T14:12:32+09:00",
+ "generatedAt": "2026-08-12T15:51:39+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
  "count": 3,
  "typhoons": [
+  {
+   "id": "TC2620",
+   "number": "2617",
+   "numberShort": "17",
+   "name": "ナンカー",
+   "nameEn": "Nangka",
+   "category": "台風",
+   "issue": "2026-08-12T15:45:00+09:00",
+   "analysis": {
+    "hours": 0,
+    "label": "実況",
+    "validTime": "2026-08-12T15:00:00+09:00",
+    "category": "台風",
+    "intensity": "-",
+    "scale": "大型",
+    "location": "小笠原近海",
+    "course": "東北東",
+    "speedKmh": "20",
+    "pressure": 994.0,
+    "windMs": 18.0,
+    "gustMs": 25.0,
+    "lat": 22.2,
+    "lon": 144.0,
+    "circleKm": null,
+    "galeRadiusKm": 650.0
+   },
+   "forecast": [
+    {
+     "hours": 12,
+     "label": "予報　１２時間後",
+     "validTime": "2026-08-13T03:00:00+09:00",
+     "category": "台風",
+     "intensity": "-",
+     "scale": "",
+     "location": "小笠原近海",
+     "course": "北北東",
+     "speedKmh": "35",
+     "pressure": 994.0,
+     "windMs": 18.0,
+     "gustMs": 25.0,
+     "lat": 25.5,
+     "lon": 146.0,
+     "circleKm": 45.0
+    },
+    {
+     "hours": 24,
+     "label": "予報　２４時間後",
+     "validTime": "2026-08-13T15:00:00+09:00",
+     "category": "台風",
+     "intensity": "-",
+     "scale": "",
+     "location": "小笠原近海",
+     "course": "北東",
+     "speedKmh": "25",
+     "pressure": 994.0,
+     "windMs": 18.0,
+     "gustMs": 25.0,
+     "lat": 27.4,
+     "lon": 147.9,
+     "circleKm": 65.0
+    },
+    {
+     "hours": 48,
+     "label": "予報　４８時間後",
+     "validTime": "2026-08-14T15:00:00+09:00",
+     "category": "台風",
+     "intensity": "-",
+     "scale": "",
+     "location": "南鳥島近海",
+     "course": "北東",
+     "speedKmh": "10",
+     "pressure": 994.0,
+     "windMs": 18.0,
+     "gustMs": 25.0,
+     "lat": 29.4,
+     "lon": 149.6,
+     "circleKm": 100.0
+    },
+    {
+     "hours": 72,
+     "label": "予報　７２時間後",
+     "validTime": "2026-08-15T15:00:00+09:00",
+     "category": "台風",
+     "intensity": "-",
+     "scale": "",
+     "location": "日本の東",
+     "course": "北西",
+     "speedKmh": null,
+     "pressure": 996.0,
+     "windMs": 18.0,
+     "gustMs": 25.0,
+     "lat": 30.6,
+     "lon": 148.3,
+     "circleKm": 150.0
+    },
+    {
+     "hours": 96,
+     "label": "予報　９６時間後",
+     "validTime": "2026-08-16T15:00:00+09:00",
+     "category": "台風",
+     "intensity": "-",
+     "scale": "",
+     "location": "日本の東",
+     "course": "北北西",
+     "speedKmh": "15",
+     "pressure": 996.0,
+     "windMs": 18.0,
+     "gustMs": 25.0,
+     "lat": 33.5,
+     "lon": 146.5,
+     "circleKm": 230.0
+    },
+    {
+     "hours": 120,
+     "label": "予報　１２０時間後",
+     "validTime": "2026-08-17T15:00:00+09:00",
+     "category": "台風",
+     "intensity": "-",
+     "scale": "",
+     "location": "日本の東",
+     "course": "北",
+     "speedKmh": "15",
+     "pressure": 998.0,
+     "windMs": 18.0,
+     "gustMs": 25.0,
+     "lat": 36.9,
+     "lon": 147.6,
+     "circleKm": 330.0
+    }
+   ],
+   "track": [
+    [
+     22.1,
+     141.9
+    ],
+    [
+     22.2,
+     142.9
+    ],
+    [
+     22.2,
+     144.0
+    ]
+   ]
+  },
   {
    "id": "TC2618",
    "number": "2616",
@@ -161,130 +306,6 @@
     [
      30.0,
      162.3
-    ]
-   ]
-  },
-  {
-   "id": "TC2620",
-   "number": "2617",
-   "numberShort": "17",
-   "name": "ナンカー",
-   "nameEn": "Nangka",
-   "category": "台風",
-   "issue": "2026-08-12T12:45:00+09:00",
-   "analysis": {
-    "hours": 0,
-    "label": "実況",
-    "validTime": "2026-08-12T12:00:00+09:00",
-    "category": "台風",
-    "intensity": "-",
-    "scale": "大型",
-    "location": "小笠原近海",
-    "course": "東北東",
-    "speedKmh": "15",
-    "pressure": 994.0,
-    "windMs": 18.0,
-    "gustMs": 25.0,
-    "lat": 22.2,
-    "lon": 142.9,
-    "circleKm": null,
-    "galeRadiusKm": 650.0
-   },
-   "forecast": [
-    {
-     "hours": 24,
-     "label": "予報　２４時間後",
-     "validTime": "2026-08-13T12:00:00+09:00",
-     "category": "台風",
-     "intensity": "-",
-     "scale": "",
-     "location": "小笠原近海",
-     "course": "北東",
-     "speedKmh": "30",
-     "pressure": 994.0,
-     "windMs": 18.0,
-     "gustMs": 25.0,
-     "lat": 27.1,
-     "lon": 147.7,
-     "circleKm": 80.0
-    },
-    {
-     "hours": 45,
-     "label": "予報　４５時間後",
-     "validTime": "2026-08-14T09:00:00+09:00",
-     "category": "台風",
-     "intensity": "-",
-     "scale": "",
-     "location": "南鳥島近海",
-     "course": "北東",
-     "speedKmh": "15",
-     "pressure": 994.0,
-     "windMs": 18.0,
-     "gustMs": 25.0,
-     "lat": 29.2,
-     "lon": 149.6,
-     "circleKm": 130.0
-    },
-    {
-     "hours": 69,
-     "label": "予報　６９時間後",
-     "validTime": "2026-08-15T09:00:00+09:00",
-     "category": "台風",
-     "intensity": "-",
-     "scale": "",
-     "location": "日本の東",
-     "course": "北",
-     "speedKmh": null,
-     "pressure": 996.0,
-     "windMs": 18.0,
-     "gustMs": 25.0,
-     "lat": 30.5,
-     "lon": 149.2,
-     "circleKm": 185.0
-    },
-    {
-     "hours": 93,
-     "label": "予報　９３時間後",
-     "validTime": "2026-08-16T09:00:00+09:00",
-     "category": "台風",
-     "intensity": "-",
-     "scale": "",
-     "location": "日本の東",
-     "course": "北西",
-     "speedKmh": "15",
-     "pressure": 996.0,
-     "windMs": 18.0,
-     "gustMs": 25.0,
-     "lat": 32.7,
-     "lon": 147.3,
-     "circleKm": 280.0
-    },
-    {
-     "hours": 117,
-     "label": "予報　１１７時間後",
-     "validTime": "2026-08-17T09:00:00+09:00",
-     "category": "台風",
-     "intensity": "-",
-     "scale": "",
-     "location": "日本の東",
-     "course": "北",
-     "speedKmh": "15",
-     "pressure": 998.0,
-     "windMs": 18.0,
-     "gustMs": 25.0,
-     "lat": 36.0,
-     "lon": 146.9,
-     "circleKm": 400.0
-    }
-   ],
-   "track": [
-    [
-     22.1,
-     141.9
-    ],
-    [
-     22.2,
-     142.9
     ]
    ]
   },
