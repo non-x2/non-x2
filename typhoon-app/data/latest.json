@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-13T15:54:50+09:00",
+ "generatedAt": "2026-08-13T19:34:36+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
  "count": 2,
  "typhoons": [
@@ -10,11 +10,11 @@
    "name": "ナンカー",
    "nameEn": "Nangka",
    "category": "台風",
-   "issue": "2026-08-13T15:45:00+09:00",
+   "issue": "2026-08-13T18:45:00+09:00",
    "analysis": {
     "hours": 0,
     "label": "実況",
-    "validTime": "2026-08-13T15:00:00+09:00",
+    "validTime": "2026-08-13T18:00:00+09:00",
     "category": "台風",
     "intensity": "-",
     "scale": "",
@@ -24,8 +24,8 @@
     "pressure": 994.0,
     "windMs": 18.0,
     "gustMs": 25.0,
-    "lat": 27.5,
-    "lon": 149.7,
+    "lat": 28.6,
+    "lon": 150.2,
     "circleKm": null,
     "galeRadiusKm": 390.0
    },
@@ -33,7 +33,7 @@
     {
      "hours": 24,
      "label": "予報　２４時間後",
-     "validTime": "2026-08-14T15:00:00+09:00",
+     "validTime": "2026-08-14T18:00:00+09:00",
      "category": "台風",
      "intensity": "-",
      "scale": "",
@@ -43,13 +43,13 @@
      "pressure": 996.0,
      "windMs": 18.0,
      "gustMs": 25.0,
-     "lat": 28.6,
-     "lon": 150.7,
+     "lat": 28.8,
+     "lon": 151.1,
      "circleKm": 120.0
     },
     {
-     "hours": 48,
-     "label": "予報　４８時間後",
+     "hours": 45,
+     "label": "予報　４５時間後",
      "validTime": "2026-08-15T15:00:00+09:00",
      "category": "台風",
      "intensity": "-",
@@ -65,8 +65,8 @@
      "circleKm": 210.0
     },
     {
-     "hours": 72,
-     "label": "予報　７２時間後",
+     "hours": 69,
+     "label": "予報　６９時間後",
      "validTime": "2026-08-16T15:00:00+09:00",
      "category": "台風",
      "intensity": "-",
@@ -82,8 +82,8 @@
      "circleKm": 300.0
     },
     {
-     "hours": 96,
-     "label": "予報　９６時間後",
+     "hours": 93,
+     "label": "予報　９３時間後",
      "validTime": "2026-08-17T15:00:00+09:00",
      "category": "台風",
      "intensity": "-",
@@ -99,8 +99,8 @@
      "circleKm": 370.0
     },
     {
-     "hours": 120,
-     "label": "予報　１２０時間後",
+     "hours": 117,
+     "label": "予報　１１７時間後",
      "validTime": "2026-08-18T15:00:00+09:00",
      "category": "台風",
      "intensity": "-",
@@ -160,6 +160,10 @@
     [
      27.5,
      149.7
+    ],
+    [
+     28.6,
+     150.2
     ]
    ]
   },
