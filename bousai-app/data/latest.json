@@ -1,7 +1,39 @@
 {
- "generatedAt": "2026-08-15T06:54:31+09:00",
+ "generatedAt": "2026-08-15T07:55:26+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20260815072907",
+   "time": "2026-08-15T07:29:00+09:00",
+   "place": "熊本県熊本地方",
+   "magnitude": 2.7,
+   "maxIntensity": "1",
+   "depthKm": 10.0
+  },
+  {
+   "id": "20260815071303",
+   "time": "2026-08-15T07:12:00+09:00",
+   "place": "熊本県天草・芦北地方",
+   "magnitude": 3.0,
+   "maxIntensity": "1",
+   "depthKm": 10.0
+  },
+  {
+   "id": "20260815065850",
+   "time": "2026-08-15T06:58:00+09:00",
+   "place": "インドネシア付近",
+   "magnitude": 7.7,
+   "maxIntensity": "",
+   "depthKm": null
+  },
+  {
+   "id": "20260815065838",
+   "time": "2026-08-15T06:58:00+09:00",
+   "place": "群馬県南部",
+   "magnitude": 3.6,
+   "maxIntensity": "2",
+   "depthKm": 70.0
+  },
   {
    "id": "20260815063856",
    "time": "2026-08-15T06:38:00+09:00",
@@ -89,38 +121,6 @@
    "magnitude": 2.6,
    "maxIntensity": "1",
    "depthKm": 0.0
-  },
-  {
-   "id": "20260814160531",
-   "time": "2026-08-14T16:05:00+09:00",
-   "place": "熊本県熊本地方",
-   "magnitude": 3.0,
-   "maxIntensity": "1",
-   "depthKm": 10.0
-  },
-  {
-   "id": "20260814135419",
-   "time": "2026-08-14T13:54:00+09:00",
-   "place": "小笠原諸島西方沖",
-   "magnitude": 5.1,
-   "maxIntensity": "1",
-   "depthKm": 450.0
-  },
-  {
-   "id": "20260814124244",
-   "time": "2026-08-14T12:42:00+09:00",
-   "place": "豊後水道",
-   "magnitude": 3.2,
-   "maxIntensity": "1",
-   "depthKm": 10.0
-  },
-  {
-   "id": "20260814074943",
-   "time": "2026-08-14T07:50:00+09:00",
-   "place": "千葉県北東部",
-   "magnitude": 2.8,
-   "maxIntensity": "1",
-   "depthKm": 40.0
   }
  ],
  "tsunami": {
