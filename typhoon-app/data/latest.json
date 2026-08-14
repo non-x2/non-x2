@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-14T15:52:07+09:00",
+ "generatedAt": "2026-08-14T19:31:36+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
  "count": 1,
  "typhoons": [
@@ -10,46 +10,46 @@
    "name": "ナンカー",
    "nameEn": "Nangka",
    "category": "台風",
-   "issue": "2026-08-14T15:45:00+09:00",
+   "issue": "2026-08-14T18:45:00+09:00",
    "analysis": {
     "hours": 0,
     "label": "実況",
-    "validTime": "2026-08-14T15:00:00+09:00",
+    "validTime": "2026-08-14T18:00:00+09:00",
     "category": "台風",
     "intensity": "-",
     "scale": "",
     "location": "南鳥島近海",
-    "course": "東",
+    "course": "南南東",
     "speedKmh": null,
     "pressure": 994.0,
     "windMs": 18.0,
     "gustMs": 25.0,
-    "lat": 28.9,
+    "lat": 28.5,
     "lon": 154.2,
     "circleKm": null,
-    "galeRadiusKm": 330.0
+    "galeRadiusKm": 220.0
    },
    "forecast": [
     {
      "hours": 24,
      "label": "予報　２４時間後",
-     "validTime": "2026-08-15T15:00:00+09:00",
+     "validTime": "2026-08-15T18:00:00+09:00",
      "category": "台風",
      "intensity": "-",
      "scale": "",
      "location": "南鳥島近海",
      "course": "東",
-     "speedKmh": null,
+     "speedKmh": "10",
      "pressure": 996.0,
      "windMs": 18.0,
      "gustMs": 25.0,
-     "lat": 28.8,
-     "lon": 156.7,
+     "lat": 28.5,
+     "lon": 157.0,
      "circleKm": 120.0
     },
     {
-     "hours": 48,
-     "label": "予報　４８時間後",
+     "hours": 45,
+     "label": "予報　４５時間後",
      "validTime": "2026-08-16T15:00:00+09:00",
      "category": "熱帯低気圧",
      "intensity": "-",
@@ -140,6 +140,10 @@
     ],
     [
      28.9,
+     154.2
+    ],
+    [
+     28.5,
      154.2
     ]
    ]
