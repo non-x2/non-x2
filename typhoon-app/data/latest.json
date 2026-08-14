@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-14T12:05:31+09:00",
+ "generatedAt": "2026-08-14T14:13:11+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
  "count": 1,
  "typhoons": [
@@ -10,22 +10,22 @@
    "name": "ナンカー",
    "nameEn": "Nangka",
    "category": "台風",
-   "issue": "2026-08-14T09:50:00+09:00",
+   "issue": "2026-08-14T12:45:00+09:00",
    "analysis": {
     "hours": 0,
     "label": "実況",
-    "validTime": "2026-08-14T09:00:00+09:00",
+    "validTime": "2026-08-14T12:00:00+09:00",
     "category": "台風",
     "intensity": "-",
     "scale": "",
     "location": "南鳥島近海",
-    "course": "東南東",
-    "speedKmh": "20",
+    "course": "東",
+    "speedKmh": null,
     "pressure": 994.0,
     "windMs": 18.0,
     "gustMs": 25.0,
     "lat": 29.0,
-    "lon": 154.0,
+    "lon": 154.1,
     "circleKm": null,
     "galeRadiusKm": 330.0
    },
@@ -33,7 +33,7 @@
     {
      "hours": 24,
      "label": "予報　２４時間後",
-     "validTime": "2026-08-15T09:00:00+09:00",
+     "validTime": "2026-08-15T12:00:00+09:00",
      "category": "台風",
      "intensity": "-",
      "scale": "",
@@ -43,13 +43,13 @@
      "pressure": 996.0,
      "windMs": 18.0,
      "gustMs": 25.0,
-     "lat": 28.7,
-     "lon": 155.8,
+     "lat": 28.8,
+     "lon": 156.2,
      "circleKm": 120.0
     },
     {
-     "hours": 48,
-     "label": "予報　４８時間後",
+     "hours": 45,
+     "label": "予報　４５時間後",
      "validTime": "2026-08-16T09:00:00+09:00",
      "category": "台風",
      "intensity": "-",
@@ -65,8 +65,8 @@
      "circleKm": 210.0
     },
     {
-     "hours": 72,
-     "label": "予報　７２時間後",
+     "hours": 69,
+     "label": "予報　６９時間後",
      "validTime": "2026-08-17T09:00:00+09:00",
      "category": "台風",
      "intensity": "-",
@@ -82,8 +82,8 @@
      "circleKm": 300.0
     },
     {
-     "hours": 96,
-     "label": "予報　９６時間後",
+     "hours": 93,
+     "label": "予報　９３時間後",
      "validTime": "2026-08-18T09:00:00+09:00",
      "category": "台風",
      "intensity": "-",
@@ -99,8 +99,8 @@
      "circleKm": 370.0
     },
     {
-     "hours": 120,
-     "label": "予報　１２０時間後",
+     "hours": 117,
+     "label": "予報　１１７時間後",
      "validTime": "2026-08-19T09:00:00+09:00",
      "category": "熱帯低気圧",
      "intensity": "-",
@@ -184,6 +184,10 @@
     [
      29.0,
      154.0
+    ],
+    [
+     29.0,
+     154.1
     ]
    ]
   }
