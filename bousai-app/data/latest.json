@@ -1,7 +1,15 @@
 {
- "generatedAt": "2026-08-14T12:49:37+09:00",
+ "generatedAt": "2026-08-14T15:03:12+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20260814135419",
+   "time": "2026-08-14T13:54:00+09:00",
+   "place": "小笠原諸島西方沖",
+   "magnitude": 5.1,
+   "maxIntensity": "1",
+   "depthKm": 450.0
+  },
   {
    "id": "20260814124244",
    "time": "2026-08-14T12:42:00+09:00",
@@ -113,14 +121,6 @@
    "magnitude": 3.0,
    "maxIntensity": "1",
    "depthKm": 10.0
-  },
-  {
-   "id": "20260813112900",
-   "time": "2026-08-13T11:29:00+09:00",
-   "place": "岩手県沖",
-   "magnitude": 3.5,
-   "maxIntensity": "1",
-   "depthKm": 50.0
   }
  ],
  "tsunami": {
