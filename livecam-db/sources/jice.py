@@ -54,6 +54,17 @@ def tidy_name(name: str) -> str:
     return name
 
 
+# 高速道路・自動車専用道路を見分けるための決まり
+#
+#   「◯◯自動車道」「◯◯縦貫道」「◯◯横断道」「◯◯道」（例: 三陸道・秋田道・鳥取道）
+#   および「名阪国道」を、高速道路・自動車専用道路として扱います。
+#
+# ⚠️ わざと入れていないもの：「◯◯道路」で終わる名前（高山清見道路・宮古道路 など）。
+#    自動車専用道路のこともあれば、一般道のバイパスのこともあり、
+#    **名前だけでは見分けられない**ためです。これらは「道路」のままにしています。
+EXPRESSWAY_PATTERN = re.compile(r"自動車道$|縦貫道$|横断道$|高速|^名阪国道$|(?<!国)道$")
+
+
 def guess_category(default: str, name: str) -> str:
     """名前から、もう少し細かい種類を推測する。"""
     if default == "river":
@@ -62,6 +73,8 @@ def guess_category(default: str, name: str) -> str:
         if "堰" in name or "水門" in name:
             return "weir"
         return "river"
+    if default == "road" and EXPRESSWAY_PATTERN.search(name):
+        return "expressway"
     return default
 
 
