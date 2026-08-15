@@ -24,6 +24,7 @@
     --unknown-bg: #eef1f5; --unknown-ink: #47505c; --unknown-line: #d7dde5;
     --route: #d6470f;
     --pin: #0b6bcb;
+    --pin-water: #0a8f8f;
     --pin-nocam: #7b8794;
   }
   @media (prefers-color-scheme: dark) {
@@ -43,6 +44,7 @@
       --unknown-bg: #21262e; --unknown-ink: #aab4c2; --unknown-line: #39424e;
       --route: #ff7a45;
       --pin: #4da3ff;
+      --pin-water: #3fc2c2;
       --pin-nocam: #6b7684;
     }
   }
@@ -93,6 +95,17 @@
     margin: 0 0 0.25rem;
   }
   .field-row { display: flex; gap: 0.4rem; align-items: stretch; }
+  .cat-picks { display: flex; gap: 0.9rem; flex-wrap: wrap; }
+  .cat-picks label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-weight: 400;
+    font-size: 0.95rem;
+    min-height: 44px;
+    cursor: pointer;
+  }
+  .cat-picks input { width: 20px; height: 20px; }
   input[type="text"], select {
     font: inherit;
     font-size: 1rem;
@@ -212,6 +225,8 @@
     justify-content: center;
   }
   .pin.is-nocam { background: var(--pin-nocam); }
+  .pin.is-water { background: var(--pin-water); }
+  .pin.is-water.is-nocam { background: var(--pin-nocam); }
   .pin.is-active { outline: 3px solid var(--route); outline-offset: 1px; }
   .pin-end {
     position: absolute;
@@ -282,6 +297,7 @@
     font-weight: 700;
     display: flex; align-items: center; justify-content: center;
   }
+  .cam-no.is-water { background: var(--pin-water); }
   .cam-no.is-nocam { background: var(--pin-nocam); }
   .cam-main { flex: 1 1 auto; min-width: 0; }
   .cam-title { font-weight: 700; font-size: 0.95rem; }
@@ -404,6 +420,14 @@
     <p class="note" style="margin-top:-0.3rem">💡 2文字以上入れると<strong>候補</strong>が出ます。同じ地名が各地にあるので、候補から選ぶと確実です。</p>
 
     <div class="field">
+      <label>探すカメラの種類</label>
+      <div class="cat-picks">
+        <label><input type="checkbox" id="cat-road" checked> 🚗 道路</label>
+        <label><input type="checkbox" id="cat-water"> 🌊 河川・ダム</label>
+      </div>
+    </div>
+
+    <div class="field">
       <label for="radius">通り道とみなす幅（ルートからの距離）</label>
       <select id="radius">
         <option value="300">300m（ほぼ道の上だけ）</option>
@@ -515,14 +539,17 @@
   // ============================================================ 台帳の読み込み
   //
   // 台帳は「同じ文字のくり返し」をまとめて軽くしてあります。
-  //   n=路線名 / m=管理者 / a=市区町村 / p=カメラのページ / b=写真URLの前半
-  //   c=カメラ本体 [緯度*10万, 経度*10万, n番号, m番号, a番号, p番号, b番号, 写真URLの後半]
+  //   n=名前 / m=管理者 / a=市区町村 / p=カメラのページ / b=写真URLの前半 / k=種類
+  //   c=カメラ本体 [緯度*10万, 経度*10万, n番号, m番号, a番号, p番号, b番号, 写真URLの後半, k番号]
+  //
+  // 大もとは livecam-db/data/livecams.json です（livecam-db/export.py がここに配ります）。
   //
   var CAMS = [];
   var DATA_UPDATED = '';
   try {
     var raw = JSON.parse(document.getElementById('livecam-data').textContent);
     DATA_UPDATED = raw.u || '';
+    var kinds = raw.k || [];
     CAMS = (raw.c || []).map(function (row, i) {
       return {
         id: i,
@@ -532,11 +559,23 @@
         owner: row[3] >= 0 ? (raw.m[row[3]] || '') : '',
         place: row[4] >= 0 ? (raw.a[row[4]] || '') : '',
         page: row[5] >= 0 ? (raw.p[row[5]] || '') : '',
-        img: row[6] >= 0 ? (raw.b[row[6]] || '') + (row[7] || '') : ''
+        img: row[6] >= 0 ? (raw.b[row[6]] || '') + (row[7] || '') : '',
+        cat: (row.length > 8 && row[8] >= 0) ? (kinds[row[8]] || 'road') : 'road'
       };
     });
   } catch (e) {
     CAMS = [];
+  }
+
+  // 種類の表示名。road=道路 / river=河川 / dam=ダム / weir=堰・水門
+  var CAT_LABEL = { road: '道路', river: '河川', dam: 'ダム', weir: '堰・水門' };
+  function isWater(cam) { return cam.cat === 'river' || cam.cat === 'dam' || cam.cat === 'weir'; }
+
+  // いま探す対象にするカメラ（チェックボックスで切り替え）
+  function selectedCams() {
+    var road = $('cat-road').checked;
+    var water = $('cat-water').checked;
+    return CAMS.filter(function (c) { return isWater(c) ? water : road; });
   }
 
   var $ = function (id) { return document.getElementById(id); };
@@ -709,11 +748,12 @@
 
       var b = document.createElement('button');
       b.type = 'button';
-      b.className = 'pin' + (cam.img ? '' : ' is-nocam');
+      b.className = 'pin' + (isWater(cam) ? ' is-water' : '') + (cam.img ? '' : ' is-nocam');
       b.style.left = x + 'px';
       b.style.top = y + 'px';
-      b.textContent = routeLatLngs ? String(i + 1) : '📷';
-      b.title = cam.road + (cam.place ? '（' + cam.place + '）' : '');
+      b.textContent = routeLatLngs ? String(i + 1) : (isWater(cam) ? '🌊' : '📷');
+      b.title = (CAT_LABEL[cam.cat] || '') + '：' + cam.road +
+        (cam.place ? '（' + cam.place + '）' : '');
       b.dataset.idx = String(i);
       b.addEventListener('click', function (ev) {
         ev.stopPropagation();
@@ -1010,8 +1050,9 @@
   // すべてのカメラ×すべてのルート点を総当たりすると重いので、
   // ルートの点を「マス目」に登録しておいて、カメラの近くのマスだけを調べます。
 
-  function camsNearRoute(coords, maxRadiusM) {
-    if (!CAMS.length) return [];
+  function camsNearRoute(coords, maxRadiusM, pool) {
+    pool = pool || CAMS;
+    if (!pool.length) return [];
     var cell = 0.05;                                    // マス目の大きさ（度）。約5.5km四方。
     var span = Math.max(1, Math.ceil(maxRadiusM / 5500)); // 何マス先まで見るか
     var grid = {};
@@ -1027,7 +1068,7 @@
     }
 
     var found = [];
-    CAMS.forEach(function (cam) {
+    pool.forEach(function (cam) {
       var gy = Math.floor(cam.lat / cell), gx = Math.floor(cam.lon / cell);
       var best = Infinity, bestIdx = -1;
       for (var dy = -span; dy <= span; dy++) {
@@ -1067,14 +1108,15 @@
       b.addEventListener('click', function () { openViewer(i); });
 
       var no = document.createElement('span');
-      no.className = 'cam-no' + (cam.img ? '' : ' is-nocam');
+      no.className = 'cam-no' + (isWater(cam) ? ' is-water' : '') + (cam.img ? '' : ' is-nocam');
       no.textContent = String(i + 1);
 
       var main = document.createElement('span');
       main.className = 'cam-main';
       var t = document.createElement('span');
       t.className = 'cam-title';
-      t.textContent = cam.road + (cam.place ? '　' + cam.place : '');
+      t.textContent = (isWater(cam) ? '🌊 ' : '') + cam.road +
+        (cam.place ? '　' + cam.place : '');
       var s = document.createElement('span');
       s.className = 'cam-sub';
       s.textContent = '出発から約 ' + fmtKm(item.along) + '　/　道から ' + fmtKm(item.offRoute) +
@@ -1230,7 +1272,8 @@
         // 選んだ幅ではまったく見つからないことがあります。そのときは黙って0台にせず、
         // 段階的に幅を広げて探し、それでも無ければ「いちばん近いカメラ」を出します。
         var radius = parseInt($('radius').value, 10);
-        var near = camsNearRoute(r.coords, 5000);
+        var pool = selectedCams();
+        var near = camsNearRoute(r.coords, 5000, pool);
         var found = near.filter(function (x) { return x.offRoute <= radius; });
         var widenedTo = null, nearestOnly = false;
 
@@ -1243,7 +1286,7 @@
         }
         if (!found.length) {
           // 5km以内にも無いときだけ、広い範囲から「いちばん近い5台」を出す
-          found = camsNearRoute(r.coords, 60000)
+          found = camsNearRoute(r.coords, 60000, pool)
             .slice()
             .sort(function (a, b) { return a.offRoute - b.offRoute; })
             .slice(0, 5)
@@ -1317,7 +1360,7 @@
   // 現在地のまわりのカメラを地図に出す（ルート検索の前でも使えるように）
   function showNearby(lat, lon) {
     routeLatLngs = null;
-    var near = CAMS.map(function (cam) {
+    var near = selectedCams().map(function (cam) {
       return { cam: cam, offRoute: distMeters(lat, lon, cam.lat, cam.lon), along: null };
     }).filter(function (x) { return x.offRoute < 30000; })
       .sort(function (a, b) { return a.offRoute - b.offRoute; })
@@ -1332,10 +1375,12 @@
   function boot() {
     if (DATA_UPDATED) {
       var withImg = CAMS.filter(function (c) { return c.img; }).length;
-      $('data-updated').textContent = 'カメラ台帳: 全国 ' + CAMS.length + ' 台（うち ' + withImg +
-        ' 台はこのページで映像が見られます）／更新 ' + DATA_UPDATED.slice(0, 10);
+      var water = CAMS.filter(isWater).length;
+      $('data-updated').textContent = 'カメラ台帳: 全国 ' + CAMS.length + ' 台' +
+        '（道路 ' + (CAMS.length - water) + ' ／ 河川・ダム ' + water + '）' +
+        '／うち ' + withImg + ' 台はこのページで映像が見られます／更新 ' + DATA_UPDATED.slice(0, 10);
     } else {
-      $('data-updated').textContent = 'カメラ台帳: まだ作られていません（scripts/fetch_livecams.py を実行してください）';
+      $('data-updated').textContent = 'カメラ台帳: まだ作られていません（livecam-db/build.py を実行してください）';
     }
 
     attachSuggest('from', 'cand-from');

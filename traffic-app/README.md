@@ -27,31 +27,27 @@
 | ファイル | 役割 |
 |---|---|
 | `index.html` | ページ本体。**これ1枚で動きます**（ダブルクリックでも開けます） |
-| `data/livecams.json` | カメラ台帳の「大もと」（人が読める形） |
-| `scripts/fetch_livecams.py` | 台帳を作りなおす係（Python標準機能のみ） |
+| `data/livecams.json` | カメラ台帳のコピー（大もとは `livecam-db/`） |
+
+> 🔑 **カメラ台帳の「大もと」は [`livecam-db/`](../livecam-db/README.md) です。**
+> ここ（`traffic-app/data/`）にあるのは配られたコピーなので、**直接編集しないでください**。
+> 直すときは `livecam-db/build.py` で作りなおして `livecam-db/export.py` で配りなおします。
 
 台帳は `index.html` の中にも埋め込まれています。
 これは**ダブルクリックで開いたとき**（`file://`）でも動くようにするためです
 （`file://` では別ファイルの読み込みがブラウザに止められるため）。
-`data/livecams.json` と埋め込みは、上のスクリプトが**同時に**書き換えるのでズレません。
+`data/livecams.json` と埋め込みは `livecam-db/export.py` が**同時に**書き換えるのでズレません。
 
 ---
 
 ## 台帳の作りなおし方
 
 ```bash
-python3 traffic-app/scripts/fetch_livecams.py
+python3 livecam-db/build.py     # 台帳を作りなおす（大もと）
+python3 livecam-db/export.py    # このページに配る
 ```
 
-やっていること:
-
-1. 全国の道路ライブカメラの位置データを取得
-   （[国土技術研究センター「道路チェック地図」](https://www.jice.or.jp/knowledge/maps/roads)）
-2. 説明文から「写真のURL・カメラのページ・管理者名」を取り出す
-3. **写真URLが `https://` で開けるか1台ずつ実際に試す**（→ 後述）
-4. 緯度経度から市区町村名を調べる（[国土地理院](https://maps.gsi.go.jp/)。前に調べたぶんは使い回し）
-5. `data/livecams.json` と `index.html` の台帳を書き換える
-
+やっていることの詳しい説明は [`livecam-db/README.md`](../livecam-db/README.md) にあります。
 急いでいるときは `--no-verify`（写真の確認をとばす）／`--no-geocode`（市区町村の調べ直しをとばす）が使えます。
 
 **⚙️ 自動更新**: `.github/workflows/livecam-update.yml` が**毎週火曜 5:10（日本時間）**に上を実行します。

@@ -17,7 +17,7 @@
 ├── .github/workflows/              # ⚙️ 自動で動くもの
 │   ├── typhoon-update.yml          #    毎時25分：気象庁から台風データを取得
 │   ├── bousai-update.yml           #    毎時35分：気象庁から地震・津波・雷・大雨データを取得
-│   ├── livecam-update.yml          #    毎週火5:10：全国の道路ライブカメラ台帳を作りなおす
+│   ├── livecam-update.yml          #    毎週火5:10：全国のライブカメラ台帳を作りなおす
 │   ├── pages-deploy.yml            #    Pagesを自動でオンにして公開しなおす
 │   ├── offices-check.yml           #    👀 予報区リストのズレを自動照合（見張り番）
 │   └── branch-cleanup.yml          #    🧹 マージ済みの古いブランチを自動削除（お掃除係）
@@ -57,8 +57,14 @@
 ├── bousai-app/                     # 🛟 防災情報まとめ（地震・津波・雷・大雨／台風ページの弟分）
 ├── traffic-app/                    # 🚗 交通・ライブカメラ（ルートの通り道のカメラを押して見る）
 │   ├── index.html                  #    ページ本体（地図も自前・外部ライブラリ0）
-│   ├── data/livecams.json          #    全国1430台のカメラ台帳（大もと）
-│   └── scripts/fetch_livecams.py   #    台帳を作りなおす係
+│   └── data/livecams.json          #    台帳のコピー（大もとは livecam-db/）
+├── livecam-db/                     # 📷 ライブカメラ台帳（★大もと・他のアプリからも使える）
+│   ├── README.md                   #    スキーマ・使い方・情報源を選ぶ約束
+│   ├── build.py                    #    台帳を作る司令塔（集める→まとめる→https確認→市区町村）
+│   ├── export.py                   #    台帳を各アプリに配る係
+│   ├── livecam.py                  #    台帳を使う道具（近く・ルート沿い・検索／CLIあり）
+│   ├── sources/                    #    情報源ごとの読み取り係（足すのはここ）
+│   └── data/livecams.json          #    できあがった台帳（大もと）
 ├── data/offices.json               # 🗾 全国58予報区リストの「大もと」（両アプリ共通・1か所だけの正）
 ├── tools/                          # 🧰 小さな道具箱
 │   ├── check_offices.py            #    👀 予報区リストのズレを照合する見張り番（手動でも実行可）
