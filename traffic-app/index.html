@@ -423,7 +423,7 @@
       <label>探すカメラの種類</label>
       <div class="cat-picks">
         <label><input type="checkbox" id="cat-road" checked> 🚗 道路</label>
-        <label><input type="checkbox" id="cat-water"> 🌊 河川・ダム</label>
+        <label><input type="checkbox" id="cat-water"> 🌊 河川・ダム・海</label>
       </div>
     </div>
 
@@ -490,6 +490,28 @@
       <li><a href="https://www.drivetraffic.jp/" target="_blank" rel="noopener">🛣 ドラとら（高速道路の交通状況）</a></li>
       <li><a href="https://www.mlit.go.jp/road/bosai/LIVEcamera.html" target="_blank" rel="noopener">📷 国土交通省 全国のライブカメラ一覧</a></li>
       <li><a href="https://www.jma.go.jp/bosai/map.html" target="_blank" rel="noopener">🌦 気象庁 天気・警報（雨や雪の確認）</a></li>
+    </ul>
+  </section>
+
+  <!-- ============ 各県のカメラサイト ============ -->
+  <section class="card">
+    <h2>🗾 各県の道路カメラサイト</h2>
+    <p class="note" style="margin-top:0">このページに載っているのは<strong>国が管理する道路・河川・海</strong>のカメラです。
+      <strong>県が管理する道路</strong>のカメラは各県のサイトで見られます（雪国は特に充実しています）。</p>
+    <ul class="link-list">
+      <li><a href="https://northern-road.jp/navi/" target="_blank" rel="noopener">北海道　北の道ナビ</a></li>
+      <li><a href="https://www.koutsu-aomori.com/Road/livecamera.html" target="_blank" rel="noopener">青森県　青森みち情報</a></li>
+      <li><a href="http://road.pref.akita.lg.jp/" target="_blank" rel="noopener">秋田県　あきたのみち情報</a></li>
+      <li><a href="http://www.pref.fukushima.jp/douro/kanri/dourokamera.html" target="_blank" rel="noopener">福島県　道路ライブカメラ</a></li>
+      <li><a href="https://www.kendobousai-gunma.jp/" target="_blank" rel="noopener">群馬県　ぐんまの道路ライブカメラ</a></li>
+      <li><a href="https://www.live-cam.pref.niigata.jp/" target="_blank" rel="noopener">新潟県　にいがたLIVEカメラ</a></li>
+      <li><a href="https://toyama-douro.toyama.toyama.jp/" target="_blank" rel="noopener">富山県　富山県道路情報</a></li>
+      <li><a href="https://douro.pref.ishikawa.lg.jp/" target="_blank" rel="noopener">石川県　石川みち情報ネット</a></li>
+      <li><a href="https://www.hozen.pref.fukui.lg.jp/hozen/yuki/" target="_blank" rel="noopener">福井県　みち情報ネットふくい</a></li>
+      <li><a href="https://www.pref.nagano.lg.jp/michikanri/infra/doro/joho/hiroba/" target="_blank" rel="noopener">長野県　道路情報広場Nagano</a></li>
+      <li><a href="https://douro.pref.gifu.lg.jp/" target="_blank" rel="noopener">岐阜県　道の情報</a></li>
+      <li><a href="https://yukinavi.net/" target="_blank" rel="noopener">鳥取県　とっとり雪みちNAVI</a></li>
+      <li><a href="https://info.pref.shimane.jp/RoadShimane/" target="_blank" rel="noopener">島根県　道路規制情報</a></li>
     </ul>
   </section>
 
@@ -567,9 +589,10 @@
     CAMS = [];
   }
 
-  // 種類の表示名。road=道路 / river=河川 / dam=ダム / weir=堰・水門
-  var CAT_LABEL = { road: '道路', river: '河川', dam: 'ダム', weir: '堰・水門' };
-  function isWater(cam) { return cam.cat === 'river' || cam.cat === 'dam' || cam.cat === 'weir'; }
+  // 種類の表示名。road=道路 / river=河川 / dam=ダム / weir=堰・水門 / sea=海（灯台・港）
+  var CAT_LABEL = { road: '道路', river: '河川', dam: 'ダム', weir: '堰・水門', sea: '海' };
+  // 道路以外（川・ダム・海）は、まとめて1つのチェックボックスで出し入れします
+  function isWater(cam) { return cam.cat !== 'road'; }
 
   // いま探す対象にするカメラ（チェックボックスで切り替え）
   function selectedCams() {
@@ -751,7 +774,8 @@
       b.className = 'pin' + (isWater(cam) ? ' is-water' : '') + (cam.img ? '' : ' is-nocam');
       b.style.left = x + 'px';
       b.style.top = y + 'px';
-      b.textContent = routeLatLngs ? String(i + 1) : (isWater(cam) ? '🌊' : '📷');
+      b.textContent = routeLatLngs ? String(i + 1)
+        : (cam.cat === 'sea' ? '⛵' : isWater(cam) ? '🌊' : '📷');
       b.title = (CAT_LABEL[cam.cat] || '') + '：' + cam.road +
         (cam.place ? '（' + cam.place + '）' : '');
       b.dataset.idx = String(i);
@@ -1115,7 +1139,7 @@
       main.className = 'cam-main';
       var t = document.createElement('span');
       t.className = 'cam-title';
-      t.textContent = (isWater(cam) ? '🌊 ' : '') + cam.road +
+      t.textContent = (cam.cat === 'sea' ? '⛵ ' : isWater(cam) ? '🌊 ' : '') + cam.road +
         (cam.place ? '　' + cam.place : '');
       var s = document.createElement('span');
       s.className = 'cam-sub';
@@ -1377,7 +1401,7 @@
       var withImg = CAMS.filter(function (c) { return c.img; }).length;
       var water = CAMS.filter(isWater).length;
       $('data-updated').textContent = 'カメラ台帳: 全国 ' + CAMS.length + ' 台' +
-        '（道路 ' + (CAMS.length - water) + ' ／ 河川・ダム ' + water + '）' +
+        '（道路 ' + (CAMS.length - water) + ' ／ 河川・ダム・海 ' + water + '）' +
         '／うち ' + withImg + ' 台はこのページで映像が見られます／更新 ' + DATA_UPDATED.slice(0, 10);
     } else {
       $('data-updated').textContent = 'カメラ台帳: まだ作られていません（livecam-db/build.py を実行してください）';

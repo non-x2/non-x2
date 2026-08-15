@@ -27,13 +27,14 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from sources import base, jice  # noqa: E402
+from sources import base, jice, kaiho  # noqa: E402
 
 DB_PATH = Path(__file__).resolve().parent / "data" / "livecams.json"
 
 # 情報源の係の一覧。新しい情報源を足すときはここに登録します。
 COLLECTORS = {
     "jice": jice.collect_all,
+    "kaiho": kaiho.collect_all,
 }
 
 # 台帳がこの数を下回ったら「こわれている」とみなして上書きしない（安全装置）
