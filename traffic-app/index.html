@@ -209,10 +209,13 @@
   .pin {
     position: absolute;
     z-index: 3;
-    width: 26px;
-    height: 26px;
-    min-height: 26px;
-    margin: -13px 0 0 -13px;
+    /* 指で押しやすいよう、丸を少し大きめに。
+       これ以上大きくすると、近いピン同士を間引く量が増えて
+       地図に出るカメラが減ってしまうため、ここで折り合いをつけています。 */
+    width: 32px;
+    height: 32px;
+    min-height: 32px;
+    margin: -16px 0 0 -16px;
     padding: 0;
     border-radius: 50%;
     border: 2px solid #fff;
@@ -227,8 +230,17 @@
     justify-content: center;
   }
   .pin.is-nocam { background: var(--pin-nocam); }
-  .pin.is-water { background: var(--pin-water); }
-  .pin.is-expressway { background: var(--pin-express); }
+  /* 種類のちがいを「色」だけに頼らず、枠のかたちでも分かるようにする
+     （色が見分けにくい方や、屋外の強い日ざしの下でも区別できるように） */
+  .pin.is-water {
+    background: var(--pin-water);
+    border-style: dashed;         /* 川・ダム・海 ＝ 破線の枠 */
+  }
+  .pin.is-expressway {
+    background: var(--pin-express);
+    border-style: double;         /* 高速道路 ＝ 二重線の枠 */
+    border-width: 4px;
+  }
   .pin.is-water.is-nocam { background: var(--pin-nocam); }
   .pin.is-active { outline: 3px solid var(--route); outline-offset: 1px; }
   .pin-end {
@@ -879,7 +891,7 @@
 
       // 近すぎるピンは重ねない。拡大すれば離れるので出てきます。
       var tooClose = placed.some(function (q) {
-        return Math.abs(q.x - x) < 24 && Math.abs(q.y - y) < 24;
+        return Math.abs(q.x - x) < 32 && Math.abs(q.y - y) < 32;
       });
       if (tooClose) { hidden++; return; }
       placed.push({ x: x, y: y });
