@@ -14,7 +14,7 @@
     db = livecam.load()
 
     # ① ある地点の近くのカメラ（近い順）
-    for cam in livecam.near(db, 35.681, 139.767, radius_m=3000, limit=5):
+    for cam in livecam.near(db, 35.681, 139.767, radius_m=10000, limit=5):
         print(cam["name"], cam["place"], round(cam["distance_m"]), "m")
 
     # ② ルート沿いのカメラ（出発地からの順）
@@ -26,7 +26,7 @@
     for cam in livecam.search(db, "国道1号", pref="静岡県"):
         print(cam["name"], cam["place"])
 
-    # ④ 種類でしぼる（road=道路 / river=河川 / dam=ダム / weir=堰・水門）
+    # ④ 種類でしぼる（road=一般道 / expressway=高速 / river=河川 / dam=ダム / sea=海）
     rivers = livecam.filter_cams(db, category="river", with_image=True)
 
 --------------------------------------------------------------------
@@ -34,9 +34,10 @@
 --------------------------------------------------------------------
 
     python3 livecam-db/livecam.py info
-    python3 livecam-db/livecam.py near 35.681 139.767 --radius 5000 --limit 10
+    python3 livecam-db/livecam.py near 35.681 139.767 --radius 10000 --limit 10
     python3 livecam-db/livecam.py search 国道1号 --pref 静岡県
-    python3 livecam-db/livecam.py near 34.70 137.73 --category river --json
+    python3 livecam-db/livecam.py near 34.70 137.73 --radius 10000 --category river
+    python3 livecam-db/livecam.py route 40.81,140.45 40.83,140.73 --radius 1500
 
 外部のライブラリは使いません（Python 3 の標準機能だけ）。
 """
@@ -46,6 +47,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import sys
 from pathlib import Path
 
 DB_PATH = Path(__file__).resolve().parent / "data" / "livecams.json"
@@ -207,11 +209,18 @@ def main() -> int:
     p_near.add_argument("--radius", type=float, default=5000, help="半径（メートル）")
     p_near.add_argument("--limit", type=int, default=20)
 
-    p_search = sub.add_parser("search", help="名前・場所で探す")
+    p_search = sub.add_parser("search", help="名前・場所・管理者で探す")
     p_search.add_argument("keyword")
     p_search.add_argument("--limit", type=int, default=30)
 
-    for p in (p_near, p_search):
+    p_route = sub.add_parser(
+        "route", help="ルート沿いのカメラを探す（緯度,経度 を2つ以上ならべる）")
+    p_route.add_argument("points", nargs="+", metavar="緯度,経度",
+                         help="例: 35.17,136.88 34.70,137.73")
+    p_route.add_argument("--radius", type=float, default=1500, help="道からの距離（メートル）")
+    p_route.add_argument("--limit", type=int, default=30)
+
+    for p in (p_near, p_search, p_route):
         p.add_argument("--category", help="road / river / dam / weir")
         p.add_argument("--pref", help="都道府県名（例: 静岡県）")
         p.add_argument("--with-image", action="store_true", help="映像が出せるカメラだけ")
@@ -239,6 +248,20 @@ def main() -> int:
 
     if args.cmd == "near":
         _show(near(db, args.lat, args.lon, args.radius, args.limit, **kw), args.json)
+    elif args.cmd == "route":
+        pts = []
+        for text in args.points:
+            try:
+                lat, lon = (float(v) for v in text.split(","))
+            except ValueError:
+                print(f"⚠️ 「{text}」は 緯度,経度 の形になっていません", file=sys.stderr)
+                return 1
+            pts.append([lat, lon])
+        if len(pts) < 2:
+            print("⚠️ 地点を2つ以上ならべてください（例: 35.17,136.88 34.70,137.73）",
+                  file=sys.stderr)
+            return 1
+        _show(along_route(db, pts, args.radius, **kw)[:args.limit], args.json)
     else:
         _show(search(db, args.keyword, **kw)[:args.limit], args.json)
     return 0

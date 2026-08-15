@@ -40,11 +40,12 @@
 ### コマンドで調べる
 
 ```bash
-python3 livecam-db/livecam.py info                                  # 台帳の要約
-python3 livecam-db/livecam.py near 35.681 139.767 --radius 5000     # 東京駅の近く
-python3 livecam-db/livecam.py near 34.70 137.73 --category river    # 河川カメラだけ
-python3 livecam-db/livecam.py search 国道1号 --pref 静岡県           # 名前・場所で探す
-python3 livecam-db/livecam.py search 天竜川 --with-image --json      # JSONで受け取る
+python3 livecam-db/livecam.py info                                        # 台帳の要約
+python3 livecam-db/livecam.py near 35.681 139.767 --radius 10000          # 東京駅の近く（6台）
+python3 livecam-db/livecam.py near 34.70 137.73 --radius 10000 --category river  # 河川だけ（10台）
+python3 livecam-db/livecam.py search 国道1号 --pref 静岡県                 # 名前・場所・管理者で探す
+python3 livecam-db/livecam.py route 40.81,140.45 40.83,140.73                # ルート沿い（五所川原→青森・3台）
+python3 livecam-db/livecam.py search 天竜川 --with-image --json           # JSONで受け取る
 ```
 
 ### プログラムから使う（他のプロジェクトでも同じ）
@@ -56,7 +57,7 @@ import livecam
 db = livecam.load()
 
 # ① ある地点の近くのカメラ（近い順）
-for cam in livecam.near(db, 35.681, 139.767, radius_m=3000, limit=5):
+for cam in livecam.near(db, 35.681, 139.767, radius_m=10000, limit=5):
     print(cam["name"], cam["place"], round(cam["distance_m"]), "m")
 
 # ② ルート沿いのカメラ（出発地からの順）  route = [[緯度, 経度], …]
@@ -92,12 +93,12 @@ rivers = livecam.filter_cams(db, category="river", pref="新潟県", with_image=
 | `src` | どの情報源から来たか |
 | `cat` | 種類（road / expressway / river / dam / weir / sea） |
 | `name` | 路線名・河川名など |
-| `place` | 市区町村（緯度経度から自動で付けています） |
+| `place` | 市区町村（緯度経度から自動で付けています）。**5台だけ空**＝海上や山間部で、国土地理院の区域データに当たらない地点 |
 | `lat` / `lon` | 緯度・経度 |
 | `img` | **ページ内にそのまま出せる写真URL**。出せないカメラは `null` |
 | `page` | 公式のカメラページ |
 | `owner` | 管理者（◯◯地方整備局 など） |
-| `also` | 別の情報源にも載っていた場合、その情報源（任意） |
+| `also` | 別の情報源にも載っていた場合、その情報源（**無いカメラが大半**。`cam.get("also", [])` で読むこと） |
 
 ---
 
@@ -137,6 +138,12 @@ python3 livecam-db/build.py --only jice-roads   # 情報源をしぼる
 
 - 取得に失敗したら、**今ある台帳は上書きしません**
 - カメラが極端に少ない結果になったときも上書きしません（こわれたデータで壊さないため）
+- **情報源ごと**に前回の70%を下回ったら中止します
+  （合計だけ見ていると「道路が全部消えても河川が残っているから合格」になってしまうため）
+- 通信の失敗は**カメラ1台ぶんの失敗として扱い**、全体を止めません
+  （1台の不調で週1の更新が丸ごと止まらないように）
+- 同じ座標に3種類以上の名前が登録されていたら**警告を出します**
+  （元データのまちがいに気づくため。実際に北海道の8河川が同じ1点に登録されている例があります）
 
 ---
 

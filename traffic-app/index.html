@@ -262,6 +262,32 @@
     background: var(--card);
     opacity: 0.94;
   }
+  /* 縮尺の目安（棒の長さが何メートルにあたるか） */
+  .map-scale {
+    position: absolute;
+    left: 0.5rem; bottom: 0.4rem;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    background: rgba(255,255,255,.8);
+    border-radius: 4px;
+    padding: 0.1rem 0.35rem;
+    pointer-events: none;
+  }
+  .map-scale span {
+    display: block;
+    height: 6px;
+    border: 2px solid #333;
+    border-top: 0;
+    box-sizing: content-box;
+  }
+  .map-scale em {
+    font-style: normal;
+    font-size: 0.72rem;
+    color: #333;
+    white-space: nowrap;
+  }
   .map-credit {
     position: absolute;
     right: 0.3rem; bottom: 0.2rem;
@@ -464,7 +490,7 @@
     </div>
 
     <button type="button" class="btn-primary" id="search">🔍 ルートと通り道のカメラを調べる</button>
-    <p class="status" id="status" hidden></p>
+    <p class="status" id="status" role="status" aria-live="polite" hidden></p>
     <p class="note">道案内は自動車のルートで計算します。地名は日本語でどうぞ（駅名・市区町村名・住所が使えます）。<br>
       📷 ライブカメラは<strong>国が管理する国道</strong>が中心です。<strong>高速道路にはほとんどありません</strong>ので、
       高速を通るルートでは少なめになります（見つからないときは自動で範囲を広げて探します）。</p>
@@ -490,10 +516,11 @@
         <svg id="map-svg" aria-hidden="true"><polyline id="route-line" fill="none" stroke="var(--route)" stroke-width="5" stroke-linejoin="round" stroke-linecap="round" opacity="0.85"></polyline></svg>
       </div>
       <div class="map-tools">
-        <button type="button" id="zoom-in" title="拡大">＋</button>
-        <button type="button" id="zoom-out" title="縮小">－</button>
-        <button type="button" id="fit" title="ルート全体を表示">⤢</button>
+        <button type="button" id="zoom-in" aria-label="拡大" title="拡大">＋</button>
+        <button type="button" id="zoom-out" aria-label="縮小" title="縮小">－</button>
+        <button type="button" id="fit" aria-label="ルート全体を表示" title="ルート全体を表示">⤢</button>
       </div>
+      <div class="map-scale" id="map-scale"><span id="map-scale-bar"></span><em id="map-scale-label"></em></div>
       <span class="map-credit">地理院タイル</span>
     </div>
     <p class="note" id="map-hint">指でなぞると動かせます。青い丸がライブカメラです。押すと映像が出ます。</p>
@@ -501,7 +528,7 @@
 
   <!-- ============ 3. カメラ一覧 ============ -->
   <section class="card" id="cam-card" hidden>
-    <h2>3️⃣ 通り道のライブカメラ</h2>
+    <h2 id="cam-heading">3️⃣ 通り道のライブカメラ</h2>
     <ol id="cam-list"></ol>
     <p class="note" id="cam-note"></p>
   </section>
@@ -566,7 +593,7 @@
   <div class="viewer-box">
     <div class="viewer-head">
       <h2 id="viewer-title">カメラ</h2>
-      <button type="button" class="viewer-close" id="viewer-close" title="閉じる">✕</button>
+      <button type="button" class="viewer-close" id="viewer-close" aria-label="閉じる" title="閉じる">✕</button>
     </div>
     <p class="viewer-meta" id="viewer-sub"></p>
     <div class="viewer-shot" id="viewer-shot"></div>
@@ -739,6 +766,29 @@
     drawTiles(size);
     drawRoute();
     drawPins();
+    drawScale();
+  }
+
+  // 縮尺の目安を描く。
+  // 「画面の1ピクセルが何メートルか」を出し、1・2・5・10・20…の
+  // きりのよい長さのうち、100px前後におさまるものを選んで棒の長さにします。
+  function drawScale() {
+    // 地図の中心の緯度では、1ピクセルが何メートルか
+    var worldPx = TILE * Math.pow(2, view.zoom);
+    var mPerPx = Math.cos(view.lat * Math.PI / 180) * 2 * Math.PI * R_EARTH / worldPx;
+
+    var target = 100;                       // 棒の長さの目安（ピクセル）
+    var raw = mPerPx * target;              // その長さは何メートルか
+    var pow = Math.pow(10, Math.floor(Math.log(raw) / Math.LN10));
+    var nice = [1, 2, 5, 10].map(function (n) { return n * pow; })
+      .filter(function (v) { return v / mPerPx <= target * 1.6; })
+      .pop() || pow;
+
+    $('map-scale-bar').style.width = Math.round(nice / mPerPx) + 'px';
+    // 縮尺は「5 km」のように、きりのよい数字で出す（「5.0 km」にしない）
+    $('map-scale-label').textContent = nice >= 1000
+      ? Math.round(nice / 1000) + ' km'
+      : Math.round(nice) + ' m';
   }
 
   function drawTiles(size) {
@@ -1222,7 +1272,10 @@
       t.textContent = cam.place || cam.road;
       var s = document.createElement('span');
       s.className = 'cam-sub';
-      s.textContent = '出発から約 ' + fmtKm(item.along) + '　/　道から ' + fmtKm(item.offRoute) +
+      // ルート検索のときは「出発からの道のり」、現在地のときは「ここからの距離」
+      s.textContent = (item.along != null
+        ? '出発から約 ' + fmtKm(item.along) + '　/　道から ' + fmtKm(item.offRoute)
+        : 'ここから約 ' + fmtKm(item.offRoute)) +
         (cam.img ? '' : '　/　映像は公式ページで');
       main.appendChild(t);
       main.appendChild(document.createElement('br'));
@@ -1266,9 +1319,11 @@
   var viewerList = [];
   var viewerIdx = -1;
   var viewerTimer = null;
+  var lastFocus = null;   // カメラ画面を開く前に触っていた場所
 
   function openViewer(i) {
     if (!viewerList.length || i < 0 || i >= viewerList.length) return;
+    var wasOpen = !viewer.hidden;   // 「次のカメラ」で移動しただけかどうか
     viewerIdx = i;
     var cam = viewerList[i].cam;
 
@@ -1298,6 +1353,13 @@
     pinEls.forEach(function (el) {
       el.classList.toggle('is-active', Number(el.dataset.idx) === i);
     });
+
+    // キーボードや読み上げの人が「開いたこと」に気づけるよう、
+    // 閉じるボタンに合図（フォーカス）を移します。閉じたら元の場所に戻します。
+    if (!wasOpen) {
+      lastFocus = document.activeElement;
+      $('viewer-close').focus();
+    }
 
     clearInterval(viewerTimer);
     if (cam.img) viewerTimer = setInterval(showShot, 30000); // 30秒ごとに撮り直し
@@ -1342,6 +1404,11 @@
     clearInterval(viewerTimer);
     viewerTimer = null;
     pinEls.forEach(function (el) { el.classList.remove('is-active'); });
+    // 開く前に触っていたボタンへ戻す（キーボードで迷子にならないように）
+    if (lastFocus && document.contains(lastFocus)) {
+      try { lastFocus.focus(); } catch (e) {}
+    }
+    lastFocus = null;
   }
 
   $('viewer-close').addEventListener('click', closeViewer);
@@ -1354,6 +1421,14 @@
     if (ev.key === 'Escape') closeViewer();
     if (ev.key === 'ArrowLeft') openViewer(viewerIdx - 1);
     if (ev.key === 'ArrowRight') openViewer(viewerIdx + 1);
+    if (ev.key === 'Tab') {
+      // Tabがカメラ画面の外へ出ていかないよう、中でぐるぐる回す
+      var items = viewer.querySelectorAll('button:not([disabled]), a[href]');
+      if (!items.length) return;
+      var first = items[0], last = items[items.length - 1];
+      if (ev.shiftKey && document.activeElement === first) { ev.preventDefault(); last.focus(); }
+      else if (!ev.shiftKey && document.activeElement === last) { ev.preventDefault(); first.focus(); }
+    }
   });
 
   // ============================================================ 「調べる」ボタン
@@ -1369,6 +1444,10 @@
     }
     if (!CAMS.length) {
       say('カメラの台帳が読み込めていません。ページを開きなおしてみてください。', 'error');
+      return;
+    }
+    if (!$('cat-road').checked && !$('cat-water').checked) {
+      say('探すカメラの種類を、1つ以上えらんでください（🚗 道路 か 🌊 河川・ダム・海）。', 'error');
       return;
     }
 
@@ -1422,6 +1501,7 @@
         $('sum-cams').textContent = found.length + ' 台';
         $('route-card').hidden = false;
         $('cam-card').hidden = false;
+        $('cam-heading').textContent = '3️⃣ 通り道のライブカメラ';
 
         renderCamList(found);
         fitAll();
@@ -1442,6 +1522,12 @@
         }
       })
       .catch(function (err) {
+        // 圏外などで通信そのものができなかったときは、ブラウザの英語メッセージが
+        // そのまま出てしまうので、日本語の案内に置き換えます。
+        if (err instanceof TypeError) {
+          say('⚠️ インターネットにつながりませんでした。電波のよい場所で、もう一度お試しください。', 'error');
+          return;
+        }
         say('⚠️ ' + (err && err.message ? err.message : 'うまくいきませんでした') +
             '（地名を「◯◯駅」「◯◯市」のように変えると見つかりやすくなります）', 'error');
       })
@@ -1468,8 +1554,11 @@
       var lat = pos.coords.latitude, lon = pos.coords.longitude;
       $('from').value = lat.toFixed(5) + ',' + lon.toFixed(5);
       setView(lat, lon, 12);
-      showNearby(lat, lon);
-      say('✅ 現在地を出発地に入れました。近くのカメラを地図に出しています。', 'ok');
+      var n = showNearby(lat, lon);
+      say(n
+        ? '✅ 現在地を出発地に入れました。近くのカメラ ' + n + ' 台を下に並べています。'
+        : '✅ 現在地を出発地に入れました。ただし30km以内にカメラは見つかりませんでした。'
+          + '目的地を入れて「調べる」を押すと、通り道のカメラを探します。', 'ok');
     }, function () {
       say('現在地を取得できませんでした（位置情報の許可を確認してください）。地名を入れてもOKです。', 'error');
     }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 });
@@ -1483,9 +1572,20 @@
     }).filter(function (x) { return x.offRoute < 30000; })
       .sort(function (a, b) { return a.offRoute - b.offRoute; })
       .slice(0, 40);
+
     viewerList = near;
     shownCams = near.map(function (x) { return x.cam; });
+
+    // ⚠️ ここが大事：地図とカメラ画面だけ差し替えて一覧を放置すると、
+    //    「一覧に出ている名前」と「押したときに開くカメラ」がズレます。
+    //    ルートはもう関係ないので、ルートの要約を隠し、一覧も現在地基準に作り直します。
+    $('route-card').hidden = true;
+    $('cam-heading').textContent = '3️⃣ 現在地の近くのライブカメラ';
+    $('cam-card').hidden = near.length === 0;
+    renderCamList(near);
+
     render();
+    return near.length;
   }
 
   // ============================================================ 起動

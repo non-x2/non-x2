@@ -11,6 +11,7 @@
 
 from __future__ import annotations
 
+import http.client
 import json
 import re
 import ssl
@@ -19,6 +20,19 @@ import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta, timezone
+
+# 通信で起こりうる失敗をまとめたもの。
+# ⚠️ ここが漏れていると、カメラ1台の不調で週1の更新が丸ごと止まります。
+#    http.client の例外（BadStatusLine・IncompleteRead など）は OSError でも
+#    ValueError でもないため、明示的に入れておく必要があります。
+NET_ERRORS = (
+    urllib.error.URLError,
+    urllib.error.HTTPError,
+    ssl.SSLError,
+    http.client.HTTPException,
+    OSError,
+    ValueError,
+)
 
 JST = timezone(timedelta(hours=9))
 USER_AGENT = "non-x2-livecam-db/1.0 (+https://github.com/non-x2/non-x2)"
@@ -94,7 +108,7 @@ def check_image(url: str) -> bool:
                 return False
             # 中身が空同然のものは「表示できない」とみなす
             return len(res.read(1024)) >= 256
-    except (urllib.error.URLError, urllib.error.HTTPError, ssl.SSLError, OSError, ValueError):
+    except NET_ERRORS:
         return False
 
 
@@ -148,8 +162,7 @@ def _reverse_geocode_once(lat: float, lon: float) -> str | None:
     """その1点だけで自治体コードを調べる（見つからなければ None）。"""
     try:
         data = fetch_json(f"{REVGEO_URL}?lat={lat}&lon={lon}", GEO_TIMEOUT)
-    except (urllib.error.URLError, urllib.error.HTTPError, ssl.SSLError,
-            OSError, ValueError, json.JSONDecodeError):
+    except NET_ERRORS + (json.JSONDecodeError,):
         return None
     code = ((data or {}).get("results") or {}).get("muniCd")
     return (str(code).lstrip("0") or "0") if code else None
