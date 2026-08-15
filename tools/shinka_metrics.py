@@ -177,9 +177,10 @@ def build_report(
     lines.append(f"| 🌐 公開ページ数 | {metrics['public_pages']} |")
     lines.append("")
     lines.append(
-        "> 🌐 公開ページ数は固定値（3）です。"
-        "内訳: `index.html`（入口ページ）・`typhoon-app/`（台風情報まとめ）・"
-        "`bousai-app/`（防災情報まとめ）の3つだけをWebに公開しているため。"
+        "> 🌐 公開ページ数は、公開ワークフロー（`pages-deploy.yml`）が"
+        "実際に配置しているものを数えています。"
+        "Webに出しているのは入口ページと各アプリだけで、"
+        "作業ログ・脚本・台帳（`livecam-db/`）は公開していません。"
     )
     lines.append("")
     lines.append(f"## 📈 グラフ1: 日別コミット数（直近{len(daily_counts)}日間）")
@@ -226,6 +227,21 @@ def build_report(
     return "\n".join(lines)
 
 
+def count_public_pages() -> int:
+    """Webに公開しているページの数を、公開ワークフローの中身から数える。
+
+    以前は固定値（3）でしたが、ページが増えても数字が変わらず、
+    実態とズレてしまいました。公開の設定そのものを見て数えれば、
+    増えても減っても自動で正しくなります。
+    """
+    wf = REPO_ROOT / ".github" / "workflows" / "pages-deploy.yml"
+    if not wf.exists():
+        return 0
+    text = wf.read_text(encoding="utf-8")
+    # 「cp index.html _site/」「cp -r typhoon-app _site/」のような行を数える
+    return len(re.findall(r"^\s*cp\s+(?:-r\s+)?\S+\s+_site/", text, re.M))
+
+
 def main() -> None:
     docs = list_docs()
 
@@ -237,7 +253,7 @@ def main() -> None:
         "kaizen_records": count_kaizen_records(),
         "total_commits": count_total_commits(),
         "merged_prs": count_merged_prs(),
-        "public_pages": 3,  # index.html・typhoon-app・bousai-app の3つだけをWebに公開しているため固定値
+        "public_pages": count_public_pages(),
     }
 
     daily_counts, history_start = daily_commit_counts(days=14)

@@ -1,20 +1,20 @@
-# 🚗 道路ライブカメラ台帳の自動更新
+# 📷 ライブカメラ台帳の自動更新
 #
-# 全国の道路ライブカメラの「場所と写真URLの一覧」を作りなおします。
+# 全国のライブカメラ（道路・河川・ダム）の「場所と写真URLの一覧」を作りなおします。
 # カメラは増えたり減ったり、故障して映像が止まったりするので、週に1回だけ確認します。
 #
 # やること:
-#   1. 大もとの地図データ（国土技術研究センター）を取得
+#   1. 大もとの地図データ（国土技術研究センター）を取得 → livecam-db/data/livecams.json
 #   2. 写真URLが https で開けるか 1台ずつ確認（※ここに時間がかかります）
 #   3. 新しく増えたカメラの市区町村名を調べる（前に調べたぶんは使い回し）
-#   4. traffic-app/data/livecams.json と traffic-app/index.html の台帳を書き換え
+#   4. できた台帳を各アプリに配る（traffic-app のデータとページ内の埋め込み）
 #
 # 変わりがない回はコミットしません（履歴が無駄に増えないように）。
-# 手で今すぐ動かしたいときは、GitHubの Actions タブ →「🚗 ライブカメラ台帳の自動更新」→「Run workflow」。
+# 手で今すぐ動かしたいときは、GitHubの Actions タブ →「📷 ライブカメラ台帳の自動更新」→「Run workflow」。
 #
 # ※ 台風（毎時25分）・防災（毎時35分）とぶつからないよう、こちらは週1・別の時刻にしています。
 
-name: 🚗 ライブカメラ台帳の自動更新
+name: 📷 ライブカメラ台帳の自動更新
 
 on:
   schedule:
@@ -32,27 +32,30 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 30 # 1400台ぶんの確認をするので長め。固まっても30分で打ち切る保険
+    timeout-minutes: 45 # 3400台ぶんの確認をするので長め。固まっても45分で打ち切る保険
     steps:
       - name: リポジトリを取得
         uses: actions/checkout@v4
 
-      - name: ライブカメラの台帳を作りなおす
-        run: python3 traffic-app/scripts/fetch_livecams.py
+      - name: ライブカメラの台帳を作りなおす（大もと）
+        run: python3 livecam-db/build.py
+
+      - name: できた台帳を各アプリに配る
+        run: python3 livecam-db/export.py
 
       - name: 交通量の観測点台帳も手入れする（市区町村名の調べ直し）
         run: python3 traffic-app/scripts/fetch_road_status.py --rebuild-points
 
       - name: 変わっていればコミットして反映
         run: |
-          if [ -z "$(git status --porcelain traffic-app)" ]; then
+          if [ -z "$(git status --porcelain livecam-db traffic-app)" ]; then
             echo "変更なし。コミットはしません。"
             exit 0
           fi
           git config user.name  'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add traffic-app
-          git commit -m '🚗 交通の台帳を自動更新（ライブカメラ・交通量観測点）'
+          git add livecam-db traffic-app
+          git commit -m '📷 台帳を自動更新（ライブカメラ・交通量観測点）'
           # 同時刻に他の更新が入っていた場合に備えて、取り込んでから押す
           for i in 1 2 3; do
             git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && exit 0

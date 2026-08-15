@@ -1,0 +1,262 @@
+#!/usr/bin/env python3
+"""ライブカメラ台帳（データベース）を作る司令塔。
+
+やることは4つだけです:
+
+  1. `sources/` の各係に「取ってきて」と頼む
+  2. 同じ場所のカメラが重複していたら1つにまとめる
+  3. 写真URLが https で開けるかを1台ずつ確かめる（ページ内に出せるかの判定）
+  4. 緯度経度から市区町村名を付けて、`data/livecams.json` に保存する
+
+使い方:
+    python3 livecam-db/build.py                 # 全部やる（時間がかかります）
+    python3 livecam-db/build.py --no-verify     # 写真の確認をとばす（前回の結果を使う）
+    python3 livecam-db/build.py --no-geocode    # 市区町村の調べ直しをとばす
+    python3 livecam-db/build.py --only jice-roads   # 情報源をしぼる
+
+外部のライブラリは使いません（Python 3 の標準機能だけ）。
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import re
+import socket
+import sys
+from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from sources import base, jice, kaiho  # noqa: E402
+
+DB_PATH = Path(__file__).resolve().parent / "data" / "livecams.json"
+
+# 情報源の係の一覧。新しい情報源を足すときはここに登録します。
+COLLECTORS = {
+    "jice": jice.collect_all,
+    "kaiho": kaiho.collect_all,
+}
+
+# 台帳がこの数を下回ったら「こわれている」とみなして上書きしない（安全装置）
+MIN_EXPECTED = 2000
+
+# 情報源ごとに、前回の台数のこの割合を下回ったら中止する（安全装置）
+SOURCE_MIN_RATIO = 0.7
+
+
+def dedupe(cams: list[dict]) -> list[dict]:
+    """ほぼ同じ場所・同じ写真のカメラを1つにまとめる。
+
+    別々の情報源に同じカメラが載っていることがあるためです。
+    判定は「写真URLが同じ」または「約11m以内で名前も同じ」。
+    """
+    by_img: dict[str, dict] = {}
+    by_spot: dict[tuple, dict] = {}
+    out: list[dict] = []
+
+    for cam in cams:
+        img = cam.get("img")
+        spot = (round(cam["lat"], 4), round(cam["lon"], 4), cam["name"])
+
+        twin = (by_img.get(img) if img else None) or by_spot.get(spot)
+        if twin is not None:
+            # 情報が足りないほうを、あるほうで補う
+            for key in ("img", "page", "owner", "place"):
+                if not twin.get(key) and cam.get(key):
+                    twin[key] = cam[key]
+            twin.setdefault("also", [])
+            if cam["src"] not in twin["also"] and cam["src"] != twin["src"]:
+                twin["also"].append(cam["src"])
+            continue
+
+        out.append(cam)
+        if img:
+            by_img[img] = cam
+        by_spot[spot] = cam
+
+    return out
+
+
+def load_previous() -> tuple[set[str], dict[str, str], dict[str, int]]:
+    """前回の台帳から「開けた写真URL」「場所ごとの市区町村名」「情報源ごとの台数」を読み込む。"""
+    known_ok: set[str] = set()
+    places: dict[str, str] = {}
+    counts: dict[str, int] = {}
+    if not DB_PATH.exists():
+        return known_ok, places, counts
+    try:
+        old = json.loads(DB_PATH.read_text(encoding="utf-8"))
+    except (json.JSONDecodeError, OSError):
+        return known_ok, places, counts
+    for cam in old.get("cams", []):
+        if cam.get("img"):
+            known_ok.add(cam["img"])
+        if cam.get("place") and cam.get("lat") is not None:
+            places[base.place_key(cam["lat"], cam["lon"])] = cam["place"]
+    for src in old.get("sources", []):
+        if src.get("id"):
+            counts[src["id"]] = src.get("count", 0)
+    return known_ok, places, counts
+
+
+def warn_same_spot(cams: list[dict]) -> None:
+    """同じ座標に何台も登録されていたら知らせる（元データのまちがいに気づくため）。
+
+    例：北海道の8本の河川のカメラが、まったく同じ1点に登録されていたことがあります。
+    直すのは情報源の側なので、ここでは**気づけるように知らせるだけ**にしています。
+    """
+    spots: dict[tuple, list[str]] = {}
+    for cam in cams:
+        spots.setdefault((round(cam["lat"], 6), round(cam["lon"], 6)), []).append(cam["name"])
+    for (lat, lon), names in spots.items():
+        uniq = sorted(set(names))
+        if len(uniq) >= 3:   # 名前がちがうのに同じ点＝あやしい
+            print(f"  ⚠️ 同じ座標に {len(uniq)} 種類の名前: ({lat}, {lon}) "
+                  f"{'、'.join(uniq[:5])}{'…' if len(uniq) > 5 else ''}",
+                  file=sys.stderr)
+
+
+def warn_dead_pages(cams: list[dict]) -> int:
+    """案内先（公式ページ）のドメインが消えていないか確かめて知らせる。
+
+    映像を出せないカメラは「公式ページを見てください」と案内するので、
+    その案内先まで消えていると、利用者は行き止まりになります。
+
+    確かめるのは**名前が引けるか（DNS）だけ**です。
+      - ページを開きに行かないので速く、相手のサーバーにも負担をかけません
+      - 名前が引けない＝そのドメインは確実に消えている、と言い切れます
+      - 逆に「名前は引けるがページが404」までは見ません（そこまで断定できないため）
+
+    見つけても**消しはしません**。気づけるように知らせるだけです。
+    """
+    hosts: dict[str, int] = {}
+    for cam in cams:
+        page = cam.get("page") or ""
+        m = re.match(r"https?://([^/]+)", page)
+        if m:
+            hosts[m.group(1)] = hosts.get(m.group(1), 0) + 1
+
+    if not hosts:
+        return 0
+
+    def resolves(host: str) -> bool:
+        try:
+            socket.getaddrinfo(host.split(":")[0], None)
+            return True
+        except OSError:
+            return False
+
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        results = list(pool.map(resolves, hosts))
+
+    dead = [(h, n) for (h, n), ok in zip(hosts.items(), results) if not ok]
+    total = sum(n for _, n in dead)
+    for host, n in sorted(dead, key=lambda x: -x[1]):
+        print(f"  ⚠️ 案内先のドメインが消えています: {host}（{n}台ぶん）", file=sys.stderr)
+    return total
+
+
+def build(only: list[str] | None, verify: bool, geocode: bool) -> dict:
+    print("⏳ 情報源からカメラを集めています…")
+    cams: list[dict] = []
+    sources: list[dict] = []
+
+    for key, collect in COLLECTORS.items():
+        if only and key not in only and not any(o.startswith(key) for o in only):
+            continue
+        got, used = collect(only)
+        cams.extend(got)
+        sources.extend(used)
+
+    if not cams:
+        raise RuntimeError("カメラが1台も集まりませんでした")
+
+    print(f"📋 集まったカメラ: {len(cams)} 台")
+    cams = dedupe(cams)
+    print(f"🔁 重複をまとめた後: {len(cams)} 台")
+
+    known_ok, place_cache, prev_counts = load_previous()
+
+    # 元データのまちがいに気づくための見張り
+    warn_same_spot(cams)
+    dead_pages = warn_dead_pages(cams)
+    if dead_pages:
+        print(f"  ⚠️ 案内先が消えているカメラ: 合計 {dead_pages} 台"
+              f"（映像も出せない場合、利用者は行き止まりになります）", file=sys.stderr)
+
+    # 🛡 安全装置：情報源ごとに、前回より大きく減っていないか確かめる。
+    #    合計だけ見ていると「道路が全部消えても河川が残っているから合格」に
+    #    なってしまうため、情報源ごとに確かめます。
+    for src in sources:
+        before = prev_counts.get(src["id"])
+        if before and src["count"] < before * SOURCE_MIN_RATIO:
+            raise RuntimeError(
+                f"{src['name']} が {before}台 → {src['count']}台 に激減しました"
+                f"（前回の{SOURCE_MIN_RATIO:.0%}未満）。相手のサイトの不調かもしれないので中止します"
+            )
+
+    shown = base.verify_images(cams, known_ok, enabled=verify)
+    print(f"📷 ページ内で映像を出せるカメラ: {shown} 台 / 公式ページで見るカメラ: {len(cams) - shown} 台")
+
+    placed = base.fill_places(cams, place_cache, enabled=geocode)
+    print(f"🗾 市区町村名が付いたカメラ: {placed} 台")
+
+    # 並び順を安定させる（北から南へ）。差分が見やすくなります。
+    cams.sort(key=lambda c: (-c["lat"], c["lon"], c["name"]))
+    for i, cam in enumerate(cams):
+        cam["id"] = f"{cam['src']}-{i:05d}"
+
+    by_cat: dict[str, int] = {}
+    for cam in cams:
+        by_cat[cam["cat"]] = by_cat.get(cam["cat"], 0) + 1
+
+    return {
+        "updated": datetime.now(base.JST).isoformat(timespec="seconds"),
+        "count": len(cams),
+        "withImage": shown,
+        "withPlace": placed,
+        "byCategory": by_cat,
+        "sources": sources,
+        "cams": cams,
+    }
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description="ライブカメラ台帳を作ります")
+    parser.add_argument("--no-verify", action="store_true",
+                        help="写真が開けるかの確認をとばす（前回の結果を使います）")
+    parser.add_argument("--no-geocode", action="store_true",
+                        help="市区町村名の調べ直しをとばす（前回の結果を使います）")
+    parser.add_argument("--only", nargs="+", metavar="情報源",
+                        help="使う情報源をしぼる（例: --only jice-roads）")
+    args = parser.parse_args()
+
+    try:
+        db = build(only=args.only, verify=not args.no_verify, geocode=not args.no_geocode)
+    except Exception as exc:  # 失敗したら、今ある台帳は上書きしない（安全装置）
+        print(f"⚠️ 取得に失敗したので、今ある台帳はそのままにします: {exc}", file=sys.stderr)
+        return 1
+
+    if not args.only and db["count"] < MIN_EXPECTED:
+        print(
+            f"⚠️ カメラが {db['count']} 台しか集まりませんでした（いつもは {MIN_EXPECTED} 台以上）。"
+            "こわれたデータで上書きしないため中止します。",
+            file=sys.stderr,
+        )
+        return 1
+
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    DB_PATH.write_text(
+        json.dumps(db, ensure_ascii=False, separators=(",", ":")) + "\n",
+        encoding="utf-8",
+    )
+    print(f"💾 保存しました: {DB_PATH}（{DB_PATH.stat().st_size / 1024:.0f} KB）")
+    print("   内訳: " + " / ".join(f"{k} {v}台" for k, v in sorted(db["byCategory"].items())))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
