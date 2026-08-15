@@ -40,6 +40,9 @@ jobs:
       - name: ライブカメラの台帳を作りなおす
         run: python3 traffic-app/scripts/fetch_livecams.py
 
+      - name: 交通量の観測点台帳も手入れする（市区町村名の調べ直し）
+        run: python3 traffic-app/scripts/fetch_road_status.py --rebuild-points
+
       - name: 変わっていればコミットして反映
         run: |
           if [ -z "$(git status --porcelain traffic-app)" ]; then
@@ -49,7 +52,7 @@ jobs:
           git config user.name  'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add traffic-app
-          git commit -m '🚗 道路ライブカメラの台帳を自動更新'
+          git commit -m '🚗 交通の台帳を自動更新（ライブカメラ・交通量観測点）'
           # 同時刻に他の更新が入っていた場合に備えて、取り込んでから押す
           for i in 1 2 3; do
             git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && exit 0
