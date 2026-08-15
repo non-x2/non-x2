@@ -107,7 +107,7 @@
     min-height: 44px;
     cursor: pointer;
   }
-  .cat-picks input { width: 20px; height: 20px; }
+  .cat-picks input { width: 24px; height: 24px; }
   input[type="text"], select {
     font: inherit;
     font-size: 1rem;
@@ -277,6 +277,20 @@
   #cam-list { list-style: none; margin: 0; padding: 0; }
   #cam-list li { border-bottom: 1px solid var(--border-soft); }
   #cam-list li:last-child { border-bottom: 0; }
+  /* 路線が変わったところに入れる区切りの見出し */
+  .cam-group {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-dim);
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 0.35rem 0.6rem;
+    margin: 0.7rem 0 0.2rem;
+    border-bottom: 0 !important;
+  }
+  #cam-list .cam-group:first-child { margin-top: 0; }
+  .cam-more { border-bottom: 0 !important; padding: 0.6rem 0 0.2rem; text-align: center; }
+  .cam-more button { width: 100%; font-size: 0.92rem; font-weight: 700; }
   .cam-btn {
     display: flex;
     width: 100%;
@@ -384,7 +398,14 @@
     color: var(--text-dim);
     text-align: center;
   }
-  footer a { color: var(--accent); }
+  /* 文章の中のリンクは行の高さぶんしか無く、指では押しにくい（15px しかない）。
+     上下に余白を足して、見た目を変えずに「押せる範囲」だけ広げます。 */
+  footer a {
+    color: var(--accent);
+    display: inline-block;
+    padding: 0.7rem 0.15rem;
+    margin: -0.7rem 0;
+  }
 
   @media (max-width: 480px) {
     body { padding-left: 0.75rem; padding-right: 0.75rem; }
@@ -561,8 +582,9 @@
 
 <footer>
   <p>
-    カメラの位置：<a href="https://www.jice.or.jp/knowledge/maps/roads" target="_blank" rel="noopener">国土技術研究センター「道路チェック地図」</a>／
-    映像：各道路管理者（国土交通省 各地方整備局ほか）／
+    カメラの位置：<a href="https://www.jice.or.jp/knowledge/maps/roads" target="_blank" rel="noopener">国土技術研究センター「道路チェック地図」</a>・<a href="https://www.jice.or.jp/knowledge/maps/rivers" target="_blank" rel="noopener">「河川チェック地図」</a>／
+    出典：<a href="https://camera.mics.kaiho.mlit.go.jp/" target="_blank" rel="noopener">海上保安庁ホームページ</a>（灯台・港のカメラ。公共データ利用規約 PDL1.0）／
+    映像：各管理者（国土交通省 各地方整備局・海上保安庁ほか）／
     地図：<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル</a>／
     道案内：<a href="https://project-osrm.org/" target="_blank" rel="noopener">OSRM</a>（<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>）
   </p>
@@ -1149,11 +1171,38 @@
 
   // ============================================================ 画面の組み立て
 
-  function renderCamList(list) {
+  // 種類のしるし（🛣高速 / 🌊川・ダム / ⛵海 / 一般道は無し）
+  function catMark(cam) {
+    return cam.cat === 'sea' ? '⛵ ' : cam.cat === 'expressway' ? '🛣 '
+      : isWater(cam) ? '🌊 ' : '';
+  }
+
+  var LIST_STEP = 20; // 最初に出す台数（多いと画面が長くなりすぎるため）
+
+  function renderCamList(list, limit) {
     var ol = $('cam-list');
     ol.textContent = '';
-    list.forEach(function (item, i) {
+
+    // カメラが何十台もあると、全部並べたときにスマホで10画面以上の長さになります。
+    // そこで最初は 20 台だけ出して、「もっと見る」で足していきます。
+    var shown = Math.min(limit || LIST_STEP, list.length);
+
+    // 同じ路線が何十行も続くと読みづらいので、路線が変わったところに区切りを入れ、
+    // 各行は「場所」だけを見出しにします（路線名は区切りに1回だけ出す）。
+    var prevRoad = null;
+
+    list.slice(0, shown).forEach(function (item, i) {
       var cam = item.cam;
+
+      if (cam.road !== prevRoad) {
+        prevRoad = cam.road;
+        var same = list.slice(0, shown).filter(function (x) { return x.cam.road === cam.road; }).length;
+        var head = document.createElement('li');
+        head.className = 'cam-group';
+        head.textContent = catMark(cam) + cam.road + '（' + same + '台）';
+        ol.appendChild(head);
+      }
+
       var li = document.createElement('li');
       var b = document.createElement('button');
       b.type = 'button';
@@ -1169,9 +1218,8 @@
       main.className = 'cam-main';
       var t = document.createElement('span');
       t.className = 'cam-title';
-      t.textContent = (cam.cat === 'sea' ? '⛵ ' : cam.cat === 'expressway' ? '🛣 '
-                       : isWater(cam) ? '🌊 ' : '') + cam.road +
-        (cam.place ? '　' + cam.place : '');
+      // 路線名は上の区切りに出しているので、ここは場所だけ（場所が無いときだけ路線名）
+      t.textContent = cam.place || cam.road;
       var s = document.createElement('span');
       s.className = 'cam-sub';
       s.textContent = '出発から約 ' + fmtKm(item.along) + '　/　道から ' + fmtKm(item.offRoute) +
@@ -1190,6 +1238,21 @@
       li.appendChild(b);
       ol.appendChild(li);
     });
+
+    // まだ出していないカメラがあれば「もっと見る」を足す
+    if (shown < list.length) {
+      var more = document.createElement('li');
+      more.className = 'cam-more';
+      var mb = document.createElement('button');
+      mb.type = 'button';
+      mb.className = 'btn-ghost';
+      mb.textContent = '▼ もっと見る（残り ' + (list.length - shown) + ' 台）';
+      mb.addEventListener('click', function () {
+        renderCamList(list, shown + LIST_STEP);
+      });
+      more.appendChild(mb);
+      ol.appendChild(more);
+    }
 
     var withImg = list.filter(function (x) { return x.cam.img; }).length;
     $('cam-note').textContent = list.length
