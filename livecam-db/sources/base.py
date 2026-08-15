@@ -11,6 +11,7 @@
 
 from __future__ import annotations
 
+import http.client
 import json
 import re
 import ssl
@@ -19,6 +20,19 @@ import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 from datetime import timedelta, timezone
+
+# 通信で起こりうる失敗をまとめたもの。
+# ⚠️ ここが漏れていると、カメラ1台の不調で週1の更新が丸ごと止まります。
+#    http.client の例外（BadStatusLine・IncompleteRead など）は OSError でも
+#    ValueError でもないため、明示的に入れておく必要があります。
+NET_ERRORS = (
+    urllib.error.URLError,
+    urllib.error.HTTPError,
+    ssl.SSLError,
+    http.client.HTTPException,
+    OSError,
+    ValueError,
+)
 
 JST = timezone(timedelta(hours=9))
 USER_AGENT = "non-x2-livecam-db/1.0 (+https://github.com/non-x2/non-x2)"
@@ -94,7 +108,7 @@ def check_image(url: str) -> bool:
                 return False
             # 中身が空同然のものは「表示できない」とみなす
             return len(res.read(1024)) >= 256
-    except (urllib.error.URLError, urllib.error.HTTPError, ssl.SSLError, OSError, ValueError):
+    except NET_ERRORS:
         return False
 
 
@@ -144,15 +158,41 @@ def fetch_muni_table() -> dict[str, str]:
     return table
 
 
-def reverse_geocode(lat: float, lon: float) -> str | None:
-    """緯度経度から自治体コードを調べる。"""
+def _reverse_geocode_once(lat: float, lon: float) -> str | None:
+    """その1点だけで自治体コードを調べる（見つからなければ None）。"""
     try:
         data = fetch_json(f"{REVGEO_URL}?lat={lat}&lon={lon}", GEO_TIMEOUT)
-    except (urllib.error.URLError, urllib.error.HTTPError, ssl.SSLError,
-            OSError, ValueError, json.JSONDecodeError):
+    except NET_ERRORS + (json.JSONDecodeError,):
         return None
     code = ((data or {}).get("results") or {}).get("muniCd")
     return (str(code).lstrip("0") or "0") if code else None
+
+
+# 少しずらして試す位置（度）。0.003度 ≒ 330m、0.006度 ≒ 660m、0.012度 ≒ 1.3km。
+# 近いところから順に試し、見つかった時点で打ち切ります
+# （ふつうのカメラは最初の1回で決まるので、通信が増えるのは水の上のカメラだけです）。
+def _ring(step: float) -> tuple:
+    """ある距離の東西南北＋斜めの8方向。"""
+    d = step * 0.7  # 斜めは少し内側にして、同じくらいの距離にそろえる
+    return ((step, 0.0), (-step, 0.0), (0.0, step), (0.0, -step),
+            (d, d), (d, -d), (-d, d), (-d, -d))
+
+
+_NUDGES = ((0.0, 0.0),) + _ring(0.003) + _ring(0.006) + _ring(0.012)
+
+
+def reverse_geocode(lat: float, lon: float) -> str | None:
+    """緯度経度から自治体コードを調べる。
+
+    ⚠️ 川や海の上に立っているカメラ（橋の上・河口・港など）は、
+    その点に自治体の区域が無く、国土地理院が空の答えを返します。
+    そのときは **少しずつずらした近くの点** を順に試して、最初に見つかったものを使います。
+    """
+    for dlat, dlon in _NUDGES:
+        code = _reverse_geocode_once(lat + dlat, lon + dlon)
+        if code:
+            return code
+    return None
 
 
 def place_key(lat: float, lon: float) -> str:
