@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>交通・ライブカメラ｜ルートの通り道の道路を見る</title>
-<meta name="description" content="出発地と目的地を入れるとルートを地図に描き、その通り道にある道路ライブカメラを拾い出します。クリックすると今の道路の様子が見られます。">
+<meta name="description" content="出発地と目的地を入れるとルートを地図に描き、その通り道にある道路ライブカメラを拾い出します。全国の高速道路・国道の「いまの交通量」も、1週間前との比較つきで地図に表示します。">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='90'%3E%F0%9F%9A%97%3C/text%3E%3C/svg%3E">
 <style>
   :root {
@@ -27,6 +27,11 @@
     --pin-water: #0a8f8f;
     --pin-express: #7a3fb5;
     --pin-nocam: #7b8794;
+    --obs-lot: #d81e12;
+    --obs-more: #e08a00;
+    --obs-usual: #2f9e5b;
+    --obs-less: #2f7fd6;
+    --obs-na: #98a3b1;
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -48,6 +53,11 @@
       --pin-water: #3fc2c2;
       --pin-express: #b98ae0;
       --pin-nocam: #6b7684;
+      --obs-lot: #ff5f52;
+      --obs-more: #ffb04d;
+      --obs-usual: #4dc07f;
+      --obs-less: #64a9ff;
+      --obs-na: #77828f;
     }
   }
   * { box-sizing: border-box; }
@@ -259,6 +269,44 @@
     box-shadow: 0 1px 4px rgba(0,0,0,.4);
     pointer-events: none;
   }
+  /* --- 交通量の丸（観測点）。カメラのピンより小さく、下に重ねる --- */
+  .obs {
+    position: absolute;
+    z-index: 2;
+    width: 15px;
+    height: 15px;
+    min-height: 15px;
+    margin: -8px 0 0 -8px;
+    padding: 0;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,.92);
+    background: var(--obs-na);
+    box-shadow: 0 1px 3px rgba(0,0,0,.35);
+  }
+  .obs.is-lot { background: var(--obs-lot); }
+  .obs.is-more { background: var(--obs-more); }
+  .obs.is-usual { background: var(--obs-usual); }
+  .obs.is-less { background: var(--obs-less); }
+  .obs.is-active { outline: 3px solid var(--accent); outline-offset: 1px; z-index: 3; }
+
+  /* --- 交通量カード --- */
+  .obs-legend { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.6rem 0 0.2rem; padding: 0; list-style: none; font-size: 0.8rem; }
+  .obs-legend li { display: flex; align-items: center; gap: 0.35rem; border: 1px solid var(--border-soft); border-radius: 999px; padding: 0.05rem 0.6rem; background: var(--bg); }
+  .obs-dotchip { width: 12px; height: 12px; border-radius: 50%; display: inline-block; flex: none; border: 1.5px solid rgba(255,255,255,.92); box-shadow: 0 0 1px rgba(0,0,0,.45); }
+  .obs-tools { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; margin: 0.5rem 0 0.2rem; }
+  .obs-toggle { display: flex; align-items: center; gap: 0.4rem; font-size: 0.9rem; }
+  .obs-toggle input { width: 1.15rem; height: 1.15rem; }
+  .obs-h3 { font-size: 0.95rem; margin: 1rem 0 0.2rem; }
+  #obs-list { list-style: none; margin: 0.2rem 0 0; padding: 0; }
+  #obs-list li { border-bottom: 1px solid var(--border-soft); }
+  #obs-list li:last-child { border-bottom: 0; }
+  .obs-btn { display: flex; width: 100%; text-align: left; align-items: center; gap: 0.55rem; border: 0; background: none; border-radius: 8px; padding: 0.45rem 0.3rem; }
+  .obs-btn:hover { background: var(--bg); }
+  .obs-main { flex: 1; min-width: 0; }
+  .obs-title { font-weight: 700; font-size: 0.92rem; }
+  .obs-sub { font-size: 0.78rem; color: var(--text-dim); }
+  .obs-val { font-weight: 700; white-space: nowrap; font-size: 0.9rem; }
+
   .map-tools {
     position: absolute;
     right: 0.5rem;
@@ -474,7 +522,8 @@
 
 <header>
   <h1>🚗 交通・ライブカメラ</h1>
-  <p class="lead">行き先を決めると、その<strong>通り道にある道路ライブカメラ</strong>を拾い出します。押すと今の道路の様子が見えます。</p>
+  <p class="lead">行き先を決めると、その<strong>通り道にある道路ライブカメラ</strong>を拾い出します。押すと今の道路の様子が見えます。
+    地図には全国の<strong>いまの交通量</strong>（いつもと比べて多いか）も色の丸で出ます。</p>
   <p class="updated-badge" id="data-updated">カメラ台帳: 読み込み中…</p>
 </header>
 
@@ -559,6 +608,33 @@
     <p class="note" id="map-hint">指でなぞると動かせます。青い丸がライブカメラです。押すと映像が出ます。</p>
   </section>
 
+  <!-- ============ いまの交通量 ============ -->
+  <section class="card" id="obs-card">
+    <h2>🚦 いまの交通量（いつもと比べて多い？）</h2>
+    <p class="note" style="margin-top:0">全国の<strong>高速道路・国道にある観測点（約1,000か所）</strong>が「5分間に通った車の台数」を数えています。
+      それを<strong>1週間前の同じ時刻とくらべて</strong>色分けし、上の地図に小さな丸で重ねます。</p>
+    <p class="note" id="obs-updated">⏳ 交通量データを読み込んでいます…</p>
+    <ul class="obs-legend">
+      <li><span class="obs-dotchip" style="background:var(--obs-lot)"></span>かなり多い<span id="obs-count-lot"></span></li>
+      <li><span class="obs-dotchip" style="background:var(--obs-more)"></span>多い<span id="obs-count-more"></span></li>
+      <li><span class="obs-dotchip" style="background:var(--obs-usual)"></span>いつも並み<span id="obs-count-usual"></span></li>
+      <li><span class="obs-dotchip" style="background:var(--obs-less)"></span>少ない<span id="obs-count-less"></span></li>
+      <li><span class="obs-dotchip" style="background:var(--obs-na)"></span>比べられない<span id="obs-count-na"></span></li>
+    </ul>
+    <div class="obs-tools">
+      <label class="obs-toggle"><input type="checkbox" id="obs-show" checked> 地図に交通量の丸を出す</label>
+      <button type="button" class="btn-mini btn-ghost" id="obs-reload">🔄 いま更新する</button>
+    </div>
+    <h3 class="obs-h3" id="obs-list-title" hidden></h3>
+    <ol id="obs-list"></ol>
+    <p class="note" id="obs-detail" hidden></p>
+    <p class="note">📌 この色は<strong>「渋滞かどうか」ではありません</strong>。国の観測データに速度が入っていないため、
+      「車の台数が いつも（＝1週間前の同じ時刻）と比べて多いか」だけを正直に出しています（多め＝混みやすい目安にはなります）。
+      連休や天気で「いつも」の側がズレることもあります。データは<strong>観測から約20分遅れ</strong>で届き、控えは毎時更新・このページは5分ごとに読み直します。
+      渋滞・通行止めの確定情報は、下の公式サイトで確認してください。<br>
+      <small>出典：国土交通省API機能による交通量(参考値)を加工して作成</small></p>
+  </section>
+
   <!-- ============ 3. カメラ一覧 ============ -->
   <section class="card" id="cam-card" hidden>
     <h2 id="cam-heading">3️⃣ 通り道のライブカメラ</h2>
@@ -572,6 +648,7 @@
     <p class="note" style="margin-top:0">ライブカメラは「その場所の今の様子」です。<strong>渋滞や通行止めの全体像</strong>は下の公式サイトが確実です。</p>
     <ul class="link-list">
       <li><a href="https://www.jartic.or.jp/" target="_blank" rel="noopener">🚗 日本道路交通情報センター（JARTIC）渋滞・規制情報</a></li>
+      <li><a href="https://www.road-info-prvs.mlit.go.jp/roadinfo/sp/" target="_blank" rel="noopener">🚧 国土交通省 道路情報提供システム（国道の通行止め・規制の地図）</a></li>
       <li><a href="https://www.drivetraffic.jp/" target="_blank" rel="noopener">🛣 ドラとら（高速道路の交通状況）</a></li>
       <li><a href="https://www.mlit.go.jp/road/bosai/LIVEcamera.html" target="_blank" rel="noopener">📷 国土交通省 全国のライブカメラ一覧</a></li>
       <li><a href="https://www.jma.go.jp/bosai/map.html" target="_blank" rel="noopener">🌦 気象庁 天気・警報（雨や雪の確認）</a></li>
@@ -645,6 +722,7 @@
     カメラの位置：<a href="https://www.jice.or.jp/knowledge/maps/roads" target="_blank" rel="noopener">国土技術研究センター「道路チェック地図」</a>・<a href="https://www.jice.or.jp/knowledge/maps/rivers" target="_blank" rel="noopener">「河川チェック地図」</a>／
     出典：<a href="https://camera.mics.kaiho.mlit.go.jp/" target="_blank" rel="noopener">海上保安庁ホームページ</a>（灯台・港のカメラ。公共データ利用規約 PDL1.0）／
     映像：各管理者（国土交通省 各地方整備局・海上保安庁ほか）／
+    交通量：国土交通省API機能による交通量(参考値)を加工して作成／
     地図：<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル</a>／
     道案内：<a href="https://project-osrm.org/" target="_blank" rel="noopener">OSRM</a>（<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>）
   </p>
@@ -799,6 +877,7 @@
     drawTiles(size);
     drawRoute();
     drawPins();
+    drawObs();
     drawScale();
   }
 
@@ -1538,6 +1617,7 @@
         $('cam-heading').textContent = '3️⃣ 通り道のライブカメラ';
 
         renderCamList(found);
+        renderObsList();
         fitAll();
 
         var where = from.title + ' → ' + to.title;
@@ -1619,8 +1699,369 @@
     renderCamList(near);
 
     render();
+    renderObsList();
     return near.length;
   }
+
+  // ============================================================ いまの交通量（高速道路・国道の観測点）
+  //
+  // データの出どころ：国土交通省の「交通量API」。全国の観測点が「5分間に通った
+  // 車の台数」を数えています（観測から約20分遅れ・速度は入っていません）。
+  // このAPIはブラウザから直接呼べない決まりのため、GitHub Actions が毎時
+  // data/road_status.json に控えを置き、このページはそれを読みます。
+  //   ① data/road_status.json（毎時の控え）
+  //   ② 端末に残った前回分（①が読めないとき）
+  //   ③ 正直にあきらめて案内文（どちらも無いとき）
+  // 「渋滞かどうか」は台数だけでは分からないので、1週間前の同じ時刻と比べて
+  // 「いつもより多い／少ない」を出します（判定の線引きは、のんラボの目安です）。
+
+  var OBS_LEVELS = {
+    lot:   { mark: '🔴', label: 'いつもよりかなり多い', cls: 'is-lot' },
+    more:  { mark: '🟠', label: 'いつもより多い',       cls: 'is-more' },
+    usual: { mark: '🟢', label: 'いつも並み',           cls: 'is-usual' },
+    less:  { mark: '🔵', label: 'いつもより少ない',     cls: 'is-less' },
+    na:    { mark: '⚪', label: '比べられない',         cls: '' }
+  };
+  // 目立つ色を優先して描く順番。⚠️ 0 から始めないこと（JSでは 0 が「無い」と
+  // 同じ扱いになり、下の「|| 9」で既定値に化けてしまうため。実際に一度やらかした）
+  var OBS_ORDER = { lot: 1, more: 2, less: 3, usual: 4, na: 5 };
+  var OBS_SAVE_KEY = 'nonx2-road-status-v1';
+
+  var obsPoints = [];       // 観測点（台帳と5分値を合体させたもの)
+  var obsMeta = null;       // 観測時刻などのメモ
+  var obsEls = [];          // 地図に出している丸
+  var obsSelected = null;   // いま選んでいる観測点のコード
+  var obsStale = false;     // データが古すぎるか（6時間以上前）
+  var obsLoading = false;
+
+  // 「いつもより多い？」の判定。台数が少ない道で率だけが跳ねないよう、
+  // 「倍率」と「増えた台数」の両方がそろったときだけ色を変えます。
+  function obsLevel(cur, base) {
+    if (cur === null || base === null) return 'na';
+    // くらべる相手（1週間前）が8台未満しか無いときは、倍率が意味をなさない
+    // （先週側のセンサー不調の可能性も高い）ので、正直に「比べられない」扱いに。
+    if (base < 8) return cur >= 30 ? 'na' : 'usual';
+    var diff = cur - base;
+    var ratio = cur / base;
+    if (ratio >= 1.5 && diff >= 30) return 'lot';
+    if (ratio >= 1.2 && diff >= 20) return 'more';
+    if (ratio <= 0.7 && diff <= -20) return 'less';
+    return 'usual';
+  }
+
+  function obsJoin(pointsFile, statusFile) {
+    var munis = (pointsFile && pointsFile.m) || [];
+    var byCode = {};
+    ((pointsFile && pointsFile.p) || []).forEach(function (r) { byCode[String(r[0])] = r; });
+    var list = [];
+    var pts = (statusFile && statusFile.points) || {};
+    Object.keys(pts).forEach(function (code) {
+      var row = byCode[code];
+      if (!row) return; // 台帳に無い観測点は場所が分からないので出せない
+      var v = pts[code];
+      var up = v[0], dn = v[1], bu = v[2], bd = v[3];
+      var cur = (up === null && dn === null) ? null : (up || 0) + (dn || 0);
+      var base = (bu === null && bd === null) ? null : (bu || 0) + (bd || 0);
+      list.push({
+        code: code,
+        lat: row[1] / 1e5,
+        lon: row[2] / 1e5,
+        expwy: row[3] === 1,
+        place: row[4] >= 0 ? (munis[row[4]] || '') : '',
+        up: up, dn: dn, cur: cur, base: base,
+        diff: (cur !== null && base !== null) ? cur - base : 0,
+        level: obsLevel(cur, base)
+      });
+    });
+    return list;
+  }
+
+  function obsTime() {
+    // 時間コード（例 202608151040）→ 日時。日本時間として読みます。
+    var t = obsMeta && obsMeta.timecode;
+    if (!t || t.length !== 12) return null;
+    return new Date(+t.slice(0, 4), +t.slice(4, 6) - 1, +t.slice(6, 8), +t.slice(8, 10), +t.slice(10, 12));
+  }
+
+  function fmtObsTime(d) {
+    return (d.getMonth() + 1) + '月' + d.getDate() + '日 ' +
+      d.getHours() + ':' + ('0' + d.getMinutes()).slice(-2);
+  }
+
+  function obsHeaderText(fromCache) {
+    var d = obsTime();
+    if (!d) return '⚠️ 観測時刻がわかりませんでした。';
+    var ageMin = Math.max(0, Math.round((Date.now() - d.getTime()) / 60000));
+    var age = ageMin < 60 ? ageMin + '分前' : Math.round(ageMin / 60 * 10) / 10 + '時間前';
+    var text = '観測時刻：' + fmtObsTime(d) + ' ごろの5分間（' + age + '）';
+    if (obsMeta.basecode) {
+      text += '／くらべる相手：1週間前の同じ時刻';
+    } else {
+      text += '／⚠️ 今回は1週間前のデータが取れず、比較なし';
+    }
+    if (fromCache) {
+      text = '⚠️ いまの控えを読めなかったため、端末に残っていた前回分を表示しています。 ' + text;
+    }
+    if (obsStale) {
+      text += '。⚠️ 6時間以上前のデータなので、色分けはお休みして丸だけ出しています（自動更新が止まっているかもしれません）';
+    } else if (ageMin > 120) {
+      text += '。⚠️ 2時間以上前のデータです（自動更新が止まっているかもしれません）';
+    }
+    return text;
+  }
+
+  function applyObs(pointsFile, statusFile, fromCache) {
+    obsMeta = {
+      timecode: String(statusFile.timecode || ''),
+      basecode: statusFile.basecode || null,
+      generated: statusFile.generated || ''
+    };
+    obsPoints = obsJoin(pointsFile, statusFile);
+    var d = obsTime();
+    obsStale = !d || (Date.now() - d.getTime()) > 6 * 3600 * 1000;
+
+    $('obs-updated').textContent = obsHeaderText(fromCache);
+
+    // 凡例に「いま何地点あるか」を添える
+    var counts = { lot: 0, more: 0, usual: 0, less: 0, na: 0 };
+    obsPoints.forEach(function (o) { counts[o.level]++; });
+    Object.keys(counts).forEach(function (key) {
+      var el = $('obs-count-' + key);
+      if (el) el.textContent = obsStale ? '' : ' ' + counts[key];
+    });
+
+    drawObs();
+    renderObsList();
+  }
+
+  function loadObs(manual) {
+    if (obsLoading) return;
+    obsLoading = true;
+    if (manual) $('obs-updated').textContent = '⏳ 交通量データを読み込んでいます…';
+    function getJson(res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    }
+    Promise.all([
+      fetch('data/road_points.json', { cache: 'no-store' }).then(getJson),
+      fetch('data/road_status.json', { cache: 'no-store' }).then(getJson)
+    ]).then(function (pair) {
+      applyObs(pair[0], pair[1], false);
+      try {
+        localStorage.setItem(OBS_SAVE_KEY, JSON.stringify({ p: pair[0], s: pair[1] }));
+      } catch (e) { /* 保存できなくても表示はできる */ }
+    }).catch(function () {
+      // 控えが読めないとき：端末に残った前回分 → それも無ければ正直に案内
+      var saved = null;
+      try { saved = JSON.parse(localStorage.getItem(OBS_SAVE_KEY) || 'null'); } catch (e) {}
+      if (saved && saved.p && saved.s) {
+        applyObs(saved.p, saved.s, true);
+        return;
+      }
+      obsMeta = null; obsPoints = []; obsStale = false;
+      $('obs-updated').textContent = '⚠️ 交通量データを読み込めませんでした。' +
+        'このファイルをパソコンで直接開いている（file://）ときは、この欄は公開ページでのみ表示されます。' +
+        '渋滞・通行止めは下の「公式の渋滞・通行止め情報」で確認してください。';
+      drawObs();
+      renderObsList();
+    }).then(function () {
+      obsLoading = false;
+    });
+  }
+
+  function drawObs() {
+    obsEls.forEach(function (el) { if (el.parentNode) el.parentNode.removeChild(el); });
+    obsEls = [];
+    if (!obsPoints.length || !$('obs-show').checked) return;
+
+    var size = mapSize();
+    var margin = 30;
+    var placed = [];
+    var minGap = view.zoom >= 10 ? 11 : 15; // 引きの地図ほど強めに間引く
+    var pts = obsPoints.slice().sort(function (a, b) {
+      return (OBS_ORDER[a.level] || 9) - (OBS_ORDER[b.level] || 9);
+    });
+
+    pts.forEach(function (o) {
+      var p = project(o.lat, o.lon, view.zoom);
+      var x = p.x - originX, y = p.y - originY;
+      if (x < -margin || y < -margin || x > size.w + margin || y > size.h + margin) return;
+      if (view.zoom < 14 && o.code !== obsSelected) { // しっかり拡大したら全部出す
+        var tooClose = placed.some(function (q) {
+          return Math.abs(q.x - x) < minGap && Math.abs(q.y - y) < minGap;
+        });
+        if (tooClose) return;
+      }
+      placed.push({ x: x, y: y });
+
+      var lv = OBS_LEVELS[obsStale ? 'na' : o.level];
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'obs' + (lv.cls ? ' ' + lv.cls : '') + (o.code === obsSelected ? ' is-active' : '');
+      b.style.left = x + 'px';
+      b.style.top = y + 'px';
+      b.title = '交通量: ' + (o.place || '観測点') + (obsStale ? '' : '（' + lv.label + '）');
+      b.setAttribute('aria-label', b.title);
+      b.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        if (suppressClick) return;
+        selectObs(o);
+      });
+      layerEl.appendChild(b);
+      obsEls.push(b);
+    });
+  }
+
+  function obsDetailText(o) {
+    var lv = OBS_LEVELS[o.level];
+    var kind = o.expwy ? '高速道路' : '一般国道';
+    var place = o.place ? o.place + ' 付近' : '（市区町村名は調べられませんでした）';
+    var d = obsTime();
+    var parts = ['【' + kind + '】' + place];
+    if (o.cur === null) {
+      parts.push('機器の故障・欠測のため、いまの台数は測れていません。');
+    } else {
+      var updn = '上り' + (o.up === null ? '測れず' : o.up + '台') +
+                 '・下り' + (o.dn === null ? '測れず' : o.dn + '台');
+      parts.push('いま（' + (d ? fmtObsTime(d) : '') + ' ごろの5分間）は ' + o.cur + '台（' + updn + '）。');
+      if (o.base === null) {
+        parts.push('1週間前の同じ時刻のデータが無いため、多い少ないの判定はできません。');
+      } else {
+        var pct = o.base > 0 ? Math.round(o.cur / o.base * 100) + '%' : '－';
+        parts.push('1週間前の同じ時刻は ' + o.base + '台（いまはその ' + pct + '）。');
+      }
+    }
+    if (!obsStale) parts.push(lv.mark + ' ' + lv.label);
+    return parts.join(' ');
+  }
+
+  function selectObs(o) {
+    obsSelected = o.code;
+    var detail = $('obs-detail');
+    detail.textContent = '📍 ' + obsDetailText(o);
+    detail.hidden = false;
+    drawObs();
+  }
+
+  // ルート沿いの観測点をひろう（カメラの camsNearRoute と同じ考え方）
+  function obsNearRoute(coords, maxRadiusM) {
+    if (!obsPoints.length || !coords || coords.length < 2) return [];
+    var cell = 0.05;
+    var span = Math.max(1, Math.ceil(maxRadiusM / 5500));
+    var grid = {};
+    for (var i = 0; i < coords.length; i++) {
+      var key = Math.floor(coords[i][0] / cell) + ':' + Math.floor(coords[i][1] / cell);
+      (grid[key] || (grid[key] = [])).push(i);
+    }
+    var cum = new Float64Array(coords.length);
+    for (var j = 1; j < coords.length; j++) {
+      cum[j] = cum[j - 1] + distMeters(coords[j - 1][0], coords[j - 1][1], coords[j][0], coords[j][1]);
+    }
+    var found = [];
+    obsPoints.forEach(function (o) {
+      var gy = Math.floor(o.lat / cell), gx = Math.floor(o.lon / cell);
+      var best = Infinity, bestIdx = -1;
+      for (var dy = -span; dy <= span; dy++) {
+        for (var dx = -span; dx <= span; dx++) {
+          var list = grid[(gy + dy) + ':' + (gx + dx)];
+          if (!list) continue;
+          for (var k = 0; k < list.length; k++) {
+            var idx = list[k];
+            var d = idx > 0
+              ? distToSegment(o.lat, o.lon, coords[idx - 1][0], coords[idx - 1][1], coords[idx][0], coords[idx][1])
+              : distMeters(o.lat, o.lon, coords[idx][0], coords[idx][1]);
+            if (d < best) { best = d; bestIdx = idx; }
+          }
+        }
+      }
+      if (bestIdx >= 0 && best <= maxRadiusM) {
+        found.push({ obs: o, offRoute: best, along: cum[bestIdx] });
+      }
+    });
+    found.sort(function (a, b) { return a.along - b.along; });
+    return found;
+  }
+
+  function renderObsList() {
+    var title = $('obs-list-title');
+    var ol = $('obs-list');
+    ol.textContent = '';
+    $('obs-detail').hidden = true;
+
+    if (!obsPoints.length || obsStale) { title.hidden = true; return; }
+
+    var rows, heading;
+    if (routeLatLngs && routeLatLngs.length > 1) {
+      // ルートを調べたあとは「そのルート沿い」を出す（出発地から順）
+      var near = obsNearRoute(routeLatLngs, 3000);
+      rows = near.map(function (x) { return x.obs; }).slice(0, 15);
+      heading = '🚗 このルート沿いの観測点（出発地から順・3km以内 ' + near.length + ' か所）';
+      if (!rows.length) {
+        heading = '🚗 このルート沿い3km以内に観測点はありませんでした（観測点は約1,000か所だけなので、無い道も多いです）';
+      }
+    } else {
+      rows = obsPoints.filter(function (o) { return o.level === 'lot' || o.level === 'more'; })
+        .sort(function (a, b) {
+          var byLevel = (OBS_ORDER[a.level] || 9) - (OBS_ORDER[b.level] || 9);
+          return byLevel !== 0 ? byLevel : b.diff - a.diff;
+        })
+        .slice(0, 10);
+      heading = rows.length
+        ? '🔴 いつもより車が多いところ（全国の上位' + rows.length + 'か所）'
+        : '✅ いま「いつもより多い」観測点は全国にありません';
+    }
+    title.textContent = heading;
+    title.hidden = false;
+
+    rows.forEach(function (o) {
+      var lv = OBS_LEVELS[o.level];
+      var li = document.createElement('li');
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'obs-btn';
+
+      var chip = document.createElement('span');
+      chip.className = 'obs-dotchip';
+      chip.style.background = 'var(--obs-' + (o.level === 'na' ? 'na' : o.level) + ')';
+
+      var main = document.createElement('span');
+      main.className = 'obs-main';
+      var t1 = document.createElement('span');
+      t1.className = 'obs-title';
+      t1.textContent = (o.place || '（場所名なし）');
+      var t2 = document.createElement('span');
+      t2.className = 'obs-sub';
+      t2.textContent = (o.expwy ? '高速道路' : '一般国道') + '・' + lv.label;
+      main.appendChild(t1);
+      main.appendChild(document.createElement('br'));
+      main.appendChild(t2);
+
+      var val = document.createElement('span');
+      val.className = 'obs-val';
+      if (o.cur === null) {
+        val.textContent = '測れず';
+      } else {
+        val.textContent = o.cur + '台';
+        if (o.base !== null && o.base > 0) {
+          val.textContent += '（' + Math.round(o.cur / o.base * 100) + '%）';
+        }
+      }
+
+      b.appendChild(chip);
+      b.appendChild(main);
+      b.appendChild(val);
+      b.addEventListener('click', function () {
+        setView(o.lat, o.lon, Math.max(view.zoom, 11));
+        selectObs(o);
+        mapEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+      li.appendChild(b);
+      ol.appendChild(li);
+    });
+  }
+
+  $('obs-show').addEventListener('change', drawObs);
+  $('obs-reload').addEventListener('click', function () { loadObs(true); });
 
   // ============================================================ 起動
 
@@ -1678,6 +2119,10 @@
     attachSuggest('to', 'cand-to');
 
     render();
+
+    // いまの交通量：読み込み＋5分ごとに読み直し（控え自体は毎時更新）
+    loadObs(false);
+    setInterval(function () { loadObs(false); }, 5 * 60 * 1000);
 
     // リンクから開かれたときは、その条件をそのまま入れて検索する
     var saved = readUrl();
