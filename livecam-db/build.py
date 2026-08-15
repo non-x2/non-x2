@@ -21,7 +21,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
+import socket
 import sys
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
 
@@ -116,6 +119,46 @@ def warn_same_spot(cams: list[dict]) -> None:
                   file=sys.stderr)
 
 
+def warn_dead_pages(cams: list[dict]) -> int:
+    """案内先（公式ページ）のドメインが消えていないか確かめて知らせる。
+
+    映像を出せないカメラは「公式ページを見てください」と案内するので、
+    その案内先まで消えていると、利用者は行き止まりになります。
+
+    確かめるのは**名前が引けるか（DNS）だけ**です。
+      - ページを開きに行かないので速く、相手のサーバーにも負担をかけません
+      - 名前が引けない＝そのドメインは確実に消えている、と言い切れます
+      - 逆に「名前は引けるがページが404」までは見ません（そこまで断定できないため）
+
+    見つけても**消しはしません**。気づけるように知らせるだけです。
+    """
+    hosts: dict[str, int] = {}
+    for cam in cams:
+        page = cam.get("page") or ""
+        m = re.match(r"https?://([^/]+)", page)
+        if m:
+            hosts[m.group(1)] = hosts.get(m.group(1), 0) + 1
+
+    if not hosts:
+        return 0
+
+    def resolves(host: str) -> bool:
+        try:
+            socket.getaddrinfo(host.split(":")[0], None)
+            return True
+        except OSError:
+            return False
+
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        results = list(pool.map(resolves, hosts))
+
+    dead = [(h, n) for (h, n), ok in zip(hosts.items(), results) if not ok]
+    total = sum(n for _, n in dead)
+    for host, n in sorted(dead, key=lambda x: -x[1]):
+        print(f"  ⚠️ 案内先のドメインが消えています: {host}（{n}台ぶん）", file=sys.stderr)
+    return total
+
+
 def build(only: list[str] | None, verify: bool, geocode: bool) -> dict:
     print("⏳ 情報源からカメラを集めています…")
     cams: list[dict] = []
@@ -139,6 +182,10 @@ def build(only: list[str] | None, verify: bool, geocode: bool) -> dict:
 
     # 元データのまちがいに気づくための見張り
     warn_same_spot(cams)
+    dead_pages = warn_dead_pages(cams)
+    if dead_pages:
+        print(f"  ⚠️ 案内先が消えているカメラ: 合計 {dead_pages} 台"
+              f"（映像も出せない場合、利用者は行き止まりになります）", file=sys.stderr)
 
     # 🛡 安全装置：情報源ごとに、前回より大きく減っていないか確かめる。
     #    合計だけ見ていると「道路が全部消えても河川が残っているから合格」に
