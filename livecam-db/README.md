@@ -12,7 +12,8 @@
 
 ## いま入っているカメラ
 
-`python3 livecam-db/livecam.py info` でいつでも確認できます。
+`python3 livecam-db/livecam.py info` でいつでも確認できます（2026-08-15 時点：**3,424台**／うち
+**2,615台**はページ内に映像を出せる／道路1,412・河川1,819・ダム114・海79）。
 
 | 情報源 | 中身 | 利用条件 |
 |---|---|---|
@@ -82,7 +83,7 @@ rivers = livecam.filter_cams(db, category="river", pref="新潟県", with_image=
 |---|---|
 | `id` | 台帳の中での通し番号 |
 | `src` | どの情報源から来たか |
-| `cat` | 種類（road / river / dam / weir） |
+| `cat` | 種類（road / river / dam / weir / sea） |
 | `name` | 路線名・河川名など |
 | `place` | 市区町村（緯度経度から自動で付けています） |
 | `lat` / `lon` | 緯度・経度 |
@@ -192,6 +193,7 @@ python3 livecam-db/build.py --only jice-roads   # 情報源をしぼる
 | `livecam.py` | 台帳を**使う**ための小さな道具（近くを探す・ルート沿いを探す・検索） |
 | `sources/base.py` | どの情報源でも使う共通の道具（取得・https確認・市区町村） |
 | `sources/jice.py` | 情報源①：JICE の道路／河川ライブカメラ |
+| `sources/kaiho.py` | 情報源②：海上保安庁のライブカメラ（灯台・港・岬） |
 | `data/livecams.json` | できあがった台帳（**大もと**） |
 
 すべて **Python 3 の標準機能のみ**で動きます（追加インストール不要）。
