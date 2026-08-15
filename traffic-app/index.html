@@ -1,0 +1,1352 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>交通・ライブカメラ｜ルートの通り道の道路を見る</title>
+<meta name="description" content="出発地と目的地を入れるとルートを地図に描き、その通り道にある道路ライブカメラを拾い出します。クリックすると今の道路の様子が見られます。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='90'%3E%F0%9F%9A%97%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f4f6f8;
+    --card: #ffffff;
+    --text: #1b1f24;
+    --text-dim: #5b6472;
+    --border: #d9dee4;
+    --border-soft: #e6eaee;
+    --accent: #0b6bcb;
+    --tab-active-bg: #1a3c6e;
+    --tab-active-fg: #ffffff;
+    --ok-bg: #e7f5ec; --ok-ink: #1d6b3a; --ok-line: #bfe3cd;
+    --warn-bg: #fdf3e0; --warn-ink: #8a5a0a; --warn-line: #f0ddb4;
+    --alert-bg: #fdeaea; --alert-ink: #a02725; --alert-line: #f3c6c5;
+    --unknown-bg: #eef1f5; --unknown-ink: #47505c; --unknown-line: #d7dde5;
+    --route: #d6470f;
+    --pin: #0b6bcb;
+    --pin-nocam: #7b8794;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12151a;
+      --card: #1a1f26;
+      --text: #e8ecf1;
+      --text-dim: #9aa5b4;
+      --border: #313a45;
+      --border-soft: #262e38;
+      --accent: #6db3ff;
+      --tab-active-bg: #2a4a72;
+      --tab-active-fg: #eaf2fd;
+      --ok-bg: #16281d; --ok-ink: #7ecf9c; --ok-line: #23503a;
+      --warn-bg: #2c2413; --warn-ink: #e8bb62; --warn-line: #55461f;
+      --alert-bg: #301718; --alert-ink: #f2918f; --alert-line: #5c2a2a;
+      --unknown-bg: #21262e; --unknown-ink: #aab4c2; --unknown-line: #39424e;
+      --route: #ff7a45;
+      --pin: #4da3ff;
+      --pin-nocam: #6b7684;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { overflow-x: hidden; }
+  body {
+    margin: 0;
+    padding: 1.5rem 1rem 3rem;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+    line-height: 1.75;
+    overflow-x: hidden;
+  }
+  main, header, footer { max-width: 44rem; margin-left: auto; margin-right: auto; }
+  header h1 { font-size: 1.35rem; margin: 0 0 0.2rem; }
+  header .lead { color: var(--text-dim); font-size: 0.9rem; margin: 0; }
+  .updated-badge {
+    display: inline-block;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.15rem 0.8rem;
+    margin: 0.6rem 0 0;
+  }
+
+  /* --- カード --- */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1rem 1.1rem;
+    margin: 0.9rem 0;
+  }
+  .card h2 { font-size: 1.05rem; margin: 0 0 0.6rem; }
+  .card h3 { font-size: 0.95rem; margin: 1rem 0 0.4rem; }
+  .card[hidden] { display: none; }
+  .note { font-size: 0.85rem; color: var(--text-dim); margin: 0.5rem 0 0; }
+
+  /* --- 入力まわり --- */
+  .field { margin: 0 0 0.7rem; }
+  .field label {
+    display: block;
+    font-size: 0.88rem;
+    font-weight: 700;
+    margin: 0 0 0.25rem;
+  }
+  .field-row { display: flex; gap: 0.4rem; align-items: stretch; }
+  input[type="text"], select {
+    font: inherit;
+    font-size: 1rem;
+    width: 100%;
+    padding: 0.5rem 0.7rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    min-height: 44px;
+  }
+  input[type="text"]:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  button {
+    font: inherit;
+    cursor: pointer;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    min-height: 44px;
+    padding: 0.4rem 0.9rem;
+  }
+  button:disabled { opacity: 0.55; cursor: wait; }
+  .btn-primary {
+    width: 100%;
+    font-size: 1.02rem;
+    font-weight: 700;
+    background: var(--tab-active-bg);
+    color: var(--tab-active-fg);
+    border-color: var(--tab-active-bg);
+    margin-top: 0.3rem;
+  }
+  .btn-mini { font-size: 0.85rem; white-space: nowrap; padding: 0.3rem 0.7rem; }
+  .btn-ghost { border-color: var(--accent); color: var(--accent); }
+
+  /* --- 状態表示 --- */
+  .status {
+    margin: 0.7rem 0 0;
+    padding: 0.6rem 0.85rem;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    border: 1px solid var(--unknown-line);
+    background: var(--unknown-bg);
+    color: var(--unknown-ink);
+  }
+  .status[hidden] { display: none; }
+  .status.is-busy { border-color: var(--warn-line); background: var(--warn-bg); color: var(--warn-ink); }
+  .status.is-ok { border-color: var(--ok-line); background: var(--ok-bg); color: var(--ok-ink); }
+  .status.is-error { border-color: var(--alert-line); background: var(--alert-bg); color: var(--alert-ink); }
+
+  /* --- ルートの要約 --- */
+  .summary { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0 0 0.3rem; }
+  .summary div {
+    flex: 1 1 7rem;
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    padding: 0.45rem 0.6rem;
+    background: var(--bg);
+  }
+  .summary dt { font-size: 0.76rem; color: var(--text-dim); margin: 0; }
+  .summary dd { margin: 0; font-size: 1.1rem; font-weight: 700; }
+
+  /* --- 地図 --- */
+  #map {
+    position: relative;
+    width: 100%;
+    height: 62vh;
+    min-height: 320px;
+    max-height: 560px;
+    overflow: hidden;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    background: #e8eef2;
+    touch-action: none;
+    cursor: grab;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  #map.is-dragging { cursor: grabbing; }
+  #map-layer { position: absolute; inset: 0; will-change: transform; }
+  /* 重なりの順番：地図タイル → ルートの線 → カメラのピン
+     （同じ場所に重ねて置くので、z-index で前後をはっきり決めています） */
+  #map-layer img.tile {
+    position: absolute;
+    z-index: 1;
+    width: 256px;
+    height: 256px;
+    pointer-events: none;
+    -webkit-user-drag: none;
+  }
+  #map-svg {
+    position: absolute;
+    z-index: 2;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    overflow: visible;
+    pointer-events: none;
+  }
+  .pin {
+    position: absolute;
+    z-index: 3;
+    width: 26px;
+    height: 26px;
+    min-height: 26px;
+    margin: -13px 0 0 -13px;
+    padding: 0;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    background: var(--pin);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1;
+    box-shadow: 0 1px 4px rgba(0,0,0,.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .pin.is-nocam { background: var(--pin-nocam); }
+  .pin.is-active { outline: 3px solid var(--route); outline-offset: 1px; }
+  .pin-end {
+    position: absolute;
+    z-index: 3;
+    width: 30px; height: 30px; min-height: 30px;
+    margin: -15px 0 0 -15px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    background: var(--route);
+    color: #fff;
+    font-size: 0.85rem;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,.4);
+    pointer-events: none;
+  }
+  .map-tools {
+    position: absolute;
+    right: 0.5rem;
+    top: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    z-index: 5;
+  }
+  .map-tools button {
+    width: 44px; height: 44px; min-height: 44px;
+    padding: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    background: var(--card);
+    opacity: 0.94;
+  }
+  .map-credit {
+    position: absolute;
+    right: 0.3rem; bottom: 0.2rem;
+    font-size: 0.68rem;
+    background: rgba(255,255,255,.75);
+    color: #333;
+    padding: 0 0.35rem;
+    border-radius: 4px;
+    z-index: 5;
+  }
+
+  /* --- カメラ一覧 --- */
+  #cam-list { list-style: none; margin: 0; padding: 0; }
+  #cam-list li { border-bottom: 1px solid var(--border-soft); }
+  #cam-list li:last-child { border-bottom: 0; }
+  .cam-btn {
+    display: flex;
+    width: 100%;
+    gap: 0.6rem;
+    align-items: center;
+    text-align: left;
+    border: 0;
+    background: none;
+    border-radius: 10px;
+    padding: 0.6rem 0.4rem;
+    min-height: 56px;
+  }
+  .cam-btn:hover { background: var(--bg); }
+  .cam-no {
+    flex: 0 0 auto;
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    background: var(--pin);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .cam-no.is-nocam { background: var(--pin-nocam); }
+  .cam-main { flex: 1 1 auto; min-width: 0; }
+  .cam-title { font-weight: 700; font-size: 0.95rem; }
+  .cam-sub { font-size: 0.8rem; color: var(--text-dim); }
+  .cam-go { flex: 0 0 auto; font-size: 0.8rem; color: var(--accent); font-weight: 700; }
+
+  /* --- カメラを見る画面 --- */
+  #viewer {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(0,0,0,.72);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  #viewer[hidden] { display: none; }
+  .viewer-box {
+    background: var(--card);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    width: min(46rem, 100%);
+    max-height: 92vh;
+    overflow: auto;
+    padding: 0.9rem 1rem 1.1rem;
+  }
+  .viewer-head { display: flex; gap: 0.5rem; align-items: flex-start; }
+  .viewer-head h2 { flex: 1 1 auto; font-size: 1.05rem; margin: 0; }
+  .viewer-close { flex: 0 0 auto; width: 44px; height: 44px; padding: 0; font-size: 1.1rem; }
+  .viewer-shot {
+    margin: 0.7rem 0 0;
+    background: #000;
+    border-radius: 10px;
+    overflow: hidden;
+    min-height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .viewer-shot img { display: block; width: 100%; height: auto; }
+  .viewer-msg {
+    padding: 1.2rem 1rem;
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--text-dim);
+  }
+  .viewer-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.7rem 0 0; }
+  .viewer-actions a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0.4rem 0.9rem;
+    border-radius: 10px;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.9rem;
+  }
+  .viewer-meta { font-size: 0.8rem; color: var(--text-dim); margin: 0.6rem 0 0; }
+
+  /* --- リンク一覧 --- */
+  .link-list { list-style: none; margin: 0; padding: 0; }
+  .link-list li { border-bottom: 1px solid var(--border-soft); }
+  .link-list li:last-child { border-bottom: 0; }
+  .link-list a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0.45rem 0.2rem;
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.92rem;
+  }
+  .link-list a:hover { text-decoration: underline; }
+
+  footer {
+    margin-top: 1.6rem;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    text-align: center;
+  }
+  footer a { color: var(--accent); }
+
+  @media (max-width: 480px) {
+    body { padding-left: 0.75rem; padding-right: 0.75rem; }
+    .card { padding: 0.9rem 0.85rem; }
+    #map { height: 55vh; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🚗 交通・ライブカメラ</h1>
+  <p class="lead">行き先を決めると、その<strong>通り道にある道路ライブカメラ</strong>を拾い出します。押すと今の道路の様子が見えます。</p>
+  <p class="updated-badge" id="data-updated">カメラ台帳: 読み込み中…</p>
+</header>
+
+<main>
+
+  <!-- ============ 1. ルートを決める ============ -->
+  <section class="card">
+    <h2>1️⃣ どこからどこへ行きますか？</h2>
+
+    <div class="field">
+      <label for="from">出発地</label>
+      <div class="field-row">
+        <input type="text" id="from" placeholder="例）名古屋駅　豊橋市　東京都千代田区" autocomplete="off" list="cand-from">
+        <datalist id="cand-from"></datalist>
+        <button type="button" class="btn-mini btn-ghost" id="use-gps" title="今いる場所を出発地にします">📍 現在地</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="to">目的地</label>
+      <input type="text" id="to" placeholder="例）静岡駅　箱根町　大阪市北区" autocomplete="off" list="cand-to">
+      <datalist id="cand-to"></datalist>
+    </div>
+    <p class="note" style="margin-top:-0.3rem">💡 2文字以上入れると<strong>候補</strong>が出ます。同じ地名が各地にあるので、候補から選ぶと確実です。</p>
+
+    <div class="field">
+      <label for="radius">通り道とみなす幅（ルートからの距離）</label>
+      <select id="radius">
+        <option value="300">300m（ほぼ道の上だけ）</option>
+        <option value="700">700m（せまめ）</option>
+        <option value="1500" selected>1.5km（おすすめ）</option>
+        <option value="3000">3km（広く拾う）</option>
+        <option value="5000">5km（とても広く拾う）</option>
+      </select>
+    </div>
+
+    <button type="button" class="btn-primary" id="search">🔍 ルートと通り道のカメラを調べる</button>
+    <p class="status" id="status" hidden></p>
+    <p class="note">道案内は自動車のルートで計算します。地名は日本語でどうぞ（駅名・市区町村名・住所が使えます）。<br>
+      📷 ライブカメラは<strong>国が管理する国道</strong>が中心です。<strong>高速道路にはほとんどありません</strong>ので、
+      高速を通るルートでは少なめになります（見つからないときは自動で範囲を広げて探します）。</p>
+  </section>
+
+  <!-- ============ 2. ルートの結果 ============ -->
+  <section class="card" id="route-card" hidden>
+    <h2>2️⃣ ルート</h2>
+    <p class="note" id="route-places" style="margin-top:0"></p>
+    <dl class="summary">
+      <div><dt>距離</dt><dd id="sum-dist">－</dd></div>
+      <div><dt>所要時間の目安</dt><dd id="sum-time">－</dd></div>
+      <div><dt>通り道のカメラ</dt><dd id="sum-cams">－</dd></div>
+    </dl>
+    <p class="note">⚠️ 所要時間は<strong>渋滞を考えていない目安</strong>です。実際の混み具合は、下のライブカメラや公式の渋滞情報で確かめてください。</p>
+  </section>
+
+  <!-- ============ 地図 ============ -->
+  <section class="card" id="map-card">
+    <h2>🗾 地図</h2>
+    <div id="map">
+      <div id="map-layer">
+        <svg id="map-svg" aria-hidden="true"><polyline id="route-line" fill="none" stroke="var(--route)" stroke-width="5" stroke-linejoin="round" stroke-linecap="round" opacity="0.85"></polyline></svg>
+      </div>
+      <div class="map-tools">
+        <button type="button" id="zoom-in" title="拡大">＋</button>
+        <button type="button" id="zoom-out" title="縮小">－</button>
+        <button type="button" id="fit" title="ルート全体を表示">⤢</button>
+      </div>
+      <span class="map-credit">地理院タイル</span>
+    </div>
+    <p class="note" id="map-hint">指でなぞると動かせます。青い丸がライブカメラです。押すと映像が出ます。</p>
+  </section>
+
+  <!-- ============ 3. カメラ一覧 ============ -->
+  <section class="card" id="cam-card" hidden>
+    <h2>3️⃣ 通り道のライブカメラ</h2>
+    <ol id="cam-list"></ol>
+    <p class="note" id="cam-note"></p>
+  </section>
+
+  <!-- ============ 公式の交通情報 ============ -->
+  <section class="card">
+    <h2>🚦 公式の渋滞・通行止め情報</h2>
+    <p class="note" style="margin-top:0">ライブカメラは「その場所の今の様子」です。<strong>渋滞や通行止めの全体像</strong>は下の公式サイトが確実です。</p>
+    <ul class="link-list">
+      <li><a href="https://www.jartic.or.jp/" target="_blank" rel="noopener">🚗 日本道路交通情報センター（JARTIC）渋滞・規制情報</a></li>
+      <li><a href="https://www.drivetraffic.jp/" target="_blank" rel="noopener">🛣 ドラとら（高速道路の交通状況）</a></li>
+      <li><a href="https://www.mlit.go.jp/road/bosai/LIVEcamera.html" target="_blank" rel="noopener">📷 国土交通省 全国のライブカメラ一覧</a></li>
+      <li><a href="https://www.jma.go.jp/bosai/map.html" target="_blank" rel="noopener">🌦 気象庁 天気・警報（雨や雪の確認）</a></li>
+    </ul>
+  </section>
+
+</main>
+
+<!-- ============ カメラを見る画面 ============ -->
+<div id="viewer" hidden role="dialog" aria-modal="true" aria-labelledby="viewer-title">
+  <div class="viewer-box">
+    <div class="viewer-head">
+      <h2 id="viewer-title">カメラ</h2>
+      <button type="button" class="viewer-close" id="viewer-close" title="閉じる">✕</button>
+    </div>
+    <p class="viewer-meta" id="viewer-sub"></p>
+    <div class="viewer-shot" id="viewer-shot"></div>
+    <div class="viewer-actions">
+      <button type="button" class="btn-ghost" id="viewer-reload">🔄 今すぐ更新</button>
+      <button type="button" id="viewer-prev">← 前のカメラ</button>
+      <button type="button" id="viewer-next">次のカメラ →</button>
+      <a id="viewer-page" href="#" target="_blank" rel="noopener">🔗 公式ページ</a>
+    </div>
+    <p class="viewer-meta" id="viewer-note"></p>
+  </div>
+</div>
+
+<footer>
+  <p>
+    カメラの位置：<a href="https://www.jice.or.jp/knowledge/maps/roads" target="_blank" rel="noopener">国土技術研究センター「道路チェック地図」</a>／
+    映像：各道路管理者（国土交通省 各地方整備局ほか）／
+    地図：<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル</a>／
+    道案内：<a href="https://project-osrm.org/" target="_blank" rel="noopener">OSRM</a>（<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>）
+  </p>
+  <p>
+    <a href="../index.html">← のんラボのトップへ</a>　|
+    <a href="https://non-x2.github.io/non-x2/traffic-app/">🌐 公開ページ（いつでも最新）</a>
+  </p>
+</footer>
+
+<!-- ここから下は「カメラの台帳」です。traffic-app/scripts/fetch_livecams.py が自動で書き換えます。 -->
+<script id="livecam-data" type="application/json">
+{"u":"2026-08-15","n":["国道5号","国道12号","国道36号","国道37号","国道38号","国道39号","国道40号","国道44号","国道227号","国道228号","国道229号","国道230号","国道231号","国道232号","国道233号","国道235号","国道236号","国道238号","国道239号","国道240号","国道241号","国道243号","国道244号","国道273号","国道274号","国道275号","国道276号","国道277号","国道333号","国道334号","国道335号","国道336号","国道391号","国道393号","国道451号","国道453号","国道7号","鹿児島九州道","津軽自動車道","国道101号","国道4号","国道104号","国道45号","八戸南環状道路","八戸南道路","国道46号","東横道","中野バイパス","国道9号","山田道路","釜石山田道路","大船渡三陸道路","高田道路","仙人峠道路","国道108号","国道6号","三陸道","国道47号","国道48号","秋田道","国道13号","国道112号","国道113号","国道49号","国道53号","国道17号","国道18号","国道50号","国道20号","国道8号","国道116号","国道117号","国道253号","国道252号","国道353号","国道148号","国道41号","国道156号","国道470号","国道160号","国道159号","国道157号","国道161号","国道27号","国道138号","国道52号","国道139号","国道19号","国道153号","国道474号","国道21号","国道158号","高山清見道路","国道1号","国道246号","宮古道路","国道25号","京奈和自動車道","国道42号","国道2号","国道29号","北近畿豊岡自動車道","名阪国道","鳥取道","国道178号","国道179号","国道180号","国道181号","国道183号","国道313号","国道482号","浜田・三隅道路","益田道路","国道191号","国道3号","国道54号","国道32号","国道55号","国道192号","国道11号","国道33号","国道56号","国道201号","国道202号","国道210号","国道209号","有沿道路","国道497号","国道35号","国道205号","国道34号","国道57号","国道208号","国道10号","東九州自動車道","宮崎九州中央道","国道220号","国道224号","鹿児島大隅縦貫道","国道225号","国道226号"],"m":["北海道開発局","東北地方整備局 青森河川国道事務所","九州地方整備局 大隅河川国道事務所","東北地方整備局 岩手河川国道事務所","東北地方整備局 三陸国道事務所","中国地方整備局 松江国道事務所","東北地方整備局 仙台河川国道事務所","東北地方整備局 山形河川国道事務所","東北地方整備局 能代河川国道事務所","東北地方整備局 湯沢河川国道事務所","東北地方整備局 秋田河川国道事務所","東北地方整備局 秋田国道維持出張所","東北地方整備局 酒田河川国道事務所","東北地方整備局 福島河川国道事務所","東北地方整備局 郡山国道事務所","東北地方整備局 磐城国道事務所","関東地方整備局 高崎河川国道事務所","関東地方整備局 宇都宮国道事務所","関東地方整備局 相武国道事務所","北陸地方整備局 新潟国道事務所","北陸地方整備局 長岡国道事務所","北陸地方整備局 高田河川国道事務所","新潟県 および新潟県IT＆ITS推進協議会","新潟県 新潟県土木部","北陸地方整備局 富山河川国道事務所","北陸地方整備局 金沢河川国道事務所","近畿地方整備局 福井河川国道事務所","関東地方整備局 甲府河川国道事務所","関東地方整備局 長野国道事務所","中部地方整備局 飯田国道事務所","中部地方整備局 岐阜国道事務所","中部地方整備局 高山国道事務所","中部地方整備局 多治見砂防国道事務所","中部地方整備局 浜松河川国道事務所","中部地方整備局 静岡国道事務所","中部地方整備局 沼津河川国道事務所","中部地方整備局 名古屋国道事務所","中部地方整備局 三重河川国道事務所","中部地方整備局 北勢国道事務所","近畿地方整備局 奈良国道事務所","中部地方整備局 紀勢国道事務所","近畿地方整備局 滋賀国道事務所","近畿地方整備局 京都国道事務所","近畿地方整備局 姫路河川国道事務所","近畿地方整備局 豊岡河川国道事務所","中国地方整備局 鳥取河川国道事務所","中国地方整備局 倉吉河川国道事務所","中国地方整備局 浜田河川国道事務所","九州地方整備局 福岡国道事務所","中国地方整備局 岡山国道事務所","中国地方整備局 三次河川国道事務所","中国地方整備局 山口河川国道事務所","四国地方整備局 道路部","九州地方整備局 北九州国道事務所","九州地方整備局 長崎河川国道事務所","九州地方整備局 熊本河川国道事務所","九州地方整備局 大分河川国道事務所","九州地方整備局 延岡河川国道事務所","九州地方整備局 鹿児島国道事務所"],"a":["北海道長万部町","北海道黒松内町","北海道仁木町","北海道小樽市","北海道札幌市厚別区","北海道江別市","北海道岩見沢市","北海道奈井江町","北海道砂川市","北海道滝川市","北海道深川市","北海道旭川市","北海道恵庭市","北海道苫小牧市","北海道伊達市","北海道室蘭市","北海道芦別市","北海道南富良野町","北海道釧路市","北海道白糠町","北海道上川町","北海道北見市","北海道比布町","北海道音威子府村","北海道中川町","北海道天塩町","北海道幌延町","北海道豊富町","北海道稚内市","北海道厚岸町","北海道浜中町","北海道根室市","北海道厚沢部町","北海道福島町","北海道積丹町","北海道神恵内村","北海道岩内町","北海道寿都町","北海道島牧村","北海道札幌市南区","北海道喜茂別町","北海道留寿都村","北海道洞爺湖町","北海道増毛町","北海道遠別町","北海道初山別村","北海道羽幌町","北海道苫前町","北海道小平町","北海道留萌市","北海道日高町","北海道新冠町","北海道広尾町","北海道枝幸町","北海道浜頓別町","北海道弟子屈町","北海道美幌町","北海道標茶町","北海道標津町","北海道上士幌町","北海道夕張市","北海道むかわ町","北海道月形町","北海道中頓別町","北海道倶知安町","北海道八雲町","北海道遠軽町","北海道佐呂間町","北海道斜里町","北海道羅臼町","北海道赤井川村","北海道新十津川町","青森県平川市","青森県大鰐町","青森県弘前市","青森県藤崎町","青森県青森市","鹿児島県曽於市","青森県五所川原市","青森県平内町","青森県野辺地町","青森県東北町","青森県七戸町","青森県十和田市","青森県五戸町","青森県三戸町","青森県南部町","青森県八戸市","青森県六戸町","青森県階上町","岩手県一戸町","岩手県岩手町","岩手県盛岡市","岩手県奥州市","岩手県一関市","岩手県雫石町","秋田県仙北市","岩手県花巻市","岩手県久慈市","岩手県田野畑村","岩手県岩泉町","岩手県山田町","岩手県大槌町","岩手県釜石市","岩手県大船渡市","岩手県陸前高田市","島根県安来市","岩手県遠野市","岩手県住田町","宮城県大衡村","宮城県大崎市","宮城県栗原市","宮城県美里町","宮城県白石市","宮城県柴田町","宮城県岩沼市","宮城県仙台市太白区","宮城県山元町","宮城県塩竈市","宮城県松島町","宮城県東松島市","宮城県登米市","宮城県気仙沼市","島根県松江市","宮城県南三陸町","島根県出雲市","宮城県石巻市","山形県舟形町","宮城県仙台市青葉区","山形県東根市","秋田県能代市","秋田県小坂町","秋田県三種町","秋田県北秋田市","秋田県大館市","秋田県大仙市","秋田県湯沢市","秋田県八郎潟町","秋田県秋田市","秋田県由利本荘市","秋田県にかほ市","山形県金山町","山形県真室川町","山形県新庄市","山形県遊佐町","山形県三川町","山形県鶴岡市","島根県大田市","山形県庄内町","山形県米沢市","山形県南陽市","山形県上山市","山形県村山市","山形県尾花沢市","山形県戸沢村","山形県最上町","山形県西川町","山形県小国町","山形県長井市","福島県福島市","福島県西郷村","福島県白河市","福島県会津若松市","福島県猪苗代町","福島県郡山市","福島県西会津町","福島県柳津町","福島県会津坂下町","福島県平田村","福島県いわき市","群馬県みなかみ町","群馬県高崎市","長野県軽井沢町","栃木県那須町","栃木県那須塩原市","栃木県矢板市","栃木県高根沢町","栃木県上三川町","茨城県五霞町","茨城県古河市","栃木県下野市","栃木県足利市","栃木県栃木市","栃木県小山市","東京都八王子市","神奈川県相模原市緑区","新潟県関川村","新潟県湯沢町","新潟県村上市","新潟県胎内市","新潟県聖籠町","新潟県新潟市北区","新潟県新潟市東区","新潟県新潟市中央区","新潟県新潟市西区","新潟県新潟市西蒲区","新潟県長岡市","新潟県三条市","新潟県新潟市南区","新潟県新潟市江南区","新潟県阿賀町","新潟県小千谷市","新潟県魚沼市","新潟県柏崎市","新潟県上越市","新潟県妙高市","石川県宝達志水町","新潟県糸魚川市","新潟県南魚沼市","新潟県十日町市","富山県朝日町","富山県滑川市","富山県富山市","岐阜県飛騨市","富山県砺波市","富山県小矢部市","富山県高岡市","富山県氷見市","石川県七尾市","石川県羽咋市","石川県金沢市","石川県津幡町","石川県野々市市","石川県川北町","石川県白山市","福井県あわら市","福井県南越前町","福井県敦賀市","福井県小浜市","福井県高浜町","福井県若狭町","山梨県上野原市","山梨県大月市","山梨県甲州市","山梨県韮崎市","山梨県北杜市","山梨県山中湖村","山梨県南部町","山梨県身延町","山梨県富士川町","山梨県富士河口湖町","山梨県都留市","長野県御代田町","長野県東御市","長野県上田市","長野県坂城町","長野県千曲市","長野県長野市","長野県飯綱町","長野県信濃町","長野県松本市","長野県安曇野市","長野県生坂村","長野県大町市","長野県富士見町","長野県茅野市","長野県諏訪市","長野県塩尻市","長野県木祖村","長野県木曽町","長野県上松町","長野県大桑村","長野県南木曽町","長野県飯田市","長野県阿智村","長野県平谷村","長野県根羽村","岐阜県垂井町","岐阜県関ケ原町","滋賀県米原市","岐阜県白川町","岐阜県七宗町","岐阜県郡上市","福井県大野市","岐阜県高山市","岐阜県下呂市","岐阜県多治見市","岐阜県土岐市","岐阜県瑞浪市","岐阜県御嵩町","岐阜県可児市","岐阜県中津川市","岐阜県恵那市","静岡県藤枝市","静岡県島田市","静岡県掛川市","静岡県磐田市","静岡県浜松市中央区","静岡県湖西市","愛知県新城市","静岡県浜松市浜名区","静岡県富士宮市","静岡県静岡市清水区","静岡県小山町","静岡県函南町","静岡県三島市","静岡県長泉町","静岡県静岡市葵区","愛知県豊田市","三重県亀山市","滋賀県甲賀市","岩手県宮古市","奈良県五條市","三重県伊賀市","奈良県山添村","奈良県奈良市","三重県大紀町","三重県紀北町","三重県尾鷲市","三重県熊野市","三重県多気町","三重県大台町","滋賀県大津市","滋賀県栗東市","滋賀県長浜市","滋賀県彦根市","滋賀県近江八幡市","滋賀県高島市","京都府京都市山科区","京都府京都市東山区","京都府亀岡市","京都府南丹市","京都府京丹波町","兵庫県明石市","兵庫県加古川市","兵庫県高砂市","兵庫県姫路市","兵庫県太子町","兵庫県たつの市","兵庫県赤穂市","兵庫県上郡町","兵庫県宍粟市","兵庫県香美町","兵庫県新温泉町","兵庫県養父市","兵庫県朝来市","兵庫県丹波市","奈良県御所市","奈良県橿原市","奈良県田原本町","奈良県三宅町","奈良県川西町","奈良県天理市","鳥取県鳥取市","鳥取県岩美町","鳥取県若桜町","鳥取県智頭町","兵庫県佐用町","岡山県美作市","岡山県西粟倉村","鳥取県琴浦町","鳥取県湯梨浜町","鳥取県大山町","鳥取県米子市","鳥取県三朝町","鳥取県日野町","鳥取県日南町","鳥取県倉吉市","鳥取県江府町","島根県江津市","島根県浜田市","島根県益田市","島根県津和野町","福岡県古賀市","島根県雲南市","島根県飯南町","岡山県奈義町","広島県三次市","広島県安芸高田市","山口県長門市","山口県萩市","山口県阿武町","山口県山口市","山口県宇部市","山口県周南市","徳島県三好市","徳島県阿南市","徳島県東みよし町","愛媛県東温市","愛媛県松山市","愛媛県久万高原町","愛媛県伊予市","愛媛県宇和島市","愛媛県西予市","高知県香美市","高知県大豊町","高知県仁淀川町","高知県黒潮町","高知県中土佐町","高知県室戸市","福岡県篠栗町","福岡県筑紫野市","福岡県福岡市西区","福岡県糸島市","大分県日田市","福岡県うきは市","福岡県久留米市","福岡県八女市","福岡県大川市","福岡県みやま市","福岡県大牟田市","福岡県岡垣町","福岡県飯塚市","福岡県糸田町","長崎県佐世保市","長崎県東彼杵町","長崎県諫早市","長崎県長崎市","長崎県南島原市","熊本県山鹿市","熊本県八代市","熊本県芦北町","熊本県宇土市","熊本県阿蘇市","熊本県宇城市","熊本県南阿蘇村","熊本県熊本市北区","大分県由布市","大分県九重町","大分県杵築市","大分県日出町","大分県宇佐市","大分県別府市","大分県佐伯市","宮崎県延岡市","宮崎県門川町","宮崎県日向市","鹿児島県垂水市","鹿児島県鹿屋市","鹿児島県鹿児島市","鹿児島県大崎町","鹿児島県いちき串木野市","鹿児島県霧島市","鹿児島県枕崎市"],"p":["http://info-road.hdb.hkd.mlit.go.jp/RoadInfo/index_gazou2.htm","http://www.thr.mlit.go.jp/aomori/road/cctv/index.html","http://www.qsr.mlit.go.jp/osumi/bousai/top.html?gmn=mapDR2","http://www2.thr.mlit.go.jp/iwate/bousai/douro/index.html","http://www2.thr.mlit.go.jp/iwate/bousai/douro/index.html#","http://www.thr.mlit.go.jp/bumon/j73501/gazou/index.html","http://www.cgr.mlit.go.jp/matsukoku/route9/index.html","http://www.thr.mlit.go.jp/sendai/livecamera/road/4-1.html","http://www.thr.mlit.go.jp/sendai/livecamera/road/4-2.html","http://www.thr.mlit.go.jp/sendai/livecamera/road/45.html","http://www.thr.mlit.go.jp/sendai/livecamera/road/45-1.html","http://www.thr.mlit.go.jp/sendai/livecamera/road/47.html","http://www.thr.mlit.go.jp/sendai/livecamera/road/48.html","http://www.thr.mlit.go.jp/yamagata/camera-road/s-map-48.html","http://www.thr.mlit.go.jp/noshiro/douro/f_romen_intra.htm","http://www.thr.mlit.go.jp/yuzawa/02_miti/livecam/index.htm","http://www.thr.mlit.go.jp/akita/index.html","http://www.thr.mlit.go.jp/akita/akikoku/index.html","http://www.thr.mlit.go.jp/sakata/road/view/index.html","http://www.thr.mlit.go.jp/yamagata/camera-road/s-map-13s.html","http://www.thr.mlit.go.jp/yamagata/camera-road/s-map-13n.html","http://www.thr.mlit.go.jp/yamagata/camera-road/s-map-47w.html","http://www.thr.mlit.go.jp/yamagata/camera-road/s-map-47e.html","http://www.thr.mlit.go.jp/yamagata/camera-road/s-map-112.html","http://www.thr.mlit.go.jp/sakata/road/r112/index.html","http://www.thr.mlit.go.jp/yamagata/camera-road/s-map-113.html","http://www.thr.mlit.go.jp/fukushima/kurinavi/plane_frame.html","http://www.thr.mlit.go.jp/koriyama/inform/shirakawa_index.html","http://www.thr.mlit.go.jp/koriyama/inform/aizu_index.html","http://www.thr.mlit.go.jp/koriyama/inform/atami_index.html","http://www.thr.mlit.go.jp/koriyama/inform/westaizu_index.html","http://www.thr.mlit.go.jp/koriyama/inform/koriyamaeast_index.html","http://www.thr.mlit.go.jp/iwaki/index.html","http://www.ktr.mlit.go.jp/takasaki/takasaki_index009.html","http://www.ktr.mlit.go.jp/utunomiya/utunomiya_index002.html","http://www.ktr.mlit.go.jp/sobu/03camera/index.htm","http://www.live-cam.pref.niigata.jp/","http://www.palro.go.jp/toyamadouro/Map.htm#top","http://www.hrr.mlit.go.jp/kanazawa/douro/michinavi/index.html","http://www.fukui.kkr.mlit.go.jp/douro/cctv/index.html","http://www.fukui.kkr.mlit.go.jp/douro/cctv/","http://www.ktr.mlit.go.jp/koufu/michi_camera/index.htm","http://www.ktr.mlit.go.jp/nagano/douroinfo/","http://www.cbr.mlit.go.jp/iikoku/info/live/index.html","http://www.cbr.mlit.go.jp/gifu/traffic/index.html","http://www.cbr.mlit.go.jp/takayama/cctv/index.html","http://www.cbr.mlit.go.jp/tajimi/desk/area_02.html","http://www.cbr.mlit.go.jp/tajimi/desk/area_01.html","http://www.cbr.mlit.go.jp/tajimi/desk/area_03.html","http://www.cbr.mlit.go.jp/tajimi/desk/area_04.html","http://www.cbr.mlit.go.jp/hamamatsu/live_view_road/pc/index.html","http://www.cbr.mlit.go.jp/shizukoku/camera/139/139.html","http://www.cbr.mlit.go.jp/shizukoku/camera/52/52.html","http://www.cbr.mlit.go.jp/numazu/road/realtime/246-138.html","http://www.cbr.mlit.go.jp/shizukoku/camera/fujieda/fujieda.html","http://www.cbr.mlit.go.jp/numazu/road/realtime/izu.html","http://www.cbr.mlit.go.jp/shizukoku/camera/izu/izu.html","http://www.cbr.mlit.go.jp/shizukoku/camera/fujiyui/fujiyui.html","http://www.cbr.mlit.go.jp/shizukoku/camera/seishin/seishin.html","http://www.cbr.mlit.go.jp/numazu/road/realtime/hakone.html","http://www.cbr.mlit.go.jp/meikoku/benri/livecamera/index.html","http://www.cbr.mlit.go.jp/mie/live/suzuka_pass/index.html","http://www.cbr.mlit.go.jp/hokusei/","http://www.kkr.mlit.go.jp/nara/index.php#map","http://www.cbr.mlit.go.jp/kisei/road/livecamera/#area","http://www.kkr.mlit.go.jp/shiga/live2008/index.html","http://sansyu.kyoto.kkr.mlit.go.jp/live/app/pc/main.php","http://www.kkr.mlit.go.jp/himeji/livecam/road_cam/2line/index.html","http://www.cbr.mlit.go.jp/hokusei/meihan/romen/mapa.htm","http://www.kkr.mlit.go.jp/himeji/livecam/road_cam/29line/index.html","http://www.kkr.mlit.go.jp/toyooka/bosai/road/index.html","http://www.kkr.mlit.go.jp/toyooka/bosai/road/kinki.html","http://www.cgr.mlit.go.jp/tottori/livecam_road/index.asp","http://hot-navi.jp/its2/","http://www.cgr.mlit.go.jp/kurayoshi/road-camera/","http://road21.jp/camera/index.html","http://www.qsr.mlit.go.jp/fukkoku/bousai.html","http://www.cbr.mlit.go.jp/kisei/livecamera/index.html","http://www.cgr.mlit.go.jp/matsukoku/tonbara-iji/route54/index.html","http://www.road.cgr.mlit.go.jp/smart/livecam.html#page_list","http://www.cgr.mlit.go.jp/miyoshi/live/index.php/camera_list/road/funo","http://www.cgr.mlit.go.jp/yamaguchi/romen/s.rb","http://www.skrdoukan.com/road/pc/pc-cctvinfo.html","http://www.qsr.mlit.go.jp/kitakyu/live_camera/","http://www.qsr.mlit.go.jp/nagasaki/bousai/road/index.html","http://www.qsr.mlit.go.jp/kumamoto/bousai/road_live/road_live01.html","http://www.qsr.mlit.go.jp/kumamoto/bousai/road_live/road_live02.html","http://www.qsr.mlit.go.jp/oita/cctv/douro.html","http://121.101.87.1/bousai/data/map_cctv.php?mid=douro","http://www.qsr.mlit.go.jp/osumi/bousai/top.html?gmn=mapSK3","http://www.qsr.mlit.go.jp/kakoku/cctv/camidx.html"],"b":["https://www2.thr.mlit.go.jp/aomori/roadcctv/","https://www2.thr.mlit.go.jp/iwate/bousai/douro/","https://www.thr.mlit.go.jp/akita/douro/romen/photo/","https://www.thr.mlit.go.jp/bumon/j73501/gazou/Images/","https://www.thr.mlit.go.jp/bumon/j73501/gazou/images/","https://www.cgr.mlit.go.jp/matsukoku/kanri_cctvimg/","https://www2.thr.mlit.go.jp/sendai/html/image/","https://www2.thr.mlit.go.jp/yamagata/ycam/data/","https://www2.thr.mlit.go.jp/noshiro/douro/romen/r7/","https://www.thr.mlit.go.jp/yuzawa/miti/romen/","https://www.thr.mlit.go.jp/akita/douro/ROMEN/photo/","https://www2.thr.mlit.go.jp/Bumon/J76301/livecam/","https://www.thr.mlit.go.jp/fukushima/adachi/html/live_cam/kariyasu/","https://www.thr.mlit.go.jp/fukushima/adachi/html/live_cam/itaya/","https://www.thr.mlit.go.jp/fukushima/adachi/html/live_cam/futatsu1/","https://www.thr.mlit.go.jp/fukushima/adachi/html/live_cam/nakano2/","https://www.thr.mlit.go.jp/fukushima/adachi/html/live_cam/enbu/","https://www.thr.mlit.go.jp/koriyama/inform/live/image/","https://www2.thr.mlit.go.jp/iwaki/homepage/road/native/","https://www.ktr.mlit.go.jp/utunomiya/livecamera/pic/","https://www.ktr.mlit.go.jp/sobu/roadinfo/image/","https://www.seishiga.kkr.mlit.go.jp/fukui/pic/","https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/01/","https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/04/","https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/05/","https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/06/","https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/07/","https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/10/","https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/11/","https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/12/","https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/13/","https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/27/","https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/16/","https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/18/","https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/19/","https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/20/","https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/22/","https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/24/","https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/37/","https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/14/","https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/28/","https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/29/","https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/09/","https://www.ktr.mlit.go.jp/nagano/douroinfo/data/camera/cond_m/","https://www.cbr.mlit.go.jp/iikoku/CCTV/","https://www.cbr.mlit.go.jp/gifu/cctv/cameraimage/","https://www.cbr.mlit.go.jp/takayama/cctv/cctv_img/","https://www.cbr.mlit.go.jp/tajimi/douro/camera/images/","https://www.cbr.mlit.go.jp/hamamatsu/live_view_road/pc/img/","https://www.cbr.mlit.go.jp/shizukoku/camera/gazou/","https://www.cbr.mlit.go.jp/numazu/kanogawa/cctv/snapshot/","https://www.cbr.mlit.go.jp/meikoku/livecamera/data/","https://www.cbr.mlit.go.jp/mie/live/touge/cam_data/","https://www.cbr.mlit.go.jp/hokusei/cctv/","https://www.seishiga.kkr.mlit.go.jp/nara/pic/","https://www.ktr.mlit.go.jp/koufu/livecamera/CCTV/26/","https://www.cbr.mlit.go.jp/kisei/itv/","https://www.seishiga.kkr.mlit.go.jp/shiga/pic/","https://www.seishiga.kkr.mlit.go.jp/himeji/pic/","https://www.seishiga.kkr.mlit.go.jp/toyooka/pic/","https://www.cbr.mlit.go.jp/hokusei/meihan/romen/image/","https://yukinavi.net/data/041/","https://yukinavi.net/data/043/","https://yukinavi.net/data/054/","https://yukinavi.net/data/055/","https://yukinavi.net/data/059/","https://yukinavi.net/data/044/","https://yukinavi.net/data/040/","https://yukinavi.net/data/039/","https://yukinavi.net/data/009/","https://www.cgr.mlit.go.jp/hamada/cctv/d_view/img/","https://www.hrr.mlit.go.jp/bosai/img/","https://www.cgr.mlit.go.jp/okakoku/sys/ext/IMAGES/douro_eizou/","https://www.cgr.mlit.go.jp/miyoshi/live/cam_data/last/","https://www.skr.mlit.go.jp/road/pc/","https://www.qsr.mlit.go.jp/kitakyu/camera/","https://www.qsr.mlit.go.jp/nagasaki/bousai/cctv/","https://www.qsr.mlit.go.jp/oita/bousaiinfo/data/cctv/img/","https://www.qsr.mlit.go.jp/kakoku/cctvimg/"],"c":[[4249994,14036577,0,0,0,0,-1,""],[4270375,14042314,0,0,1,0,-1,""],[4306186,14068709,0,0,2,0,-1,""],[4321069,14091826,0,0,3,0,-1,""],[4305071,14148335,1,0,4,0,-1,""],[4311562,14158202,1,0,5,0,-1,""],[4318732,14173294,1,0,6,0,-1,""],[4342197,14188675,1,0,7,0,-1,""],[4353571,14192010,1,0,8,0,-1,""],[4364768,14196208,1,0,9,0,-1,""],[4370974,14213751,1,0,10,0,-1,""],[4372845,14220546,1,0,11,0,-1,""],[4286168,14159984,2,0,12,0,-1,""],[4276791,14170906,2,0,13,0,-1,""],[4264282,14161779,2,0,13,0,-1,""],[4259816,14046176,3,0,0,0,-1,""],[4260205,14048283,3,0,1,0,-1,""],[4259478,14054141,3,0,0,0,-1,""],[4248324,14084678,3,0,14,0,-1,""],[4242883,14090439,3,0,14,0,-1,""],[4237158,14094435,3,0,15,0,-1,""],[4347081,14226958,4,0,16,0,-1,""],[4319480,14257821,4,0,17,0,-1,""],[4313552,14276449,4,0,17,0,-1,""],[4290162,14396467,4,0,18,0,-1,""],[4299680,14421661,4,0,19,0,-1,""],[4300508,14425462,4,0,18,0,-1,""],[4299907,14436130,4,0,18,0,-1,""],[4372688,14294830,5,0,20,0,-1,""],[4365491,14316267,5,0,20,0,-1,""],[4366765,14317809,5,0,21,0,-1,""],[4396391,14244635,6,0,22,0,-1,""],[4469192,14226870,6,0,23,0,-1,""],[4472978,14210116,6,0,24,0,-1,""],[4480484,14206742,6,0,24,0,-1,""],[4489880,14194259,6,0,25,0,-1,""],[4504134,14175643,6,0,26,0,-1,""],[4519645,14173906,6,0,27,0,-1,""],[4527184,14173436,6,0,28,0,-1,""],[4301667,14472300,7,0,29,0,-1,""],[4322215,14516787,7,0,30,0,-1,""],[4325392,14538388,7,0,31,0,-1,""],[4326641,14549290,7,0,31,0,-1,""],[4195081,14045584,8,0,32,0,-1,""],[4153074,14025951,9,0,33,0,-1,""],[4329086,14058978,10,0,34,0,-1,""],[4332992,14041708,10,0,34,0,-1,""],[4312254,14044441,10,0,35,0,-1,""],[4295871,14045648,10,0,36,0,-1,""],[4285089,14033716,10,0,37,0,-1,""],[4281939,14018457,10,0,37,0,-1,""],[4269070,13996965,10,0,38,0,-1,""],[4287792,14114595,11,0,39,0,-1,""],[4285734,14109838,11,0,39,0,-1,""],[4285001,14108944,11,0,40,0,-1,""],[4269458,14083974,11,0,41,0,-1,""],[4264864,14081005,11,0,42,0,-1,""],[4374303,14134370,12,0,43,0,-1,""],[4381355,14141167,12,0,43,0,-1,""],[4381691,14142131,12,0,43,0,-1,""],[4382744,14147205,12,0,43,0,-1,""],[4493372,14175664,13,0,25,0,-1,""],[4486200,14175456,13,0,25,0,-1,""],[4475499,14179468,13,0,44,0,-1,""],[4454579,14176698,13,0,45,0,-1,""],[4437838,14171098,13,0,46,0,-1,""],[4425393,14165640,13,0,47,0,-1,""],[4404003,14166252,13,0,48,0,-1,""],[4391901,14168506,14,0,49,0,-1,""],[4246748,14213784,15,0,50,0,-1,""],[4243266,14221417,15,0,50,0,-1,""],[4234755,14233116,15,0,51,0,-1,""],[4236090,14305025,16,0,52,0,-1,""],[4477786,14272171,17,0,53,0,-1,""],[4500789,14253202,17,0,53,0,-1,""],[4512479,14240091,17,0,54,0,-1,""],[4542503,14203004,17,0,28,0,-1,""],[4542561,14184667,17,0,28,0,-1,""],[4421960,14186774,18,0,47,0,-1,""],[4319503,14414852,19,0,18,0,-1,""],[4345686,14424376,20,0,55,0,-1,""],[4365378,14425400,21,0,56,0,-1,""],[4364851,14425050,21,0,55,0,-1,""],[4346054,14468852,21,0,57,0,-1,""],[4376297,14479641,22,0,58,0,-1,""],[4375864,14483160,22,0,58,0,-1,""],[4358702,14312930,23,0,59,0,-1,""],[4291332,14196655,24,0,60,0,-1,""],[4288845,14225219,24,0,61,0,-1,""],[4289475,14247782,24,0,50,0,-1,""],[4334716,14168142,25,0,62,0,-1,""],[4481977,14228343,25,0,63,0,-1,""],[4290189,14079559,26,0,64,0,-1,""],[4270439,14117043,26,0,14,0,-1,""],[4218112,14009085,27,0,65,0,-1,""],[4388200,14302130,28,0,20,0,-1,""],[4398371,14357940,28,0,66,0,-1,""],[4397663,14359781,28,0,67,0,-1,""],[4395198,14372296,28,0,67,0,-1,""],[4394425,14378374,28,0,21,0,-1,""],[4403790,14493403,29,0,68,0,-1,""],[4396207,14483782,29,0,68,0,-1,""],[4394588,14512671,30,0,69,0,-1,""],[4228180,14331814,31,0,52,0,-1,""],[4324952,14455947,32,0,57,0,-1,""],[4309249,14099486,33,0,70,0,-1,""],[4355378,14166327,34,0,71,0,-1,""],[4262518,14102497,35,0,14,0,-1,""],[4042210,14062826,36,1,72,1,0,"001.jpg"],[4045785,14063571,36,1,72,1,0,"014.jpg"],[4043337,14063468,36,1,72,1,0,"067.jpg"],[4044290,14063498,36,1,72,1,0,"084.jpg"],[4049537,14061694,36,1,73,1,0,"029.jpg"],[4049537,14061694,36,1,73,1,0,"085.jpg"],[4056946,14053042,36,1,74,1,0,"033.jpg"],[4057742,14051865,36,1,74,1,0,"012.jpg"],[4063179,14048811,36,1,74,1,0,"011.jpg"],[4065479,14050594,36,1,75,1,0,"039.jpg"],[4068757,14054331,36,1,75,1,0,"009.jpg"],[4071102,14057954,36,1,76,1,0,"008.jpg"],[4074651,14058223,36,1,76,1,0,"035.jpg"],[4075965,14058685,36,1,76,1,0,"086.jpg"],[4077536,14059991,36,1,76,1,0,"087.jpg"],[4078862,14062662,36,1,76,1,0,"003.jpg"],[4081234,14063710,36,1,76,1,0,"004.jpg"],[4083083,14066274,36,1,76,1,0,"050.jpg"],[4082490,14073187,36,1,76,1,0,"019.jpg"],[4079797,14071474,36,1,76,1,0,"048.jpg"],[3159148,13096906,37,2,77,2,-1,""],[4074647,14057137,38,1,76,1,0,"088.jpg"],[4075986,14052227,38,1,78,1,0,"038.jpg"],[4077656,14050177,38,1,78,1,0,"089.jpg"],[4078307,14049631,38,1,78,1,0,"076.jpg"],[4080198,14047951,38,1,78,1,0,"066.jpg"],[4082621,14045115,38,1,78,1,0,"075.jpg"],[4081282,14047663,38,1,78,1,0,"053.jpg"],[4082214,14043241,39,1,78,1,0,"082.jpg"],[4083675,14082354,40,1,76,1,0,"007.jpg"],[4086018,14084340,40,1,76,1,0,"006.jpg"],[4090077,14086094,40,1,76,1,0,"005.jpg"],[4091734,14092350,40,1,79,1,0,"017.jpg"],[4092622,14101850,40,1,79,1,0,"016.jpg"],[4089726,14107716,40,1,79,1,0,"028.jpg"],[4085858,14111362,40,1,80,1,0,"015.jpg"],[4082284,14112181,40,1,81,1,0,"043.jpg"],[4076688,14114322,40,1,82,1,0,"034.jpg"],[4058402,14125879,40,1,83,1,0,"044.jpg"],[4049912,14131656,40,1,84,1,0,"040.jpg"],[4046374,14131405,40,1,84,1,0,"023.jpg"],[4036233,14124752,40,1,85,1,0,"025.jpg"],[4044686,14133602,41,1,86,1,0,"026.jpg"],[4045970,14136304,41,1,86,1,0,"091.jpg"],[4047717,14142350,41,1,87,1,0,"090.jpg"],[4066275,14132175,42,1,88,1,0,"070.jpg"],[4060666,14128545,42,1,88,1,0,"045.jpg"],[4054817,14143891,42,1,87,1,0,"057.jpg"],[4051320,14149925,42,1,87,1,0,"056.jpg"],[4044549,14163915,42,1,89,1,0,"027.jpg"],[4048068,14152039,43,1,87,1,0,"046.jpg"],[4047103,14159453,44,1,89,1,0,"064.jpg"],[4013774,14128912,40,3,90,3,1,"HICP0050.jpg"],[4011769,14125869,40,3,90,4,1,"HICP0040.jpg"],[4007643,14123354,40,3,90,4,1,"HICP0010.jpg"],[4003711,14123843,40,3,91,4,1,"HICP0030.jpg"],[3987269,14118334,40,3,92,4,1,"HICP2200.jpg"],[3976449,14113196,40,3,92,4,1,"HICP2160.jpg"],[3911248,14114321,40,3,93,4,1,"HICP2040.jpg"],[3893880,14111930,40,3,94,4,1,"HICP0070.jpg"],[3970640,14087453,45,3,95,4,1,"HICP0060.jpg"],[3971646,14084722,45,3,95,4,1,"HICP0020.jpg"],[3971828,14082121,45,3,95,4,1,"HICP0100.jpg"],[3971676,14081900,45,3,95,4,2,"r46c12.jpg"],[3968804,14079261,45,3,96,4,2,"r46c7.jpg"],[3966515,14068564,45,3,96,4,2,"r46c1.jpg"],[3931796,14125778,46,3,97,4,1,"HICP3220.jpg"],[3929138,14134351,46,3,97,4,1,"HICP3270.jpg"],[4020733,14178863,42,4,98,5,3,"cctv002.jpg"],[4014778,14176190,42,4,98,5,4,"cctv003.jpg"],[3994377,14184122,42,4,99,5,3,"cctv005.jpg"],[3993372,14185243,42,4,99,5,3,"cctv006.jpg"],[3992405,14187228,42,4,99,5,4,"cctv007.jpg"],[3984916,14195234,42,4,100,5,3,"cctv008.jpg"],[3984794,14195809,42,4,100,5,3,"cctv056.jpg"],[3950939,14195606,42,4,101,5,3,"cctv013.jpg"],[3938782,14193913,42,4,102,5,4,"cctv082.jpg"],[3931163,14188384,42,4,103,5,3,"cctv028.jpg"],[3919150,14185748,42,4,103,5,4,"cctv046.jpg"],[3918450,14185305,42,4,103,5,4,"cctv047.jpg"],[3913471,14182272,42,4,104,5,3,"cctv049.jpg"],[3912435,14176823,42,4,104,5,4,"cctv051.jpg"],[3902560,14168413,42,4,105,5,3,"cctv054.jpg"],[3987474,14193776,47,4,100,5,4,"cctv104.jpg"],[3540874,13329768,48,5,106,6,5,"08010003200202.jpg"],[3944408,14195949,49,4,101,5,4,"cctv014.jpg"],[3933307,14187895,50,4,103,5,4,"cctv106.jpg"],[3912197,14178963,51,4,104,5,4,"cctv107.jpg"],[3903299,14171348,51,4,104,5,4,"cctv108.jpg"],[3902840,14170563,52,4,104,5,4,"cctv109.jpg"],[3925574,14162910,53,4,107,5,3,"cctv026.jpg"],[3923769,14167121,53,4,108,5,4,"cctv112.jpg"],[3924405,14174002,53,4,103,5,4,"cctv111.jpg"],[3925195,14175743,53,4,103,5,4,"cctv110.jpg"],[3849551,14088308,40,6,109,7,6,"DR-74112-l.jpg"],[3851057,14089462,40,6,110,7,6,"DR-74113-l.jpg"],[3851784,14090667,40,6,110,7,6,"DR-74114-l.jpg"],[3859782,14096795,40,6,110,7,6,"DR-74166-l.jpg"],[3865352,14100608,40,6,111,7,6,"DR-74115-l.jpg"],[3870184,14100824,40,6,111,7,6,"DR-74118-l.jpg"],[3880378,14106519,40,6,111,7,6,"DR-74116-l.jpg"],[3885383,14109784,40,6,111,7,6,"DR-74119-l.jpg"],[3855357,14106075,54,6,112,7,6,"DR-74120-l.jpg"],[3791173,14058662,40,6,113,8,6,"DR-74110-l.jpg"],[3801009,14061173,40,6,113,8,6,"DR-74107-l.jpg"],[3807106,14079972,40,6,114,8,6,"DR-74108-l.jpg"],[3806976,14080689,40,6,114,8,6,"DR-74109-l.jpg"],[3810892,14087507,40,6,115,8,6,"DR-74164-l.jpg"],[3821901,14089466,40,6,116,8,6,"DR-74165-l.jpg"],[3796390,14087847,55,6,117,8,6,"DR-74111-l.jpg"],[3790740,14090094,55,6,117,8,6,"DR-74163-l.jpg"],[3833750,14103617,42,6,118,9,6,"DR-74101-l.jpg"],[3836151,14106067,42,6,119,9,6,"DR-74102-l.jpg"],[3840505,14108825,42,6,119,9,6,"DR-74103-l.jpg"],[3840906,14111497,42,6,120,9,6,"DR-74106-l.jpg"],[3839694,14116100,42,6,120,9,6,"DR-74167-l.jpg"],[3861835,14132640,42,6,121,9,6,"DR-74168-l.jpg"],[3864226,14137382,42,6,121,9,6,"DR-74105-l.jpg"],[3893354,14161512,42,6,122,9,6,"DR-74104-l.jpg"],[3896422,14163189,42,6,122,10,6,"DR-74172-l.jpg"],[3892984,14162868,42,6,122,10,6,"DR-74173-l.jpg"],[3892988,14162885,42,6,122,10,6,"DR-74174-l.jpg"],[3893154,14161618,42,6,122,10,6,"DR-74175-l.jpg"],[3892681,14160458,42,6,122,10,6,"DR-74176-l.jpg"],[3892075,14158273,42,6,122,10,6,"DR-74177-l.jpg"],[3891969,14157245,42,6,122,10,6,"DR-74178-l.jpg"],[3891385,14154876,42,6,122,10,6,"DR-74179-l.jpg"],[3889784,14155163,42,6,122,10,6,"DR-74180-l.jpg"],[3889083,14155676,42,6,122,10,6,"DR-74181-l.jpg"],[3886628,14157936,42,6,122,10,6,"DR-74182-l.jpg"],[3885878,14158016,42,6,122,10,6,"DR-74183-l.jpg"],[3882764,14157714,42,6,122,10,6,"DR-74184-l.jpg"],[3881413,14156074,42,6,122,10,6,"DR-74185-l.jpg"],[3881197,14155681,42,6,122,10,6,"DR-74186-l.jpg"],[3879486,14152878,42,6,122,10,6,"DR-74187-l.jpg"],[3876642,14150808,42,6,122,10,6,"DR-74188-l.jpg"],[3544936,13309098,48,5,123,6,5,"08010003200312.jpg"],[3875437,14152644,42,6,122,10,6,"DR-74190-l.jpg"],[3873943,14153146,42,6,124,10,6,"DR-74191-l.jpg"],[3873323,14153818,42,6,124,10,6,"DR-74192-l.jpg"],[3871934,14153134,42,6,124,10,6,"DR-74193-l.jpg"],[3544425,13307232,48,5,123,6,5,"08010003200706.jpg"],[3869795,14150055,42,6,124,10,6,"DR-74195-l.jpg"],[3869265,14149170,42,6,124,10,6,"DR-74196-l.jpg"],[3869356,14148369,42,6,124,10,6,"DR-74197-l.jpg"],[3537290,13278730,48,5,125,6,5,"08010003200707.jpg"],[3841089,14113672,56,6,120,9,6,"DR-74160-l.jpg"],[3844499,14126662,56,6,126,9,6,"DR-74161-l.jpg"],[3859755,14128293,56,6,126,9,6,"DR-74162-l.jpg"],[3870681,14130293,56,6,121,9,6,"DR-74171-l.jpg"],[3867677,14086119,57,6,110,11,6,"DR-74117-l.jpg"],[3871624,14081627,57,6,110,11,6,"DR-74136-l.jpg"],[3874338,14073867,57,6,110,11,6,"DR-74137-l.jpg"],[3873574,14070152,57,6,110,11,6,"DR-74138-l.jpg"],[3873011,14068909,57,6,110,11,6,"DR-74139-l.jpg"],[3872761,14066679,57,6,110,11,6,"DR-74169-l.jpg"],[3872783,14063769,57,6,110,11,6,"DR-74140-l.jpg"],[3874290,14039244,57,6,127,11,7,"07072-3.jpg"],[3826658,14077253,58,6,128,12,6,"DR-74170-l.jpg"],[3831895,14062240,58,6,128,12,6,"DR-74125-l.jpg"],[3535177,13272475,48,5,125,6,5,"08010003200711.jpg"],[3835587,14059551,58,6,128,12,6,"DR-74127-l.jpg"],[3835765,14059042,58,6,128,12,6,"DR-74128-l.jpg"],[3527569,13259874,48,5,125,6,5,"87353009000011.jpg"],[3836445,14058835,58,6,128,12,6,"DR-74130-l.jpg"],[3837149,14058148,58,6,128,12,6,"DR-74131-l.jpg"],[3837682,14057490,58,6,128,12,6,"DR-74132-l.jpg"],[3838462,14057499,58,6,128,12,6,"DR-74133-l.jpg"],[3834703,14060298,58,6,128,12,6,"DR-74134-l.jpg"],[3837500,14057519,58,6,128,12,6,"DR-74135-l.jpg"],[3839401,14056472,58,6,129,12,7,"04068-3.jpg"],[3838495,14057401,58,7,128,13,7,"04051-3.jpg"],[4016171,14003930,59,8,130,14,8,"cam28.jpg"],[4020760,14017203,59,8,130,14,8,"cam39.jpg"],[4037150,14070940,59,8,131,14,8,"cam45.jpg"],[3999791,14007624,36,8,132,14,8,"cam13.jpg"],[4005215,14007466,36,8,132,14,8,"cam11.jpg"],[4009291,14003166,36,8,132,14,8,"cam15.jpg"],[4021088,14015550,36,8,130,14,8,"cam8.jpg"],[4021155,14026426,36,8,130,14,8,"cam3.jpg"],[4021457,14027912,36,8,133,14,8,"cam5.jpg"],[4025934,14040338,36,8,133,14,8,"cam21.jpg"],[4027868,14044932,36,8,134,14,8,"cam14.jpg"],[4031785,14056387,36,8,134,14,8,"cam24.jpg"],[4040849,14061161,36,8,134,14,8,"cam2.jpg"],[4041745,14062061,36,8,134,14,8,"cam1.jpg"],[4042210,14062826,36,8,72,1,0,"001.jpg"],[3959570,14032554,60,9,135,15,9,"Yzk-018.jpg"],[3905199,14042838,60,9,136,15,9,"Yzk-010.jpg"],[3902039,14037528,60,9,136,15,9,"Yzk-004.jpg"],[3962016,14037050,45,9,135,15,10,"r46c4.jpg"],[3961347,14058391,45,10,96,16,10,"r46c2.jpg"],[3966529,14068581,45,9,96,15,10,"r46c1.jpg"],[3970013,14076651,45,10,96,16,10,"r46c10.jpg"],[3968816,14079278,45,9,96,15,10,"r46c7.jpg"],[3971755,14082052,45,9,95,15,10,"r46c12.jpg"],[3997684,14007750,36,10,137,16,10,"r7c6.jpg"],[3979560,14006236,36,10,138,16,10,"r7c5.jpg"],[3957792,14005938,36,10,139,16,10,"r7c4.jpg"],[3942171,14002731,36,10,139,16,10,"r7c3.jpg"],[3926848,13992308,36,10,140,16,10,"r7c2.jpg"],[3912458,13988068,36,10,140,16,10,"r7c1.jpg"],[3963891,14029613,60,11,135,17,7,"06064-3.jpg"],[3895160,14035812,60,9,141,15,7,"06165-3.jpg"],[3897974,14036442,60,9,142,15,7,"06166-3.jpg"],[3892526,14033858,60,9,141,15,7,"06197-3.jpg"],[3877589,14031089,60,9,143,15,7,"06024-3.jpg"],[3908790,13987993,36,12,144,18,11,"cctv065.jpg"],[3906557,13988133,36,12,144,18,11,"cctv064.jpg"],[3905640,13987408,36,12,144,18,11,"cctv063.jpg"],[3878521,13983381,36,12,145,18,11,"cctv078.jpg"],[3872012,13969334,36,12,146,18,11,"cctv048.jpg"],[3872012,13969334,36,12,146,18,11,"cctv047.jpg"],[3872012,13969334,36,12,146,18,11,"cctv046.jpg"],[3869405,13964936,36,12,146,18,11,"cctv044.jpg"],[3868601,13963770,36,12,146,18,11,"cctv052.jpg"],[3861906,13958284,36,12,146,18,11,"cctv053.jpg"],[3860620,13957474,36,12,146,18,11,"cctv071.jpg"],[3859097,13956436,36,12,146,18,11,"cctv055.jpg"],[3855564,13955206,36,12,146,18,11,"cctv056.jpg"],[3525552,13257542,48,5,147,6,5,"08010003200602.jpg"],[3524492,13254571,48,5,147,6,5,"08010003200605.jpg"],[3880605,13995549,57,12,148,18,11,"cctv069.jpg"],[3879106,13999342,57,12,148,18,11,"cctv076.jpg"],[3784730,14024283,60,7,149,19,7,"05016-3.jpg"],[3786013,14023509,60,7,149,19,7,"05017-3.jpg"],[3786418,14023079,60,7,149,19,7,"05018-3.jpg"],[3789216,14017017,60,7,149,19,7,"05019-3.jpg"],[3790005,14014006,60,7,149,19,7,"05020-3.jpg"],[3878025,14002799,57,7,148,18,11,"cctv070.jpg"],[3805194,14017316,60,7,150,19,7,"05048-3.jpg"],[3806064,14017595,60,7,150,19,7,"05049-3.jpg"],[3806539,14017687,60,7,150,19,7,"05050-3.jpg"],[3809580,14019927,60,7,150,19,7,"24192-3.jpg"],[3812294,14021197,60,7,151,19,7,"24189-3.jpg"],[3813105,14023995,60,7,151,19,7,"24184-3.jpg"],[3851864,14033762,60,7,152,20,7,"07035-3.jpg"],[3852516,14033822,60,7,152,20,7,"07036-3.jpg"],[3865643,14036336,60,7,153,20,7,"07206-3.jpg"],[3866844,14033320,60,7,153,20,7,"07037-3.jpg"],[3867771,14032099,60,7,153,20,7,"07038-3.jpg"],[3868878,14031397,60,7,127,20,7,"07047-3.jpg"],[3877589,14031089,60,7,143,20,7,"06024-3.jpg"],[3876663,14005112,57,7,154,21,7,"06067-3.jpg"],[3874267,14012594,57,7,154,21,7,"06071-3.jpg"],[3873850,14013662,57,7,154,21,7,"06066-3.jpg"],[3872886,14016228,57,7,154,21,7,"06065-3.jpg"],[3519957,13245596,48,5,147,6,5,"08010003200631.jpg"],[3872726,14037412,57,7,127,22,7,"06069-3.jpg"],[3875441,14041888,57,7,155,22,7,"07072-3.jpg"],[3873762,14061230,57,7,155,22,7,"07073-3.jpg"],[3840565,14051228,58,7,129,13,7,"04068-3.jpg"],[3840444,14051706,58,7,129,13,7,"04055-3.jpg"],[3839567,14054187,58,7,129,13,7,"04054-3.jpg"],[3839580,14055736,58,7,129,13,7,"04053-3.jpg"],[3839127,14056775,58,7,129,13,7,"04052-3.jpg"],[3516890,13241755,48,5,147,6,5,"08010003200632.jpg"],[3858568,13989674,61,7,146,23,11,"cctv007.jpg"],[3858058,13993991,61,7,146,23,11,"cctv014.jpg"],[3856334,13992212,61,7,146,23,11,"cctv018.jpg"],[3852380,13994948,61,7,-1,23,11,"cctv029.jpg"],[3849640,13997047,61,7,156,23,7,"08087-3.jpg"],[3849413,13997263,61,7,156,23,7,"08086-3.jpg"],[3848963,13998394,61,7,156,23,7,"08085-3.jpg"],[3848854,13998511,61,7,156,23,7,"08084-3.jpg"],[3847877,13999322,61,7,156,23,7,"08083-3.jpg"],[3847647,13999498,61,7,156,23,7,"08082-3.jpg"],[3845903,13999040,61,7,156,23,7,"08081-3.jpg"],[3845381,13999291,61,7,156,23,7,"08080-3.jpg"],[3845290,14000202,61,7,156,23,7,"08079-3.jpg"],[3845781,14001028,61,7,156,23,7,"08078-3.jpg"],[3845882,14001338,61,7,156,23,7,"08077-3.jpg"],[3845615,14002740,61,7,156,23,7,"08076-3.jpg"],[3845420,14004608,61,7,156,23,7,"08075-3.jpg"],[3845457,14005410,61,7,156,23,7,"08074-3.jpg"],[3845373,14006066,61,7,156,23,7,"08073-3.jpg"],[3844597,14006641,61,7,156,23,7,"08072-3.jpg"],[3842196,14016495,61,7,156,23,7,"08071-3.jpg"],[3853463,13995741,61,12,-1,24,11,"cctv028.jpg"],[3853230,13994132,61,12,-1,24,11,"cctv027.jpg"],[3853874,13993273,61,12,-1,24,11,"cctv025.jpg"],[3855606,13993010,61,12,-1,24,11,"cctv022.jpg"],[3856439,13993970,61,12,146,24,11,"cctv036.jpg"],[3856832,13993638,61,12,146,24,11,"cctv017.jpg"],[3856974,13993812,61,12,146,24,11,"cctv016.jpg"],[3857841,13994294,61,12,146,24,11,"cctv015.jpg"],[3858089,13993662,61,12,146,24,11,"cctv035.jpg"],[3857722,13993127,61,12,146,24,11,"cctv013.jpg"],[3857581,13992703,61,12,146,24,11,"cctv034.jpg"],[3857289,13991457,61,12,146,24,11,"cctv012.jpg"],[3516401,13241509,48,5,147,6,5,"08010003200708.jpg"],[3857378,13990088,61,12,146,24,11,"cctv008.jpg"],[3868890,13983658,61,12,146,24,11,"cctv019.jpg"],[3858568,13989674,61,12,146,24,11,"cctv007.jpg"],[3870266,13983596,61,12,146,24,11,"cctv043.jpg"],[3862035,13983993,61,12,146,18,11,"cctv011.jpg"],[3861028,13983827,61,12,146,18,11,"cctv037.jpg"],[3858616,13986635,61,12,146,24,11,"cctv009.jpg"],[3858675,13987713,61,12,146,24,11,"cctv040.jpg"],[3858619,13989445,61,12,146,24,11,"cctv002.jpg"],[3857540,13992304,61,12,146,24,11,"cctv039.jpg"],[3858085,13993948,61,12,146,24,11,"cctv038.jpg"],[3873870,13984590,61,12,146,24,11,"cctv041.jpg"],[3807126,13970040,62,7,-1,25,7,"05080-3.jpg"],[3807612,13971360,62,7,157,25,7,"05081-3.jpg"],[3804322,13977739,62,7,157,25,7,"05082-3.jpg"],[3805296,13981598,62,7,157,25,7,"05083-3.jpg"],[3804520,13983153,62,7,157,25,7,"05084-3.jpg"],[3804975,13983811,62,7,157,25,7,"05085-3.jpg"],[3801973,13989127,62,7,157,25,7,"05086-3.jpg"],[3805362,14004639,62,7,158,25,7,"05087-3.jpg"],[3805007,14007459,62,7,150,25,7,"24193-3.jpg"],[3804160,14013846,62,7,150,25,7,"24175-3.jpg"],[3784646,14024309,60,13,149,26,12,"kariyasu.jpg"],[3782800,14026688,60,13,159,26,13,"kurikotn.jpg"],[3783761,14029944,60,13,159,26,14,"futatsu1.jpg"],[3784028,14034633,60,13,159,26,15,"nakano2.jpg"],[3783710,14037988,60,13,159,26,16,"enbu.jpg"],[3712290,14016840,40,14,160,27,17,"51_1824r4.jpg"],[3715526,14025168,40,14,161,27,17,"52_1943r4.jpg"],[3753652,13997998,63,14,162,28,17,"31_1197r49.jpg"],[3753090,13997962,63,14,162,28,17,"30_1188r49.jpg"],[3752069,13998667,63,14,162,28,17,"29_1179r49.jpg"],[3751993,14000288,63,14,162,28,17,"28_1159r49.jpg"],[3751868,14001989,63,14,162,28,17,"27_1136r49.jpg"],[3751681,14002504,63,14,163,28,17,"26_1135r49.jpg"],[3751134,14003005,63,14,163,28,17,"25_1132r49.jpg"],[3752396,14004741,63,14,163,28,17,"82_1110r49.jpg"],[3753037,14005690,63,14,163,28,17,"24_1100r49.jpg"],[3753182,14011156,63,14,163,29,17,"23_1045r49.jpg"],[3751545,14012939,63,14,163,29,17,"84_1016r49.jpg"],[3750165,14014648,63,14,163,29,17,"22_990r49.jpg"],[3749213,14014918,63,14,163,29,17,"21_984r49.jpg"],[3749157,14015042,63,14,163,29,17,"81_981r49.jpg"],[3748495,14018486,63,14,163,29,17,"20_946r49.jpg"],[3748283,14019455,63,14,163,29,17,"19_937r49.jpg"],[3748144,14020029,63,14,164,29,17,"14_930r49.jpg"],[3748549,14020134,63,14,164,29,17,"13_923r49.jpg"],[3749404,14020904,63,14,164,29,17,"12_916r49.jpg"],[3749351,14025861,63,14,164,29,17,"10_868r49.jpg"],[3748945,14027301,63,14,164,29,17,"2_852r49.jpg"],[3747703,14028678,63,14,164,29,17,"1_838r49.jpg"],[3765787,13958424,63,14,165,30,17,"46_1743r49.jpg"],[3763821,13959975,63,14,165,30,17,"45_1730r49.jpg"],[3763110,13960602,63,14,165,30,17,"44_1706r49.jpg"],[3762910,13961662,63,14,165,30,17,"39_1694r49.jpg"],[3761537,13963104,63,14,165,30,17,"38_1677r49.jpg"],[3756870,13967158,63,14,165,30,17,"37_1611r49.jpg"],[3757647,13969351,63,14,165,30,17,"36_1562r49.jpg"],[3757629,13970260,63,14,165,30,17,"50_1555r49.jpg"],[3756776,13971841,63,14,166,30,17,"35_1552r49.jpg"],[3756755,13972837,63,14,166,30,17,"34_1547r49.jpg"],[3756267,13973129,63,14,166,30,17,"49_1538r49.jpg"],[3755572,13975178,63,14,166,30,17,"33_1516r49.jpg"],[3755927,13977268,63,14,167,30,17,"48_1488r49.jpg"],[3756610,13978068,63,14,167,30,17,"47_1474r49.jpg"],[3731120,14047332,63,14,164,31,17,"72_554r49.jpg"],[3729083,14053235,63,14,164,31,17,"74_452r49.jpg"],[3721315,14060376,63,14,168,31,17,"73_370r49.jpg"],[3720488,14061006,64,14,168,31,17,"71_351r49.jpg"],[3717428,14065096,63,15,169,32,18,"save.jpg"],[3676223,13882611,65,16,170,33,-1,""],[3673432,13885130,65,16,170,33,-1,""],[3673134,13885412,65,16,170,33,-1,""],[3672595,13888748,65,16,170,33,-1,""],[3631073,13901326,65,16,171,33,-1,""],[3634365,13864330,66,16,172,33,-1,""],[3710496,14013847,40,17,173,34,19,"CAM001.jpg"],[3710338,14013942,40,17,173,34,19,"CAM005.jpg"],[3707279,14012575,40,17,173,34,19,"CAM002.jpg"],[3706092,14010969,40,17,173,34,19,"CAM003.jpg"],[3702460,14009216,40,17,173,34,19,"CAM009.jpg"],[3700493,14006460,40,17,173,34,19,"CAM006.jpg"],[3691708,14000004,40,17,174,34,19,"CAM004.jpg"],[3683456,13995067,40,17,175,34,19,"CAM008.jpg"],[3660978,13997464,40,17,176,34,19,"CAM007.jpg"],[3640957,13989500,40,17,177,34,19,"CAM012.jpg"],[3612246,13975416,40,17,178,34,19,"CAM011.jpg"],[3612957,13976100,40,17,179,34,19,"CAM010.jpg"],[3637102,13983705,40,17,180,34,19,"CAM013.jpg"],[3631750,13942066,67,17,181,34,19,"CAM016.jpg"],[3630227,13970218,67,17,182,34,19,"CAM015.jpg"],[3630983,13978412,67,17,183,34,19,"CAM014.jpg"],[3562100,13922818,68,18,184,35,20,"4cam_16.jpg"],[3561729,13917052,68,18,185,35,20,"2cam_10.jpg"],[3807002,13961889,62,7,186,25,-1,""],[3806195,13966640,62,7,186,25,-1,""],[3676923,13881594,65,16,187,33,-1,""],[3855102,13955030,36,19,188,36,-1,""],[3847032,13955555,36,19,188,36,-1,""],[3842348,13957084,36,19,188,36,-1,""],[3834697,13955023,36,19,188,36,-1,""],[3819091,13946620,36,19,188,36,-1,""],[3809650,13944187,36,19,189,36,-1,""],[3796254,13927857,36,19,190,36,-1,""],[3794000,13917867,36,19,191,36,-1,""],[3792130,13912603,36,19,192,36,-1,""],[3790219,13907644,36,19,192,36,-1,""],[3789487,13905110,69,19,193,36,-1,""],[3787960,13901718,69,19,194,36,-1,""],[3786758,13900494,70,19,194,36,-1,""],[3786310,13898091,70,19,194,36,-1,""],[3780528,13892234,70,19,195,36,-1,""],[3761718,13882339,70,20,196,36,-1,""],[3757845,13890216,69,20,197,36,-1,""],[3783872,13901853,69,19,198,36,-1,""],[3785419,13913144,63,19,199,36,-1,""],[3773093,13933570,63,19,200,36,-1,""],[3768443,13944607,63,19,200,36,-1,""],[3766293,13951448,63,19,200,36,-1,""],[3766031,13957701,63,19,200,36,-1,""],[3744914,13876784,69,20,196,36,-1,""],[3734561,13882803,65,20,196,36,-1,""],[3731536,13881826,65,20,201,36,-1,""],[3721704,13896719,65,20,202,36,-1,""],[3740619,13865043,69,20,203,36,-1,""],[3740103,13860626,70,20,203,36,-1,""],[3735576,13852086,69,20,203,36,-1,""],[3734565,13848715,69,20,203,36,-1,""],[3728119,13839778,69,21,204,36,-1,""],[3724369,13834904,69,21,204,36,-1,""],[3720851,13830085,69,21,204,36,-1,""],[3716216,13824743,69,21,204,36,-1,""],[3709489,13827642,66,21,204,36,-1,""],[3702609,13822682,66,21,205,36,-1,""],[3697021,13822473,66,21,204,36,-1,""],[3693492,13822011,66,21,205,36,-1,""],[3686780,13819697,66,21,205,36,-1,""],[3716189,13825697,66,21,204,36,-1,""],[3695185,13821899,66,21,204,36,-1,""],[3685085,13685085,66,21,206,36,-1,""],[3710498,13798970,69,21,207,36,-1,""],[3703156,13783505,69,21,207,36,-1,""],[3700071,13772350,69,21,207,36,-1,""],[3697963,13764165,69,21,207,36,-1,""],[3707874,13888455,65,20,208,36,-1,""],[3731536,13881826,65,20,201,36,-1,""],[3701783,13883009,65,20,208,36,-1,""],[3691263,13879594,65,20,187,36,-1,""],[3696025,13879925,65,20,187,36,-1,""],[3680581,13878578,65,20,187,36,-1,""],[3706583,13871269,71,22,209,36,-1,""],[3710735,13877252,72,22,209,36,-1,""],[3733328,13902801,73,23,202,36,-1,""],[3717910,13884650,73,23,202,36,-1,""],[3707622,13884266,72,23,208,36,-1,""],[3698431,13878090,74,23,208,36,-1,""],[3713784,13871528,72,23,209,36,-1,""],[3713548,13865916,72,23,209,36,-1,""],[3719850,13868598,73,23,209,36,-1,""],[3697972,13786976,75,23,207,36,-1,""],[3689800,13786820,75,23,207,36,-1,""],[3697844,13763555,69,24,210,37,-1,""],[3678190,13739790,69,24,211,37,-1,""],[3672018,13726301,69,24,212,37,-1,""],[3671865,13727336,69,24,212,37,-1,""],[3672082,13725409,69,24,212,37,-1,""],[3673130,13721871,69,24,212,37,-1,""],[3656351,13721305,76,24,212,37,-1,""],[3649678,13723628,76,24,212,37,-1,""],[3647221,13723991,76,24,212,37,-1,""],[3645285,13725488,76,24,213,37,-1,""],[3657214,13698550,77,24,214,37,-1,""],[3667884,13684594,69,24,215,37,-1,""],[3676181,13700528,69,24,216,37,-1,""],[3673524,13695878,78,24,216,37,-1,""],[3678288,13699988,79,24,216,37,-1,""],[3674132,13696464,78,24,216,37,-1,""],[3684512,13698147,79,24,217,37,-1,""],[3676799,13697709,78,24,216,37,-1,""],[3689947,13701070,79,24,217,37,-1,""],[3693357,13702707,79,24,217,37,-1,""],[3696289,13705311,79,25,218,38,-1,""],[3692748,13685422,80,25,219,38,-1,""],[3663730,13670867,80,25,220,38,-1,""],[3667399,13681134,69,25,221,38,-1,""],[3660132,13665981,69,25,220,38,-1,""],[3509622,13237286,48,5,147,6,5,"08010003200672.jpg"],[3656804,13660145,69,25,220,38,-1,""],[3656804,13660145,69,25,220,38,-1,""],[3654299,13660074,69,25,222,38,-1,""],[3646512,13649632,69,25,223,38,-1,""],[3657211,13665594,81,25,220,38,-1,""],[3655645,13664855,81,25,220,38,-1,""],[3644072,13663033,81,25,224,38,-1,""],[3658040,13668726,80,25,220,38,-1,""],[3625500,13628446,69,25,225,38,-1,""],[3626134,13628764,69,26,225,39,21,"C00575.jpg?time=95751"],[3579685,13609235,69,26,226,39,21,"C00565.jpg?time=95855"],[3558617,13612440,69,26,227,39,21,"C00588.jpg?time=95932"],[3553710,13609704,82,26,227,39,21,"C00630.jpg?time=1001"],[3548928,13575465,83,26,228,39,21,"C00605.jpg?time=10049"],[3548531,13547271,83,26,229,39,21,"C00617.jpg?time=10134"],[3568925,13608170,69,26,227,40,21,"C00574.jpg?time=1022"],[3566578,13608911,69,26,227,40,21,"C02528.jpg?time=10226"],[3560260,13610030,69,26,227,40,21,"C00581.jpg?time=1032"],[3559585,13609910,82,26,227,40,21,"C00619.jpg?time=10328"],[3546311,13586332,83,26,230,40,21,"C00604.jpg?time=10350"],[3548379,13548898,83,26,229,40,21,"C03557.jpg?time=10419"],[3562731,13911437,68,27,231,41,22,"Camera.jpg"],[3560465,13903829,68,27,232,41,23,"Camera.jpg"],[3559651,13888395,68,27,232,41,24,"Camera.jpg"],[3560479,13883938,68,27,232,41,25,"Camera.jpg"],[3563943,13877693,68,27,233,41,26,"Camera.jpg"],[3570246,13845389,68,27,234,41,27,"Camera.jpg"],[3578394,13838308,68,27,235,41,28,"Camera.jpg"],[3580850,13833016,68,27,235,41,29,"Camera.jpg"],[3585350,13829233,68,27,235,41,30,"Camera.jpg"],[3507907,13234698,48,5,147,6,5,"08010003200692.jpg"],[3539273,13886401,84,27,236,41,31,"Camera.jpg"],[3522005,13852032,85,27,237,41,32,"Camera.jpg"],[3522686,13851618,85,27,237,41,33,"Camera.jpg"],[3527094,13845404,85,27,237,41,34,"Camera.jpg"],[3535111,13842168,85,27,238,41,35,"Camera.jpg"],[3541040,13844215,85,27,238,41,36,"Camera.jpg"],[3551302,13845649,85,27,239,41,37,"Camera.jpg"],[3553618,13845218,85,27,239,41,38,"Camera.jpg"],[3556400,13847252,85,27,239,41,39,"Camera.jpg"],[3544813,13860862,86,27,240,41,40,"Camera.jpg"],[3548066,13861081,86,27,240,41,41,"Camera.jpg"],[3559326,13892991,86,27,241,41,42,"Camera.jpg"],[3634391,13860807,66,16,172,33,-1,""],[3632456,13862210,66,28,172,42,43,"214141_L.jpg"],[3633922,13858012,66,28,172,42,43,"214151_L.jpg"],[3634192,13855305,66,28,172,42,43,"214136_L.jpg"],[3632287,13849981,66,28,242,42,43,"214146_L.jpg"],[3634781,13836769,66,28,243,42,43,"214131_L.jpg"],[3640598,13825958,66,28,244,42,43,"214101_L.jpg"],[3641842,13821050,66,28,244,42,43,"214106_L.jpg"],[3645946,13818159,66,28,245,42,43,"214116_L.jpg"],[3649455,13815049,66,28,246,42,43,"214121_L.jpg"],[3654294,13812446,66,28,246,42,43,"021018_L.jpg"],[3655755,13813847,66,28,246,42,43,"214126_L.jpg"],[3661028,13819623,66,28,247,42,43,"080126_L.jpg"],[3663190,13820505,66,28,247,42,43,"080128_L.jpg"],[3665213,13822460,66,28,247,42,43,"021010_L.jpg"],[3670516,13827883,66,28,247,42,43,"021002_L.jpg"],[3673275,13827587,66,28,247,42,43,"080176_L.jpg"],[3674965,13825552,66,28,248,42,43,"080186_L.jpg"],[3675741,13822301,66,28,248,42,43,"080136_L.jpg"],[3682681,13819674,66,28,249,42,43,"080196_L.jpg"],[3685527,13819251,66,28,205,42,43,"080139_L.jpg"],[3623168,13795624,87,28,250,42,43,"211196_L.jpg"],[3636785,13792922,87,28,251,42,43,"211101_L.jpg"],[3639476,13792487,87,28,251,42,43,"211156_L.jpg"],[3642555,13794429,87,28,252,42,43,"211141_L.jpg"],[3646076,13794263,87,28,252,42,43,"211111_L.jpg"],[3649511,13795361,87,28,253,42,43,"208116_L.jpg"],[3653198,13796545,87,28,247,42,43,"208141_L.jpg"],[3654125,13796875,87,28,247,42,43,"208106_L.jpg"],[3655621,13799354,87,28,247,42,43,"208146_L.jpg"],[3656354,13799233,87,28,247,42,43,"208101_L.jpg"],[3659482,13804655,87,28,247,42,43,"209106_L.jpg"],[3660604,13806673,87,28,247,42,43,"210116_L.jpg"],[3661710,13810308,87,28,247,42,43,"209112_L.jpg"],[3662531,13814545,87,28,247,42,43,"210126_L.jpg"],[3661039,13814634,87,28,247,42,43,"080246_L.jpg"],[3664632,13818197,87,28,247,42,43,"080221_L.jpg"],[3588460,13825401,68,28,254,42,43,"215102_L.jpg"],[3589792,13824311,68,28,254,42,43,"215161_L.jpg"],[3591146,13823244,68,28,254,42,43,"215156_L.jpg"],[3597558,13816870,68,28,255,42,-1,""],[3599980,13813558,68,28,255,42,43,"215136_L.jpg"],[3602460,13813005,68,28,256,42,43,"215146_L.jpg"],[3603033,13812509,68,28,256,42,43,"215131_L.jpg"],[3609256,13802009,68,28,257,42,43,"211176_L.jpg"],[3609551,13801184,68,28,257,42,43,"211181_L.jpg"],[3608622,13791930,87,29,257,43,44,"C084.jpg"],[3603927,13788522,87,29,257,43,44,"C028.jpg"],[3601385,13786026,87,29,257,43,44,"C032.jpg"],[3599946,13785216,87,29,257,43,44,"C027.jpg"],[3598671,13784413,87,29,257,43,44,"C026.jpg"],[3596230,13780984,87,29,257,43,44,"C076.jpg"],[3595146,13780667,87,29,257,43,44,"C075.jpg"],[3594272,13779016,87,29,258,43,44,"C064.jpg"],[3592734,13778370,87,29,258,43,44,"C089.jpg"],[3592118,13777268,87,29,258,43,44,"C024.jpg"],[3590370,13777390,87,29,259,43,44,"C063.jpg"],[3586641,13773835,87,29,259,43,-1,""],[3585463,13771064,87,29,259,43,44,"C023.jpg"],[3577788,13769817,87,29,260,43,44,"C058.jpg"],[3576921,13770187,87,29,260,43,44,"C055.jpg"],[3572014,13771065,87,29,261,43,44,"C054.jpg"],[3571027,13770254,87,29,261,43,44,"C114.jpg"],[3567230,13763937,87,29,261,43,44,"C021.jpg"],[3565130,13761990,87,29,262,43,-1,""],[3560260,13760806,87,29,262,43,44,"C018.jpg"],[3558842,13757213,87,29,262,43,44,"C030.jpg"],[3549844,13783450,88,29,263,43,44,"C048.jpg"],[3546636,13776154,89,29,263,43,44,"C162.jpg"],[3546474,13776548,89,29,263,43,44,"C160.jpg"],[3545912,13779439,89,29,263,43,44,"C166.jpg"],[3544747,13780215,89,29,263,43,44,"C168.jpg"],[3544120,13780627,89,29,263,43,44,"C170.jpg"],[3545225,13772369,88,29,264,43,-1,""],[3544493,13771575,88,29,264,43,44,"C086.jpg"],[3542209,13769968,88,29,264,43,44,"C041.jpg"],[3539865,13768810,88,29,264,43,44,"C039.jpg"],[3541746,13769955,88,29,264,43,-1,""],[3534982,13766586,88,29,265,43,44,"C036.jpg"],[3534499,13765912,88,29,265,43,44,"C035.jpg"],[3532367,13763126,88,29,265,43,44,"C034.jpg"],[3530463,13762216,88,29,266,43,44,"C033.jpg"],[3529132,13760106,88,29,266,43,44,"C099.jpg"],[3536748,13652738,90,30,267,44,-1,""],[3536724,13649384,90,30,268,44,-1,""],[3536159,13646791,90,30,268,44,-1,""],[3527472,13258655,48,5,125,6,5,"08010003200710.jpg"],[3534700,13641942,90,30,269,44,-1,""],[3534879,13643176,90,30,268,44,-1,""],[3536076,13645848,90,30,268,44,-1,""],[3560276,13716443,76,30,270,44,-1,""],[3557842,13718853,76,30,270,44,-1,""],[3553789,13711919,76,30,271,44,-1,""],[3564197,13694644,77,30,272,44,-1,""],[3577595,13692890,77,30,272,44,-1,""],[3584866,13687929,77,30,272,44,-1,""],[3586697,13686051,77,30,272,44,-1,""],[3587785,13683218,91,30,272,44,45,"52587_640.jpg?20151217133351"],[3587055,13681830,91,30,273,44,-1,""],[3645618,13725156,76,31,213,45,46,"20411220.jpg"],[3645087,13726804,76,31,213,45,46,"20411160.jpg"],[3645087,13726804,76,31,213,45,46,"20411150.jpg"],[3644107,13727434,76,31,213,45,46,"20411110.jpg"],[3643433,13727674,76,31,213,45,46,"20411100.jpg"],[3640871,13729597,76,31,213,45,46,"20411090.jpg"],[3640170,13729151,76,31,213,45,46,"20411080.jpg"],[3639369,13728134,76,31,213,45,46,"20411070.jpg"],[3637454,13727610,76,31,213,45,46,"20411060.jpg"],[3636595,13728452,76,31,213,45,46,"20411050.jpg"],[3634120,13729500,76,31,213,45,46,"20411040.jpg"],[3634029,13729506,76,31,213,45,46,"20411030.jpg"],[3632451,13728953,76,31,213,45,46,"20411020.jpg"],[3631582,13726469,76,31,213,45,46,"20411010.jpg"],[3631264,13725602,76,31,213,45,46,"20411000.jpg"],[3630191,13724924,76,31,213,45,46,"20410990.jpg"],[3630344,13724052,76,31,213,45,46,"20410980.jpg"],[3630226,13722168,76,31,213,45,-1,""],[3629455,13718817,76,31,213,45,-1,""],[3627884,13715701,76,31,213,45,46,"20410950.jpg"],[3627606,13715486,76,31,213,45,46,"20410940.jpg"],[3627165,13714697,76,31,213,45,46,"20410930.jpg"],[3626261,13714075,76,31,213,45,46,"20410910.jpg"],[3624725,13716330,76,31,213,45,46,"20410900.jpg"],[3616622,13724550,76,31,274,45,46,"10410650.jpg"],[3613271,13724760,76,31,274,45,46,"10410640.jpg"],[3610841,13726614,76,31,274,45,46,"10410620.jpg"],[3610711,13726480,76,31,274,45,46,"10410610.jpg"],[3608537,13725021,76,31,274,45,46,"10410600.jpg"],[3608330,13724834,76,31,274,45,46,"10410590.jpg"],[3608089,13725134,76,31,274,45,46,"10410580.jpg"],[3608129,13726306,76,31,274,45,46,"10410570.jpg"],[3607442,13726773,76,31,274,45,46,"10410550.jpg"],[3616715,13722908,92,31,274,45,46,"11580030.jpg"],[3614396,13719372,92,31,274,45,46,"11580240.jpg"],[3614091,13714488,92,31,274,45,46,"11580490.jpg"],[3613895,13708714,92,31,274,45,46,"11580870.jpg"],[3613883,13708040,92,31,274,45,46,"11580880.jpg"],[3604792,13727348,76,31,274,45,46,"10410540.jpg"],[3604584,13727434,76,31,274,45,46,"10410530.jpg"],[3603550,13728799,76,31,274,45,46,"10410520.jpg"],[3602259,13729314,76,31,274,45,46,"10410510.jpg"],[3601996,13728805,76,31,274,45,46,"10410500.jpg"],[3601012,13729211,76,31,274,45,46,"10410490.jpg"],[3599926,13728396,76,31,274,45,46,"10410480.jpg"],[3596984,13726091,76,31,275,45,46,"30410360.jpg"],[3596831,13726038,76,31,275,45,46,"30410350.jpg"],[3595222,13726155,76,31,275,45,46,"30410340.jpg"],[3594986,13726175,76,31,275,45,46,"30410330.jpg"],[3594108,13725254,76,31,275,45,46,"30410320.jpg"],[3592385,13722058,76,31,275,45,46,"30410310.jpg"],[3586645,13721448,76,31,275,45,46,"30410300.jpg"],[3584954,13722381,76,31,275,45,46,"30410290.jpg"],[3584211,13722995,76,31,275,45,46,"30410280.jpg"],[3584211,13722995,76,31,275,45,46,"30410270.jpg"],[3582042,13724089,76,31,275,45,46,"30410260.jpg"],[3577675,13722207,76,31,275,45,46,"30410140.jpg"],[3576438,13722699,76,31,275,45,46,"30410120.jpg"],[3574906,13721554,76,31,275,45,46,"30410100.jpg"],[3575082,13720989,76,31,275,45,46,"30410090.jpg"],[3574844,13721000,76,31,275,45,46,"30410080.jpg"],[3574681,13721000,76,31,275,45,46,"30410060.jpg"],[3571730,13719392,76,31,275,45,46,"30410040.jpg"],[3569459,13717312,76,31,275,45,46,"30410020.jpg"],[3533021,13707652,87,32,276,46,47,"C001N1L.jpg"],[3532988,13707298,87,32,276,46,47,"C009N1L.jpg"],[3533073,13709356,87,32,276,46,47,"C019N1L.jpg"],[3533853,13711569,87,32,276,46,47,"C027N1L.jpg"],[3534111,13713829,87,32,276,46,47,"C042N1L.jpg"],[3534208,13714723,87,32,276,46,47,"C043N1L.jpg"],[3535247,13717206,87,32,277,46,47,"C028N1L.jpg"],[3536733,13719319,87,32,277,46,47,"C020N1L.jpg"],[3536580,13722496,87,32,278,46,47,"C029N1L.jpg"],[3543805,13707556,90,32,279,47,47,"C060N1L.jpg"],[3543574,13711594,90,32,279,47,47,"C056N1L.jpg"],[3543032,13709071,90,32,280,47,47,"C059N1L.jpg"],[3542926,13711168,90,32,279,47,47,"C057N1L.jpg"],[3542850,13714963,90,32,279,47,47,"C055N1L.jpg"],[3539499,13718808,90,32,277,47,47,"C038N1L.jpg"],[3539416,13718788,90,32,277,47,47,"C054N1L.jpg"],[3545966,13744206,87,32,281,48,47,"C032N1L.jpg"],[3544913,13739111,87,32,282,48,47,"C022N1L.jpg"],[3544081,13735846,87,32,282,48,47,"C045N1L.jpg"],[3541930,13731853,87,32,278,48,47,"C044N1L.jpg"],[3541053,13730365,87,32,278,48,47,"C031N1L.jpg"],[3538935,13727172,87,32,278,48,47,"C030N1L.jpg"],[3548264,13750121,87,32,281,49,47,"C033N1L.jpg"],[3548928,13751070,87,32,281,49,47,"C046N1L.jpg"],[3550421,13751476,87,32,281,49,47,"C035N1L.jpg"],[3552196,13753364,87,32,281,49,47,"C049N1L.jpg"],[3555761,13754316,87,32,281,49,47,"C066N1L.jpg"],[3556917,13753842,87,32,281,49,47,"C067N1L.jpg"],[3557945,13753827,87,32,281,49,47,"C068N1L.jpg"],[3558571,13755059,87,32,281,49,47,"C069N1L.jpg"],[3558540,13756278,87,32,281,49,47,"C090N1L.jpg"],[3486616,13821273,93,33,283,50,48,"PCR0001L.jpg"],[3485055,13819032,93,33,284,50,48,"PCR0028L.jpg"],[3484186,13814365,93,33,284,50,48,"PCR0032L.jpg"],[3483951,13813651,93,33,284,50,48,"PCR0033L.jpg"],[3483818,13812244,93,33,284,50,48,"PCR0034L.jpg"],[3483768,13811799,93,33,284,50,48,"PCR0035L.jpg"],[3482543,13812112,93,33,284,50,48,"PCR0037L.jpg"],[3481883,13811297,93,33,284,50,48,"PCR0050L.jpg"],[3478642,13805038,93,33,285,50,48,"PCR0066L.jpg"],[3478178,13804053,93,33,285,50,48,"PCR0067L.jpg"],[3473901,13788762,93,33,286,50,48,"PCR0079L.jpg"],[3473790,13787751,93,33,286,50,48,"PCR0081L.jpg"],[3507147,13234585,48,5,147,6,5,"08010003200693.jpg"],[3473092,13780115,93,33,287,50,48,"PCR0086L.jpg"],[3472801,13778633,93,33,287,50,48,"PCR0088L.jpg"],[3467081,13773750,93,33,287,50,48,"PCR0094L.jpg"],[3468765,13760830,93,33,287,50,48,"PCR0101L.jpg"],[3467669,13749927,93,33,288,50,48,"PCR0111L.jpg"],[3468281,13749152,93,33,288,50,48,"PCR0112L.jpg"],[3468598,13749055,93,33,288,50,48,"PCR0113L.jpg"],[3499999,13766648,89,33,289,50,48,"PCR1013L.jpg"],[3499756,13766555,89,33,289,50,48,"PCR1012L.jpg"],[3498749,13765985,89,33,289,50,48,"PCR1011L.jpg"],[3498438,13765981,89,33,289,50,48,"PCR1010L.jpg"],[3498201,13766006,89,33,289,50,48,"PCR1009L.jpg"],[3494164,13766719,89,33,290,50,48,"PCR1008L.jpg"],[3492360,13767040,89,33,290,50,48,"PCR1007L.jpg"],[3491410,13766837,89,33,290,50,48,"PCR1006L.jpg"],[3491203,13766721,89,33,290,50,48,"PCR1005L.jpg"],[3491015,13766769,89,33,290,50,48,"PCR1004L.jpg"],[3489082,13767233,89,33,290,50,48,"PCR1003L.jpg"],[3488522,13766523,89,33,290,50,48,"PCR1002L.jpg"],[3488783,13766826,89,33,290,50,48,"PCR1001L.jpg"],[3543239,13859621,86,34,291,51,49,"R139kenkyo.jpg"],[3542403,13859280,86,34,291,51,49,"nehara2.jpg"],[3541347,13859055,86,34,291,51,-1,""],[3540510,13858435,86,34,291,51,49,"nehara1.jpg"],[3532827,13858670,86,34,291,51,49,"uchinoIC.jpg"],[3531392,13859920,86,34,291,51,49,"kamiideIC.jpg"],[3519808,13852619,85,34,291,52,49,"R52kenkyo.jpg"],[3519306,13853064,85,34,291,52,49,"shibakawa6.jpg"],[3518984,13852909,85,34,291,52,49,"shibakawa5.jpg"],[3518349,13852725,85,34,291,52,49,"shibakawa1.jpg"],[3518767,13852889,85,34,291,52,49,"shibakawa3.jpg"],[3517037,13852321,85,34,292,52,49,"shishiharakichi.jpg"],[3515459,13852026,85,34,292,52,49,"shishiharadanchi.jpg"],[3513422,13852053,85,34,292,52,-1,""],[3513690,13852120,85,34,292,52,-1,""],[3538814,13886200,84,35,293,53,50,"340.jpg"],[3538373,13885828,84,35,293,53,50,"341.jpg"],[3538205,13885001,84,35,293,53,50,"342.jpg"],[3535290,13895383,94,35,293,53,50,"365.jpg"],[3535582,13895761,94,35,293,53,50,"364.jpg"],[3535864,13897361,94,35,293,53,50,"363.jpg"],[3536695,13898520,94,35,293,53,50,"359.jpg"],[3535790,13900718,94,35,293,53,50,"354.jpg"],[3536209,13900103,94,35,293,53,50,"355.jpg"],[3536065,13900342,94,35,293,53,50,"356.jpg"],[3487019,13822815,93,34,283,54,49,"taniinaba.jpg"],[3489162,13826208,93,34,283,54,49,"yabutahigashi.jpg"],[3489774,13827815,93,34,283,54,49,"hirohata.jpg"],[3491378,13828985,93,34,283,54,49,"okabetnnobori01.jpg"],[3490561,13827024,93,34,283,54,49,"fujiedaokabeic2.jpg"],[3490068,13827491,93,34,283,54,49,"fujiedaokabeic1.jpg"],[3490311,13828628,93,34,283,54,49,"uchitani.jpg"],[3508530,13894470,93,35,294,55,50,"338.jpg"],[3510252,13894868,93,35,295,55,50,"335.jpg"],[3511048,13894790,93,35,295,55,50,"334.jpg"],[3512477,13894743,93,35,295,55,50,"332.jpg"],[3513212,13894215,93,34,295,56,50,"330.jpg"],[3514085,13893723,93,34,295,56,50,"329.jpg"],[3514683,13893486,93,34,295,56,50,"328.jpg"],[3515167,13892469,93,34,295,56,50,"327.jpg"],[3515272,13888276,93,34,296,56,50,"322.jpg"],[3515023,13887890,93,34,296,56,50,"319.jpg"],[3514837,13887589,93,35,296,55,50,"318.jpg"],[3512615,13862651,93,34,292,57,49,"kanbarahigashi.jpg"],[3511563,13861480,93,34,292,57,49,"housuirobashi.jpg"],[3509952,13855490,93,34,292,57,49,"yuigyokounishi.jpg"],[3508269,13854757,93,34,292,57,-1,""],[3507259,13854358,93,34,-1,57,49,"yuisatta.jpg"],[3507183,13854289,93,34,292,57,49,"yuinishikurasawa2.jpg"],[3506356,13853828,93,34,292,57,49,"okitsuazumacyou1.jpg"],[3504541,13850815,93,34,292,58,49,"okitsuseikenji.jpg"],[3500400,13838413,93,34,297,58,49,"karaseranpu1.jpg"],[3498998,13835995,93,34,297,58,49,"abekawaohashi.jpg"],[3518152,13901339,93,35,295,59,50,"302.jpg"],[3517906,13901360,93,35,294,59,50,"303.jpg"],[3517735,13901575,93,35,294,59,50,"304.jpg"],[3517465,13900944,93,35,294,59,50,"306.jpg"],[3517251,13900678,93,35,295,59,50,"307.jpg"],[3517181,13901116,93,35,294,59,50,"308.jpg"],[3517093,13901176,93,35,294,59,50,"309.jpg"],[3516928,13900872,93,35,294,59,50,"310.jpg"],[3516683,13900610,93,35,294,59,50,"311.jpg"],[3516676,13900400,93,35,294,59,50,"312.jpg"],[3516535,13900314,93,35,294,59,50,"313.jpg"],[3516308,13900233,93,35,294,59,50,"314.jpg"],[3516188,13899936,93,35,295,59,50,"315.jpg"],[3518833,13745407,88,36,298,60,51,"9004.jpeg"],[3517304,13744266,88,36,298,60,51,"9003.jpeg"],[3516868,13742206,88,36,298,60,51,"9002.jpeg"],[3526426,13754614,88,36,298,60,51,"9001.jpeg"],[3488449,13635647,93,37,299,61,52,"Jpeg001.jpg"],[3488600,13635524,93,37,299,61,52,"Jpeg002.jpg"],[3488780,13635182,93,37,299,61,52,"Jpeg003.jpg"],[3488760,13634965,93,37,299,61,52,"Jpeg004.jpg"],[3488794,13634499,93,37,299,61,52,"Jpeg005.jpg"],[3488919,13634201,93,37,299,61,52,"Jpeg006.jpg"],[3488878,13634029,93,37,299,61,-1,""],[3488679,13633907,93,37,299,61,52,"Jpeg008.jpg"],[3488496,13633507,93,37,299,61,-1,""],[3488761,13633590,93,37,299,61,52,"Jpeg010.jpg"],[3488869,13633584,93,37,299,61,52,"Jpeg011.jpg"],[3489116,13633571,93,37,299,61,52,"Jpeg012.jpg"],[3489696,13633576,93,37,300,61,52,"Jpeg012.jpg"],[3488782,13635344,93,37,299,61,52,"Jpeg020.jpg"],[3488857,13634901,93,37,299,61,52,"Jpeg019.jpg"],[3488915,13634538,93,37,299,61,52,"Jpeg018.jpg"],[3488971,13634020,93,37,299,61,52,"Jpeg017.jpg"],[3488682,13633712,93,37,299,61,52,"Jpeg016.jpg"],[3488984,13633738,93,37,299,61,52,"Jpeg015.jpg"],[3489135,13633643,93,37,299,61,52,"Jpeg014.jpg"],[3489252,13633813,93,37,299,61,52,"Jpeg013.jpg"],[3488162,13635902,93,37,299,61,52,"Jpeg021.jpg"],[3487111,13636234,93,37,299,61,52,"Jpeg027.jpg"],[3486992,13636370,93,37,299,61,52,"Jpeg025.jpg"],[3485938,13637457,93,37,299,61,52,"Jpeg026.jpg"],[3484948,13639276,93,37,299,61,52,"Jpeg029.jpg"],[3485192,13640689,93,37,299,61,52,"Jpeg024.jpg"],[3485850,13642078,93,37,299,61,52,"Jpeg030.jpg"],[3959603,14193988,95,4,301,5,4,"cctv105.jpg"],[3485776,13641222,96,38,299,62,53,"A-18.jpg"],[3485867,13641410,96,38,299,62,53,"A-1.jpg"],[3485538,13641591,96,38,299,62,53,"A-2.jpg"],[3485106,13641698,96,38,299,62,53,"A-3.jpg"],[3435613,13568470,97,39,302,63,54,"C02318.jpg"],[3484128,13640071,96,38,299,62,53,"A-5.jpg"],[3483896,13638843,96,38,299,62,53,"A-6.jpg"],[3483786,13638666,96,38,299,62,53,"A-7.jpg"],[3483792,13638152,96,38,299,62,53,"A-8.jpg"],[3484161,13637059,96,38,299,62,53,"A-9.jpg"],[3484148,13636458,96,38,299,62,53,"A-10.jpg"],[3484002,13636078,96,38,299,62,53,"A-11.jpg"],[3483870,13635994,96,38,299,62,53,"A-12.jpg"],[3483733,13634930,96,38,299,62,53,"A-13.jpg"],[3483804,13634904,96,38,299,62,53,"A-14.jpg"],[3483630,13633608,96,38,299,62,53,"A-15.jpg"],[3483701,13633332,96,38,299,62,53,"A-16.jpg"],[3483631,13633791,96,38,299,62,53,"A-17.jpg"],[3483611,13633636,96,38,299,62,53,"A-18.jpg"],[4081368,14080447,36,1,76,1,0,"030.jpg"],[3483710,13631236,96,38,299,62,53,"B-1.jpg"],[3483590,13630721,96,38,299,62,53,"B-2.jpg"],[3483510,13629812,96,38,299,62,53,"B-3.jpg"],[3483451,13629426,96,38,299,62,53,"B-4.jpg"],[3483557,13628205,96,38,299,62,53,"B-5.jpg"],[3483530,13627900,96,38,303,62,53,"B-6.jpg"],[3858935,13988082,61,7,146,23,11,"cctv001.jpg"],[3483560,13627400,96,38,303,62,53,"B-8.jpg"],[3483850,13626876,96,38,303,62,53,"B-9.jpg"],[3483930,13625833,96,38,303,62,53,"B-10.jpg"],[3483766,13625182,96,38,303,62,53,"B-11.jpg"],[3483185,13623931,96,38,303,62,53,"B-12.jpg"],[3483030,13623580,96,38,303,62,53,"B-13.jpg"],[3482274,13622574,96,38,303,62,53,"B-14.jpg"],[3481700,13621459,96,38,303,62,53,"B-15.jpg"],[3481476,13621187,96,38,303,62,53,"C-1.jpg"],[3481126,13620173,96,38,303,62,53,"C-2.jpg"],[3857263,13992282,61,12,146,24,11,"cctv010.jpg"],[3541477,13885921,84,27,236,41,55,"Camera.jpg"],[3479478,13616918,96,38,303,62,53,"C-5.jpg"],[3479362,13616669,96,38,303,62,53,"C-6.jpg"],[3479245,13616442,96,38,303,62,53,"C-7.jpg"],[3478476,13615951,96,38,303,62,53,"C-8.jpg"],[3477326,13615758,96,38,303,62,53,"C-9.jpg"],[3477207,13615709,96,38,303,62,53,"C-10.jpg"],[3476458,13615558,96,38,303,62,53,"C-11.jpg"],[3475332,13614362,96,38,303,62,53,"C-12.jpg"],[3475264,13613988,96,38,303,62,53,"D-1.jpg"],[3475301,13613500,96,38,303,62,53,"D-2.jpg"],[3474791,13612255,96,38,303,62,53,"D-3.jpg"],[3474499,13611902,96,38,303,62,53,"D-4.jpg"],[3474018,13611306,96,38,303,62,53,"D-5.jpg"],[3473427,13610201,96,38,303,62,53,"D-6.jpg"],[3472883,13609476,96,38,303,62,53,"D-7.jpg"],[3472329,13608525,96,38,303,62,53,"D-8.jpg"],[3471933,13608279,96,38,303,62,53,"D-9.jpg"],[3471337,13607942,96,38,303,62,53,"D-10.jpg"],[3470604,13607602,96,38,303,62,53,"D-11.jpg"],[3470290,13606880,96,38,303,62,53,"D-12.jpg"],[3469903,13606326,96,38,303,62,53,"D-13.jpg"],[3469596,13606062,96,38,304,62,53,"E-1.jpg"],[3469340,13605707,96,38,304,62,53,"E-2.jpg"],[3469099,13604942,96,38,304,62,53,"E-3.jpg"],[3468510,13604685,96,38,304,62,53,"E-4.jpg"],[3468270,13604409,96,38,304,62,53,"E-5.jpg"],[3467956,13603617,96,38,304,62,53,"E-6.jpg"],[3467514,13603385,96,38,304,62,53,"E-7.jpg"],[3466821,13603279,96,38,304,62,53,"E-8.jpg"],[3466007,13603344,96,38,304,62,53,"E-9.jpg"],[3465643,13603185,96,38,304,62,53,"E-10.jpg"],[3465275,13602673,96,38,304,62,53,"E-11.jpg"],[3465272,13602252,96,38,304,62,53,"E-12.jpg"],[3464848,13601539,96,38,304,62,53,"E-13.jpg"],[3464568,13601130,96,38,304,62,53,"E-14.jpg"],[3472855,13781098,93,33,286,50,48,"PCR0085L.jpg"],[3463233,13599721,96,38,304,62,53,"E-16.jpg"],[3463018,13599048,96,38,305,62,53,"E-17.jpg"],[3462878,13598663,96,38,305,62,53,"E-18.jpg"],[3462510,13598383,96,38,305,62,53,"E-19.jpg"],[3462318,13598334,96,38,305,62,53,"E-20.jpg"],[3462100,13598179,96,38,305,62,53,"E-21.jpg"],[3461846,13597466,96,38,305,62,53,"E-22.jpg"],[3461619,13596802,96,38,305,62,53,"E-23.jpg"],[3461250,13596236,96,38,305,62,53,"E-24.jpg"],[3423900,13635813,98,40,306,64,56,"001.jpg"],[3424033,13635444,98,40,307,64,56,"010.jpg"],[3410276,13620191,98,40,307,64,56,"030.jpg"],[3408860,13619261,98,40,308,64,56,"033.jpg"],[3405188,13619523,98,40,308,64,56,"036.jpg"],[3400059,13615106,98,40,308,64,56,"053.jpg"],[3391844,13610650,98,40,309,64,56,"075.jpg"],[3535819,13645215,90,30,268,44,-1,""],[3446442,13652281,98,40,310,64,56,"158.jpg"],[3445322,13650789,98,40,311,64,56,"159.jpg"],[3440717,13644198,98,40,311,64,56,"160.jpg"],[3440134,13643338,98,40,311,64,56,"179.jpg"],[3434652,13640697,98,40,306,64,56,"156.jpg"],[3431710,13641208,98,40,306,64,56,"157.jpg"],[3402747,13617990,98,40,308,64,56,"039.jpg"],[3499837,13585786,93,41,312,65,57,"C00152.jpg"],[3499402,13585679,93,41,312,65,57,"C00153.jpg"],[3499393,13585426,93,41,312,65,57,"C00154.jpg"],[3497033,13592801,93,41,312,65,57,"C02505.jpg"],[3502662,13599479,93,41,313,65,57,"C03853.jpg"],[3492752,13629786,93,41,300,65,57,"C00139.jpg"],[3489699,13633489,93,41,300,65,57,"C00136.jpg"],[3555537,13613724,69,41,314,65,57,"C00158.jpg"],[3552371,13616153,69,41,314,65,57,"C00161.jpg"],[3550446,13622094,69,41,314,65,57,"C00170.jpg"],[3542341,13624625,69,41,314,65,57,"C00174.jpg"],[3534861,13629463,69,41,269,65,57,"C03861.jpg"],[3534731,13641938,90,41,269,65,57,"C00198.jpg"],[3526792,13626636,69,41,315,65,57,"C00075.jpg"],[3511660,13612882,69,41,316,65,57,"C00188.jpg"],[3553456,13609562,82,41,317,65,57,"C02436.jpg"],[3549717,13608850,82,41,317,65,57,"C00212.jpg"],[3540341,13602234,82,41,317,65,57,"C00221.jpg"],[3531827,13602537,82,41,317,65,57,"C00224.jpg"],[3521620,13593029,82,41,312,65,57,"C00238.jpg"],[3516105,13590059,82,41,312,65,57,"C02496.jpg"],[3507911,13588130,82,41,312,65,57,"C02498.jpg"],[3504937,13585999,82,41,312,65,57,"C00240.jpg"],[3498901,13579325,93,42,318,66,-1,""],[3498888,13578802,93,42,319,66,-1,""],[3485862,13642339,96,38,299,62,53,"A-4.jpg"],[3498965,13563449,48,42,320,66,-1,""],[3512235,13544203,48,42,321,66,-1,""],[3512245,13543932,48,42,322,66,-1,""],[3472160,13489713,99,43,323,67,58,"C00452.jpg"],[3474705,13487088,99,43,324,67,58,"C00453.jpg"],[3477474,13484012,99,43,324,67,58,"C00454.jpg"],[3477869,13483558,99,43,324,67,58,"C00456.jpg"],[3479107,13479954,99,43,325,67,58,"C00457.jpg"],[3480097,13475050,99,43,326,67,58,"C00461.jpg"],[3479946,13475554,99,43,326,67,58,"C00460.jpg"],[3479853,13472379,99,43,326,67,58,"C00463.jpg"],[3480748,13469622,99,43,326,67,58,"C00464.jpg"],[3481139,13468305,99,43,326,67,58,"C00465.jpg"],[3481569,13467105,99,43,326,67,58,"C00466.jpg"],[3481773,13464743,99,43,326,67,58,"C00468.jpg"],[3482876,13463353,99,43,326,67,58,"C00469.jpg"],[3483275,13463016,99,43,326,67,58,"C00470.jpg"],[3484524,13640968,96,38,299,68,53,"A-4.jpg"],[3484493,13460620,99,43,327,67,58,"C00475.jpg"],[3484770,13459803,99,43,327,67,58,"C00477.jpg"],[3484708,13457897,99,43,327,67,58,"C00481.jpg"],[3483178,13455033,99,43,328,67,58,"C00486.jpg"],[3482742,13453006,99,43,328,67,58,"C00487.jpg"],[3482867,13438562,99,43,329,67,58,"C03821.jpg"],[3483343,13434996,99,43,329,67,58,"C00489.jpg"],[3484348,13432701,99,43,329,67,58,"C00491.jpg"],[3484230,13431910,99,43,330,67,58,"C00493.jpg"],[3483015,13430833,99,43,330,67,58,"C00495.jpg"],[3529562,13452286,100,43,331,69,58,"C00535.jpg"],[3529881,13454199,100,43,331,69,58,"C00532.jpg"],[3527985,13454590,100,43,331,69,58,"C00528.jpg"],[3527502,13454039,100,43,331,69,58,"C00527.jpg"],[3527096,13454035,100,43,331,69,58,"C00526.jpg"],[3525938,13454456,100,43,331,69,58,"C03831.jpg"],[3526247,13454429,100,43,331,69,58,"C00524.jpg"],[3523692,13454838,100,43,331,69,58,"C03830.jpg"],[3523138,13454379,100,43,331,69,58,"C00521.jpg"],[3522732,13452962,100,43,331,69,58,"C00518.jpg"],[3522153,13452970,100,43,331,69,58,"C03829.jpg"],[3520927,13452044,100,43,331,69,58,"C00515.jpg"],[3520172,13452194,100,43,331,69,58,"C00514.jpg"],[3520176,13452198,100,43,331,69,58,"C00513.jpg"],[3518721,13452745,100,43,331,69,58,"C00510.jpg"],[3514191,13454500,100,43,331,69,58,"C00509.jpg"],[3512366,13456874,100,43,331,69,58,"C00507.jpg"],[3510771,13458034,100,43,331,69,58,"C03828.jpg"],[3506940,13458673,100,43,331,69,58,"C03827.jpg"],[3498950,13458884,100,43,326,69,58,"C00498.jpg"],[3493432,13457843,100,43,326,69,58,"C03825.jpg"],[3487991,13460639,100,43,326,69,58,"C03824.jpg"],[3487464,13461636,100,43,326,69,58,"C03823.jpg"],[3486597,13461819,100,43,326,69,58,"C00497.jpg"],[3484611,13460286,100,43,327,69,58,"C00496.jpg"],[3541172,13460018,48,44,332,70,59,"C00836.jpg"],[3556426,13447795,48,44,333,70,59,"C00866.jpg"],[3548084,13458558,48,44,332,70,59,"C00844.jpg"],[3538478,13471165,48,44,334,70,59,"C00821.jpg"],[3533442,13485907,48,44,335,70,59,"C00803.jpg"],[3538025,13478177,48,44,334,70,59,"C00809.jpg"],[3552510,13443065,48,44,333,70,59,"C00873.jpg"],[3555682,13446453,48,44,333,70,59,"C00868.jpg"],[3551232,13452366,48,44,333,70,59,"C00859.jpg"],[3550094,13453758,48,44,332,70,59,"C00850.jpg"],[3548580,13457577,48,44,332,70,59,"C00846.jpg"],[3543061,13460132,48,44,332,70,-1,""],[3542371,13460052,48,44,332,70,-1,""],[3540541,13460621,48,44,332,70,59,"C00835.jpg"],[3538991,13462556,48,44,334,70,59,"C00828.jpg"],[3533442,13492453,48,44,335,70,59,"C00796.jpg"],[3538971,13474923,101,44,334,71,59,"C03512.jpg"],[3536234,13475986,101,44,334,71,59,"C03521.jpg"],[3535622,13476420,101,44,334,71,59,"C03522.jpg"],[3534645,13478339,101,44,334,71,59,"C03525.jpg"],[3534661,13478322,101,44,334,71,59,"C03526.jpg"],[3534469,13480275,101,44,335,71,59,"C03529.jpg"],[3533955,13481524,101,44,335,71,59,"C03530.jpg"],[3533100,13483202,101,44,335,71,59,"C03533.jpg"],[3532782,13483757,101,44,335,71,59,"C03534.jpg"],[3532069,13484252,101,44,335,71,59,"C03535.jpg"],[3531583,13484656,101,44,335,71,59,"C02406.jpg"],[3530330,13492001,101,44,335,71,59,"C02578.jpg"],[3529132,13497054,101,44,336,71,59,"C02579.jpg"],[3524307,13501298,101,44,336,71,59,"C02580.jpg"],[3524430,13501304,101,44,336,71,59,"C02581.jpg"],[3523298,13502100,101,44,336,71,59,"C02582.jpg"],[3433768,13566216,97,39,302,63,54,"C02332.jpg"],[3434462,13567400,97,39,302,63,54,"C02327.jpg"],[3434660,13567581,97,39,302,63,54,"C02326.jpg"],[3483960,13632307,96,38,299,62,-1,""],[3435613,13568470,97,39,302,63,54,"C02316.jpg"],[3438655,13571191,97,39,302,63,54,"C02306.jpg"],[3445530,13574312,97,39,337,63,54,"C03996.jpg"],[3445850,13574846,97,39,337,63,54,"C03995.jpg"],[3446640,13575251,97,39,338,63,54,"C03572.jpg"],[3449063,13576186,97,39,338,63,54,"C03568.jpg"],[3453978,13577784,97,39,339,63,54,"C02304.jpg"],[3456321,13577961,97,39,339,63,54,"C02298.jpg"],[3457439,13578164,97,39,340,63,54,"C02294.jpg"],[3458867,13579110,97,39,341,63,54,"C02287.jpg"],[3459740,13579164,97,39,342,63,54,"C02285.jpg"],[3461062,13579851,97,39,342,63,54,"C03993.jpg"],[3461474,13585482,102,39,342,63,54,"C00414.jpg"],[3461375,13585907,102,39,342,63,54,"C00418.jpg"],[3461637,13587428,102,39,305,63,54,"C00406.jpg"],[3462099,13587826,102,39,305,63,54,"C02064.jpg"],[3483559,13627897,96,38,303,62,60,"UC.jpg"],[3460707,13590407,102,39,342,63,54,"C03991.jpg"],[3461195,13593777,102,39,305,63,54,"C02127.jpg"],[3460978,13595772,102,39,305,63,54,"C02134.jpg"],[3461046,13594877,102,39,305,63,54,"C00374.jpg"],[3461019,13596230,102,39,305,63,54,"C02142.jpg?tm=1482304153746"],[3551846,13402619,48,45,343,72,-1,""],[3551803,13405095,48,45,343,72,-1,""],[3552567,13411268,48,45,343,72,-1,""],[3479878,13618032,96,38,303,62,53,"C-3.jpg"],[3555385,13427971,48,45,343,72,-1,""],[3555751,13436369,48,45,344,72,-1,""],[3552590,13440339,48,45,344,72,-1,""],[3551302,13420195,100,45,343,72,-1,""],[3547192,13424083,100,45,343,72,-1,""],[3529839,13446221,100,45,345,72,-1,""],[3529749,13448242,100,45,345,72,-1,""],[3529040,13422725,64,45,346,72,-1,""],[3521416,13421710,64,45,346,72,-1,""],[3519566,13420289,64,45,346,72,-1,""],[3503224,13438740,103,45,347,72,-1,""],[3510815,13432712,103,45,348,72,-1,""],[3518816,13433262,103,45,349,72,-1,""],[3521957,13432283,103,45,346,72,-1,""],[3525957,13426168,103,45,346,72,-1,""],[3533732,13418791,103,45,343,72,-1,""],[3543053,13420597,103,45,343,72,-1,""],[3551894,13361431,48,46,350,73,-1,""],[3548685,13370318,48,46,350,73,-1,""],[3551314,13399262,48,46,343,73,-1,""],[3550702,13392963,48,46,351,73,-1,""],[3551733,13355189,48,46,352,73,-1,""],[3550807,13353970,48,46,352,73,-1,""],[3549013,13349152,48,46,352,73,-1,""],[3549667,13346290,48,46,352,73,-1,""],[3541322,13333973,48,46,353,73,-1,""],[3560014,13437458,104,46,344,74,61,"camera.jpg"],[3531289,13390931,105,46,354,74,62,"camera.jpg"],[3518617,13342216,106,46,355,74,63,"camera.jpg"],[3519559,13351898,107,46,355,74,64,"camera.jpg"],[3507696,13318696,108,46,356,74,65,"camera.jpg"],[3531896,13375620,109,46,357,74,66,"camera.jpg"],[3535341,13448788,110,46,345,74,67,"camera.jpg"],[3531278,13400366,110,46,343,74,68,"camera.jpg"],[3529100,13357359,110,46,358,74,69,"camera.jpg"],[3503656,13225262,48,47,359,75,70,"00011.jpg?cache=1450664168190"],[3501339,13223372,48,47,359,75,70,"00012.jpg?cache=1450664200210"],[3489499,13210437,48,47,360,75,70,"00013.jpg?cache=1450664242201"],[3487834,13206576,111,47,360,75,70,"00021.jpg?cache=1450664486550"],[3485165,13203272,111,47,360,75,70,"00022.jpg?cache=1450664535285"],[3484137,13200877,111,47,360,75,70,"00023.jpg?cache=1450664570248"],[3479775,13617850,96,38,303,62,-1,""],[3478011,13196342,48,47,360,75,-1,""],[3476745,13193754,48,47,360,75,70,"00024.jpg?cache=1450664910856"],[3466237,13181030,112,47,361,75,70,"00025.jpg?cache=1450664980632"],[3454659,13182653,48,47,362,75,-1,""],[3448068,13178948,48,47,362,75,70,"00017.jpg?cache=1450665108740"],[3447510,13177846,48,47,362,75,70,"00018.jpg?cache=1450665194140"],[3445397,13176725,48,47,362,75,70,"00019.jpg?cache=1450665219168"],[3466543,13168838,113,47,361,75,70,"00020.jpg?cache=1450665240280"],[3463764,13600466,96,38,304,62,53,"E-15.jpg"],[3483598,13461519,99,43,327,67,58,"C00472.jpg"],[3373642,13047713,114,48,363,76,-1,""],[3390006,13611286,98,40,309,77,56,"077.jpg"],[3875896,14152046,42,6,122,10,6,"DR-74189-l.jpg"],[3871792,14152167,42,6,124,10,6,"DR-74194-l.jpg"],[3867826,14145522,42,6,124,10,6,"DR-74198-l.jpg"],[3882534,13992532,57,12,148,18,11,"cctv066.jpg"],[3883821,13991425,57,12,148,18,11,"cctv067.jpg"],[3872726,14018367,57,7,154,21,7,"06070-3.jpg"],[3834437,14060843,58,6,128,12,6,"DR-74126-l.jpg"],[3836316,14058802,58,6,128,12,6,"DR-74129-l.jpg"],[3518665,13282228,115,5,364,78,5,"08010003200139.jpg"],[3512877,13277076,115,5,364,78,5,"08010003200126.jpg"],[3496216,13273470,115,5,365,78,5,"08010003200102.jpg"],[3659641,13663973,69,25,220,38,71,"761030.jpg?time="],[3498985,13563680,48,42,320,66,-1,""],[3556412,13428803,48,45,343,72,-1,""],[3518679,13420607,64,49,366,79,72,"JPEG_kurootonnel.jpg?1538714135955"],[3517805,13421207,64,49,366,79,72,"JPEG_bakuwaue.jpg?1538714410284"],[3517704,13421160,64,49,366,79,72,"JPEG_bakuwasita.jpg?1538714460804"],[3516562,13421096,64,49,366,79,72,"JPEG_tenjinbashikita.jpg?1538714509335"],[3516510,13421171,64,49,366,79,72,"JPEG_tenjinbashiminami.jpg?1538714537813"],[3516061,13421190,64,49,366,79,72,"JPEG_nagiroopbashi.jpg?1538714568811"],[3515717,13421379,64,49,366,79,72,"JPEG_nagiroopbashiminami.jpg?1538714608517"],[3514230,13421499,64,49,366,79,72,"JPEG_nagitonnelkita.jpg?1538715046190"],[3493874,13274183,115,50,367,80,73,"010103.jpg"],[3492078,13276084,115,50,367,80,73,"010106.jpg"],[3490142,13277719,115,50,367,80,73,"010111.jpg"],[3489280,13277480,115,50,367,80,73,"010112.jpg"],[3488507,13278117,115,50,367,80,73,"010113.jpg"],[3488164,13278227,115,50,367,80,73,"010117.jpg"],[3483945,13280374,115,50,367,80,73,"010118.jpg"],[3475149,13280769,115,50,367,80,73,"010126.jpg"],[3474020,13278554,115,50,367,80,73,"010127.jpg"],[3469318,13275269,115,50,368,80,73,"010129.jpg"],[3468178,13274106,115,50,368,80,73,"010130.jpg"],[3463077,13263231,115,50,368,80,73,"010134.jpg"],[3437245,13115469,113,51,369,81,-1,""],[3436246,13132478,113,51,370,81,-1,""],[3455909,13153257,113,51,371,81,-1,""],[3421814,13151639,48,51,372,81,-1,""],[3430464,13157782,48,51,372,81,-1,""],[3439765,13172351,48,51,372,81,-1,""],[3405678,13133363,99,51,373,81,-1,""],[3406667,13166350,99,51,374,81,-1,""],[3406049,13197337,99,51,374,81,-1,""],[3398333,13378517,116,52,375,82,74,"E8158138.jpg?1353392142555"],[3380711,13459056,117,52,376,82,74,"E8159202.jpg?1353392065002"],[3403697,13398060,118,52,377,82,74,"E815833D.jpg?1353392113091"],[3399666,13368671,118,52,375,82,74,"E815843F.jpg"],[3406798,13381289,116,52,375,82,74,"E80B2204.jpg"],[3379424,13294204,119,52,378,82,74,"E829313B.jpg"],[3370763,13286028,120,52,379,82,74,"E8294146.jpg"],[3358899,13299087,120,52,380,82,74,"E829413A.jpg?1353392191742"],[3355499,13300561,120,52,380,82,74,"E8294136.jpg?1353392245822"],[3368389,13269733,121,52,381,82,74,"E8295207.jpg"],[3333269,13252473,121,52,382,82,74,"E82A2136.jpg"],[3344265,13252230,121,52,383,82,74,"E82A3101.jpg"],[3366145,13366121,116,52,384,82,74,"E821212B.jpg"],[3368824,13368880,116,52,385,82,74,"E821215E.jpg"],[3380046,13376382,116,52,385,82,74,"E821210C.jpg"],[3354484,13310337,120,52,386,82,74,"E821310A.jpg"],[3356924,13315848,120,52,386,82,74,"E8213155.jpg"],[3316394,13314559,121,52,387,82,74,"E8203107.jpg"],[3332939,13322524,121,52,388,82,74,"E8211104.jpg"],[3339770,13420648,117,52,389,82,74,"0E8214103.jpg?1420782758176"],[3483365,13199353,48,47,360,75,70,"00014.jpg"],[3362135,13053961,122,48,390,76,-1,""],[3362155,13054572,122,48,390,76,-1,""],[3362091,13056100,122,48,390,76,-1,""],[3361791,13057670,122,48,390,76,-1,""],[3362236,13055223,122,48,390,76,-1,""],[3361971,13056166,122,48,390,76,-1,""],[3361702,13057198,122,48,390,76,-1,""],[3361577,13057697,122,48,390,76,-1,""],[3360961,13058163,122,48,390,76,-1,""],[3346768,13053899,114,48,391,76,-1,""],[3357312,13025734,123,48,392,76,-1,""],[3350436,13011072,123,48,393,76,-1,""],[3350327,13008606,123,48,393,76,-1,""],[3350114,13007752,123,48,393,76,-1,""],[3333509,13084512,124,48,394,76,-1,""],[3333644,13084001,124,48,395,76,-1,""],[3332805,13052474,114,48,396,76,-1,""],[3327529,13051137,125,48,396,76,-1,""],[3314513,13061972,114,48,397,76,-1,""],[3318770,13038665,126,48,398,76,-1,""],[3311396,13043505,126,48,399,76,-1,""],[3305155,13043018,126,48,400,76,-1,""],[3384949,13064066,114,53,401,83,75,"cam01_1.jpg"],[3364115,13062956,122,53,402,83,75,"cam02_1.jpg"],[3365146,13076192,122,53,403,83,75,"cam03_1.jpg"],[3319973,12967472,127,54,404,84,76,"ngscctv_vga_06.jpg"],[3317326,12971162,127,54,404,84,76,"ngscctv_vga_07.jpg"],[3316949,12984335,128,54,404,84,76,"ngscctv_vga_04.jpg"],[3308665,12980432,129,54,404,84,76,"ngscctv_vga_05.jpg"],[3304767,12992446,130,54,405,84,76,"ngscctv_vga_01.jpg"],[3287323,13002465,130,54,406,84,76,"ngscctv_vga_02.jpg"],[3275956,12992790,130,54,407,84,76,"ngscctv_vga_03.jpg"],[3272606,13030707,131,54,408,84,76,"ngscctv_vga_08.jpg"],[3311095,13068968,114,55,409,85,-1,""],[3238153,13053864,114,55,410,85,-1,""],[3233142,13048529,114,55,411,85,-1,""],[3227301,13050082,114,55,411,85,-1,""],[3269555,13056597,131,55,412,86,-1,""],[3292764,13100803,131,55,413,86,-1,""],[3293094,13102267,131,55,413,86,-1,""],[3295809,13119701,131,55,413,86,-1,""],[3260740,13047023,131,55,414,86,-1,""],[3288389,13098681,131,55,415,86,-1,""],[3293357,13102782,131,55,413,86,-1,""],[3296031,13122987,131,55,413,86,-1,""],[3295773,13121366,131,55,413,86,-1,""],[3295731,13119186,131,55,413,86,-1,""],[3294182,13115633,131,55,413,86,-1,""],[3296108,13124413,131,55,413,86,-1,""],[3290886,13066376,132,55,416,85,-1,""],[3325228,13129895,124,56,417,87,77,"cctv_vga_015.jpg?1538707859259"],[3325520,13101106,124,56,394,87,-1,""],[3330893,13091500,124,56,394,87,77,"cctv_vga_037.jpg?1538707743948"],[3325611,13103443,124,56,394,87,77,"cctv_vga_026.jpg?1538707828516"],[3323692,13122200,124,56,418,87,77,"cctv_vga_021.jpg?1538707677056"],[3326153,13132509,124,56,417,87,-1,""],[3325990,13132826,124,56,417,87,-1,""],[3325480,13132911,124,56,417,87,-1,""],[3323698,13132358,124,56,417,87,-1,""],[3319934,13134994,124,56,417,87,-1,""],[3319259,13137569,124,56,417,87,-1,""],[3325385,13130769,124,56,417,87,-1,""],[3349127,13145158,133,56,419,87,-1,""],[3348103,13148896,133,56,419,87,-1,""],[3341244,13154945,133,56,420,87,-1,""],[3337910,13156788,133,56,420,87,-1,""],[3353555,13130104,133,56,421,87,-1,""],[3336402,13150798,133,56,420,87,-1,""],[3335686,13149776,133,56,420,87,-1,""],[3335602,13149873,133,56,420,87,-1,""],[3330533,13150260,133,56,422,87,-1,""],[3328859,13150438,133,56,422,87,-1,""],[3326989,13150982,133,56,422,87,-1,""],[3281452,13189236,134,57,423,88,-1,""],[3274320,13185569,134,57,423,88,-1,""],[3271284,13181746,134,57,424,88,-1,""],[3267759,13175961,134,57,424,88,-1,""],[3266092,13170275,134,57,424,88,-1,""],[3257532,13162219,134,57,424,88,-1,""],[3252843,13166528,134,57,424,88,-1,""],[3277324,13169537,133,57,424,88,-1,""],[3250773,13167712,133,57,424,88,-1,""],[3247653,13165414,133,57,425,88,-1,""],[3244365,13163019,133,57,426,88,-1,""],[3234365,13162406,133,57,426,88,-1,""],[3266680,13170371,133,57,424,88,-1,""],[3258754,13167700,133,57,424,88,-1,""],[3259448,13149806,135,57,424,88,-1,""],[3154520,13070567,136,2,427,2,-1,""],[3163188,13080108,136,2,427,2,-1,""],[3155712,13072765,136,2,427,2,-1,""],[3140320,13077018,136,2,428,2,-1,""],[3155855,13074457,136,2,427,2,-1,""],[3160062,13078743,136,2,427,2,-1,""],[3158970,13059794,137,2,429,89,-1,""],[3157555,13061066,137,2,429,89,-1,""],[3156589,13061784,137,2,429,89,-1,""],[3155260,13065764,137,2,429,89,-1,""],[3155368,13068637,137,2,429,89,-1,""],[3155564,13069635,137,2,429,89,-1,""],[3155618,13069874,136,2,427,89,-1,""],[3138888,13081872,136,2,428,89,-1,""],[3144683,13089243,138,2,428,2,-1,""],[3146667,13089999,37,2,428,2,-1,""],[3149892,13092484,37,2,430,2,-1,""],[3152207,13093053,37,2,430,2,-1,""],[3159296,13096717,37,2,77,2,-1,""],[3462291,13589017,102,39,305,63,54,"C02144.jpg"],[3164738,13093138,37,2,77,2,-1,""],[3166039,13093690,37,2,77,2,-1,""],[3167823,13093859,37,2,77,2,-1,""],[3175236,13029716,114,58,431,90,78,"R3_347k980.jpg"],[3145494,13048433,139,58,429,90,78,"R225_034k070.jpg"],[3171768,13081513,133,58,432,90,78,"R10_422k300.jpg"],[3164662,13060426,133,58,429,90,78,"R10_454k540.jpg"],[3131762,13032671,139,58,433,90,78,"R225_009k040.jpg"],[3135891,13055133,140,58,429,90,78,"R226_061k750.jpg"]]}
+</script>
+
+<script>
+(function () {
+  'use strict';
+
+  // ============================================================ 台帳の読み込み
+  //
+  // 台帳は「同じ文字のくり返し」をまとめて軽くしてあります。
+  //   n=路線名 / m=管理者 / a=市区町村 / p=カメラのページ / b=写真URLの前半
+  //   c=カメラ本体 [緯度*10万, 経度*10万, n番号, m番号, a番号, p番号, b番号, 写真URLの後半]
+  //
+  var CAMS = [];
+  var DATA_UPDATED = '';
+  try {
+    var raw = JSON.parse(document.getElementById('livecam-data').textContent);
+    DATA_UPDATED = raw.u || '';
+    CAMS = (raw.c || []).map(function (row, i) {
+      return {
+        id: i,
+        lat: row[0] / 1e5,
+        lon: row[1] / 1e5,
+        road: raw.n[row[2]] || '道路',
+        owner: row[3] >= 0 ? (raw.m[row[3]] || '') : '',
+        place: row[4] >= 0 ? (raw.a[row[4]] || '') : '',
+        page: row[5] >= 0 ? (raw.p[row[5]] || '') : '',
+        img: row[6] >= 0 ? (raw.b[row[6]] || '') + (row[7] || '') : ''
+      };
+    });
+  } catch (e) {
+    CAMS = [];
+  }
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  // ============================================================ 便利な計算
+
+  var R_EARTH = 6371000; // 地球の半径（メートル）
+
+  // 2点間のだいたいの距離（メートル）。日本の範囲なら十分な精度です。
+  function distMeters(lat1, lon1, lat2, lon2) {
+    var la = (lat1 + lat2) / 2 * Math.PI / 180;
+    var dx = (lon2 - lon1) * Math.PI / 180 * Math.cos(la);
+    var dy = (lat2 - lat1) * Math.PI / 180;
+    return Math.sqrt(dx * dx + dy * dy) * R_EARTH;
+  }
+
+  // 点と線分の距離（メートル）。カメラが「道の途中」にあっても拾えるようにするため。
+  function distToSegment(lat, lon, aLat, aLon, bLat, bLon) {
+    var k = Math.cos((aLat + bLat) / 2 * Math.PI / 180);
+    var px = (lon - aLon) * k, py = lat - aLat;
+    var vx = (bLon - aLon) * k, vy = bLat - aLat;
+    var len2 = vx * vx + vy * vy;
+    var t = len2 > 0 ? (px * vx + py * vy) / len2 : 0;
+    t = Math.max(0, Math.min(1, t));
+    var dx = px - vx * t, dy = py - vy * t;
+    return Math.sqrt(dx * dx + dy * dy) * Math.PI / 180 * R_EARTH;
+  }
+
+  function fmtKm(m) {
+    if (m < 1000) return Math.round(m) + ' m';
+    return (m / 1000).toFixed(m < 10000 ? 1 : 0) + ' km';
+  }
+
+  function fmtDuration(sec) {
+    var h = Math.floor(sec / 3600);
+    var m = Math.round((sec - h * 3600) / 60);
+    if (m === 60) { h += 1; m = 0; }
+    return h > 0 ? h + '時間' + m + '分' : m + '分';
+  }
+
+  // ============================================================ かんたん地図
+  //
+  // 外部の地図ライブラリは使わず、地理院タイルを並べて自前で描いています
+  // （このページ1枚だけで動くようにするため）。
+
+  var TILE = 256;
+  var TILE_URL = 'https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png';
+  var MIN_ZOOM = 4, MAX_ZOOM = 17;
+
+  var mapEl = $('map'), layerEl = $('map-layer'), svgEl = $('map-svg'), lineEl = $('route-line');
+
+  var view = { lat: 36.2, lon: 137.8, zoom: 5 };
+  var originX = 0, originY = 0;          // 画面左上のワールド座標
+  var tiles = {};                        // 表示中のタイル（作り直しを減らすため取っておく）
+  var pinEls = [];                       // カメラのピン
+  var endEls = [];                       // 出発地・目的地の印
+  var routeLatLngs = null;               // ルートの座標列
+  var shownCams = [];                    // いま地図に出しているカメラ
+
+  function project(lat, lon, z) {
+    var s = TILE * Math.pow(2, z);
+    var sin = Math.sin(Math.max(-85.05, Math.min(85.05, lat)) * Math.PI / 180);
+    return {
+      x: (lon + 180) / 360 * s,
+      y: (0.5 - Math.log((1 + sin) / (1 - sin)) / (4 * Math.PI)) * s
+    };
+  }
+
+  function unproject(x, y, z) {
+    var s = TILE * Math.pow(2, z);
+    var n = Math.PI - 2 * Math.PI * y / s;
+    return {
+      lat: 180 / Math.PI * Math.atan(0.5 * (Math.exp(n) - Math.exp(-n))),
+      lon: x / s * 360 - 180
+    };
+  }
+
+  function mapSize() {
+    return { w: mapEl.clientWidth || 320, h: mapEl.clientHeight || 320 };
+  }
+
+  function render() {
+    var size = mapSize();
+    var c = project(view.lat, view.lon, view.zoom);
+    originX = c.x - size.w / 2;
+    originY = c.y - size.h / 2;
+    layerEl.style.transform = 'translate(0px, 0px)';
+
+    drawTiles(size);
+    drawRoute();
+    drawPins();
+  }
+
+  function drawTiles(size) {
+    var z = view.zoom;
+    var max = Math.pow(2, z);
+    var margin = TILE; // 少し外側まで用意して、動かしたときの白抜けを減らす
+    var x0 = Math.floor((originX - margin) / TILE);
+    var x1 = Math.floor((originX + size.w + margin) / TILE);
+    var y0 = Math.floor((originY - margin) / TILE);
+    var y1 = Math.floor((originY + size.h + margin) / TILE);
+
+    var need = {};
+    for (var ty = y0; ty <= y1; ty++) {
+      if (ty < 0 || ty >= max) continue;
+      for (var tx = x0; tx <= x1; tx++) {
+        var wrapped = ((tx % max) + max) % max;
+        var key = z + '/' + wrapped + '/' + tx + '/' + ty;
+        need[key] = true;
+        var img = tiles[key];
+        if (!img) {
+          img = document.createElement('img');
+          img.className = 'tile';
+          img.alt = '';
+          img.loading = 'eager';
+          img.decoding = 'async';
+          img.src = TILE_URL.replace('{z}', z).replace('{x}', wrapped).replace('{y}', ty);
+          img.addEventListener('error', function () { this.style.visibility = 'hidden'; });
+          layerEl.appendChild(img);
+          tiles[key] = img;
+        }
+        img.style.left = (tx * TILE - originX) + 'px';
+        img.style.top = (ty * TILE - originY) + 'px';
+      }
+    }
+    Object.keys(tiles).forEach(function (key) {
+      if (!need[key]) {
+        if (tiles[key].parentNode) tiles[key].parentNode.removeChild(tiles[key]);
+        delete tiles[key];
+      }
+    });
+  }
+
+  function drawRoute() {
+    if (!routeLatLngs || routeLatLngs.length < 2) { lineEl.setAttribute('points', ''); return; }
+    // 点が多すぎると重いので、画面の細かさに合わせて間引く
+    var step = Math.max(1, Math.floor(routeLatLngs.length / 1200));
+    var pts = [];
+    for (var i = 0; i < routeLatLngs.length; i += step) {
+      var p = project(routeLatLngs[i][0], routeLatLngs[i][1], view.zoom);
+      pts.push((p.x - originX).toFixed(1) + ',' + (p.y - originY).toFixed(1));
+    }
+    var last = project(routeLatLngs[routeLatLngs.length - 1][0], routeLatLngs[routeLatLngs.length - 1][1], view.zoom);
+    pts.push((last.x - originX).toFixed(1) + ',' + (last.y - originY).toFixed(1));
+    lineEl.setAttribute('points', pts.join(' '));
+  }
+
+  function drawPins() {
+    pinEls.forEach(function (el) { if (el.parentNode) el.parentNode.removeChild(el); });
+    pinEls = [];
+
+    var size = mapSize();
+    var margin = 60;
+    var placed = [];   // すでに置いたピンの位置（重なりを避けるため）
+    var hidden = 0;
+
+    shownCams.forEach(function (cam, i) {
+      var p = project(cam.lat, cam.lon, view.zoom);
+      var x = p.x - originX, y = p.y - originY;
+
+      // 画面の外はそもそも作らない（長いルートでも軽く動くように）
+      if (x < -margin || y < -margin || x > size.w + margin || y > size.h + margin) return;
+
+      // 近すぎるピンは重ねない。拡大すれば離れるので出てきます。
+      var tooClose = placed.some(function (q) {
+        return Math.abs(q.x - x) < 24 && Math.abs(q.y - y) < 24;
+      });
+      if (tooClose) { hidden++; return; }
+      placed.push({ x: x, y: y });
+
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'pin' + (cam.img ? '' : ' is-nocam');
+      b.style.left = x + 'px';
+      b.style.top = y + 'px';
+      b.textContent = routeLatLngs ? String(i + 1) : '📷';
+      b.title = cam.road + (cam.place ? '（' + cam.place + '）' : '');
+      b.dataset.idx = String(i);
+      b.addEventListener('click', function (ev) {
+        ev.stopPropagation();
+        if (suppressClick) return; // 地図を動かしただけのときは開かない
+        openViewer(i);
+      });
+      layerEl.appendChild(b);
+      pinEls.push(b);
+    });
+
+    $('map-hint').textContent = hidden > 0
+      ? '指でなぞると動かせます。青い丸がライブカメラで、押すと映像が出ます。'
+        + '（近くのカメラ ' + hidden + ' 台は重ならないよう隠しています。＋で拡大すると出てきます）'
+      : '指でなぞると動かせます。青い丸がライブカメラです。押すと映像が出ます。';
+    // 出発地・目的地の印
+    endEls.forEach(function (el) { if (el.parentNode) el.parentNode.removeChild(el); });
+    endEls = [];
+    if (routeLatLngs && routeLatLngs.length > 1) {
+      [[routeLatLngs[0], '出'], [routeLatLngs[routeLatLngs.length - 1], '着']].forEach(function (pair) {
+        var p = project(pair[0][0], pair[0][1], view.zoom);
+        var d = document.createElement('div');
+        d.className = 'pin-end';
+        d.style.left = (p.x - originX) + 'px';
+        d.style.top = (p.y - originY) + 'px';
+        d.textContent = pair[1];
+        layerEl.appendChild(d);
+        endEls.push(d);
+      });
+    }
+  }
+
+  function setView(lat, lon, zoom) {
+    view.lat = lat;
+    view.lon = lon;
+    if (typeof zoom === 'number') view.zoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, Math.round(zoom)));
+    render();
+  }
+
+  function fitBounds(minLat, minLon, maxLat, maxLon) {
+    var size = mapSize();
+    // 拡大率は1段ずつしか変えられない（1段違うと2倍）ので、余白は
+    // 「出発・目的地の印がはみ出さない最小限」にとどめます。
+    // 余白を大きく取ると、1段階ぶん小さく表示されてルートが豆粒になります。
+    var pad = 24;
+    var z = MAX_ZOOM;
+    for (; z > MIN_ZOOM; z--) {
+      var a = project(maxLat, minLon, z);
+      var b = project(minLat, maxLon, z);
+      if ((b.x - a.x) <= (size.w - pad * 2) && (b.y - a.y) <= (size.h - pad * 2)) break;
+    }
+    setView((minLat + maxLat) / 2, (minLon + maxLon) / 2, z);
+  }
+
+  // ---- 指・マウスで動かす ----
+  //
+  // カメラのピンの上からでも地図を動かせるようにしています。
+  // 「少し動いたらドラッグ、動かなければピンを押した」と見分けます。
+  var drag = null;
+  var suppressClick = false;  // ドラッグ直後の「押した」判定を打ち消す
+
+  mapEl.addEventListener('pointerdown', function (ev) {
+    if (ev.target.closest('.map-tools')) return;
+    drag = { id: ev.pointerId, x: ev.clientX, y: ev.clientY, dx: 0, dy: 0, moved: false };
+  });
+  mapEl.addEventListener('pointermove', function (ev) {
+    if (!drag || ev.pointerId !== drag.id || pinch) return;
+    drag.dx = ev.clientX - drag.x;
+    drag.dy = ev.clientY - drag.y;
+    if (!drag.moved && (Math.abs(drag.dx) > 4 || Math.abs(drag.dy) > 4)) {
+      // ここではじめて「ドラッグ中」に切り替える（ピンを押しただけのときは切り替わらない）
+      drag.moved = true;
+      mapEl.classList.add('is-dragging');
+      try { mapEl.setPointerCapture(ev.pointerId); } catch (e) {}
+    }
+    if (drag.moved) layerEl.style.transform = 'translate(' + drag.dx + 'px, ' + drag.dy + 'px)';
+  });
+  function endDrag(ev) {
+    if (!drag || (ev && ev.pointerId !== drag.id)) return;
+    var moved = drag.moved, dx = drag.dx, dy = drag.dy;
+    drag = null;
+    mapEl.classList.remove('is-dragging');
+    if (!moved) return;
+    // 動かしたときは、直後に来る「押した」を1回だけ無視する
+    suppressClick = true;
+    setTimeout(function () { suppressClick = false; }, 0);
+    var size = mapSize();
+    var g = unproject(originX - dx + size.w / 2, originY - dy + size.h / 2, view.zoom);
+    setView(g.lat, g.lon);
+  }
+  mapEl.addEventListener('pointerup', endDrag);
+  mapEl.addEventListener('pointercancel', endDrag);
+
+  // ---- ホイールで拡大縮小 ----
+  mapEl.addEventListener('wheel', function (ev) {
+    ev.preventDefault();
+    zoomAround(ev.deltaY < 0 ? 1 : -1, ev.clientX, ev.clientY);
+  }, { passive: false });
+
+  function zoomAround(delta, clientX, clientY) {
+    var newZoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, view.zoom + delta));
+    if (newZoom === view.zoom) return;
+    var rect = mapEl.getBoundingClientRect();
+    var offX = (clientX == null ? rect.width / 2 : clientX - rect.left);
+    var offY = (clientY == null ? rect.height / 2 : clientY - rect.top);
+    var g = unproject(originX + offX, originY + offY, view.zoom); // 指の下の場所
+    var p = project(g.lat, g.lon, newZoom);
+    var nOriginX = p.x - offX, nOriginY = p.y - offY;
+    var size = mapSize();
+    var c = unproject(nOriginX + size.w / 2, nOriginY + size.h / 2, newZoom);
+    view.zoom = newZoom;
+    setView(c.lat, c.lon);
+  }
+
+  // ---- 2本指でつまんで拡大縮小 ----
+  var pinch = null;
+  mapEl.addEventListener('touchstart', function (ev) {
+    if (ev.touches.length !== 2) return;
+    drag = null;
+    mapEl.classList.remove('is-dragging');
+    var rect = mapEl.getBoundingClientRect();
+    var t1 = ev.touches[0], t2 = ev.touches[1];
+    pinch = {
+      dist: Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY) || 1,
+      mx: (t1.clientX + t2.clientX) / 2 - rect.left,
+      my: (t1.clientY + t2.clientY) / 2 - rect.top
+    };
+    layerEl.style.transformOrigin = pinch.mx + 'px ' + pinch.my + 'px';
+  }, { passive: true });
+  mapEl.addEventListener('touchmove', function (ev) {
+    if (!pinch || ev.touches.length !== 2) return;
+    ev.preventDefault();
+    var t1 = ev.touches[0], t2 = ev.touches[1];
+    var d = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY) || 1;
+    layerEl.style.transform = 'scale(' + (d / pinch.dist) + ')';
+    pinch.scale = d / pinch.dist;
+  }, { passive: false });
+  mapEl.addEventListener('touchend', function (ev) {
+    if (!pinch || ev.touches.length >= 2) return;
+    var scale = pinch.scale || 1;
+    var mx = pinch.mx, my = pinch.my;
+    pinch = null;
+    layerEl.style.transform = 'translate(0px, 0px)';
+    layerEl.style.transformOrigin = '';
+    var delta = Math.round(Math.log(scale) / Math.LN2);
+    if (delta !== 0) zoomAround(delta, mapEl.getBoundingClientRect().left + mx, mapEl.getBoundingClientRect().top + my);
+    else render();
+  }, { passive: true });
+
+  $('zoom-in').addEventListener('click', function () { zoomAround(1); });
+  $('zoom-out').addEventListener('click', function () { zoomAround(-1); });
+  $('fit').addEventListener('click', function () { fitAll(); });
+
+  var resizeTimer = null;
+  window.addEventListener('resize', function () {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(render, 150);
+  });
+
+  function fitAll() {
+    if (routeLatLngs && routeLatLngs.length > 1) {
+      var minLat = 90, maxLat = -90, minLon = 180, maxLon = -180;
+      routeLatLngs.forEach(function (p) {
+        if (p[0] < minLat) minLat = p[0];
+        if (p[0] > maxLat) maxLat = p[0];
+        if (p[1] < minLon) minLon = p[1];
+        if (p[1] > maxLon) maxLon = p[1];
+      });
+      fitBounds(minLat, minLon, maxLat, maxLon);
+    } else {
+      setView(36.2, 137.8, 5);
+    }
+  }
+
+  // ============================================================ 状態メッセージ
+
+  var statusEl = $('status');
+  function say(text, kind) {
+    statusEl.hidden = false;
+    statusEl.className = 'status' + (kind ? ' is-' + kind : '');
+    statusEl.textContent = text;
+  }
+  function clearSay() { statusEl.hidden = true; }
+
+  // ============================================================ 外部サービス
+
+  // 地名の候補を取ってくる（国土地理院の住所検索）
+  var geoCache = {};
+  function geoCandidates(query) {
+    var q = query.trim();
+    if (geoCache[q]) return Promise.resolve(geoCache[q]);
+    var url = 'https://msearch.gsi.go.jp/address-search/AddressSearch?q=' + encodeURIComponent(q);
+    return fetch(url).then(function (r) {
+      if (!r.ok) throw new Error('住所検索がうまくいきませんでした');
+      return r.json();
+    }).then(function (list) {
+      geoCache[q] = list || [];
+      return geoCache[q];
+    });
+  }
+
+  // 候補の中から「たぶんこれ」を選ぶ。
+  //
+  // ⚠️ ここが大事：国土地理院の検索は「住所」を先に返すので、
+  //    「名古屋駅」と入れると千葉県成田市名古屋（＝地名）が1番目に来てしまいます。
+  //    そこで、入れた言葉との一致の仕方で点数を付けて選び直します。
+  function pickBest(list, query) {
+    var q = query.trim();
+    var adminEnd = /[都道府県市区町村]$/;
+    var scored = list.map(function (item, i) {
+      var title = (item.properties && item.properties.title) || '';
+      var endsWithQ = title.length >= q.length && title.slice(-q.length) === q;
+      var hasQ = title.indexOf(q) >= 0;
+      var isAdmin = adminEnd.test(title);
+      var score = 0;
+      if (title === q) score = 100;                 // ぴったり同じ（例:「名古屋駅」）
+      else if (isAdmin && endsWithQ) score = 70;    // 自治体名で終わる（例:「愛知県豊橋市」←「豊橋市」）
+      else if (isAdmin && hasQ) score = 65;         // 自治体名に含まれる（例:「静岡県浜松市」←「浜松」）
+      else if (endsWithQ) score = 60;
+      else if (hasQ) score = 30;
+      return { item: item, title: title, score: score, len: title.length, order: i };
+    });
+    scored.sort(function (a, b) {
+      if (b.score !== a.score) return b.score - a.score;   // 点数が高い順
+      if (a.len !== b.len) return a.len - b.len;           // 同点なら短い＝より的確なほう
+      return a.order - b.order;                            // それも同じなら元の順
+    });
+    return scored[0];
+  }
+
+  // 地名 → 緯度経度
+  // 「35.68,139.76」のように緯度経度が直接入っていたら、そのまま使います（現在地ボタン用）。
+  function geocode(query) {
+    var m = query.match(/^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$/);
+    if (m) {
+      return Promise.resolve({ lat: parseFloat(m[1]), lon: parseFloat(m[2]), title: '指定した地点' });
+    }
+    return geoCandidates(query).then(function (list) {
+      if (!list || !list.length) throw new Error('「' + query + '」の場所が見つかりませんでした');
+      var best = pickBest(list, query);
+      var c = best.item.geometry.coordinates;
+      return { lat: c[1], lon: c[0], title: best.title || query };
+    });
+  }
+
+  // 入力中に候補を出す（datalist）。国土地理院に何度も聞かないよう、少し待ってから調べます。
+  function attachSuggest(inputId, listId) {
+    var input = $(inputId), dl = $(listId), timer = null, last = '';
+    input.addEventListener('input', function () {
+      var q = input.value.trim();
+      if (q.length < 2 || q === last || /^[\d.,\s-]+$/.test(q)) return;
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        last = q;
+        geoCandidates(q).then(function (list) {
+          if (input.value.trim() !== q) return; // 入力が変わっていたら捨てる
+          dl.textContent = '';
+          var seen = {};
+          list.slice(0, 12).forEach(function (item) {
+            var t = (item.properties && item.properties.title) || '';
+            if (!t || seen[t]) return;
+            seen[t] = true;
+            var op = document.createElement('option');
+            op.value = t;
+            dl.appendChild(op);
+          });
+        }).catch(function () { /* 候補が出せなくても、検索そのものは動くので黙って見送る */ });
+      }, 400);
+    });
+  }
+
+  // 2地点 → 自動車のルート（OSRM）
+  function route(from, to) {
+    var url = 'https://router.project-osrm.org/route/v1/driving/' +
+      from.lon + ',' + from.lat + ';' + to.lon + ',' + to.lat +
+      '?overview=full&geometries=geojson&alternatives=false&steps=false';
+    return fetch(url).then(function (r) {
+      if (!r.ok) throw new Error('ルート検索がうまくいきませんでした');
+      return r.json();
+    }).then(function (json) {
+      if (json.code !== 'Ok' || !json.routes || !json.routes.length) {
+        throw new Error('この2地点をつなぐ車のルートが見つかりませんでした');
+      }
+      var r0 = json.routes[0];
+      return {
+        distance: r0.distance,
+        duration: r0.duration,
+        coords: r0.geometry.coordinates.map(function (c) { return [c[1], c[0]]; })
+      };
+    });
+  }
+
+  // ============================================================ ルート沿いのカメラ探し
+  //
+  // すべてのカメラ×すべてのルート点を総当たりすると重いので、
+  // ルートの点を「マス目」に登録しておいて、カメラの近くのマスだけを調べます。
+
+  function camsNearRoute(coords, maxRadiusM) {
+    if (!CAMS.length) return [];
+    var cell = 0.05;                                    // マス目の大きさ（度）。約5.5km四方。
+    var span = Math.max(1, Math.ceil(maxRadiusM / 5500)); // 何マス先まで見るか
+    var grid = {};
+    for (var i = 0; i < coords.length; i++) {
+      var key = Math.floor(coords[i][0] / cell) + ':' + Math.floor(coords[i][1] / cell);
+      (grid[key] || (grid[key] = [])).push(i);
+    }
+
+    // ルートの出発地からの積算距離（カメラを順番に並べるため）
+    var cum = new Float64Array(coords.length);
+    for (var j = 1; j < coords.length; j++) {
+      cum[j] = cum[j - 1] + distMeters(coords[j - 1][0], coords[j - 1][1], coords[j][0], coords[j][1]);
+    }
+
+    var found = [];
+    CAMS.forEach(function (cam) {
+      var gy = Math.floor(cam.lat / cell), gx = Math.floor(cam.lon / cell);
+      var best = Infinity, bestIdx = -1;
+      for (var dy = -span; dy <= span; dy++) {
+        for (var dx = -span; dx <= span; dx++) {
+          var list = grid[(gy + dy) + ':' + (gx + dx)];
+          if (!list) continue;
+          for (var k = 0; k < list.length; k++) {
+            var idx = list[k];
+            // 手前の点との線分で測る（点と点のすき間に入っているカメラも拾うため）
+            var d = idx > 0
+              ? distToSegment(cam.lat, cam.lon, coords[idx - 1][0], coords[idx - 1][1], coords[idx][0], coords[idx][1])
+              : distMeters(cam.lat, cam.lon, coords[idx][0], coords[idx][1]);
+            if (d < best) { best = d; bestIdx = idx; }
+          }
+        }
+      }
+      if (bestIdx >= 0 && best <= maxRadiusM) {
+        found.push({ cam: cam, offRoute: best, along: cum[bestIdx] });
+      }
+    });
+
+    found.sort(function (a, b) { return a.along - b.along; });
+    return found;
+  }
+
+  // ============================================================ 画面の組み立て
+
+  function renderCamList(list) {
+    var ol = $('cam-list');
+    ol.textContent = '';
+    list.forEach(function (item, i) {
+      var cam = item.cam;
+      var li = document.createElement('li');
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'cam-btn';
+      b.addEventListener('click', function () { openViewer(i); });
+
+      var no = document.createElement('span');
+      no.className = 'cam-no' + (cam.img ? '' : ' is-nocam');
+      no.textContent = String(i + 1);
+
+      var main = document.createElement('span');
+      main.className = 'cam-main';
+      var t = document.createElement('span');
+      t.className = 'cam-title';
+      t.textContent = cam.road + (cam.place ? '　' + cam.place : '');
+      var s = document.createElement('span');
+      s.className = 'cam-sub';
+      s.textContent = '出発から約 ' + fmtKm(item.along) + '　/　道から ' + fmtKm(item.offRoute) +
+        (cam.img ? '' : '　/　映像は公式ページで');
+      main.appendChild(t);
+      main.appendChild(document.createElement('br'));
+      main.appendChild(s);
+
+      var go = document.createElement('span');
+      go.className = 'cam-go';
+      go.textContent = cam.img ? '見る ▶' : '開く ↗';
+
+      b.appendChild(no);
+      b.appendChild(main);
+      b.appendChild(go);
+      li.appendChild(b);
+      ol.appendChild(li);
+    });
+
+    var withImg = list.filter(function (x) { return x.cam.img; }).length;
+    $('cam-note').textContent = list.length
+      ? 'このページで映像が見られるカメラ: ' + withImg + ' 台／公式ページで見るカメラ: ' + (list.length - withImg) + ' 台'
+      : '';
+  }
+
+  // ============================================================ カメラを見る画面
+
+  var viewer = $('viewer');
+  var viewerList = [];
+  var viewerIdx = -1;
+  var viewerTimer = null;
+
+  function openViewer(i) {
+    if (!viewerList.length || i < 0 || i >= viewerList.length) return;
+    viewerIdx = i;
+    var cam = viewerList[i].cam;
+
+    $('viewer-title').textContent = cam.road + (cam.place ? '　' + cam.place : '');
+    var sub = [];
+    if (routeLatLngs) sub.push((i + 1) + '台目 / 全' + viewerList.length + '台');
+    if (viewerList[i].along != null) sub.push('出発から約 ' + fmtKm(viewerList[i].along));
+    if (cam.owner) sub.push(cam.owner);
+    $('viewer-sub').textContent = sub.join('　・　');
+
+    var pageLink = $('viewer-page');
+    if (cam.page) {
+      pageLink.href = cam.page;
+      pageLink.hidden = false;
+    } else {
+      pageLink.hidden = true;
+    }
+
+    $('viewer-prev').disabled = (i <= 0);
+    $('viewer-next').disabled = (i >= viewerList.length - 1);
+    $('viewer-reload').hidden = !cam.img;
+
+    showShot();
+    viewer.hidden = false;
+
+    // ピンの強調（重なり防止で間引いているので、番号で照合する）
+    pinEls.forEach(function (el) {
+      el.classList.toggle('is-active', Number(el.dataset.idx) === i);
+    });
+
+    clearInterval(viewerTimer);
+    if (cam.img) viewerTimer = setInterval(showShot, 30000); // 30秒ごとに撮り直し
+  }
+
+  function showShot() {
+    var cam = viewerList[viewerIdx] && viewerList[viewerIdx].cam;
+    var box = $('viewer-shot');
+    box.textContent = '';
+    if (!cam) return;
+
+    if (!cam.img) {
+      var msg = document.createElement('p');
+      msg.className = 'viewer-msg';
+      msg.textContent = 'このカメラの映像は、このページに直接出せない形で公開されています。下の「公式ページ」から見てください。';
+      box.appendChild(msg);
+      $('viewer-note').textContent = '';
+      return;
+    }
+
+    var img = document.createElement('img');
+    img.alt = cam.road + 'のライブカメラ映像';
+    img.referrerPolicy = 'no-referrer';
+    img.addEventListener('error', function () {
+      box.textContent = '';
+      var p = document.createElement('p');
+      p.className = 'viewer-msg';
+      p.textContent = '映像を読み込めませんでした（カメラの点検中や、一時的な通信の失敗かもしれません）。「公式ページ」から確認してください。';
+      box.appendChild(p);
+    });
+    img.src = cam.img + (cam.img.indexOf('?') >= 0 ? '&' : '?') + '_=' + Date.now();
+    box.appendChild(img);
+
+    var now = new Date();
+    $('viewer-note').textContent = '📷 ' +
+      now.getHours() + '時' + String(now.getMinutes()).padStart(2, '0') + '分に取得（30秒ごとに自動で撮り直します）。' +
+      'カメラによっては数分に1回しか更新されません。';
+  }
+
+  function closeViewer() {
+    viewer.hidden = true;
+    clearInterval(viewerTimer);
+    viewerTimer = null;
+    pinEls.forEach(function (el) { el.classList.remove('is-active'); });
+  }
+
+  $('viewer-close').addEventListener('click', closeViewer);
+  $('viewer-reload').addEventListener('click', showShot);
+  $('viewer-prev').addEventListener('click', function () { openViewer(viewerIdx - 1); });
+  $('viewer-next').addEventListener('click', function () { openViewer(viewerIdx + 1); });
+  viewer.addEventListener('click', function (ev) { if (ev.target === viewer) closeViewer(); });
+  document.addEventListener('keydown', function (ev) {
+    if (viewer.hidden) return;
+    if (ev.key === 'Escape') closeViewer();
+    if (ev.key === 'ArrowLeft') openViewer(viewerIdx - 1);
+    if (ev.key === 'ArrowRight') openViewer(viewerIdx + 1);
+  });
+
+  // ============================================================ 「調べる」ボタン
+
+  var searchBtn = $('search');
+
+  function runSearch() {
+    var fromText = $('from').value.trim();
+    var toText = $('to').value.trim();
+    if (!fromText || !toText) {
+      say('出発地と目的地の両方を入れてください。', 'error');
+      return;
+    }
+    if (!CAMS.length) {
+      say('カメラの台帳が読み込めていません。ページを開きなおしてみてください。', 'error');
+      return;
+    }
+
+    searchBtn.disabled = true;
+    say('⏳ 場所を調べています…', 'busy');
+
+    var from, to;
+    Promise.all([geocode(fromText), geocode(toText)])
+      .then(function (pair) {
+        from = pair[0]; to = pair[1];
+        say('⏳ ルートを計算しています…（' + from.title + ' → ' + to.title + '）', 'busy');
+        return route(from, to);
+      })
+      .then(function (r) {
+        say('⏳ 通り道のライブカメラを探しています…', 'busy');
+        routeLatLngs = r.coords;
+
+        // ライブカメラは「国が管理する国道」が中心なので、高速道路メインのルートだと
+        // 選んだ幅ではまったく見つからないことがあります。そのときは黙って0台にせず、
+        // 段階的に幅を広げて探し、それでも無ければ「いちばん近いカメラ」を出します。
+        var radius = parseInt($('radius').value, 10);
+        var near = camsNearRoute(r.coords, 5000);
+        var found = near.filter(function (x) { return x.offRoute <= radius; });
+        var widenedTo = null, nearestOnly = false;
+
+        if (!found.length) {
+          [1500, 3000, 5000].forEach(function (step) {
+            if (found.length || step <= radius) return;
+            var wider = near.filter(function (x) { return x.offRoute <= step; });
+            if (wider.length) { found = wider; widenedTo = step; }
+          });
+        }
+        if (!found.length) {
+          // 5km以内にも無いときだけ、広い範囲から「いちばん近い5台」を出す
+          found = camsNearRoute(r.coords, 60000)
+            .slice()
+            .sort(function (a, b) { return a.offRoute - b.offRoute; })
+            .slice(0, 5)
+            .sort(function (a, b) { return a.along - b.along; });
+          nearestOnly = found.length > 0;
+        }
+
+        viewerList = found;
+        shownCams = found.map(function (x) { return x.cam; });
+
+        $('route-places').textContent = '出発：' + from.title + '　→　目的地：' + to.title +
+          '（違う場所が選ばれたときは、地名をもっと詳しく入れるか、入力欄の候補から選んでください）';
+        $('sum-dist').textContent = fmtKm(r.distance);
+        $('sum-time').textContent = fmtDuration(r.duration);
+        $('sum-cams').textContent = found.length + ' 台';
+        $('route-card').hidden = false;
+        $('cam-card').hidden = false;
+
+        renderCamList(found);
+        fitAll();
+
+        var where = from.title + ' → ' + to.title;
+        if (nearestOnly) {
+          say('このルートの近く（5km以内）にはライブカメラがありませんでした。' +
+              'かわりに、ルートから いちばん近いカメラを ' + found.length + ' 台だけ出しています（距離は一覧に出ています）。' +
+              'ライブカメラは国が管理する国道が中心で、高速道路にはほとんどありません。', null);
+        } else if (widenedTo) {
+          say('⚠️ 選んだ幅では見つからなかったので、' + fmtKm(widenedTo) + ' まで広げて ' + found.length +
+              ' 台見つけました（' + where + '）。ルートから離れたカメラも含みます。', null);
+        } else if (found.length) {
+          say('✅ ' + where + ' のルート沿いに ' + found.length +
+              ' 台のカメラが見つかりました。地図の丸か下の一覧を押すと映像が出ます。', 'ok');
+        } else {
+          say('ルートは出ましたが、ライブカメラが1台も見つかりませんでした。', null);
+        }
+      })
+      .catch(function (err) {
+        say('⚠️ ' + (err && err.message ? err.message : 'うまくいきませんでした') +
+            '（地名を「◯◯駅」「◯◯市」のように変えると見つかりやすくなります）', 'error');
+      })
+      .then(function () {
+        searchBtn.disabled = false;
+      });
+  }
+
+  searchBtn.addEventListener('click', runSearch);
+  ['from', 'to'].forEach(function (id) {
+    $(id).addEventListener('keydown', function (ev) {
+      if (ev.key === 'Enter') runSearch();
+    });
+  });
+
+  // ---- 現在地ボタン ----
+  $('use-gps').addEventListener('click', function () {
+    if (!navigator.geolocation) {
+      say('この端末では現在地が使えません。地名を入れてください。', 'error');
+      return;
+    }
+    say('⏳ 現在地を調べています…', 'busy');
+    navigator.geolocation.getCurrentPosition(function (pos) {
+      var lat = pos.coords.latitude, lon = pos.coords.longitude;
+      $('from').value = lat.toFixed(5) + ',' + lon.toFixed(5);
+      setView(lat, lon, 12);
+      showNearby(lat, lon);
+      say('✅ 現在地を出発地に入れました。近くのカメラを地図に出しています。', 'ok');
+    }, function () {
+      say('現在地を取得できませんでした（位置情報の許可を確認してください）。地名を入れてもOKです。', 'error');
+    }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 });
+  });
+
+  // 現在地のまわりのカメラを地図に出す（ルート検索の前でも使えるように）
+  function showNearby(lat, lon) {
+    routeLatLngs = null;
+    var near = CAMS.map(function (cam) {
+      return { cam: cam, offRoute: distMeters(lat, lon, cam.lat, cam.lon), along: null };
+    }).filter(function (x) { return x.offRoute < 30000; })
+      .sort(function (a, b) { return a.offRoute - b.offRoute; })
+      .slice(0, 40);
+    viewerList = near;
+    shownCams = near.map(function (x) { return x.cam; });
+    render();
+  }
+
+  // ============================================================ 起動
+
+  function boot() {
+    if (DATA_UPDATED) {
+      var withImg = CAMS.filter(function (c) { return c.img; }).length;
+      $('data-updated').textContent = 'カメラ台帳: 全国 ' + CAMS.length + ' 台（うち ' + withImg +
+        ' 台はこのページで映像が見られます）／更新 ' + DATA_UPDATED.slice(0, 10);
+    } else {
+      $('data-updated').textContent = 'カメラ台帳: まだ作られていません（scripts/fetch_livecams.py を実行してください）';
+    }
+
+    attachSuggest('from', 'cand-from');
+    attachSuggest('to', 'cand-to');
+
+    render();
+  }
+
+  boot();
+})();
+</script>
+
+</body>
+</html>
