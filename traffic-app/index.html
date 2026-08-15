@@ -424,13 +424,29 @@
     color: var(--text-dim);
     text-align: center;
   }
-  /* 文章の中のリンクは行の高さぶんしか無く、指では押しにくい（15px しかない）。
-     上下に余白を足して、見た目を変えずに「押せる範囲」だけ広げます。 */
-  footer a {
-    color: var(--accent);
-    display: inline-block;
-    padding: 0.7rem 0.15rem;
-    margin: -0.7rem 0;
+  footer a { color: var(--accent); }
+  /* 出典の段落は「読むもの」なので、行の間隔だけ少しゆったりさせる
+     （ここで押せる範囲を広げると、折り返した行のリンク同士が重なって
+       押し間違いのもとになります） */
+  .footer-credit { line-height: 2.1; }
+  /* いっぽう、行き来に使うリンクは押しやすさが大事なので、
+     1行に1つ・高さ44pxのボタンのように並べます */
+  .footer-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    justify-content: center;
+    margin-top: 1rem;
+  }
+  .footer-nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0.4rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    text-decoration: none;
+    background: var(--card);
   }
 
   @media (max-width: 480px) {
@@ -608,15 +624,15 @@
 </div>
 
 <footer>
-  <p>
+  <p class="footer-credit">
     カメラの位置：<a href="https://www.jice.or.jp/knowledge/maps/roads" target="_blank" rel="noopener">国土技術研究センター「道路チェック地図」</a>・<a href="https://www.jice.or.jp/knowledge/maps/rivers" target="_blank" rel="noopener">「河川チェック地図」</a>／
     出典：<a href="https://camera.mics.kaiho.mlit.go.jp/" target="_blank" rel="noopener">海上保安庁ホームページ</a>（灯台・港のカメラ。公共データ利用規約 PDL1.0）／
     映像：各管理者（国土交通省 各地方整備局・海上保安庁ほか）／
     地図：<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル</a>／
     道案内：<a href="https://project-osrm.org/" target="_blank" rel="noopener">OSRM</a>（<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>）
   </p>
-  <p>
-    <a href="../index.html">← のんラボのトップへ</a>　|
+  <p class="footer-nav">
+    <a href="../index.html">← のんラボのトップへ</a>
     <a href="https://non-x2.github.io/non-x2/traffic-app/">🌐 公開ページ（いつでも最新）</a>
   </p>
 </footer>
