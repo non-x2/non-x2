@@ -473,6 +473,8 @@
     stroke: #e0a636;
   }
   .map-svg .tk-center { fill: #ffffff; stroke: #ff6b35; }
+  /* hidden を付けたときは必ず消えるようにする（display: flex より hidden を優先） */
+  .map-legend[hidden] { display: none; }
   .map-legend {
     display: flex;
     flex-wrap: wrap;
@@ -673,9 +675,109 @@
   .warn-glossary dt { margin: 10px 0 3px; }
   .warn-glossary dd { margin: 0 0 0 2px; font-size: 0.87rem; color: var(--text-dim); line-height: 1.7; }
 
+  /* --- 🌐 3D地球儀タブ --- */
+  .globe-stage {
+    position: relative;
+    margin-top: 0.2rem;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    /* 宇宙の背景。地図と同じく「写真あつかい」でテーマ反転させない固定色 */
+    background: radial-gradient(120% 100% at 50% 0%, #16294a 0%, #080d18 70%, #05070e 100%);
+  }
+  #globe-canvas {
+    display: block;
+    width: 100%;
+    height: auto;
+    touch-action: none;      /* 指でなぞったときページが動かないように */
+    cursor: grab;
+  }
+  #globe-canvas:active { cursor: grabbing; }
+  #globe-canvas:focus-visible {
+    outline: 3px solid var(--sky);
+    outline-offset: -3px;
+  }
+  .globe-btns {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .globe-btns button {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    background: rgba(10, 24, 44, 0.62);
+    color: #fff;
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+  }
+  .globe-btns button:hover { background: rgba(24, 52, 92, 0.82); }
+  .globe-btns button:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+  .globe-fallback {
+    margin: 0;
+    padding: 2.4rem 1rem;
+    text-align: center;
+    color: #dce7f4;
+    font-size: 0.9rem;
+  }
+  /* hidden を付けたときは必ず消えるようにする。
+     （display: flex を書くと、標準の「hidden＝非表示」より強くなってしまうため） */
+  .globe-time[hidden] { display: none; }
+  .globe-time {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 0.85rem;
+  }
+  .globe-time button {
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: 1px solid var(--border-soft);
+    background: var(--pill-bg);
+    color: var(--text);
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  .globe-time button:hover { background: var(--pill-bg-hover); }
+  .globe-time input[type="range"] {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 44px;
+    accent-color: var(--accent);
+  }
+  .globe-time-label {
+    flex: 0 0 auto;
+    min-width: 6.2em;
+    text-align: right;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+  }
+  .globe-focus {
+    margin: 0.5rem 0 0;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    color: var(--text);
+  }
+  .globe-caution {
+    margin-top: 0.55rem;
+    font-size: 0.78rem;
+  }
+
   /* 📱 スマホ幅の安全網（レイアウト崩れの予防。挙動は最小限） */
   @media (max-width: 480px) {
     table { font-size: 0.85rem; }
+    .globe-time-label { min-width: 5.2em; font-size: 0.8rem; }
   }
   /* 📱 さらに狭い画面用：余白を少し詰めて本文の場所を広げる保険（見た目のみ） */
   @media (max-width: 420px) {
@@ -699,6 +801,7 @@
   <button type="button" role="tab" id="tab-status" aria-selected="false" aria-controls="panel-status" tabindex="-1">📝 今の状況</button>
   <button type="button" role="tab" id="tab-warn" aria-selected="false" aria-controls="panel-warn" tabindex="-1">⚠️ 警報・注意報</button>
   <button type="button" role="tab" id="tab-map" aria-selected="false" aria-controls="panel-map" tabindex="-1">🗺️ マップ</button>
+  <button type="button" role="tab" id="tab-globe" aria-selected="false" aria-controls="panel-globe" tabindex="-1">🌐 3D地球儀</button>
 </nav>
 
 <main>
@@ -1031,6 +1134,67 @@
       </ul>
     </section>
   </section>
+
+  <!-- 🌐 3D地球儀：くるくる回せる地球の上に、気象庁のデータをそのまま描くタブ -->
+  <section class="panel" id="panel-globe" role="tabpanel" tabindex="0" aria-labelledby="tab-globe" hidden>
+    <div class="snapshot is-live" id="globe-live-banner" hidden>
+      <strong>⚡ 気象庁のデータで描いています。</strong>
+      地球儀の上の経路・現在地・予報円（この中に中心が来る確率70%の丸）は、すべて気象庁の発表値そのままです。
+      それでも<strong>避難の判断は公式の警報・注意報に従ってください。</strong>
+      <a class="inline-cta" href="https://www.jma.go.jp/bosai/map.html#5/34.5/139/&elem=typhoon&contents=typhoon" target="_blank" rel="noopener noreferrer">気象庁の台風情報を開く →</a>
+    </div>
+
+    <div class="snapshot" id="globe-snapshot-banner">
+      <strong>⚠️ まだ気象庁のデータを読み込めていません。</strong>
+      いまは地球だけを表示しています。データが取れると、この上に台風の経路が自動で描かれます。
+      <a class="inline-cta" href="https://www.jma.go.jp/bosai/map.html#5/34.5/139/&elem=typhoon&contents=typhoon" target="_blank" rel="noopener noreferrer">気象庁の台風情報を開く →</a>
+    </div>
+
+    <section class="map-card">
+      <h2 id="globe-title">🌐 3D地球儀で見る</h2>
+      <p class="map-note">ドラッグ（スマホは指でなぞる）で<strong>地球が回ります</strong>。ホイールやピンチで拡大・縮小、ダブルタップで最初の向きに戻ります。</p>
+
+      <div class="globe-stage">
+        <canvas id="globe-canvas" tabindex="0" role="img"
+          aria-label="台風の位置を地球儀の上に描いた図。読み上げ用の説明はすぐ下の文章にあります。"></canvas>
+        <div class="globe-btns" role="group" aria-label="地球儀の操作">
+          <button type="button" id="globe-zoom-in" title="拡大">＋</button>
+          <button type="button" id="globe-zoom-out" title="縮小">−</button>
+          <button type="button" id="globe-reset" title="最初の向きに戻す">⟲</button>
+        </div>
+        <p class="globe-fallback" id="globe-fallback" hidden>
+          この端末では地球儀を描けませんでした。🗺️ マップタブの平面地図をご覧ください。
+        </p>
+      </div>
+
+      <!-- ⏱ 時間を動かすつまみ（実況→24時間後→…と、気象庁の予報の時刻ぶんだけ動く） -->
+      <div class="globe-time" id="globe-time" hidden>
+        <button type="button" id="globe-play" aria-label="時間を順番に再生する">▶</button>
+        <input type="range" id="globe-slider" min="0" max="0" value="0" step="1" aria-label="表示する時刻を選ぶ">
+        <span class="globe-time-label" id="globe-time-label">実況</span>
+      </div>
+      <p class="globe-focus" id="globe-focus" hidden></p>
+
+      <div class="map-legend" id="globe-legend" hidden>
+        <span><i class="swatch" style="background:#fff;border:1px solid #8fa6bd"></i>これまでの経路</span>
+        <span><i class="swatch" style="background:#ff6b35"></i>予想の進路</span>
+        <span><i class="swatch" style="background:rgba(255,107,53,.35);border:1px dashed #ff6b35"></i>予報円</span>
+        <span><i class="swatch" style="background:rgba(214,64,47,.5)"></i>暴風域</span>
+        <span><i class="swatch" style="background:rgba(255,199,120,.35)"></i>強風域</span>
+      </div>
+
+      <p class="map-note map-note-spaced" id="globe-note">
+        地球儀は「正射図法」＝宇宙から地球を見たときの見え方で描いています。裏側に回った線は、本物の地球と同じように見えなくなります。
+      </p>
+      <p class="map-note globe-caution" id="globe-caution" hidden>
+        💨 <strong>渦のアニメーションはイメージです。</strong>
+        気象庁が発表している「暴風域・強風域の大きさ」に合わせて渦を描いていますが、
+        一本一本の線は実際に観測された風ではありません。風の実況は
+        <a href="https://www.jma.go.jp/bosai/map.html#5/34.5/139/&elem=wind&contents=earth" target="_blank" rel="noopener noreferrer">気象庁の風の実況マップ</a>
+        をご覧ください。
+      </p>
+    </section>
+  </section>
 </main>
 
 <footer>
@@ -1045,12 +1209,16 @@
       { btn: document.getElementById('tab-links'), panel: document.getElementById('panel-links') },
       { btn: document.getElementById('tab-status'), panel: document.getElementById('panel-status') },
       { btn: document.getElementById('tab-warn'), panel: document.getElementById('panel-warn') },
-      { btn: document.getElementById('tab-map'), panel: document.getElementById('panel-map') }
+      { btn: document.getElementById('tab-map'), panel: document.getElementById('panel-map') },
+      { btn: document.getElementById('tab-globe'), panel: document.getElementById('panel-globe') }
     ];
     /* ⚠️タブが表示されたときに呼ばれる係。中身は下のほう（データを取る部分）で入れる。
        クリックだけでなく、キーボード操作や「前回開いていたタブの復元」でも
        ここを通るようにして、取りこぼしを防いでいる。 */
     var onWarnShown = null;
+    /* 🌐 3D地球儀の係。見えているときだけ絵を動かして、電池と通信を無駄にしない。
+       中身は下のほう（地球儀を描く部分）で入れる。 */
+    var onGlobeShown = null, onGlobeHidden = null;
     var playTimer;
     function replayTimeline(el) {
       if (!el) return;
@@ -1074,6 +1242,11 @@
         replayTimeline(document.getElementById('forecast-main'));
       }
       if (active.panel && active.panel.id === 'panel-warn' && onWarnShown) onWarnShown();
+      if (active.panel && active.panel.id === 'panel-globe') {
+        if (onGlobeShown) onGlobeShown();
+      } else if (onGlobeHidden) {
+        onGlobeHidden();
+      }
     }
     tabs.forEach(function (t, i) {
       t.btn.addEventListener('click', function () { select(t); });
@@ -1779,6 +1952,8 @@
         refreshStale();
 
         renderMap(data);
+        /* 🌐 3D地球儀にも同じデータを渡す（描けない端末では GLOBE が null になる） */
+        if (GLOBE) GLOBE.update(data);
 
         /* 取得に成功した内容を端末に保存しておく。
            次に開いたときネットが全滅でも「最後に見たデータ」を出せる（④の保険） */
@@ -1838,6 +2013,755 @@
         }).then(finish, finish);
       }
 
+
+      /* ============================================================
+         🌐 3D地球儀：くるくる回せる地球の上に、気象庁のデータをそのまま描く
+         ============================================================
+         ・地図ファイルは増やしていません。
+             世界の海岸線 … 下の W_ENC（Natural Earth 1:1000万＝🗺️マップと同じ
+                             出どころ。間引いて文字列にしたもの・約6KB）
+             日本の海岸線 … 🗺️マップタブのSVGを読み直して使い回し（詳しい版）
+         ・「正射図法」＝宇宙から地球を見たときの見え方。裏側は見えません。
+         ・気象庁のデータが取れていないときは地球だけを描きます
+           （4段構えのしくみ・警報の判定には一切さわっていません）。 */
+      var GLOBE = (function () {
+        var cv = document.getElementById('globe-canvas');
+        var ctx = null;
+        try { ctx = cv && cv.getContext ? cv.getContext('2d') : null; } catch (e) { ctx = null; }
+        if (!cv || !ctx) {
+          /* 古い端末などで canvas が使えないとき。正直にそう伝えて平面地図へ案内する */
+          var fb = document.getElementById('globe-fallback');
+          if (fb) fb.hidden = false;
+          if (cv) cv.style.display = 'none';
+          var tw = document.getElementById('globe-time');
+          if (tw) tw.hidden = true;
+          return null;
+        }
+
+        var D2R = Math.PI / 180, R_EARTH = 6371;
+        var A64 = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+        var W_ENC = 'nlB_xBLT1CCjBM4CBaQUH;vjD1xBlBBzBUyBEoBV;nc3wBaJMdvETpCIgCUuBgBmCA;3rC9tByBAdLvBIcE;vuC9tBgBHhCIiBA;79B9sBsBBMJ7CAdMiCA;5qBrsBFXtBFZAKItBFPO6BKIiBcMkBpB;zkBjoBjCLLNKNfFnBdyBXcdU7BnCf7DZjEBmCXzCJBP0BV6JpBePoFesEHoBO2HWXU1DDDYqEgBkHgBkBMGIVEWQ-BOoBW6BHKQ0BLoCGKH-EiBkBBaP0BQiBH0CKiCP6CEiDQmBY-CZ-JwCmBDuBZ2BN2BMgDJQZlBVaHXXoBHWE6BsBqCIeYqCWwCAYUiBT6DDuCE-BgBkCZ0EUoBP0CLkCQwDF4DMGSwBhBgFCWTsBJqCJkBGyEnByDDuCRlBnB_BNxBjBBRYVuBLnDHnBhBgG5B0GRApD_gHAAqDSM-CH4CMuHdgGDsDMEI1GSOiBtCS8DD0CU9BSzDG3BWFWuEJoDSBW8GW6IDwEQgBTUGqCPsEBKIvBQXe0ET8DGSO6EZYQsDP2EcCSXmBWgBFQ-C2B4CYcBbN;rqBzhB4BRJJdGVNVC9BUvBiBoCZkBgBOBQX;zkB9fQJDF1BHJK0BO;-rBhffBEYgBJDL;86CvZ6BBHtBlBFZuBAKOB;ksDxZYHdpBIJfFRhBZNzBIGWmCqBgBoBOKEH;ktDzWOTCOcbiBEJdPCXrBPHJIKQFMVIQOCcpB6BiBPGR;uoD7NfKdgB-BpB;wvD5KERXAGQOC;kwDvKPEcKLN;qfvIGpBNACX1B_EhBNbMN6BWoBH2BIYmBIcYe0BSf;45CzIGNOGQPUvCwBbSlBUBEVsBzBKnBNlCzBxCFhBpCfbMCKbR7BQTmBdKCYbRWiBBOjBnBPIRmB7BWnDNlBPJRrCBlBVbCfQOSAiBvBuDKHHSQNPmBO0BCNyBkB0CUqBiCIRKEHKGKKDcqBcIaVYBDMYmBoBIPQME6BVYGKJTRJhB-C1BWaIwCQiBW9B;urCrGhBMSEQP;ykDlGVCBMYN;4tCpGRBgBesBG5BhB;2pChFYLvBFYS;6sChFBJ5BDQMsBC;8jCnEmBBGIiDlBVH3FmBOUyBR;m0C7DJNGeEP;uhDnENGNcchB;g_CtDjBPlBMeEGKCJMAQOBMQBFX;wvClCFFRMYF;yxC9BGP5BKEMwBF;2_C5CFFHUhBWeJSZ;6zCXGfWLQWoBM-DrBcfgBLGJRBENmC_B3BKlBoBZKbLCPPFlCYdFWWPmBzCmBNLTaiBMdAhBamBKiBP;ouCcdXlCADNSRwBQjBZiBjCTAKQXBJoBNFCzBTCCmBNOYkCSOoBHuBK;uwCWLnBNmBKYQV;kiC1DVApBiBvC4DhCqCsBF-B9BWAqBnBHP2BvBF3B;2pCkBWRXBFfRNJxBBGVHfUXHHKdCBaTWAkBMOeBEQgBIqCsCyBdlBrBMb;gvCoFCXFRHUHJAXXMAYLIhBLgBeGJiBQBQQJER;4yB8DRDHQE8BiBtBLZ;wtCuGTZLOKYMADLQSBR;iqC6FZRuB8BEPXZ;msCuHYFVXBe;uuC0HGXPGGRJFJcMGLQYH;-rCmIDRTaYH;6rCyLSAGbPXAfuBJCZXWDHNMbCIMRKDcIHIyBMA;_oBsLfFAKgBD;hwBmLbGcEOJNA;rtBuM0BFiBTHHnBENPTMpBCsBIVSQG;-kC2LPJPGBSsBOJb;lhD-LHAAYWPNH;5xBoOuDxBnCHOKTGLSlCQIE_BN2Ba0BH;twB8ORQEMOb;4rCoOJPLgBciBKFPrB;k0CqVHRHGPPLGKWiBA;0VqWfVNKuBM;6OqW0BHfHXIEI;2J8XHf1BUEK6BC;4F4ZMNBZRFLqBUE;k4CmXNnB9BJbVNGAQxCNUPNfLJJIESTUgCqB-BCUkBOJoBcOYDYIMWEKrBRTAV;gGsaHPNSSOEP;-5C0bcEEVbFRTfOJVVADUKOWCMsBmBb;5nBkdiBDRHdOIGGH;ltCqerBGvBYFQ0BJuBjB;hjB2fNROIMFFFuBHFNOEKXJPVCAUXRLAOKTE7BAKOHEkBsBoBSNR;9yC4hBUCFVQPlBYBQKD;45C2fWhBdGLbSVANPMLNCkDLSCcSKHIKESpC;nE2gB_BJQWJU8BaULVtB;-H4iBLPXUeGGJ;z_C2jBTHNQeKWHRJ;7B0kBVTqBCVhBUB0B7BYDLRGJjEZLEwBYlBMWGLKEOeBEMlBQDULJJeWkBoBA;vnDulBlBGkBCCH;lzBmnBXJRGOIcD;prD8nB8BJPFpBGBK;n1BipBmDnBRFpBOvBTHKZBQKKiBOA;hJypBDNWNlDfxCKUIrBKkBKpBEMOgBCeNeM8CE;tvB-pBVADKIKiBBPR;rtD0pBOFFQ2BDoBRzBLJV_BWrBAJGEIXDKJLHAwCmDjBBL;37BmrBNFlCMgBO0BT;wwDosBZGaIAN;1vDqsBZBAOwBDVH;x4BurBBTcQYNFNSNkBgBCW6BDaJNVOJBJlBNxBEdjBzBPPHBLvBTTVJnBeBShBcE2DnB2BDEjBsBpBacXqBgBIiBcPgBXOYWPwB2CCwBZkBAGpBiBPcMgBegChCHN6ChBIPWJCX1ClB_DA9CjCwBeoCSSJRLMlB8BFUWOVvDvBNCBSkBQ1BDCFpCjBBNQNpCNkBApBBRlBLMIVPXEOLaAVNCOFMtBvDzCAbY9BFhBPAJOXoBAYXUTJZQ3BBHBIRTDnCM3BbPRGdPlCgB9BmBXwBMYMKiBgCKGNTxBJEBnBJLuCCgBNHzCgBpBQDkBQ4BTWQQiBeCgBYOFPNEtBOQHWYIGQiBfoBAaJMKwBCPFGJgBJCPgBLoBnB-BD2BfQtBKDNdGFkBBATQM6BTGVYGkCJ4BlBgBFSrBHhBnCxCL_CfvCVVzBH7BdRTH3BhDxDvBJrBUBJaRIfRZdJ9BBElBLFvBBCTYCGLhBRHdhBLFNoBRHR9BzBSfzBLDRtCeNoCekBdGSQGiBYHKqBNGFZLEWuCHqBICkB-CBmCMaO8EDeVS5C4BrC0EbWGIJUgBoBXKCWQmBYMKYaYV6CbMRPKLRFDMvBMdiBBJLGAYnBkBEIpCMlCuBlBJpE0BnBgBEeNc7D8DRsBhBMCfqDrELHrBmBBa3BiBSSZUjBkCXUpBMrCyDByBM2BP2BgBDKRDmB7CkBJeXKDQ1BmBpB0BxBChCavEcVDENpCPGeWGFGjClBOJRPzCpB_DfuEgCOapBJZOfHCSlBEtBiBegBsCONMOIzCH9BaoCSQABJqBAlDuBMK8BKaSqDWuBN2GJuEZmEaOHUOuBTcOCP4BI4EbbJsDCULWKTIMIoBC-CX-BEDMSEgBHARMQQAKUtBUCWYOuBLcVRJmBD;rnC2tBJHuBGaJYKiBZKINUmBAWHShBmCTBHfBMHFFnCIxENvCeiDItDCJIuBIhCGeWqCI;phC8tBRLdOwBB;1vB2tB_BHbMKKuBBkBL;j2B4tBQNSQ0BKiBVBL6BMoCRCJmBGkCVkBZjBJqEjBnBlB3BcZBBL4BZMTFNrCU0BjB_CUrCkB5BJRIOOuCEFGgBeDIvCYOE3BW1DDrCIPIUIbAFUQSoCOPL;3-BkuB8BAGFTJgBHDRzBF_BWqBEVOWI;45C4tBpCEsBKeN;n6BwtBVPVCLaeOwCD1BV;prC0sBzBJ3BUoBkBTMyEBqBNpCTZV;m-C-uBVHlCK8CB;v6B8uBLHzBGmBOaL;26CovBPPpDDnBOKMaE-DJ;x9B-vBQHJZ1CMBOyCI;zjC0vBuBDEJLJ1DLhBGqBK1DAuBa-DTbSSIcL;-jBmsBrCCpBOBK6BgBRCwBSFKwDYsEMOHvGrB9BlBERmBP;l7BmwB-BFSHFFkBJiFCaPpBJ9ECzBGJWTI_BKIIoBB;zoCwwBBNPHzDHsCc6BC;8iCkwBEJuCE8BRDJ5CVoCDKNqBK4EPCOqCBgBLKLLH4BXUUgBH4DCPScI0FLmCb4DCQHBPYFqEEkBRYGPOKIoDD2CRAvCzBHoBfDNjBEpCPjCjBbOzBPJItBFdhBYLBbTBHPIHhBLHVdDFVbRb4CKcSUgBGqD8BQeXBLRzBVPazBHxBfQNpCFAOdEZJ9DDtE1CgBBePiBIcVCRPTJ3BlBpBhC5BbLXKtBbFTrBVBLqBvBHhBzBNHuBQENQdIMeTG_BTWeLKzBfTBJJcZQDWOgBHCLbDlBjBUJiB1BAPLDQRHfLBvBnC3BhBlDbHVJAAWbGzBlBDNgCrCIlBBhBvC9BBafORgBjBIEQRARzCOAMjByBlBYzCNBpBgBZqCfmBDLKoCfuDjBXXGCsB5B8CRADThCFJZbN5B5BlBNHtDvBvBRS9BuERsDpBJZYIIFGlBWTehDFxCMRcjBL_BcbsBpBBQtBcTMlBEYMDEjBsBCwBuBIrBmBLWZnBpBBZvBhB5BPDPlCfnDbR0BAgBlC6CLwBTMvBsCJAGcTlBduBiC3DDPcVMjCSLSpBwClCLNmBZiEgBBbhC_DzEnEVpBHjBMFDhBatBGtCZnBpBRzBrBQtC7BnBGJNzBvCvCvBV_BA7BRXOJeGS7B8CRkDxBwCAuBkBsCCajByD9BuCU0CHMRWzBJfoBvBDtCbzBK5BRdKjCyBvBoCjBaBcRWWcIoBRsC0B4CgDoCDaKcwBeUiBqCLqCcgFQODAJSEJJGNLlBiDdKRkCVUOAYcM0ElBqBOUNkBCQKc-BEqBdCrBNPKnBJpBMZeKQLKWSeCIOmBBwBSiBA-BVqBCaUDM_C0BeUJIcOxCTALeDDHvBNLEEITGWMFEzBKVfPBVtBWdXBXPFMXCXDOLJBZGczBREGJLBIRNAPILehBoBCclCkBVgBRFBQPCPFGZyBpBQAAJ0BZDHbMJLQHBJTRHBIWNUhCiBfYFUZKvBZjCABXrBRVhBILrBnBtBATPVUvBACcNIOqBLsBcO6DFKMEoBjBgBdIBO8BBFYSJuBQGQsBOSekCIOKNeIgBqBMFPMHXTERULgBKgBNmCWqBJgBQDgBKMSIQPQAGcTEBM-CGWKTKnDNfSEUHSIMuCmBdShBFTNELnChBNbiBXRVVFRzBXCLPXAxByCnBXbDZKNkCuDyB2CiC4CoBsCIeQqCE-BNZFWLUG4CP8CfAN1BPnDMgBNCdqBLJUOGwBLQGLOuBUkBHMOPMKMNM4BFKLXBALOF0EsBQBTLqDOWLYMVMMI-EjBOKtBSIILWkBSOSkCAELTPUTDbWLvBpBWB2BgBLKIOVCDKQUZQkBODOUJHTWBJOiBIuCJRQBU-DGPMYMwIaYSwBIiBFbFuBB;7kCywBhCAoCGFF;uP2wBvCDOELIqBEkBL;xkCkxB3BDUIkBD;77B6wBtBAJQ8BJDF;x-B-wBIHtDKUGZMsDT;2hC-wBxDH2BciCLFH;uL6xBgCNxBHlBjBXApBMSGlCYPQkEIaH;8PoyBoBF3CNvDSgFC;-fqyBlCJVEMItBAmECHD;u-BqxBhDCrCa-CU2CdFR;r2B6xBYHjDVpBCVKSMlBAhBQwBQHEuBC8CTQL;5qB-zBmEJ1DVsBAxDhBxDJcBNDQJ3CZmBH1BLxFGBKkBEJOiCH7BS6BSjBUmDEzDAvCc6DQuBHQM-BE4GA;9Qm0B-DP9GJkGJVJ0EOoCL7EVuBBnBZAXYL_BHmBJERVAaRrBBYHHF3BDaVxBC2BPGPhBDnBSGLXLyCBrDfxCHvBbvDXbnBfPIPTjBhDQhC2BNgBbSIONIUYeGMYzBLXGGY8BD3CWWStC6B1BMvEA5BS8CIhEMCI2EUII1BG0DYJKuDI0CF0BK2DNvBKCIkFSmHA';
+
+        /* --- 文字列にしまった海岸線を、緯度経度の配列にもどす ---
+           「1つ前の点との差」だけを記録してあるので、順に足しながら戻す */
+        function decodeRings(s) {
+          var idx = {}, i;
+          for (i = 0; i < A64.length; i++) idx[A64.charAt(i)] = i;
+          var out = [], parts = s.split(';');
+          for (var r = 0; r < parts.length; r++) {
+            var t = parts[r], p = 0, n = t.length, lon = 0, lat = 0, ring = [];
+            while (p < n) {
+              var got = [0, 0];
+              for (var q = 0; q < 2; q++) {
+                var shift = 0, res = 0, c = 0;
+                while (p < n) {
+                  c = idx[t.charAt(p++)];
+                  res |= (c & 31) << shift;
+                  shift += 5;
+                  if (c < 32) break;
+                }
+                got[q] = (res & 1) ? ~(res >> 1) : (res >> 1);
+              }
+              lon += got[0]; lat += got[1];
+              ring.push([lat / 10, lon / 10]);
+            }
+            if (ring.length > 2) out.push(ring);
+          }
+          return out;
+        }
+
+        /* --- 🗺️マップタブのSVGから日本の詳しい海岸線を借りる ---
+           あちらはメルカトル図法で描いてあるので、計算を逆にたどって緯度経度へ戻す */
+        function invLon(x) { return x / KX + LON0; }
+        function invLat(y) { return (2 * Math.atan(Math.exp((Y0 - y) / KY)) - Math.PI / 2) / D2R; }
+        function japanRings() {
+          var el = document.querySelector('#map-svg .land');
+          var d = el ? (el.getAttribute('d') || '') : '';
+          var out = [], subs = d.split(/[Mm]/);
+          for (var i = 1; i < subs.length; i++) {
+            var pieces = subs[i].split(/[LlZzHhVv]/), ring = [];
+            for (var j = 0; j < pieces.length; j++) {
+              var xy = pieces[j].split(',');
+              if (xy.length < 2) continue;
+              var x = parseFloat(xy[0]), y = parseFloat(xy[1]);
+              if (isNaN(x) || isNaN(y)) continue;
+              ring.push([invLat(y), invLon(x)]);
+            }
+            if (ring.length > 2) out.push(ring);
+          }
+          return out;
+        }
+
+        /* --- 状態 --- */
+        var world = null, japan = null;      /* 海岸線（最初に開いたときだけ作る） */
+        var data = null;                     /* 気象庁のデータ */
+        var axis = [];                       /* 時間つまみの目盛り（0=実況, 24, 48…） */
+        var focus = 0;
+        var HOME_ZOOM = 1.35;                /* 最初の倍率。1.0で地球まるごと、大きいほど寄る */
+        var home = { lat: 30, lon: 140, zoom: HOME_ZOOM };
+        var view = { lat: 30, lon: 140, zoom: HOME_ZOOM };
+        var userMoved = false;               /* 自分で回したら、更新のたびに向きを戻さない */
+        var visible = false, raf = 0, lastTs = 0;
+        var intro = null, playTimer = null;
+        var W = 0, H = 0, CX = 0, CY = 0, R = 100, sinP0 = 0, cosP0 = 1;
+        var reduce = false;
+        try {
+          reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        } catch (e) { reduce = false; }
+
+        /* --- 正射図法（地球儀の見え方）へ変換 ---
+           裏側の点は「地球のふちの外」へ逃がしてから丸く切り抜く。
+           こうすると、ふちをまたぐ大陸もきれいに塗れる。 */
+        var _p = { x: 0, y: 0, v: false };
+        function proj(lat, lon) {
+          var ph = lat * D2R, dl = (lon - view.lon) * D2R;
+          var sp = Math.sin(ph), cp = Math.cos(ph), cd = Math.cos(dl);
+          var x = cp * Math.sin(dl);
+          var y = cosP0 * sp - sinP0 * cp * cd;
+          _p.v = (sinP0 * sp + cosP0 * cp * cd) >= 0;
+          if (_p.v) { _p.x = CX + R * x; _p.y = CY - R * y; return _p; }
+          var m = Math.sqrt(x * x + y * y);
+          if (m < 1e-9) { _p.x = CX; _p.y = CY - R * 1.6; }
+          else { _p.x = CX + R * 1.6 * x / m; _p.y = CY - R * 1.6 * y / m; }
+          return _p;
+        }
+
+        /* 地球の中心をぐるっと囲んでしまう形（＝ほぼ裏側にある大陸）は描かない安全装置。
+           これが無いと、まれに画面いっぱいが陸地で埋まってしまう */
+        var buf = [];
+        function windsAround(n) {
+          var tot = 0, prev = Math.atan2(buf[1] - CY, buf[0] - CX), i, a, d;
+          for (i = 1; i <= n; i++) {
+            var j = (i % n) * 3;
+            a = Math.atan2(buf[j + 1] - CY, buf[j] - CX);
+            d = a - prev;
+            if (d > Math.PI) d -= Math.PI * 2;
+            else if (d < -Math.PI) d += Math.PI * 2;
+            tot += d; prev = a;
+          }
+          return Math.abs(tot) > 5;
+        }
+
+        function drawRings(rings, fill, stroke, lw) {
+          for (var i = 0; i < rings.length; i++) {
+            var ring = rings[i], n = ring.length, seen = 0, hid = 0, k, p;
+            for (k = 0; k < n; k++) {
+              p = proj(ring[k][0], ring[k][1]);
+              buf[k * 3] = p.x; buf[k * 3 + 1] = p.y; buf[k * 3 + 2] = p.v ? 1 : 0;
+              if (p.v) seen++; else hid++;
+            }
+            if (!seen) continue;
+            if (hid && n > 40 && windsAround(n)) continue;
+            ctx.beginPath();
+            ctx.moveTo(buf[0], buf[1]);
+            for (k = 1; k < n; k++) ctx.lineTo(buf[k * 3], buf[k * 3 + 1]);
+            ctx.closePath();
+            if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+            if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lw; ctx.stroke(); }
+          }
+        }
+
+        /* 線（経路など）は、裏側に入ったところで切って描く */
+        function strokeGeo(pts, style, lw, dash) {
+          ctx.save();
+          ctx.strokeStyle = style; ctx.lineWidth = lw;
+          ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+          if (dash && ctx.setLineDash) ctx.setLineDash(dash);
+          ctx.beginPath();
+          var open = false;
+          for (var i = 0; i < pts.length; i++) {
+            var p = proj(pts[i][0], pts[i][1]);
+            if (!p.v) { open = false; continue; }
+            if (open) ctx.lineTo(p.x, p.y);
+            else { ctx.moveTo(p.x, p.y); open = true; }
+          }
+          ctx.stroke();
+          ctx.restore();
+        }
+
+        /* 丸い範囲（予報円・暴風域など）を球の上に塗る */
+        function fillGeo(pts, fill, stroke, lw, dash) {
+          ctx.save();
+          if (dash && ctx.setLineDash) ctx.setLineDash(dash);
+          ctx.beginPath();
+          var seen = 0;
+          for (var i = 0; i < pts.length; i++) {
+            var p = proj(pts[i][0], pts[i][1]);
+            if (p.v) seen++;
+            if (i) ctx.lineTo(p.x, p.y); else ctx.moveTo(p.x, p.y);
+          }
+          ctx.closePath();
+          if (seen) {
+            if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+            if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lw; ctx.stroke(); }
+          }
+          ctx.restore();
+        }
+
+        /* 中心から「◯km・方角◯度」の地点を求める（地球は丸いので球面の計算） */
+        function geoPoint(lat, lon, km, brg) {
+          var d = km / R_EARTH, ph = lat * D2R, la = lon * D2R;
+          var sp = Math.sin(ph), cp = Math.cos(ph), sd = Math.sin(d), cd = Math.cos(d);
+          var lat2 = Math.asin(sp * cd + cp * sd * Math.cos(brg));
+          var lon2 = la + Math.atan2(Math.sin(brg) * sd * cp, cd - sp * Math.sin(lat2));
+          return [lat2 / D2R, lon2 / D2R];
+        }
+        function geoCircle(lat, lon, km, n) {
+          var pts = [];
+          n = n || 48;
+          for (var i = 0; i <= n; i++) pts.push(geoPoint(lat, lon, km, i / n * Math.PI * 2));
+          return pts;
+        }
+        /* 点と点のあいだを細かく分ける（地球儀では直線もカーブして見えるため） */
+        function densify(pts) {
+          var out = [];
+          for (var i = 0; i < pts.length; i++) {
+            if (i) {
+              var a = pts[i - 1], b = pts[i];
+              var far = Math.max(Math.abs(b[0] - a[0]), Math.abs(b[1] - a[1]));
+              var steps = Math.ceil(far / 1.2);
+              for (var s = 1; s < steps; s++) {
+                out.push([a[0] + (b[0] - a[0]) * s / steps, a[1] + (b[1] - a[1]) * s / steps]);
+              }
+            }
+            out.push(pts[i]);
+          }
+          return out;
+        }
+        function dot(lat, lon, r, fill, stroke, lw) {
+          var p = proj(lat, lon);
+          if (!p.v) return null;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+          if (fill) { ctx.fillStyle = fill; ctx.fill(); }
+          if (stroke) { ctx.strokeStyle = stroke; ctx.lineWidth = lw; ctx.stroke(); }
+          return { x: p.x, y: p.y };
+        }
+        /* 台風が近くに2つあっても文字が重ならないよう、すでに置いた文字を覚えておき、
+           ぶつかるときは上へ少しずつ逃がす */
+        var labelBoxes = [];
+        function labelAt(x, y, text) {
+          ctx.font = '700 13px system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif';
+          var right = x > CX;
+          var tx = x + (right ? -10 : 10), ty = y - 10;
+          var w = ctx.measureText(text).width, h = 16;
+          for (var tryN = 0; tryN < 6; tryN++) {
+            var x0 = right ? tx - w : tx, y0 = ty - h, hit = false;
+            for (var i = 0; i < labelBoxes.length; i++) {
+              var b = labelBoxes[i];
+              if (x0 < b.x1 + 4 && x0 + w > b.x0 - 4 && y0 < b.y1 + 3 && y0 + h > b.y0 - 3) { hit = true; break; }
+            }
+            if (!hit) { labelBoxes.push({ x0: x0, x1: x0 + w, y0: y0, y1: y0 + h }); break; }
+            ty -= 21;
+          }
+          ctx.textAlign = right ? 'right' : 'left';
+          ctx.textBaseline = 'bottom';
+          ctx.lineWidth = 3.5;
+          ctx.strokeStyle = 'rgba(8,24,44,0.92)';
+          ctx.lineJoin = 'round';
+          ctx.strokeText(text, tx, ty);
+          ctx.fillStyle = '#ffffff';
+          ctx.fillText(text, tx, ty);
+        }
+
+        /* --- 💨 渦のイメージ（⚠️実測の風ではありません） ---
+           気象庁が発表している強風域・暴風域の大きさに合わせて、
+           北半球の台風と同じ「反時計回り＋中心へ吸い込まれる」動きを描く */
+        var SW = [];
+        (function () {
+          for (var i = 0; i < 90; i++) {
+            SW.push({ a: Math.random() * Math.PI * 2, r: 0.15 + Math.random() * 0.9, s: 0.6 + Math.random() * 0.8 });
+          }
+        })();
+        function swirlKm(p) {
+          var km = p.galeRadiusKm || (p.stormRadiusKm ? p.stormRadiusKm * 2.2 : 0) || p.circleKm || 260;
+          return Math.max(120, Math.min(900, km));
+        }
+        function drawSwirl(p, dt) {
+          var maxKm = swirlKm(p);
+          var sign = p.lat >= 0 ? -1 : 1;   /* 北半球は反時計回り */
+          ctx.save();
+          ctx.lineCap = 'round';
+          for (var i = 0; i < SW.length; i++) {
+            var s = SW[i];
+            if (dt) {
+              s.a += sign * (0.30 + 0.16 / Math.max(0.2, s.r)) * dt * s.s;
+              s.r -= 0.075 * dt * s.s;
+              if (s.r < 0.12) { s.r = 1 + Math.random() * 0.15; s.a = Math.random() * Math.PI * 2; }
+            }
+            var alpha = Math.min(1, s.r * 2.2) * (1 - Math.max(0, s.r - 0.85) * 4);
+            if (alpha <= 0.02) continue;
+            /* 尾は「さっきまでいた場所」＝すこし外側・すこし後ろ。
+               3つに分けて描くことで、まっすぐな棒ではなく渦のカーブに見える */
+            var tail = -sign * 0.34 * s.s, out = 0.07;
+            var xs = [], ok = true;
+            for (var k = 0; k <= 3; k++) {
+              var f = k / 3;
+              var q = geoPoint(p.lat, p.lon, (s.r + out * f) * maxKm, s.a + tail * f);
+              var pr = proj(q[0], q[1]);
+              if (!pr.v) { ok = false; break; }
+              xs.push(pr.x, pr.y);
+            }
+            if (!ok) continue;
+            ctx.strokeStyle = 'rgba(232,244,255,' + (alpha * 0.62).toFixed(3) + ')';
+            ctx.lineWidth = 1.6;
+            ctx.beginPath();
+            ctx.moveTo(xs[0], xs[1]);
+            for (k = 2; k < xs.length; k += 2) ctx.lineTo(xs[k], xs[k + 1]);
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+
+        /* --- 台風のデータの取り出し --- */
+        function typhoons() {
+          if (!data || !data.typhoons) return [];
+          return data.typhoons.filter(function (t) { return t.analysis && t.analysis.lat != null; });
+        }
+        function seqOf(t) {
+          var out = t.analysis && t.analysis.lat != null ? [t.analysis] : [];
+          return out.concat((t.forecast || []).filter(function (p) { return p.lat != null; }));
+        }
+        function pointAt(t, hours) {
+          var seq = seqOf(t);
+          for (var i = 0; i < seq.length; i++) if (seq[i].hours === hours) return seq[i];
+          return null;
+        }
+        function timeAxis() {
+          var set = {}, out = [], k;
+          typhoons().forEach(function (t) {
+            seqOf(t).forEach(function (p) { if (p.hours != null) set[p.hours] = 1; });
+          });
+          for (k in set) if (set.hasOwnProperty(k)) out.push(parseInt(k, 10));
+          out.sort(function (a, b) { return a - b; });
+          return out;
+        }
+
+        /* --- 1コマ描く --- */
+        function draw(ts) {
+          var dt = lastTs ? Math.min(0.06, (ts - lastTs) / 1000) : 0;
+          lastTs = ts;
+
+          if (intro) {
+            var k = Math.min(1, (ts - intro.t0) / intro.dur);
+            var e = 1 - Math.pow(1 - k, 3);
+            view.lat = intro.a.lat + (intro.b.lat - intro.a.lat) * e;
+            view.lon = intro.a.lon + (intro.b.lon - intro.a.lon) * e;
+            view.zoom = intro.a.zoom + (intro.b.zoom - intro.a.zoom) * e;
+            if (k >= 1) intro = null;
+          }
+
+          CX = W / 2; CY = H / 2;
+          R = Math.min(W, H) / 2 * 0.94 * view.zoom;
+          sinP0 = Math.sin(view.lat * D2R);
+          cosP0 = Math.cos(view.lat * D2R);
+
+          ctx.clearRect(0, 0, W, H);
+
+          /* ① 大気のふちの光 */
+          var atm = ctx.createRadialGradient(CX, CY, R * 0.97, CX, CY, R * 1.13);
+          atm.addColorStop(0, 'rgba(110,178,255,0.40)');
+          atm.addColorStop(1, 'rgba(110,178,255,0)');
+          ctx.fillStyle = atm;
+          ctx.beginPath(); ctx.arc(CX, CY, R * 1.13, 0, Math.PI * 2); ctx.fill();
+
+          ctx.save();
+          ctx.beginPath(); ctx.arc(CX, CY, R, 0, Math.PI * 2); ctx.clip();
+
+          /* ② 海（左上から光が当たっている感じ） */
+          var sea = ctx.createRadialGradient(CX - R * 0.34, CY - R * 0.40, R * 0.03, CX, CY, R * 1.02);
+          sea.addColorStop(0, '#4f97d1');
+          sea.addColorStop(0.52, '#1f5487');
+          sea.addColorStop(1, '#0a2038');
+          ctx.fillStyle = sea;
+          ctx.fillRect(CX - R, CY - R, R * 2, R * 2);
+
+          /* ③ 経線・緯線（20度ごと） */
+          ctx.save();
+          ctx.strokeStyle = 'rgba(255,255,255,0.11)';
+          ctx.lineWidth = 1;
+          var g, i;
+          for (g = -180; g < 180; g += 20) {
+            var mer = [];
+            for (i = -80; i <= 80; i += 4) mer.push([i, g]);
+            strokeGeo(mer, 'rgba(255,255,255,0.11)', 1, null);
+          }
+          for (g = -60; g <= 60; g += 20) {
+            var par = [];
+            for (i = -180; i <= 180; i += 4) par.push([g, i]);
+            strokeGeo(par, g === 0 ? 'rgba(255,255,255,0.20)' : 'rgba(255,255,255,0.11)', 1, null);
+          }
+          ctx.restore();
+
+          /* ④ 陸地（世界＝ざっくり、日本＝詳しい） */
+          /* 世界のほうは線を引かない（南極の継ぎ目が線になって見えるのを防ぐため）。
+             海が濃い青・陸が薄い色なので、塗りだけで十分はっきり見える */
+          if (world) drawRings(world, '#dfe7ef', null, 0);
+          if (japan) drawRings(japan, '#eef3f8', 'rgba(11,39,66,0.9)', 0.8);
+
+          /* ⑤ 台風 */
+          drawTyphoons(ts, dt);
+
+          ctx.restore();
+
+          /* ⑥ 地球のふち */
+          ctx.beginPath();
+          ctx.arc(CX, CY, R, 0, Math.PI * 2);
+          ctx.strokeStyle = 'rgba(160,208,255,0.55)';
+          ctx.lineWidth = 1.2;
+          ctx.stroke();
+        }
+
+        function drawTyphoons(ts, dt) {
+          var list = typhoons();
+          if (!list.length) return;
+          var hh = axis.length ? axis[Math.min(focus, axis.length - 1)] : 0;
+          labelBoxes.length = 0;
+
+          list.forEach(function (t, idx) {
+            var a = t.analysis;
+            var fc = (t.forecast || []).filter(function (p) { return p.lat != null; });
+            var f = pointAt(t, hh) || a;
+
+            /* 強風域・暴風域（選んでいる時刻のもの） */
+            if (f.galeRadiusKm) {
+              fillGeo(geoCircle(f.lat, f.lon, f.galeRadiusKm),
+                'rgba(255,199,120,0.26)', 'rgba(255,199,120,0.6)', 1.1);
+            }
+            if (f.stormRadiusKm) {
+              fillGeo(geoCircle(f.lat, f.lon, f.stormRadiusKm),
+                'rgba(214,64,47,0.28)', 'rgba(214,64,47,0.8)', 1.3);
+            }
+
+            /* 💨 渦のイメージ（粒の位置を進めるのは1個目のときだけ。
+               台風が2つあるとき2倍速になってしまうのを防ぐ） */
+            drawSwirl(f, (reduce || idx > 0) ? 0 : dt);
+
+            /* これまでの経路 */
+            if (t.track && t.track.length > 1) {
+              strokeGeo(densify(t.track), 'rgba(255,255,255,0.85)', 2, null);
+            }
+
+            /* 予報円（先の時刻ほど大きい＝まだ決まっていない） */
+            fc.slice().reverse().forEach(function (p) {
+              if (!p.circleKm) return;
+              var on = p.hours === hh;
+              fillGeo(geoCircle(p.lat, p.lon, p.circleKm),
+                on ? 'rgba(255,107,53,0.22)' : 'rgba(255,107,53,0.10)',
+                on ? 'rgba(255,140,90,0.95)' : 'rgba(255,107,53,0.6)',
+                on ? 1.8 : 1.1, [5, 4]);
+            });
+
+            /* 予想の進路 */
+            if (fc.length) {
+              strokeGeo(densify([a].concat(fc).map(function (p) { return [p.lat, p.lon]; })),
+                '#ff6b35', 2.4, [7, 5]);
+            }
+            fc.forEach(function (p) { dot(p.lat, p.lon, 3.6, '#ffffff', '#ff6b35', 1.8); });
+
+            /* いまの位置（ふわっと広がる輪つき） */
+            var ph = reduce ? 0.5 : ((ts % 1800) / 1800);
+            var pulse = proj(a.lat, a.lon);
+            if (pulse.v) {
+              ctx.beginPath();
+              ctx.arc(pulse.x, pulse.y, 7 + ph * 20, 0, Math.PI * 2);
+              ctx.strokeStyle = 'rgba(255,107,53,' + (0.55 * (1 - ph)).toFixed(3) + ')';
+              ctx.lineWidth = 2.4;
+              ctx.stroke();
+            }
+            var here = dot(a.lat, a.lon, 6, '#ffffff', '#ff6b35', 2.6);
+
+            /* 選んでいる時刻が「これから」なら、その位置にも印をつける */
+            if (f !== a) dot(f.lat, f.lon, 5.5, '#ffe6d6', '#ff6b35', 2.4);
+
+            if (here) labelAt(here.x, here.y, '🌀 ' + tcShort(t) + ' いまここ');
+          });
+        }
+
+        /* --- 画面の大きさに合わせる --- */
+        function resize() {
+          var stage = cv.parentNode;
+          var w = Math.max(200, stage.clientWidth || cv.clientWidth || 320);
+          var h = Math.max(270, Math.min(540, Math.round(w * 0.80)));
+          var dpr = Math.min(2, window.devicePixelRatio || 1);
+          W = w; H = h;
+          cv.style.height = h + 'px';
+          cv.width = Math.round(w * dpr);
+          cv.height = Math.round(h * dpr);
+          ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+
+        /* --- 動かす／止める（見えていないときは動かさない＝電池の節約） --- */
+        function frame(ts) {
+          raf = 0;
+          if (!visible) return;
+          draw(ts);
+          if (!reduce || intro) raf = requestAnimationFrame(frame);
+        }
+        function startLoop() {
+          if (!world) { world = decodeRings(W_ENC); japan = japanRings(); }
+          resize();
+          lastTs = 0;
+          if (!raf) raf = requestAnimationFrame(frame);
+        }
+        function stopLoop() {
+          if (raf) { cancelAnimationFrame(raf); raf = 0; }
+        }
+        function requestDraw() {
+          if (!visible) return;
+          if (!raf) raf = requestAnimationFrame(frame);
+        }
+
+        /* --- 指・マウス・キーボードで回す --- */
+        function clampLat(v) { return v > 85 ? 85 : (v < -85 ? -85 : v); }
+        function setZoom(z) {
+          view.zoom = z > 6 ? 6 : (z < 0.85 ? 0.85 : z);
+          userMoved = true;
+        }
+        function rotate(dx, dy) {
+          var per = (180 / Math.PI) / Math.max(40, R);
+          view.lon -= dx * per;
+          view.lat = clampLat(view.lat + dy * per);
+          while (view.lon > 180) view.lon -= 360;
+          while (view.lon < -180) view.lon += 360;
+          userMoved = true;
+        }
+        function stopIntro() { intro = null; }
+        function at(e) {
+          var r = cv.getBoundingClientRect();
+          return { x: e.clientX - r.left, y: e.clientY - r.top };
+        }
+        function tdist(e) {
+          var a = e.touches[0], b = e.touches[1];
+          var dx = a.clientX - b.clientX, dy = a.clientY - b.clientY;
+          return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        var mDown = false, mLast = null;
+        cv.addEventListener('mousedown', function (e) {
+          mDown = true; mLast = at(e); stopIntro(); e.preventDefault();
+        });
+        window.addEventListener('mousemove', function (e) {
+          if (!mDown) return;
+          var p = at(e);
+          rotate(p.x - mLast.x, p.y - mLast.y);
+          mLast = p; requestDraw();
+        });
+        window.addEventListener('mouseup', function () { mDown = false; });
+        cv.addEventListener('dblclick', function (e) { e.preventDefault(); resetView(); });
+
+        var tLast = null, tDist = 0, lastTap = 0;
+        cv.addEventListener('touchstart', function (e) {
+          stopIntro();
+          if (e.touches.length === 1) {
+            tLast = at(e.touches[0]); tDist = 0;
+            var now = new Date().getTime();
+            if (now - lastTap < 320) resetView();
+            lastTap = now;
+          } else if (e.touches.length >= 2) { tLast = null; tDist = tdist(e); }
+        });
+        cv.addEventListener('touchmove', function (e) {
+          if (e.touches.length === 1 && tLast) {
+            var p = at(e.touches[0]);
+            rotate(p.x - tLast.x, p.y - tLast.y);
+            tLast = p; e.preventDefault(); requestDraw();
+          } else if (e.touches.length >= 2) {
+            var d = tdist(e);
+            if (tDist > 8 && d > 8) setZoom(view.zoom * (d / tDist));
+            tDist = d; tLast = null; e.preventDefault(); requestDraw();
+          }
+        }, { passive: false });
+        cv.addEventListener('touchend', function (e) {
+          if (e.touches.length === 1) { tLast = at(e.touches[0]); tDist = 0; }
+          else if (!e.touches.length) { tLast = null; tDist = 0; }
+        });
+        cv.addEventListener('wheel', function (e) {
+          e.preventDefault(); stopIntro();
+          setZoom(view.zoom * (e.deltaY < 0 ? 1.12 : 1 / 1.12));
+          requestDraw();
+        }, { passive: false });
+        cv.addEventListener('keydown', function (e) {
+          var k = e.key, step = 6;
+          if (k === 'ArrowLeft') view.lon -= step;
+          else if (k === 'ArrowRight') view.lon += step;
+          else if (k === 'ArrowUp') view.lat = clampLat(view.lat + step);
+          else if (k === 'ArrowDown') view.lat = clampLat(view.lat - step);
+          else if (k === '+' || k === '=') setZoom(view.zoom * 1.15);
+          else if (k === '-' || k === '_') setZoom(view.zoom / 1.15);
+          else return;
+          userMoved = true; stopIntro(); e.preventDefault(); requestDraw();
+        });
+
+        function resetView() {
+          stopIntro();
+          view.lat = home.lat; view.lon = home.lon; view.zoom = home.zoom;
+          userMoved = false;
+          requestDraw();
+        }
+        function bind(id, fn) {
+          var el = document.getElementById(id);
+          if (el) el.addEventListener('click', fn);
+        }
+        bind('globe-zoom-in', function () { stopIntro(); setZoom(view.zoom * 1.25); requestDraw(); });
+        bind('globe-zoom-out', function () { stopIntro(); setZoom(view.zoom / 1.25); requestDraw(); });
+        bind('globe-reset', resetView);
+
+        /* --- ⏱ 時間つまみ --- */
+        var slider = document.getElementById('globe-slider');
+        var tlabel = document.getElementById('globe-time-label');
+        var ftext = document.getElementById('globe-focus');
+        var playBtn = document.getElementById('globe-play');
+
+        function hourLabel(h) { return h === 0 ? '実況' : h + '時間後'; }
+        function setFocus(i) {
+          focus = Math.max(0, Math.min(axis.length ? axis.length - 1 : 0, i));
+          if (slider) slider.value = String(focus);
+          var hh = axis.length ? axis[focus] : 0;
+          if (tlabel) tlabel.textContent = hourLabel(hh);
+          if (ftext) {
+            var parts = [];
+            typhoons().forEach(function (t) {
+              var p = pointAt(t, hh);
+              if (!p) return;
+              var s = tcName(t) + '：' + hourLabel(hh);
+              if (p.validTime) s += '（' + fmtShort(p.validTime) + '）';
+              if (val(p.location)) s += ' ' + val(p.location);
+              if (p.pressure) s += ' 中心気圧' + p.pressure + 'hPa';
+              parts.push(s);
+            });
+            ftext.textContent = parts.join('　／　');
+            ftext.hidden = !parts.length;
+          }
+          requestDraw();
+        }
+        if (slider) {
+          slider.addEventListener('input', function () {
+            stopPlay();
+            setFocus(parseInt(slider.value, 10) || 0);
+          });
+        }
+        function stopPlay() {
+          if (playTimer) { clearInterval(playTimer); playTimer = null; }
+          if (playBtn) { playBtn.textContent = '▶'; playBtn.setAttribute('aria-label', '時間を順番に再生する'); }
+        }
+        if (playBtn) {
+          playBtn.addEventListener('click', function () {
+            if (playTimer) { stopPlay(); return; }
+            if (axis.length < 2) return;
+            playBtn.textContent = '⏸';
+            playBtn.setAttribute('aria-label', '再生を止める');
+            playTimer = setInterval(function () {
+              setFocus(focus + 1 >= axis.length ? 0 : focus + 1);
+            }, 1100);
+          });
+        }
+
+        /* --- 気象庁のデータが届いたときに呼ばれる --- */
+        function bestHome() {
+          var h = { lat: 32, lon: 139, zoom: HOME_ZOOM }, pts = [];
+          typhoons().forEach(function (t) {
+            seqOf(t).forEach(function (p) { pts.push(p); });
+          });
+          if (pts.length) {
+            var la = 0, lo = 0;
+            pts.forEach(function (p) { la += p.lat; lo += p.lon; });
+            /* 日本（およそ北緯36度・東経138度）と台風の、ちょうど間あたりを正面にする */
+            h.lat = clampLat(((la / pts.length) + 36) / 2);
+            h.lon = ((lo / pts.length) + 138) / 2;
+          }
+          return h;
+        }
+        function update(d) {
+          data = d;
+          axis = timeAxis();
+          var list = typhoons();
+          var wrap = document.getElementById('globe-time');
+          if (wrap) wrap.hidden = axis.length < 2;
+          if (axis.length < 2) stopPlay();
+          if (slider) { slider.min = '0'; slider.max = String(Math.max(0, axis.length - 1)); }
+
+          home = bestHome();
+          if (!userMoved) {
+            view.lat = home.lat; view.lon = home.lon; view.zoom = home.zoom;
+          }
+
+          var lb = document.getElementById('globe-live-banner');
+          var sb = document.getElementById('globe-snapshot-banner');
+          if (lb) lb.hidden = false;
+          if (sb) sb.hidden = true;
+
+          var title = document.getElementById('globe-title');
+          var note = document.getElementById('globe-note');
+          /* 台風が1個も無いときは、進路の凡例と渦の注意書きは出さない（かえって分かりにくいため） */
+          var legend = document.getElementById('globe-legend');
+          var caution = document.getElementById('globe-caution');
+          if (legend) legend.hidden = !list.length;
+          if (caution) caution.hidden = !list.length;
+          var base = '地球儀は「正射図法」＝宇宙から地球を見たときの見え方で描いています。裏側に回った線は、本物の地球と同じように見えなくなります。';
+          if (!list.length) {
+            if (title) title.textContent = '🌐 3D地球儀（いま発生中の台風はありません）';
+            if (note) note.textContent = '気象庁が発表している台風は0個です。新しい台風が発生すると、この地球儀の上に自動で描かれます。' + base;
+            cv.setAttribute('aria-label', '地球儀。いま発生中の台風はありません。');
+          } else {
+            var first = list[0];
+            if (title) {
+              title.textContent = '🌐 ' + tcName(first) +
+                (list.length > 1 ? 'ほか' + (list.length - 1) + '個' : '') + 'を地球儀で見る';
+            }
+            if (note) {
+              note.textContent = '白い線が通ってきた道、オレンジの点線がこれからの進路、点線の丸が予報円（この中に中心が来る確率70%）です。' +
+                '下の「⏱」のつまみを動かすと、予報の時刻ごとの位置に切り替わります。' + base;
+            }
+            var hit = closest(first);
+            cv.setAttribute('aria-label',
+              '地球儀の上に描いた' + tcName(first) + 'の進路。' +
+              (val(first.analysis.location) ? '現在は' + val(first.analysis.location) + '。' : '') +
+              (hit ? 'いちばん近づくのは' + fmtDay(hit.point.validTime) + 'ごろ、' + hit.spot.name +
+                'までおよそ' + Math.round(hit.km) + 'km。' : '') +
+              '詳しい文章は「📝 今の状況」タブにあります。');
+          }
+          setFocus(0);
+          requestDraw();
+        }
+
+        /* --- タブの表示・非表示に合わせる --- */
+        onGlobeShown = function () {
+          visible = true;
+          startLoop();
+          if (!reduce && !userMoved && !intro) {
+            /* 最初に開いたときだけ、すこし回りながら近づく演出 */
+            intro = {
+              t0: (window.performance && performance.now) ? performance.now() : 0,
+              dur: 1100,
+              a: { lat: home.lat - 6, lon: home.lon - 34, zoom: Math.max(0.9, home.zoom * 0.74) },
+              b: { lat: home.lat, lon: home.lon, zoom: home.zoom }
+            };
+            if (!intro.t0) intro = null;
+          }
+        };
+        onGlobeHidden = function () {
+          visible = false;
+          stopLoop();
+          stopPlay();
+        };
+
+        window.addEventListener('resize', function () {
+          if (!visible) return;
+          resize(); requestDraw();
+        });
+        document.addEventListener('visibilitychange', function () {
+          if (document.hidden) { stopLoop(); }
+          else if (visible) { lastTs = 0; requestDraw(); }
+        });
+
+        setFocus(0);
+        /* 「前回開いていたタブ」の復元で最初から🌐タブが開いている場合は
+           クリックが起きないので、ここで一度だけ動かしておく */
+        var gp = document.getElementById('panel-globe');
+        if (gp && !gp.hidden) onGlobeShown();
+
+        return { update: update };
+      })();
 
       /* ============================================================
          ⚠️ 気象庁の警報・注意報を取ってきて一覧にする
