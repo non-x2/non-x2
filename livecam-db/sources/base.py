@@ -86,9 +86,47 @@ def fetch_text(url: str, timeout: int = TIMEOUT, encoding: str = "utf-8") -> str
 # そこで https:// に読み替えて **1台ずつ実際に開いてみて**、
 # ちゃんと画像が返ってくるものだけを「ページ内で見られる写真」として記録します。
 
+# 🚫 写真として使わないホスト
+#
+# 元データ（JICE）の「写真URL」欄に、まれに **第三者のまとめサイトに置かれた画像** が
+# 混ざっています。実際に livecam.asia の 2016〜2017年のスクリーンショットが43台ぶん
+# 入っていました。これをそのまま出すと:
+#   ① 何年も前の静止画を「今の様子」として見せてしまう（いちばん困る）
+#   ② よそのサイトが置いているファイルを直接読みに行くことになる
+# ため、写真としては使わず、公式ページへのリンクだけ残します。
+BLOCKED_IMAGE_HOSTS = ("livecam.asia",)
+
+
+def image_host(url: str | None) -> str:
+    """写真URLのホスト名を取り出す。"""
+    m = re.match(r"https?://([^/]+)", url or "")
+    return m.group(1).lower() if m else ""
+
+
+def is_blocked_image(url: str | None) -> bool:
+    """その写真URLが「使わないホスト」に置かれているか。"""
+    host = image_host(url)
+    return any(host == b or host.endswith("." + b) for b in BLOCKED_IMAGE_HOSTS)
+
+
+def official_image_host(url: str | None) -> bool:
+    """公的機関のホスト（go.jp / lg.jp）か、生のIPアドレスか。
+
+    これ以外は「よそのサイトかもしれない」ので、気づけるよう知らせます
+    （自動では止めません。鳥取県の雪みちNAVI のように、公的な情報を
+      別ドメインで出している例もあるためです）。
+    """
+    host = image_host(url)
+    if not host:
+        return True
+    host = host.split(":")[0]
+    return (host.endswith(".go.jp") or host.endswith(".lg.jp")
+            or re.match(r"^[\d.]+$", host) is not None)
+
+
 def https_candidate(url: str | None) -> str | None:
     """http:// の写真URLを https:// に読み替えた候補を返す。"""
-    if not url:
+    if not url or is_blocked_image(url):
         return None
     if url.startswith("https://"):
         return url
@@ -117,8 +155,24 @@ def verify_images(cams: list[dict], known_ok: set[str], enabled: bool = True) ->
 
     `known_ok` に入っている（前回開けた）URLは、確認をとばす指定のときに再利用します。
     """
+    # 使わないホストに置かれた写真を数えて知らせる（黙って消さない）
+    blocked = [c for c in cams if is_blocked_image(c.get("img"))]
+    if blocked:
+        hosts = sorted({image_host(c["img"]) for c in blocked})
+        print(f"  🚫 よそのサイトに置かれた写真のため使いません: {len(blocked)} 台"
+              f"（{'、'.join(hosts)}）。公式ページへのリンクは残します", file=sys.stderr)
+
     targets = [(i, https_candidate(c.get("img"))) for i, c in enumerate(cams)]
     checkable = [(i, u) for i, u in targets if u]
+
+    # 公的機関以外のホストは、気づけるように知らせる（止めはしない）
+    others: dict[str, int] = {}
+    for _, u in checkable:
+        if not official_image_host(u):
+            others[image_host(u)] = others.get(image_host(u), 0) + 1
+    for host, n in sorted(others.items(), key=lambda x: -x[1]):
+        print(f"  ℹ️ 公的機関以外のホストの写真: {host}（{n}台）"
+              f"— 内容を確かめて、問題なければそのまま使います", file=sys.stderr)
 
     if enabled:
         print(f"⏳ 写真 {len(checkable)} 件が https で開けるか確認中（同時 {WORKERS} 件）…")
