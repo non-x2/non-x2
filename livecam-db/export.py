@@ -6,16 +6,20 @@
 （`data/offices.json` と同じ考え方です）。
 
 いまの配り先:
-  - traffic-app … 交通・ライブカメラのページ
+  - traffic-app … 交通・ライブカメラのページ（🇯🇵 日本の台帳）
       ① traffic-app/data/livecams.json … 人が読める形
       ② traffic-app/index.html の埋め込み … ページが読む形（軽くしたもの）
       ※ ①②の両方を同時に書き換えるので、ズレません。
       ※ ページに埋め込むのは、index.html をダブルクリックで開いたとき
          （file://）でも動くようにするためです。
+  - world-livecam … 🌍 世界のライブカメラのページ（世界の台帳・試験）
+      ①② の考え方は traffic-app と同じ。ただし**読む台帳が別ファイル**
+      （data/livecams_world.json）なので、日本のページには一切混ざりません。
 
 使い方:
-    python3 livecam-db/export.py              # 全部の配り先に配る
+    python3 livecam-db/export.py                      # 全部の配り先に配る
     python3 livecam-db/export.py --target traffic-app
+    python3 livecam-db/export.py --target world-livecam
 
 外部のライブラリは使いません（Python 3 の標準機能だけ）。
 """
@@ -29,9 +33,13 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DB_PATH = Path(__file__).resolve().parent / "data" / "livecams.json"
+WORLD_DB_PATH = Path(__file__).resolve().parent / "data" / "livecams_world.json"
 
 TRAFFIC_JSON = ROOT / "traffic-app" / "data" / "livecams.json"
 TRAFFIC_HTML = ROOT / "traffic-app" / "index.html"
+
+WORLD_JSON = ROOT / "world-livecam" / "data" / "livecams_world.json"
+WORLD_HTML = ROOT / "world-livecam" / "index.html"
 
 # index.html の中の、台帳を書き込む場所の目印
 EMBED_START = '<script id="livecam-data" type="application/json">'
@@ -105,31 +113,49 @@ def write_html_embed(db: dict, html_path: Path) -> bool:
     return True
 
 
-def export_traffic_app(db: dict) -> None:
-    """交通・ライブカメラのページに配る。"""
+def write_copy(db: dict, json_path: Path, note: str) -> None:
+    """台帳の「人が読める形」のコピーを置く。"""
     payload = {
         "updated": db["updated"],
         "count": db["count"],
         "withImage": db["withImage"],
         "withPlace": db["withPlace"],
         "byCategory": db["byCategory"],
-        "note": "この台帳の大もとは livecam-db/data/livecams.json です。"
-                "直接編集せず、livecam-db/build.py と export.py で作りなおしてください。",
+        "note": note,
         "sources": db["sources"],
         "cams": db["cams"],
     }
-    TRAFFIC_JSON.parent.mkdir(parents=True, exist_ok=True)
-    TRAFFIC_JSON.write_text(
+    json_path.parent.mkdir(parents=True, exist_ok=True)
+    json_path.write_text(
         json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + "\n",
         encoding="utf-8",
     )
-    print(f"💾 配りました: {TRAFFIC_JSON}（{TRAFFIC_JSON.stat().st_size / 1024:.0f} KB）")
+    print(f"💾 配りました: {json_path}（{json_path.stat().st_size / 1024:.0f} KB）")
 
+
+def export_traffic_app(db: dict) -> None:
+    """交通・ライブカメラのページに配る（🇯🇵 日本の台帳）。"""
+    write_copy(db, TRAFFIC_JSON,
+               "この台帳の大もとは livecam-db/data/livecams.json です。"
+               "直接編集せず、livecam-db/build.py と export.py で作りなおしてください。")
     if write_html_embed(db, TRAFFIC_HTML):
         print(f"💾 ページにも埋め込みました: {TRAFFIC_HTML}（{TRAFFIC_HTML.stat().st_size / 1024:.0f} KB）")
 
 
-TARGETS = {"traffic-app": export_traffic_app}
+def export_world_livecam(db: dict) -> None:
+    """🌍 世界のライブカメラのページに配る（世界の台帳・試験）。"""
+    write_copy(db, WORLD_JSON,
+               "この台帳の大もとは livecam-db/data/livecams_world.json です。"
+               "直接編集せず、livecam-db/build_world.py と export.py で作りなおしてください。")
+    if write_html_embed(db, WORLD_HTML):
+        print(f"💾 ページにも埋め込みました: {WORLD_HTML}（{WORLD_HTML.stat().st_size / 1024:.0f} KB）")
+
+
+# 配り先ごとに「どの台帳を読むか」も決めておく（日本と世界は別ファイル）
+TARGETS = {
+    "traffic-app": (DB_PATH, export_traffic_app),
+    "world-livecam": (WORLD_DB_PATH, export_world_livecam),
+}
 
 
 def main() -> int:
@@ -143,11 +169,21 @@ def main() -> int:
               "   先に『python3 livecam-db/build.py』を実行してください。", file=sys.stderr)
         return 1
 
-    db = json.loads(DB_PATH.read_text(encoding="utf-8"))
-    print(f"📋 台帳: {db['count']} 台（映像を出せる {db['withImage']} 台）")
+    cache: dict[Path, dict] = {}
 
     for name in args.target:
-        TARGETS[name](db)
+        db_path, export = TARGETS[name]
+        if db_path not in cache:
+            if not db_path.exists():
+                # 🌍 世界の台帳（試験）がまだ無くても、日本の配布は止めません。
+                # ここで止めると、週1の自動更新まるごとが失敗してしまうためです。
+                print(f"⚠️ 台帳がないので「{name}」への配布は省略します: {db_path}", file=sys.stderr)
+                continue
+            cache[db_path] = json.loads(db_path.read_text(encoding="utf-8"))
+            db = cache[db_path]
+            print(f"📋 {db_path.name}: {db['count']} 台（映像を出せる {db['withImage']} 台）")
+        export(cache[db_path])
+
     return 0
 
 
