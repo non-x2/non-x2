@@ -1177,11 +1177,15 @@
 
       <div class="map-legend" id="globe-legend" hidden>
         <span><i class="swatch" style="background:#fff;border:1px solid #8fa6bd"></i>これまでの経路</span>
-        <span><i class="swatch" style="background:#ff6b35"></i>予想の進路</span>
+        <span><i class="swatch" style="background:#ff6b35"></i>予想の進路（日本周辺・気象庁）</span>
+        <span id="globe-legend-world" hidden><i class="swatch" style="background:#b48cff"></i>予想の進路（世界・NHC）</span>
         <span><i class="swatch" style="background:rgba(255,107,53,.35);border:1px dashed #ff6b35"></i>予報円</span>
         <span><i class="swatch" style="background:rgba(214,64,47,.5)"></i>暴風域</span>
         <span><i class="swatch" style="background:rgba(255,199,120,.35)"></i>強風域</span>
       </div>
+
+      <!-- 🌍 世界の台風（日本周辺の外）の出典と注意書き。いるときだけJSが文言を入れて表示する -->
+      <p class="map-note globe-caution" id="globe-world-note" hidden></p>
 
       <p class="map-note map-note-spaced" id="globe-note">
         地球儀は「正射図法」＝宇宙から地球を見たときの見え方で描いています。裏側に回った線は、本物の地球と同じように見えなくなります。
@@ -1378,6 +1382,7 @@
     (function () {
       var JMA = 'https://www.jma.go.jp/bosai/typhoon/data';
       var LOCAL = './data/latest.json';
+      var WORLD = './data/world.json';  /* 🌍 世界の台風の控え（NHC・JTWC。毎時Actionsが更新） */
       var WD = ['日', '月', '火', '水', '木', '金', '土'];
 
       /* --- 地図の座標変換（この地図はメルカトル図法） --- */
@@ -1968,6 +1973,16 @@
         }
       }
 
+      /* 🌍 世界の台風（地球儀タブ用のおまけレイヤー）。
+         取れないときは静かに何も出さないだけ＝気象庁の表示は一切邪魔しない。
+         file://（ダブルクリックで開いたとき）も同様に静かにあきらめる */
+      function loadWorld() {
+        if (!GLOBE || !GLOBE.updateWorld) return;
+        getJSON(WORLD, 9000).then(function (w) {
+          if (w && Array.isArray(w.storms)) GLOBE.updateWorld(w);
+        })['catch'](function () { /* おまけなので何もしない */ });
+      }
+
       /* --- 実行：①気象庁 → ②控えのファイル → ③この端末に残った前回分 → ④スナップショット --- */
       var CACHE_KEY = 'typhoon-last-data-v1';
       var lastFetchedAt = 0;
@@ -2095,6 +2110,7 @@
         /* --- 状態 --- */
         var world = null, japan = null;      /* 海岸線（最初に開いたときだけ作る） */
         var data = null;                     /* 気象庁のデータ */
+        var worldData = null;                /* 🌍 世界の台風（NHC・JTWCの控え。無くても動く） */
         var axis = [];                       /* 時間つまみの目盛り（0=実況, 24, 48…） */
         var focus = 0;
         var HOME_ZOOM = 1.35;                /* 最初の倍率。1.0で地球まるごと、大きいほど寄る */
@@ -2212,6 +2228,23 @@
           for (var i = 0; i <= n; i++) pts.push(geoPoint(lat, lon, km, i / n * Math.PI * 2));
           return pts;
         }
+        /* 日付変更線（経度180度）をまたぐ線の下ごしらえ。
+           となりの点と180度以上ちがう経度は±360して連続にする。
+           これをしないと「179度→-179度」の2度ぶんの移動が、
+           地球をぐるっと逆回りする358度ぶんの線として描かれてしまう。
+           （投影の計算は360度周期なので、190度でも-170度と同じ場所に正しく描ける） */
+        function unwrapLons(pts) {
+          if (pts.length < 2) return pts;
+          var out = [pts[0]], prev = pts[0][1];
+          for (var i = 1; i < pts.length; i++) {
+            var lon = pts[i][1];
+            while (lon - prev > 180) lon -= 360;
+            while (lon - prev < -180) lon += 360;
+            out.push([pts[i][0], lon]);
+            prev = lon;
+          }
+          return out;
+        }
         /* 点と点のあいだを細かく分ける（地球儀では直線もカーブして見えるため） */
         function densify(pts) {
           var out = [];
@@ -2318,6 +2351,23 @@
           if (!data || !data.typhoons) return [];
           return data.typhoons.filter(function (t) { return t.analysis && t.analysis.lat != null; });
         }
+        /* 🌍 控えが新しいか（12時間以内か）。台風は半日で数百kmも動くので、
+           古い控えの位置は描かない。ページを開きっぱなしで通信が切れたまま
+           時間がたっても止まるよう、フラグに覚えず毎回「今」と比べて判定する */
+        function worldFresh() {
+          if (!worldData || !worldData.generatedAt) return false;
+          var age = Date.now() - new Date(worldData.generatedAt).getTime();
+          return !isNaN(age) && age <= 12 * 3600 * 1000;
+        }
+        /* 🌍 世界の台風（日本周辺の外側。取れていない・古すぎるときは空） */
+        function worldStorms() {
+          if (!worldData || !worldData.storms || !worldFresh()) return [];
+          return worldData.storms.filter(function (s) { return s.analysis && s.analysis.lat != null; });
+        }
+        /* ラベル用の短い呼び名。「ハリケーン（カテゴリ1）」の（…）は外して「ハリケーン Lala」に */
+        function worldShort(s) {
+          return ((s.category || '').replace(/（[^）]*）/, '') + ' ' + (s.name || '')).replace(/\s+$/, '');
+        }
         function seqOf(t) {
           var out = t.analysis && t.analysis.lat != null ? [t.analysis] : [];
           return out.concat((t.forecast || []).filter(function (p) { return p.lat != null; }));
@@ -2327,9 +2377,21 @@
           for (var i = 0; i < seq.length; i++) if (seq[i].hours === hours) return seq[i];
           return null;
         }
+        /* その時刻ちょうどの発表が無い台風は「直前の発表位置」に留める。
+           気象庁と世界で予報の時刻の刻みが違うため（例：気象庁に「36時間後」は無い）、
+           無い時刻で実況位置まで巻き戻って見えるジャンプを防ぐ。
+           勝手な中間位置の計算（補間）はしない＝描くのは発表値の位置だけ */
+        function pointAtOrBefore(t, hours) {
+          var seq = seqOf(t), best = null;
+          for (var i = 0; i < seq.length; i++) {
+            if (seq[i].hours != null && seq[i].hours <= hours &&
+                (!best || seq[i].hours > best.hours)) best = seq[i];
+          }
+          return best;
+        }
         function timeAxis() {
           var set = {}, out = [], k;
-          typhoons().forEach(function (t) {
+          typhoons().concat(worldStorms()).forEach(function (t) {
             seqOf(t).forEach(function (p) { if (p.hours != null) set[p.hours] = 1; });
           });
           for (k in set) if (set.hasOwnProperty(k)) out.push(parseInt(k, 10));
@@ -2399,8 +2461,13 @@
           if (world) drawRings(world, '#dfe7ef', null, 0);
           if (japan) drawRings(japan, '#eef3f8', 'rgba(11,39,66,0.9)', 0.8);
 
-          /* ⑤ 台風 */
-          drawTyphoons(ts, dt);
+          /* ⑤ 台風（🌍世界 → 日本周辺の順に描く＝日本周辺の分が上に来る）。
+             渦の粒を進める権利は1コマにつき1回だけ渡す。
+             2つの関数が別々に進めると渦が2倍速になってしまうため */
+          labelBoxes.length = 0;
+          var sw = { dt: reduce ? 0 : dt };
+          drawWorldStorms(sw);
+          drawTyphoons(ts, sw);
 
           ctx.restore();
 
@@ -2412,16 +2479,52 @@
           ctx.stroke();
         }
 
-        function drawTyphoons(ts, dt) {
+        /* --- 🌍 世界の台風（日本周辺の外）。紫の線＝NHC・JTWCの発表値 --- */
+        function drawWorldStorms(sw) {
+          var list = worldStorms();
+          if (!list.length) return;
+          var hh = axis.length ? axis[Math.min(focus, axis.length - 1)] : 0;
+
+          list.forEach(function (s) {
+            var a = s.analysis;
+            var fc = (s.forecast || []).filter(function (p) { return p.lat != null; });
+            var f = pointAtOrBefore(s, hh) || a;
+
+            /* 💨 渦：大きさは発表値（34ノット風の半径）があればそれ、
+               無ければ風の強さからのおおよその推定（イメージである旨は画面に明記済み） */
+            var sdt = sw.dt; sw.dt = 0;
+            drawSwirl({
+              lat: f.lat, lon: f.lon,
+              galeRadiusKm: f.galeRadiusKm || Math.max(120, Math.min(420, (f.windMs || 20) * 8))
+            }, sdt);
+
+            /* これまでの経路（あるものだけ。JTWC分には入っていない） */
+            if (s.track && s.track.length > 1) {
+              strokeGeo(densify(unwrapLons(s.track)), 'rgba(255,255,255,0.55)', 1.6, null);
+            }
+
+            /* 予想の進路（紫の点線。日本周辺のオレンジと見分けるため） */
+            if (fc.length) {
+              strokeGeo(densify(unwrapLons([a].concat(fc).map(function (p) { return [p.lat, p.lon]; }))),
+                '#b48cff', 2, [7, 5]);
+            }
+            fc.forEach(function (p) { dot(p.lat, p.lon, 3, '#ffffff', '#b48cff', 1.6); });
+
+            var here = dot(a.lat, a.lon, 5, '#ffffff', '#b48cff', 2.2);
+            if (f !== a && f.lat != null) dot(f.lat, f.lon, 4.6, '#f0e9ff', '#b48cff', 2);
+            if (here) labelAt(here.x, here.y, '🌀 ' + worldShort(s));
+          });
+        }
+
+        function drawTyphoons(ts, sw) {
           var list = typhoons();
           if (!list.length) return;
           var hh = axis.length ? axis[Math.min(focus, axis.length - 1)] : 0;
-          labelBoxes.length = 0;
 
           list.forEach(function (t, idx) {
             var a = t.analysis;
             var fc = (t.forecast || []).filter(function (p) { return p.lat != null; });
-            var f = pointAt(t, hh) || a;
+            var f = pointAtOrBefore(t, hh) || a;
 
             /* 強風域・暴風域（選んでいる時刻のもの） */
             if (f.galeRadiusKm) {
@@ -2433,9 +2536,9 @@
                 'rgba(214,64,47,0.28)', 'rgba(214,64,47,0.8)', 1.3);
             }
 
-            /* 💨 渦のイメージ（粒の位置を進めるのは1個目のときだけ。
-               台風が2つあるとき2倍速になってしまうのを防ぐ） */
-            drawSwirl(f, (reduce || idx > 0) ? 0 : dt);
+            /* 💨 渦のイメージ（粒の位置を進める権利は draw() から1コマ1回だけ渡ってくる） */
+            var sdt = sw.dt; sw.dt = 0;
+            drawSwirl(f, sdt);
 
             /* これまでの経路 */
             if (t.track && t.track.length > 1) {
@@ -2629,6 +2732,16 @@
               if (p.pressure) s += ' 中心気圧' + p.pressure + 'hPa';
               parts.push(s);
             });
+            /* 🌍 世界の分も添える（時刻は日本時間に直して表示） */
+            worldStorms().forEach(function (w) {
+              var p = pointAt(w, hh);
+              if (!p) return;
+              var s2 = worldShort(w) + '：' + hourLabel(hh);
+              if (p.validTime) s2 += '（' + fmtShort(p.validTime) + '）';
+              if (p.category && p.category !== w.category) s2 += ' ' + p.category + 'へ';
+              if (p.windMs) s2 += ' 最大風速' + p.windMs + 'm/s';
+              parts.push(s2);
+            });
             ftext.textContent = parts.join('　／　');
             ftext.hidden = !parts.length;
           }
@@ -2668,13 +2781,26 @@
             /* 日本（およそ北緯36度・東経138度）と台風の、ちょうど間あたりを正面にする */
             h.lat = clampLat(((la / pts.length) + 36) / 2);
             h.lon = ((lo / pts.length) + 138) / 2;
+          } else {
+            /* 日本周辺に台風が無くて、🌍世界にはあるとき：そちらへ向けておく
+               （日本を向いたままだと、地球の裏側で何も見えないため） */
+            var wp = [];
+            worldStorms().forEach(function (s) { wp.push(s.analysis); });
+            if (wp.length) {
+              var la2 = 0, lo2 = 0;
+              wp.forEach(function (p) { la2 += p.lat; lo2 += p.lon; });
+              h.lat = clampLat(la2 / wp.length);
+              h.lon = lo2 / wp.length;  /* 単純平均。台風同士が日付変更線をまたぐ極端な組ではズレるが、手で回せるので割り切り */
+            }
           }
           return h;
         }
-        function update(d) {
-          data = d;
+        /* 見出し・凡例・注意書き・つまみをそろえる。
+           気象庁（update）と🌍世界（updateWorld）のどちらが先に届いても
+           同じ見た目になるよう、共通の1か所にまとめてある */
+        function refreshMeta() {
           axis = timeAxis();
-          var list = typhoons();
+          var list = typhoons(), wlist = worldStorms();
           var wrap = document.getElementById('globe-time');
           if (wrap) wrap.hidden = axis.length < 2;
           if (axis.length < 2) stopPlay();
@@ -2685,20 +2811,43 @@
             view.lat = home.lat; view.lon = home.lon; view.zoom = home.zoom;
           }
 
-          var lb = document.getElementById('globe-live-banner');
-          var sb = document.getElementById('globe-snapshot-banner');
-          if (lb) lb.hidden = false;
-          if (sb) sb.hidden = true;
-
           var title = document.getElementById('globe-title');
           var note = document.getElementById('globe-note');
           /* 台風が1個も無いときは、進路の凡例と渦の注意書きは出さない（かえって分かりにくいため） */
           var legend = document.getElementById('globe-legend');
           var caution = document.getElementById('globe-caution');
-          if (legend) legend.hidden = !list.length;
-          if (caution) caution.hidden = !list.length;
+          if (legend) legend.hidden = !list.length && !wlist.length;
+          if (caution) caution.hidden = !list.length && !wlist.length;
+          var lw = document.getElementById('globe-legend-world');
+          if (lw) lw.hidden = !wlist.length;
+
+          /* 🌍 世界の分の出典と注意書き（いるとき・古くて休んでいるときだけ出す） */
+          var wn = document.getElementById('globe-world-note');
+          if (wn) {
+            if (wlist.length) {
+              wn.hidden = false;
+              wn.textContent = '🌍 日本周辺の外の台風（ハリケーン・サイクロンなど）は、' +
+                '米国ハリケーンセンター（NHC）と米軍合同台風警報センター（JTWC）の発表値です。' +
+                '紫の点線がその予想の進路です。予報円・暴風域の円は日本周辺の台風（気象庁）にだけ出ます。';
+            } else if (worldData && !worldFresh()) {
+              wn.hidden = false;
+              wn.textContent = '🌍 世界の台風（日本周辺の外）は、控えのデータが古いため表示を休んでいます。' +
+                '日本周辺の台風は気象庁のデータでいつもどおり表示します。';
+            } else {
+              wn.hidden = true;
+            }
+          }
+
           var base = '地球儀は「正射図法」＝宇宙から地球を見たときの見え方で描いています。裏側に回った線は、本物の地球と同じように見えなくなります。';
-          if (!list.length) {
+          if (!list.length && wlist.length) {
+            var names = wlist.map(worldShort).join('、');
+            if (title) title.textContent = '🌐 3D地球儀（日本周辺の台風なし・世界で' + wlist.length + '個）';
+            if (note) {
+              note.textContent = '気象庁が発表している日本周辺の台風は0個です。いま世界では' + names +
+                'が活動中なので、地球儀の上に描いています。' + base;
+            }
+            cv.setAttribute('aria-label', '地球儀。日本周辺に台風はありません。世界では' + names + 'が活動中です。');
+          } else if (!list.length) {
             if (title) title.textContent = '🌐 3D地球儀（いま発生中の台風はありません）';
             if (note) note.textContent = '気象庁が発表している台風は0個です。新しい台風が発生すると、この地球儀の上に自動で描かれます。' + base;
             cv.setAttribute('aria-label', '地球儀。いま発生中の台風はありません。');
@@ -2720,7 +2869,26 @@
                 'までおよそ' + Math.round(hit.km) + 'km。' : '') +
               '詳しい文章は「📝 今の状況」タブにあります。');
           }
+        }
+
+        function update(d) {
+          data = d;
+          var lb = document.getElementById('globe-live-banner');
+          var sb = document.getElementById('globe-snapshot-banner');
+          if (lb) lb.hidden = false;
+          if (sb) sb.hidden = true;
+          refreshMeta();
           setFocus(0);
+          requestDraw();
+        }
+
+        /* 🌍 世界の台風の控え（world.json）が届いたときに呼ばれる。
+           鮮度はここでは覚えず、worldFresh() が描くたびに「今」と比べて判定する */
+        function updateWorld(w) {
+          worldData = w || null;
+          refreshMeta();
+          /* つまみの目盛りが増減するので、いまの位置がはみ出していたら中に戻す */
+          setFocus(Math.min(focus, Math.max(0, axis.length - 1)));
           requestDraw();
         }
 
@@ -2760,7 +2928,7 @@
         var gp = document.getElementById('panel-globe');
         if (gp && !gp.hidden) onGlobeShown();
 
-        return { update: update };
+        return { update: update, updateWorld: updateWorld };
       })();
 
       /* ============================================================
@@ -3147,6 +3315,7 @@
       if (typeof fetch === 'function' && typeof Promise === 'function') {
         start();
         loadWarningsLight();
+        loadWorld();
 
         /* ⚠️タブが表示されたら最新を取りにいく（10分以内に取れていれば、そのまま使う）。
            Promise が使えない環境で動き出さないよう、登録はこのガードの中に置いている。 */
@@ -3165,6 +3334,7 @@
            （タブを開けば onWarnShown が呼ばれて、そこで取りにいく） */
         function startAll() {
           start();
+          loadWorld();
           var wp = document.getElementById('panel-warn');
           if (warnJmaAt || (wp && !wp.hidden)) loadWarningsFromJma();
         }
