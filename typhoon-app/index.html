@@ -727,6 +727,54 @@
     color: #dce7f4;
     font-size: 0.9rem;
   }
+  /* 📈 風の強さの推移グラフ（台風1つにつき1行の小さな折れ線） */
+  .globe-charts {
+    display: grid;
+    gap: 6px;
+    margin-top: 0.85rem;
+  }
+  .globe-charts[hidden] { display: none; }
+  .globe-charts-title { margin: 0 0 2px; }
+  .globe-chart-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .globe-chart-name {
+    flex: 0 0 auto;
+    width: 8.6em;
+    font-size: 0.78rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .globe-chart-name i {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex: 0 0 auto;
+  }
+  .globe-chart-row canvas {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 44px;
+    display: block;
+  }
+  .globe-chart-val {
+    flex: 0 0 auto;
+    width: 4.6em;
+    text-align: right;
+    font-size: 0.78rem;
+    font-variant-numeric: tabular-nums;
+  }
+  @media (max-width: 480px) {
+    .globe-chart-name { width: 6.4em; }
+  }
+
   /* hidden を付けたときは必ず消えるようにする。
      （display: flex を書くと、標準の「hidden＝非表示」より強くなってしまうため） */
   .globe-time[hidden] { display: none; }
@@ -1174,6 +1222,9 @@
         <span class="globe-time-label" id="globe-time-label">実況</span>
       </div>
       <p class="globe-focus" id="globe-focus" hidden></p>
+
+      <!-- 📈 風の強さの推移（発表値の折れ線。⏱つまみで選んだ時刻に●がつく）。台風がいるときだけJSが中身を作る -->
+      <div class="globe-charts" id="globe-charts" hidden></div>
 
       <div class="map-legend" id="globe-legend" hidden>
         <span><i class="swatch" style="background:#fff;border:1px solid #8fa6bd"></i>これまでの経路</span>
@@ -2399,6 +2450,126 @@
           return out;
         }
 
+        /* --- 🌓 太陽が真上に来ている地点（近似式） ---
+           季節（太陽の傾き23.4度）と時刻から求める。均時差（最大±4度≒16分ぶん）は
+           省いた簡易版だが、「どこが夜か」をうっすら見せる用途には十分な精度 */
+        function subsolarPoint(d) {
+          var days = (d.getTime() - Date.UTC(d.getUTCFullYear(), 0, 0)) / 86400000;
+          var decl = -23.44 * Math.cos(2 * Math.PI / 365 * (days + 10));
+          var hours = d.getUTCHours() + d.getUTCMinutes() / 60;
+          var lon = (12 - hours) * 15;
+          if (lon > 180) lon -= 360;
+          if (lon < -180) lon += 360;
+          return { lat: decl, lon: lon };
+        }
+
+        /* 地点を「いまの視点から見た3方向の成分」にする（x=画面右・y=画面上・z=手前）。
+           proj と同じ計算のベクトル版 */
+        function viewVec(lat, lon) {
+          var ph = lat * D2R, dl = (lon - view.lon) * D2R;
+          var sp2 = Math.sin(ph), cp2 = Math.cos(ph), cd = Math.cos(dl);
+          return {
+            x: cp2 * Math.sin(dl),
+            y: cosP0 * sp2 - sinP0 * cp2 * cd,
+            z: sinP0 * sp2 + cosP0 * cp2 * cd
+          };
+        }
+
+        /* --- ⚡ 下絵のキャッシュ ---
+           海・陸・経路など「動かないもの」は、視点やデータが変わらないあいだ
+           下絵として使い回す。毎コマ描き直すのは渦と脈動の輪だけ。
+           （渦のアニメーションのために絵は常に動いており、以前は毎コマ
+           海岸線まで全部描き直していた＝スマホの電池と発熱のムダだった） */
+        var baseCv = document.createElement('canvas');
+        var baseCtx = baseCv.getContext('2d');
+        var baseKey = '';
+        var dataVer = 0, worldVer = 0;   /* データが変わったら下絵を作り直すための番号 */
+
+        function drawBase() {
+          /* 既存の描画部品はモジュール変数 ctx に描く作りなので、
+             下絵を描くあいだだけ ctx を下絵用キャンバスに差し替える */
+          var real = ctx;
+          ctx = baseCtx;
+          try {
+            ctx.clearRect(0, 0, W, H);
+
+            /* ① 大気のふちの光 */
+            var atm = ctx.createRadialGradient(CX, CY, R * 0.97, CX, CY, R * 1.13);
+            atm.addColorStop(0, 'rgba(110,178,255,0.40)');
+            atm.addColorStop(1, 'rgba(110,178,255,0)');
+            ctx.fillStyle = atm;
+            ctx.beginPath(); ctx.arc(CX, CY, R * 1.13, 0, Math.PI * 2); ctx.fill();
+
+            ctx.save();
+            ctx.beginPath(); ctx.arc(CX, CY, R, 0, Math.PI * 2); ctx.clip();
+
+            /* ② 海（左上から光が当たっている感じ） */
+            var sea = ctx.createRadialGradient(CX - R * 0.34, CY - R * 0.40, R * 0.03, CX, CY, R * 1.02);
+            sea.addColorStop(0, '#4f97d1');
+            sea.addColorStop(0.52, '#1f5487');
+            sea.addColorStop(1, '#0a2038');
+            ctx.fillStyle = sea;
+            ctx.fillRect(CX - R, CY - R, R * 2, R * 2);
+
+            /* ③ 経線・緯線（20度ごと） */
+            ctx.save();
+            ctx.strokeStyle = 'rgba(255,255,255,0.11)';
+            ctx.lineWidth = 1;
+            var g, i;
+            for (g = -180; g < 180; g += 20) {
+              var mer = [];
+              for (i = -80; i <= 80; i += 4) mer.push([i, g]);
+              strokeGeo(mer, 'rgba(255,255,255,0.11)', 1, null);
+            }
+            for (g = -60; g <= 60; g += 20) {
+              var par = [];
+              for (i = -180; i <= 180; i += 4) par.push([g, i]);
+              strokeGeo(par, g === 0 ? 'rgba(255,255,255,0.20)' : 'rgba(255,255,255,0.11)', 1, null);
+            }
+            ctx.restore();
+
+            /* ④ 陸地（世界＝ざっくり、日本＝詳しい） */
+            /* 世界のほうは線を引かない（南極の継ぎ目が線になって見えるのを防ぐため）。
+               海が濃い青・陸が薄い色なので、塗りだけで十分はっきり見える */
+            if (world) drawRings(world, '#dfe7ef', null, 0);
+            if (japan) drawRings(japan, '#eef3f8', 'rgba(11,39,66,0.9)', 0.8);
+
+            /* 🌓 夜の側をうっすら暗くする（本物の地球と同じ昼と夜）。
+               昼と夜の境目は、この投影だと画面上で「楕円の弧」になる。
+               そこで「太陽と反対側の外周の半円」＋「その楕円の弧」で夜側を囲んで塗る。
+               ⚠️ 夜の半球を fillGeo（地点の列を塗る部品）で塗ってはいけない：
+               半球ほど大きい形は、視点によって内と外が入れかわり、昼側が塗られることがある */
+            if (ctx.ellipse) {
+              var sun = subsolarPoint(new Date());
+              var sv = viewVec(sun.lat, sun.lon);
+              var th = Math.atan2(-sv.y, sv.x);   /* 画面上での太陽の方向 */
+              ctx.beginPath();
+              ctx.arc(CX, CY, R, th + Math.PI / 2, th + Math.PI * 1.5, false);
+              ctx.ellipse(CX, CY, R * Math.min(1, Math.abs(sv.z)), R, th,
+                Math.PI * 1.5, Math.PI / 2, sv.z > 0);
+              ctx.closePath();
+              ctx.fillStyle = 'rgba(3,9,22,0.34)';
+              ctx.fill();
+            }
+
+            /* ⑤ 台風（🌍世界 → 日本周辺の順に描く＝日本周辺の分が上に来る） */
+            labelBoxes.length = 0;
+            drawWorldStormsBase();
+            drawTyphoonsBase();
+
+            ctx.restore();
+
+            /* ⑥ 地球のふち */
+            ctx.beginPath();
+            ctx.arc(CX, CY, R, 0, Math.PI * 2);
+            ctx.strokeStyle = 'rgba(160,208,255,0.55)';
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
+          } finally {
+            ctx = real;
+          }
+        }
+
         /* --- 1コマ描く --- */
         function draw(ts) {
           var dt = lastTs ? Math.min(0.06, (ts - lastTs) / 1000) : 0;
@@ -2418,69 +2589,37 @@
           sinP0 = Math.sin(view.lat * D2R);
           cosP0 = Math.cos(view.lat * D2R);
 
+          /* 下絵が使い回せるかどうか（視点・データ・時刻の目盛りが同じなら使い回す。
+             「分」も入れてあるので、開きっぱなしでも夜の位置が少しずつ動く） */
+          var key = [view.lat.toFixed(3), view.lon.toFixed(3), view.zoom.toFixed(3),
+            W, H, dataVer, worldVer, focus, Math.floor(Date.now() / 60000)].join('|');
+          if (key !== baseKey) { drawBase(); baseKey = key; }
+
           ctx.clearRect(0, 0, W, H);
+          ctx.save();
+          ctx.setTransform(1, 0, 0, 1, 0, 0);   /* 下絵は実ピクセルでそのまま転写 */
+          ctx.drawImage(baseCv, 0, 0);
+          ctx.restore();
 
-          /* ① 大気のふちの光 */
-          var atm = ctx.createRadialGradient(CX, CY, R * 0.97, CX, CY, R * 1.13);
-          atm.addColorStop(0, 'rgba(110,178,255,0.40)');
-          atm.addColorStop(1, 'rgba(110,178,255,0)');
-          ctx.fillStyle = atm;
-          ctx.beginPath(); ctx.arc(CX, CY, R * 1.13, 0, Math.PI * 2); ctx.fill();
-
+          /* 動くもの（渦・脈動の輪）だけ毎コマ描く */
           ctx.save();
           ctx.beginPath(); ctx.arc(CX, CY, R, 0, Math.PI * 2); ctx.clip();
-
-          /* ② 海（左上から光が当たっている感じ） */
-          var sea = ctx.createRadialGradient(CX - R * 0.34, CY - R * 0.40, R * 0.03, CX, CY, R * 1.02);
-          sea.addColorStop(0, '#4f97d1');
-          sea.addColorStop(0.52, '#1f5487');
-          sea.addColorStop(1, '#0a2038');
-          ctx.fillStyle = sea;
-          ctx.fillRect(CX - R, CY - R, R * 2, R * 2);
-
-          /* ③ 経線・緯線（20度ごと） */
-          ctx.save();
-          ctx.strokeStyle = 'rgba(255,255,255,0.11)';
-          ctx.lineWidth = 1;
-          var g, i;
-          for (g = -180; g < 180; g += 20) {
-            var mer = [];
-            for (i = -80; i <= 80; i += 4) mer.push([i, g]);
-            strokeGeo(mer, 'rgba(255,255,255,0.11)', 1, null);
-          }
-          for (g = -60; g <= 60; g += 20) {
-            var par = [];
-            for (i = -180; i <= 180; i += 4) par.push([g, i]);
-            strokeGeo(par, g === 0 ? 'rgba(255,255,255,0.20)' : 'rgba(255,255,255,0.11)', 1, null);
-          }
+          drawLive(ts, dt);
           ctx.restore();
-
-          /* ④ 陸地（世界＝ざっくり、日本＝詳しい） */
-          /* 世界のほうは線を引かない（南極の継ぎ目が線になって見えるのを防ぐため）。
-             海が濃い青・陸が薄い色なので、塗りだけで十分はっきり見える */
-          if (world) drawRings(world, '#dfe7ef', null, 0);
-          if (japan) drawRings(japan, '#eef3f8', 'rgba(11,39,66,0.9)', 0.8);
-
-          /* ⑤ 台風（🌍世界 → 日本周辺の順に描く＝日本周辺の分が上に来る）。
-             渦の粒を進める権利は1コマにつき1回だけ渡す。
-             2つの関数が別々に進めると渦が2倍速になってしまうため */
-          labelBoxes.length = 0;
-          var sw = { dt: reduce ? 0 : dt };
-          drawWorldStorms(sw);
-          drawTyphoons(ts, sw);
-
-          ctx.restore();
-
-          /* ⑥ 地球のふち */
-          ctx.beginPath();
-          ctx.arc(CX, CY, R, 0, Math.PI * 2);
-          ctx.strokeStyle = 'rgba(160,208,255,0.55)';
-          ctx.lineWidth = 1.2;
-          ctx.stroke();
         }
 
-        /* --- 🌍 世界の台風（日本周辺の外）。紫の線＝NHC・JTWCの発表値 --- */
-        function drawWorldStorms(sw) {
+        /* 🌍 世界の台風の渦の大きさ。発表値（34ノット風の半径）があればそれ、
+           無ければ風の強さからのおおよその推定（イメージである旨は画面に明記済み） */
+        function worldSwirlSpec(f) {
+          return {
+            lat: f.lat, lon: f.lon,
+            galeRadiusKm: f.galeRadiusKm || Math.max(120, Math.min(420, (f.windMs || 20) * 8))
+          };
+        }
+
+        /* --- 🌍 世界の台風（日本周辺の外）。紫の線＝NHC・JTWCの発表値。
+           ここは「下絵」＝動かない部分だけ。渦は drawLive が毎コマ描く --- */
+        function drawWorldStormsBase() {
           var list = worldStorms();
           if (!list.length) return;
           var hh = axis.length ? axis[Math.min(focus, axis.length - 1)] : 0;
@@ -2489,14 +2628,6 @@
             var a = s.analysis;
             var fc = (s.forecast || []).filter(function (p) { return p.lat != null; });
             var f = pointAtOrBefore(s, hh) || a;
-
-            /* 💨 渦：大きさは発表値（34ノット風の半径）があればそれ、
-               無ければ風の強さからのおおよその推定（イメージである旨は画面に明記済み） */
-            var sdt = sw.dt; sw.dt = 0;
-            drawSwirl({
-              lat: f.lat, lon: f.lon,
-              galeRadiusKm: f.galeRadiusKm || Math.max(120, Math.min(420, (f.windMs || 20) * 8))
-            }, sdt);
 
             /* これまでの経路（あるものだけ。JTWC分には入っていない） */
             if (s.track && s.track.length > 1) {
@@ -2516,12 +2647,13 @@
           });
         }
 
-        function drawTyphoons(ts, sw) {
+        /* 日本周辺の台風の「下絵」＝動かない部分。渦と脈動の輪は drawLive が毎コマ描く */
+        function drawTyphoonsBase() {
           var list = typhoons();
           if (!list.length) return;
           var hh = axis.length ? axis[Math.min(focus, axis.length - 1)] : 0;
 
-          list.forEach(function (t, idx) {
+          list.forEach(function (t) {
             var a = t.analysis;
             var fc = (t.forecast || []).filter(function (p) { return p.lat != null; });
             var f = pointAtOrBefore(t, hh) || a;
@@ -2535,10 +2667,6 @@
               fillGeo(geoCircle(f.lat, f.lon, f.stormRadiusKm),
                 'rgba(214,64,47,0.28)', 'rgba(214,64,47,0.8)', 1.3);
             }
-
-            /* 💨 渦のイメージ（粒の位置を進める権利は draw() から1コマ1回だけ渡ってくる） */
-            var sdt = sw.dt; sw.dt = 0;
-            drawSwirl(f, sdt);
 
             /* これまでの経路 */
             if (t.track && t.track.length > 1) {
@@ -2562,7 +2690,33 @@
             }
             fc.forEach(function (p) { dot(p.lat, p.lon, 3.6, '#ffffff', '#ff6b35', 1.8); });
 
-            /* いまの位置（ふわっと広がる輪つき） */
+            var here = dot(a.lat, a.lon, 6, '#ffffff', '#ff6b35', 2.6);
+
+            /* 選んでいる時刻が「これから」なら、その位置にも印をつける */
+            if (f !== a) dot(f.lat, f.lon, 5.5, '#ffe6d6', '#ff6b35', 2.4);
+
+            if (here) labelAt(here.x, here.y, '🌀 ' + tcShort(t) + ' いまここ');
+          });
+        }
+
+        /* --- 毎コマ描く「動くもの」＝渦と、いまの位置の脈動の輪だけ --- */
+        function drawLive(ts, dt) {
+          var sw = { dt: (reduce || !dt) ? 0 : dt };
+          var hh = axis.length ? axis[Math.min(focus, axis.length - 1)] : 0;
+
+          worldStorms().forEach(function (s) {
+            var f = pointAtOrBefore(s, hh) || s.analysis;
+            var sdt = sw.dt; sw.dt = 0;
+            drawSwirl(worldSwirlSpec(f), sdt);
+          });
+
+          typhoons().forEach(function (t) {
+            var a = t.analysis;
+            var f = pointAtOrBefore(t, hh) || a;
+            var sdt = sw.dt; sw.dt = 0;
+            drawSwirl(f, sdt);
+
+            /* いまの位置のふわっと広がる輪 */
             var ph = reduce ? 0.5 : ((ts % 1800) / 1800);
             var pulse = proj(a.lat, a.lon);
             if (pulse.v) {
@@ -2572,12 +2726,6 @@
               ctx.lineWidth = 2.4;
               ctx.stroke();
             }
-            var here = dot(a.lat, a.lon, 6, '#ffffff', '#ff6b35', 2.6);
-
-            /* 選んでいる時刻が「これから」なら、その位置にも印をつける */
-            if (f !== a) dot(f.lat, f.lon, 5.5, '#ffe6d6', '#ff6b35', 2.4);
-
-            if (here) labelAt(here.x, here.y, '🌀 ' + tcShort(t) + ' いまここ');
           });
         }
 
@@ -2592,6 +2740,11 @@
           cv.width = Math.round(w * dpr);
           cv.height = Math.round(h * dpr);
           ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          /* ⚡ 下絵用キャンバスも同じ大きさ・同じ座標系にそろえる */
+          baseCv.width = cv.width;
+          baseCv.height = cv.height;
+          baseCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          baseKey = '';
         }
 
         /* --- 動かす／止める（見えていないときは動かさない＝電池の節約） --- */
@@ -2715,6 +2868,126 @@
         var ftext = document.getElementById('globe-focus');
         var playBtn = document.getElementById('globe-play');
 
+        /* --- 📈 風の強さの推移グラフ（実況→予報の小さな折れ線） ---
+           値はすべて発表値（気象庁・NHC・JTWC）。線の色は地球儀の進路と同じ
+           （オレンジ＝日本周辺・紫＝世界）で、色に頼らないよう名前も横に書く */
+        var chartRows = [];
+        function windSeries(t) {
+          return seqOf(t).filter(function (p) { return p.windMs != null && p.hours != null; });
+        }
+        function buildCharts() {
+          var box = document.getElementById('globe-charts');
+          if (!box) return;
+          var rows = [];
+          typhoons().forEach(function (t) {
+            if (windSeries(t).length >= 2) rows.push({ t: t, name: tcName(t), color: '#ff6b35' });
+          });
+          worldStorms().forEach(function (s) {
+            if (windSeries(s).length >= 2) rows.push({ t: s, name: worldShort(s), color: '#b48cff' });
+          });
+          chartRows = rows;
+          box.innerHTML = '';
+          box.hidden = !rows.length;
+          if (!rows.length) return;
+          var title = document.createElement('p');
+          title.className = 'map-note globe-charts-title';
+          title.textContent = '📈 風の強さの移り変わり（発表値）。⏱つまみで選んだ時刻に●がつきます。';
+          box.appendChild(title);
+          rows.forEach(function (r) {
+            var row = document.createElement('div');
+            row.className = 'globe-chart-row';
+            var name = document.createElement('span');
+            name.className = 'globe-chart-name';
+            var swx = document.createElement('i');
+            swx.style.background = r.color;
+            name.appendChild(swx);
+            name.appendChild(document.createTextNode(r.name));
+            name.title = r.name;
+            var c = document.createElement('canvas');
+            var val = document.createElement('span');
+            val.className = 'globe-chart-val';
+            row.appendChild(name);
+            row.appendChild(c);
+            row.appendChild(val);
+            box.appendChild(row);
+            r.cv = c;
+            r.val = val;
+          });
+          renderCharts();
+        }
+        function renderCharts() {
+          if (!chartRows.length) return;
+          var hh = axis.length ? axis[Math.min(focus, axis.length - 1)] : 0;
+
+          /* 全部の台風で同じものさし（横＝時間・縦＝風速）にする＝行どうしを比べられる */
+          var maxH = 24, maxW = 20;
+          chartRows.forEach(function (r) {
+            windSeries(r.t).forEach(function (p) {
+              if (p.hours > maxH) maxH = p.hours;
+              if (p.windMs > maxW) maxW = p.windMs;
+            });
+          });
+          maxW = Math.ceil(maxW / 10) * 10 + 5;
+
+          /* 目盛りの色は画面の文字色に合わせる（明るい画面でも暗い画面でも見える） */
+          var axisCol = 'rgba(120,130,140,0.42)';
+          try {
+            var mI = /rgba?\((\d+),\s*(\d+),\s*(\d+)/.exec(window.getComputedStyle(document.body).color || '');
+            if (mI) axisCol = 'rgba(' + mI[1] + ',' + mI[2] + ',' + mI[3] + ',0.30)';
+          } catch (e) { /* 取れなければ既定色のまま */ }
+
+          chartRows.forEach(function (r) {
+            var c = r.cv;
+            if (!c) return;
+            var g = c.getContext('2d');
+            var dpr2 = Math.min(2, window.devicePixelRatio || 1);
+            var w = Math.max(60, c.clientWidth || 200);
+            var h = 44;
+            c.width = Math.round(w * dpr2);
+            c.height = Math.round(h * dpr2);
+            g.setTransform(dpr2, 0, 0, dpr2, 0, 0);
+            g.clearRect(0, 0, w, h);
+            var padT = 5, padB = 6;
+            function X(hours2) { return 1 + (w - 3) * (hours2 / maxH); }
+            function Y(ms) { return h - padB - (h - padT - padB) * (ms / maxW); }
+
+            /* 目盛り：下の線＝風速0、薄い縦線＝1日ごと */
+            g.strokeStyle = axisCol;
+            g.lineWidth = 1;
+            for (var d2 = 0; d2 <= maxH; d2 += 24) {
+              g.beginPath(); g.moveTo(X(d2), padT); g.lineTo(X(d2), h - padB); g.stroke();
+            }
+            g.beginPath(); g.moveTo(1, h - padB); g.lineTo(w - 1, h - padB); g.stroke();
+
+            /* 折れ線（この台風の色） */
+            var seq = windSeries(r.t);
+            g.strokeStyle = r.color;
+            g.lineWidth = 2;
+            g.lineJoin = 'round';
+            g.lineCap = 'round';
+            g.beginPath();
+            seq.forEach(function (p, i2) {
+              if (i2) g.lineTo(X(p.hours), Y(p.windMs)); else g.moveTo(X(p.hours), Y(p.windMs));
+            });
+            g.stroke();
+
+            /* ⏱で選んだ時刻の点と、その値（その時刻の発表が無ければ直前の発表） */
+            var f = pointAtOrBefore(r.t, hh);
+            if (f && f.windMs != null) {
+              g.beginPath();
+              g.arc(X(f.hours), Y(f.windMs), 4, 0, Math.PI * 2);
+              g.fillStyle = '#ffffff';
+              g.fill();
+              g.lineWidth = 2;
+              g.strokeStyle = r.color;
+              g.stroke();
+              r.val.textContent = f.windMs + 'm/s';
+            } else {
+              r.val.textContent = '';
+            }
+          });
+        }
+
         function hourLabel(h) { return h === 0 ? '実況' : h + '時間後'; }
         function setFocus(i) {
           focus = Math.max(0, Math.min(axis.length ? axis.length - 1 : 0, i));
@@ -2745,6 +3018,7 @@
             ftext.textContent = parts.join('　／　');
             ftext.hidden = !parts.length;
           }
+          renderCharts();   /* 📈 グラフの●と数字も同じ時刻に合わせる */
           requestDraw();
         }
         if (slider) {
@@ -2838,7 +3112,7 @@
             }
           }
 
-          var base = '地球儀は「正射図法」＝宇宙から地球を見たときの見え方で描いています。裏側に回った線は、本物の地球と同じように見えなくなります。';
+          var base = '地球儀は「正射図法」＝宇宙から地球を見たときの見え方で描いています。裏側に回った線は、本物の地球と同じように見えなくなります。うっすら暗い側は、いま夜になっている地域です（太陽の位置から計算）。';
           if (!list.length && wlist.length) {
             var names = wlist.map(worldShort).join('、');
             if (title) title.textContent = '🌐 3D地球儀（日本周辺の台風なし・世界で' + wlist.length + '個）';
@@ -2869,10 +3143,13 @@
                 'までおよそ' + Math.round(hit.km) + 'km。' : '') +
               '詳しい文章は「📝 今の状況」タブにあります。');
           }
+
+          buildCharts();   /* 📈 台風の顔ぶれが変わったらグラフも作り直す */
         }
 
         function update(d) {
           data = d;
+          dataVer++;   /* ⚡ 下絵を作り直す合図 */
           var lb = document.getElementById('globe-live-banner');
           var sb = document.getElementById('globe-snapshot-banner');
           if (lb) lb.hidden = false;
@@ -2886,6 +3163,7 @@
            鮮度はここでは覚えず、worldFresh() が描くたびに「今」と比べて判定する */
         function updateWorld(w) {
           worldData = w || null;
+          worldVer++;   /* ⚡ 下絵を作り直す合図 */
           refreshMeta();
           /* つまみの目盛りが増減するので、いまの位置がはみ出していたら中に戻す */
           setFocus(Math.min(focus, Math.max(0, axis.length - 1)));
@@ -2895,6 +3173,7 @@
         /* --- タブの表示・非表示に合わせる --- */
         onGlobeShown = function () {
           visible = true;
+          renderCharts();   /* 📈 隠れているあいだは幅が測れないので、見えた瞬間に描き直す */
           startLoop();
           if (!reduce && !userMoved && !intro) {
             /* 最初に開いたときだけ、すこし回りながら近づく演出 */
@@ -2915,7 +3194,7 @@
 
         window.addEventListener('resize', function () {
           if (!visible) return;
-          resize(); requestDraw();
+          resize(); renderCharts(); requestDraw();
         });
         document.addEventListener('visibilitychange', function () {
           if (document.hidden) { stopLoop(); }

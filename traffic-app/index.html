@@ -284,8 +284,9 @@
     box-shadow: 0 1px 3px rgba(0,0,0,.35);
   }
   /* 丸そのものは 15px のまま（大きくすると地図が丸で埋まって道が見えなくなるため）。
-     指で押せる範囲だけを透明な当たり判定でひとまわり広げます（15px → 31px）。
-     見た目は1ドットも変わりません。 */
+     指で押せる範囲だけを、透明な当たり判定でひとまわり広げます。見た目は1ドットも変わりません。
+     実測：押せる範囲が直径 14px → 18〜24px。
+     （隣の丸が近いところでは、その丸に取られるぶん少し狭くなります） */
   .obs::before {
     content: '';
     position: absolute;
@@ -371,9 +372,9 @@
   }
 
   /* --- カメラ一覧 --- */
-  #cam-list, #world-list { list-style: none; margin: 0; padding: 0; }
-  #cam-list li, #world-list li { border-bottom: 1px solid var(--border-soft); }
-  #cam-list li:last-child, #world-list li:last-child { border-bottom: 0; }
+  #cam-list { list-style: none; margin: 0; padding: 0; }
+  #cam-list li { border-bottom: 1px solid var(--border-soft); }
+  #cam-list li:last-child { border-bottom: 0; }
   /* 路線が変わったところに入れる区切りの見出し */
   .cam-group {
     font-size: 0.85rem;
@@ -385,7 +386,7 @@
     margin: 0.7rem 0 0.2rem;
     border-bottom: 0 !important;
   }
-  #cam-list .cam-group:first-child, #world-list .cam-group:first-child { margin-top: 0; }
+  #cam-list .cam-group:first-child { margin-top: 0; }
   .cam-more { border-bottom: 0 !important; padding: 0.6rem 0 0.2rem; text-align: center; }
   .cam-more button { width: 100%; font-size: 0.92rem; font-weight: 700; }
   .cam-btn {
@@ -418,13 +419,6 @@
   .cam-title { font-weight: 700; font-size: 0.95rem; }
   .cam-sub { font-size: 0.8rem; color: var(--text-dim); }
   .cam-go { flex: 0 0 auto; font-size: 0.8rem; color: var(--accent); font-weight: 700; }
-
-  /* --- 🌍 世界のカメラ（試験・アイオワ州） --- */
-  #world-open { width: 100%; font-weight: 700; min-height: 44px; }
-  #world-panel { margin-top: 0.7rem; }
-  .world-tools { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; margin-bottom: 0.4rem; }
-  .world-tools input[type="text"] { flex: 1 1 12rem; min-width: 0; }
-  .world-tools label { font-size: 0.9rem; display: flex; align-items: center; gap: 0.35rem; min-height: 44px; }
 
   /* --- カメラを見る画面 --- */
   #viewer {
@@ -720,27 +714,11 @@
       ここでは<strong>公的機関（国・州の交通局など）の公式ページ</strong>を厳選してご案内します
       （映像は転載せず、リンクのみ。開くと各機関のサイトに移動します）。
     </p>
-    <h3>🇺🇸 このページで直接見られるカメラ（試験）</h3>
-    <p class="note" style="margin-top:0">
-      <strong>アメリカ・アイオワ州</strong>の交通局は、カメラの一覧を <strong>CC BY 4.0</strong>
-      （出典を書けば自由に使ってよい、という約束）で公開しています。
-      そこで、のんラボの台帳にも試しに取り込みました（<strong>790台</strong>・うち映像を出せるのは721台）。
-      下のボタンを押すと一覧が開きます。<strong>押すまでは読み込まないので、このページは重くなりません。</strong><br>
-      カメラの名前は現地の呼び名のままです（<strong>RA</strong>＝休憩所、<strong>RWIS</strong>＝道路の気象カメラ、
-      <strong>I-35</strong>＝州間高速35号線、<strong>MM 211</strong>＝211マイル地点）。<br>
-      出典：Iowa Department of Transportation - Office of Traffic Operations（CC BY 4.0）
+    <p class="note">
+      🆕 このうち<strong>再利用が公式に許可されている</strong>ぶんは、のんラボの中でも見られるようにしました。
+      → <a href="../world-livecam/"><strong>🌍 世界のライブカメラ（試験）</strong></a>
+      （いまは 🇺🇸 アイオワ州の790台。検索と地図から探せます）
     </p>
-    <button type="button" class="btn-ghost" id="world-open" aria-expanded="false" aria-controls="world-panel">🇺🇸 アイオワ州のカメラを見る（790台）</button>
-    <div id="world-panel" hidden>
-      <div class="world-tools">
-        <input type="text" id="world-q" placeholder="名前でしぼりこむ（例）I-80" autocomplete="off" aria-label="カメラの名前でしぼりこむ">
-        <label><input type="checkbox" id="world-img-only" checked> 映像が出るものだけ</label>
-      </div>
-      <p class="status" id="world-status" role="status" aria-live="polite" hidden></p>
-      <ol id="world-list"></ol>
-      <p class="note" id="world-note"></p>
-    </div>
-
     <h3>🌎 北米</h3>
     <ul class="link-list">
       <li><a href="https://cwwp2.dot.ca.gov/vm/iframemap.htm" target="_blank" rel="noopener">🇺🇸 カリフォルニア州　Caltrans 道路カメラ地図</a></li>
@@ -1510,9 +1488,6 @@
 
   var viewer = $('viewer');
   var viewerList = [];
-  // いま見ているカメラが「地図に出ているカメラ」かどうか。
-  // 🌍 世界のカメラ（地図には出していない）を見ているときは false にして、ピンを光らせません。
-  var viewerFromMap = true;
   var viewerIdx = -1;
   var viewerTimer = null;
   var lastFocus = null;   // カメラ画面を開く前に触っていた場所
@@ -1546,9 +1521,8 @@
     viewer.hidden = false;
 
     // ピンの強調（重なり防止で間引いているので、番号で照合する）
-    // 🌍 世界のカメラのときは地図と無関係なので、どのピンも光らせません。
     pinEls.forEach(function (el) {
-      el.classList.toggle('is-active', viewerFromMap && Number(el.dataset.idx) === i);
+      el.classList.toggle('is-active', Number(el.dataset.idx) === i);
     });
 
     // キーボードや読み上げの人が「開いたこと」に気づけるよう、
@@ -1689,7 +1663,6 @@
         }
 
         viewerList = found;
-        viewerFromMap = true;
         shownCams = found.map(function (x) { return x.cam; });
 
         rememberInUrl(fromText, toText, radius);
@@ -1774,7 +1747,6 @@
       .slice(0, 40);
 
     viewerList = near;
-    viewerFromMap = true;
     shownCams = near.map(function (x) { return x.cam; });
 
     // ⚠️ ここが大事：地図とカメラ画面だけ差し替えて一覧を放置すると、
@@ -2226,176 +2198,6 @@
       runSearch();
     }
   }
-
-  // ============================================================ 🌍 世界のカメラ（試験・アイオワ州）
-  //
-  // 日本のルート検索とは別の「おまけ」です。地図には出しません（アメリカの地図は持っていないため）。
-  // ⚡ ボタンを押すまで台帳を読み込まないので、このページの表示の速さは変わりません（遅延読み込み）。
-  // データの大もとは livecam-db/data/livecams_world.json（livecam-db/export.py がここに配ります）。
-  // ⚖️ アイオワ州のデータは CC BY 4.0。**出典を書くことが利用の条件**なので、
-  //    下の ATTRIBUTION の文と、HTML の説明文にある出典の行は消さないでください。
-  (function setUpWorldCams() {
-    var openBtn = $('world-open');
-    if (!openBtn) return;   // 世界の欄が無いページでも壊れないように
-
-    var panel = $('world-panel');
-    var qEl = $('world-q');
-    var imgOnlyEl = $('world-img-only');
-    var listEl = $('world-list');
-    var noteEl = $('world-note');
-    var statusEl = $('world-status');
-
-    var LABEL_OPEN = '🇺🇸 アイオワ州のカメラを見る（790台）';
-    var LABEL_CLOSE = '🇺🇸 アイオワ州のカメラを閉じる';
-    var ATTRIBUTION = '　出典：Iowa Department of Transportation - Office of Traffic Operations（CC BY 4.0）';
-
-    var WORLD = null;        // 読み込んだカメラ（1回読んだら覚えておく）
-    var loading = false;
-    var shown = LIST_STEP;   // 最初は20台だけ（日本の一覧と同じ決まり）
-
-    function setStatus(text, kind) {
-      if (!text) { statusEl.hidden = true; statusEl.textContent = ''; return; }
-      statusEl.hidden = false;
-      statusEl.className = 'status' + (kind ? ' is-' + kind : '');
-      statusEl.textContent = text;
-    }
-
-    openBtn.addEventListener('click', function () {
-      var willOpen = panel.hidden;
-      panel.hidden = !willOpen;
-      openBtn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
-      openBtn.textContent = willOpen ? LABEL_CLOSE : LABEL_OPEN;
-      if (willOpen) load();
-    });
-
-    function load() {
-      if (WORLD) { render(); return; }
-      if (loading) return;
-
-      // パソコンでファイルを直接開いた（file://）ときは、ブラウザの安全の決まりで読み込めません。
-      if (location.protocol === 'file:') {
-        setStatus('この一覧は、ファイルを直接開いたときは読み込めません（ブラウザの安全の決まりのため）。'
-          + '公開ページ https://non-x2.github.io/non-x2/traffic-app/ でご覧ください。', 'error');
-        return;
-      }
-
-      loading = true;
-      setStatus('⏳ アイオワ州のカメラ台帳を読み込んでいます…', 'busy');
-      fetch('data/livecams_world.json', { cache: 'no-store' })
-        .then(function (r) {
-          if (!r.ok) throw new Error('HTTP ' + r.status);
-          return r.json();
-        })
-        .then(function (data) {
-          WORLD = (data.cams || []).map(function (c) {
-            return {
-              lat: c.lat, lon: c.lon,
-              road: c.name || 'カメラ',
-              owner: c.owner || '',
-              place: c.place || '',
-              page: c.page || '',
-              img: c.img || '',
-              cat: c.cat || 'road'
-            };
-          });
-          loading = false;
-          setStatus('');
-          render();
-        })
-        .catch(function (err) {
-          loading = false;
-          setStatus('カメラ台帳を読み込めませんでした（' + err.message + '）。'
-            + '通信の状態を確かめて、もう一度ボタンを押してみてください。', 'error');
-        });
-    }
-
-    // カメラの名前は現地の呼び名（英語の記号）なので、意味がわかる言葉を添えます。
-    //   RA…= Rest Area（休憩所） / RWIS…= 道路気象情報のカメラ
-    function worldKind(name) {
-      if (/^RWIS/i.test(name)) return '　/　☁️ 道路の気象カメラ';
-      if (/^RA/i.test(name)) return '　/　🅿️ 休憩所';
-      return '';
-    }
-
-    // しぼりこみ（名前の一部＋「映像が出るものだけ」）
-    function matched() {
-      var q = (qEl.value || '').trim().toLowerCase();
-      var imgOnly = imgOnlyEl.checked;
-      return (WORLD || []).filter(function (c) {
-        if (imgOnly && !c.img) return false;
-        return !q || c.road.toLowerCase().indexOf(q) >= 0;
-      });
-    }
-
-    function render() {
-      if (!WORLD) return;
-      var all = matched();
-      var view = all.slice(0, shown);
-
-      listEl.textContent = '';
-      view.forEach(function (cam, i) {
-        var li = document.createElement('li');
-        var b = document.createElement('button');
-        b.type = 'button';
-        b.className = 'cam-btn';
-        b.addEventListener('click', function () {
-          // カメラを見る画面は日本のカメラと同じものを使い回します。
-          // 「前のカメラ／次のカメラ」もこのしぼりこみの中で動きます。
-          viewerList = all.map(function (c) { return { cam: c, along: null }; });
-          viewerFromMap = false;
-          openViewer(i);
-        });
-
-        var no = document.createElement('span');
-        no.className = 'cam-no' + (cam.cat === 'expressway' ? ' is-expressway' : '')
-          + (cam.img ? '' : ' is-nocam');
-        no.textContent = String(i + 1);
-
-        var main = document.createElement('span');
-        main.className = 'cam-main';
-        var t = document.createElement('span');
-        t.className = 'cam-title';
-        t.textContent = cam.road;
-        var s = document.createElement('span');
-        s.className = 'cam-sub';
-        s.textContent = (cam.cat === 'expressway' ? '🛣 州間高速道路' : '🚗 一般道')
-          + worldKind(cam.road)
-          + (cam.img ? '' : '　/　映像は公式ページで');
-        main.appendChild(t);
-        main.appendChild(document.createElement('br'));
-        main.appendChild(s);
-
-        var go = document.createElement('span');
-        go.className = 'cam-go';
-        go.textContent = cam.img ? '見る ▶' : '開く ↗';
-
-        b.appendChild(no);
-        b.appendChild(main);
-        b.appendChild(go);
-        li.appendChild(b);
-        listEl.appendChild(li);
-      });
-
-      if (view.length < all.length) {
-        var more = document.createElement('li');
-        more.className = 'cam-more';
-        var mb = document.createElement('button');
-        mb.type = 'button';
-        mb.className = 'btn-ghost';
-        mb.textContent = '▼ もっと見る（残り ' + (all.length - view.length) + ' 台）';
-        mb.addEventListener('click', function () { shown += LIST_STEP; render(); });
-        more.appendChild(mb);
-        listEl.appendChild(more);
-      }
-
-      noteEl.textContent = (all.length
-        ? '該当 ' + all.length + ' 台のうち ' + view.length + ' 台を表示中。'
-        : '見つかりませんでした。しぼりこみの言葉を変えてみてください。') + ATTRIBUTION;
-    }
-
-    qEl.addEventListener('input', function () { shown = LIST_STEP; render(); });
-    imgOnlyEl.addEventListener('change', function () { shown = LIST_STEP; render(); });
-  })();
 
   boot();
 })();
