@@ -40,7 +40,12 @@ jobs:
       - name: ライブカメラの台帳を作りなおす（大もと）
         run: python3 livecam-db/build.py
 
-      - name: できた台帳を各アプリに配る
+      # 🌍 世界台帳（試験）。失敗しても日本の台帳の更新は止めない（おまけレイヤーの考え方）
+      - name: 🌍 世界台帳も作りなおす（試験・アイオワ州）
+        continue-on-error: true
+        run: python3 livecam-db/build_world.py
+
+      - name: できた台帳を各アプリに配る（日本→traffic-app／世界→world.html）
         run: python3 livecam-db/export.py
 
       - name: 交通量の観測点台帳も手入れする（市区町村名の調べ直し）

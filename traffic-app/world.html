@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>🌍 世界のライブカメラ（試験版）｜アイオワ州の道路カメラ</title>
+<meta name="description" content="世界のライブカメラを少しずつ集める試験ページ。第1号はアメリカ・アイオワ州交通局の道路カメラ（CC BY 4.0）。地図の点や一覧から選ぶと、今の様子の写真が見られます。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='90'%3E%F0%9F%8C%8D%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #f4f6f8;
+    --card: #ffffff;
+    --text: #1b1f24;
+    --text-dim: #5b6472;
+    --border: #d9dee4;
+    --border-soft: #e6eaee;
+    --accent: #0b6bcb;
+    --pin: #0b6bcb;
+    --pin-express: #7a3fb5;
+    --pin-nocam: #7b8794;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12151a;
+      --card: #1a1f26;
+      --text: #e8ecf1;
+      --text-dim: #9aa5b4;
+      --border: #313a45;
+      --border-soft: #262e38;
+      --accent: #6db3ff;
+      --pin: #4da3ff;
+      --pin-express: #b98ae0;
+      --pin-nocam: #6b7684;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { overflow-x: hidden; }
+  body {
+    margin: 0;
+    padding: 1.5rem 1rem 3rem;
+    background: var(--bg);
+    color: var(--text);
+    font-family: system-ui, -apple-system, 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+    line-height: 1.75;
+    overflow-x: hidden;
+  }
+  main, header, footer { max-width: 44rem; margin-left: auto; margin-right: auto; }
+  header h1 { font-size: 1.35rem; margin: 0 0 0.2rem; }
+  header .lead { color: var(--text-dim); font-size: 0.9rem; margin: 0; }
+  .updated-badge {
+    display: inline-block;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.15rem 0.8rem;
+    margin: 0.6rem 0 0;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1rem 1.1rem;
+    margin: 0.9rem 0;
+  }
+  .card h2 { font-size: 1.05rem; margin: 0 0 0.6rem; }
+  .note { font-size: 0.85rem; color: var(--text-dim); margin: 0.5rem 0 0; }
+  a { color: var(--accent); }
+
+  .back-link { display: inline-flex; align-items: center; min-height: 44px; font-size: 0.9rem; text-decoration: none; }
+  .back-link:hover { text-decoration: underline; }
+
+  /* --- 分布図 --- */
+  #map-box { position: relative; }
+  #iowa-map {
+    display: block;
+    width: 100%;
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    background: var(--bg);
+    touch-action: manipulation;
+    cursor: pointer;
+  }
+  .legend { display: flex; flex-wrap: wrap; gap: 0.8rem; font-size: 0.8rem; color: var(--text-dim); margin-top: 0.5rem; }
+  .legend .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 4px; vertical-align: middle; }
+
+  /* --- 絞り込み --- */
+  .filter-row { display: flex; flex-wrap: wrap; gap: 0.6rem 1.1rem; align-items: center; margin: 0 0 0.5rem; }
+  .filter-row label { font-size: 0.9rem; display: inline-flex; align-items: center; gap: 0.3rem; min-height: 44px; }
+  #search {
+    flex: 1 1 12rem;
+    min-height: 44px;
+    padding: 0.3rem 0.7rem;
+    font-size: 16px; /* スマホで押したときに画面が勝手に拡大しないための下限 */
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  /* --- カメラ一覧 --- */
+  #cam-list { list-style: none; margin: 0.3rem 0 0; padding: 0; }
+  #cam-list li { border-bottom: 1px solid var(--border-soft); }
+  #cam-list li:last-child { border-bottom: 0; }
+  .cam-btn {
+    display: flex;
+    width: 100%;
+    text-align: left;
+    align-items: center;
+    gap: 0.55rem;
+    border: 0;
+    background: none;
+    border-radius: 8px;
+    padding: 0.45rem 0.3rem;
+    min-height: 44px;
+    color: var(--text);
+    font-size: 0.92rem;
+    cursor: pointer;
+  }
+  .cam-btn:hover { background: var(--border-soft); }
+  .cam-dot { flex: 0 0 auto; width: 12px; height: 12px; border-radius: 50%; }
+  .cam-name { flex: 1 1 auto; min-width: 0; overflow-wrap: anywhere; }
+  .cam-sub { font-size: 0.78rem; color: var(--text-dim); display: block; }
+  .cam-go { flex: 0 0 auto; font-size: 0.8rem; color: var(--accent); font-weight: 700; white-space: nowrap; }
+  .btn-more {
+    display: block;
+    width: 100%;
+    min-height: 44px;
+    margin-top: 0.6rem;
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    background: none;
+    color: var(--accent);
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+
+  /* --- カメラを見る画面 --- */
+  #viewer {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    background: rgba(0,0,0,.72);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  #viewer[hidden] { display: none; }
+  .viewer-box {
+    background: var(--card);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    width: min(46rem, 100%);
+    max-height: 92vh;
+    overflow: auto;
+    padding: 0.9rem 1rem 1.1rem;
+  }
+  .viewer-head { display: flex; gap: 0.5rem; align-items: flex-start; }
+  .viewer-head h2 { flex: 1 1 auto; font-size: 1.05rem; margin: 0; }
+  .viewer-close, .viewer-nav {
+    min-height: 44px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: none;
+    color: var(--text);
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: 0.4rem 0.9rem;
+  }
+  .viewer-close { flex: 0 0 auto; width: 44px; padding: 0; font-size: 1.1rem; }
+  .viewer-shot {
+    margin: 0.7rem 0 0;
+    background: #000;
+    border-radius: 10px;
+    overflow: hidden;
+    min-height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .viewer-shot img { display: block; width: 100%; height: auto; }
+  .viewer-msg { padding: 1.2rem 1rem; text-align: center; font-size: 0.9rem; color: var(--text-dim); }
+  .viewer-actions { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.7rem 0 0; }
+  .viewer-actions a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0.4rem 0.9rem;
+    border-radius: 10px;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.9rem;
+  }
+  .viewer-meta { font-size: 0.8rem; color: var(--text-dim); margin: 0.6rem 0 0; }
+
+  footer { margin-top: 1.6rem; font-size: 0.82rem; color: var(--text-dim); }
+</style>
+</head>
+<body>
+
+<header>
+  <a class="back-link" href="./">← 🚗 交通・ライブカメラ（日本版）に戻る</a>
+  <h1>🌍 世界のライブカメラ<span style="font-size:0.8em">（試験版）</span></h1>
+  <p class="lead">世界の公的機関のカメラを、利用許可を確かめながら少しずつ集めていくページです。</p>
+  <p class="updated-badge">📅 台帳の更新: <span id="updated">—</span>・毎週火曜に自動で見直し</p>
+</header>
+
+<main>
+
+  <!-- ============ このページについて ============ -->
+  <section class="card">
+    <h2>🇺🇸 いまはアメリカ・アイオワ州のカメラが見られます</h2>
+    <p class="note" style="margin-top:0">
+      世界中のカメラを「全て」集めることは誰にもできません（まとめた台帳が世界に存在せず、
+      国や州ごとに利用のきまりも違うためです）。そこでのんラボでは、
+      <strong>「はっきり許可が書かれているところ」だけを1つずつ</strong>足していきます。
+      第1号は<strong>アイオワ州交通局（Iowa DOT）</strong>——高速道路・一般道・休憩所などのカメラです。
+      そのほかの国・地域は<a href="./#world-links">日本版ページの「🌍 世界のライブカメラ」欄</a>から公式サイトをご案内しています。
+    </p>
+  </section>
+
+  <!-- ============ 分布図 ============ -->
+  <section class="card">
+    <h2>🗺 カメラの分布（押すと近くのカメラが開きます）</h2>
+    <div id="map-box">
+      <canvas id="iowa-map" aria-label="アイオワ州のカメラ分布図。押すと近くのカメラを表示します"></canvas>
+    </div>
+    <div class="legend">
+      <span><span class="dot" style="background:var(--pin-express)"></span>高速道路（I-系）</span>
+      <span><span class="dot" style="background:var(--pin)"></span>一般道など</span>
+      <span><span class="dot" style="background:var(--pin-nocam)"></span>映像は公式ページで</span>
+    </div>
+    <p class="note">⚠️ 背景の地図はありません（外部の地図を借りずに、カメラの位置だけを点で描いた<strong>おおまかな分布図</strong>です）。左が西・上が北。</p>
+  </section>
+
+  <!-- ============ 一覧 ============ -->
+  <section class="card">
+    <h2 id="list-heading">📷 カメラ一覧</h2>
+    <div class="filter-row">
+      <input id="search" type="search" placeholder="🔍 道路名などで探す（例: I-80）" aria-label="カメラを名前で探す">
+      <label><input type="checkbox" id="cat-express" checked> 🛣 高速道路</label>
+      <label><input type="checkbox" id="cat-road" checked> 🛞 一般道など</label>
+    </div>
+    <p class="note" id="count-note" style="margin:0"></p>
+    <ol id="cam-list"></ol>
+    <button type="button" class="btn-more" id="btn-more" hidden>▼ もっと見る</button>
+  </section>
+
+  <!-- ============ 公式リンク ============ -->
+  <section class="card">
+    <h2>🔗 アイオワ州の公式サイト</h2>
+    <ul style="list-style:none;margin:0;padding:0">
+      <li><a href="https://511ia.org/" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;min-height:44px">🚗 511 Iowa（州公式の交通情報サイト）</a></li>
+      <li><a href="https://data.iowadot.gov/datasets/IowaDOT::traffic-cameras-3/about" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;min-height:44px">📄 カメラのオープンデータ（Iowa DOT・CC BY 4.0）</a></li>
+    </ul>
+  </section>
+
+</main>
+
+<!-- ============ カメラを見る画面 ============ -->
+<div id="viewer" hidden role="dialog" aria-modal="true" aria-labelledby="viewer-title">
+  <div class="viewer-box">
+    <div class="viewer-head">
+      <h2 id="viewer-title">カメラ</h2>
+      <button type="button" class="viewer-close" id="viewer-close" aria-label="閉じる" title="閉じる">✕</button>
+    </div>
+    <p class="viewer-meta" id="viewer-sub"></p>
+    <div class="viewer-shot" id="viewer-shot"></div>
+    <div class="viewer-actions">
+      <button type="button" class="viewer-nav" id="viewer-reload">🔄 今すぐ更新</button>
+      <button type="button" class="viewer-nav" id="viewer-prev">← 前</button>
+      <button type="button" class="viewer-nav" id="viewer-next">次 →</button>
+      <a id="viewer-page" href="https://511ia.org/" target="_blank" rel="noopener">🔗 公式ページ</a>
+    </div>
+    <p class="viewer-meta">写真は約30秒ごとに自動で撮り直します。時刻は現地（アメリカ中部時間）です。</p>
+  </div>
+</div>
+
+<footer>
+  <p>
+    カメラのデータと映像の出典：<a href="https://data.iowadot.gov/" target="_blank" rel="noopener">Iowa Department of Transportation - Office of Traffic Operations</a>（CC BY 4.0）／
+    このページはのんラボが加工して作成しています。データは毎週火曜に自動で見直します。
+  </p>
+  <p><a href="./">🚗 交通・ライブカメラ（日本版）</a>｜<a href="../">🏠 のんラボの入口ページ</a></p>
+</footer>
+
+<script id="livecam-world-data" type="application/json">
+{"u":"2026-08-16","n":["RA35TOP - Center","D3 - IA 60 @ IA 9 (54)","RWIS - IA 9 MM 43 @ Sibley","RA35NB212 - Entrance","RWIS - IA 9 MM 91 @ Estherville","RWIS - I-35 MM 211 @ Worth County/Hanlontown","R83: Leland","RWIS - IA 9 MM 222 @ Saratoga","D2 - IA Ferry Queue @ Lansing (11)","D2 - IA Ferry Landing @ Lansing (10)","D2 - WI Ferry Landing @ Lansing (09)","D2 - N Front St @ Lansing Bridge (East End)","D2 - N Front St @ Lansing Bridge (West End)","D2 - N Front St @ Lansing Bridge (Middle)","RWIS - IA 9 MM 265 @ Decorah","3AX - US 71 @ MM 209 (IWZ 5776S)","3AX - US 71 @ MM 209 (IWZ 5776N)","WWD - IA 60 @ US 18 in Sheldon (57)","3AX - US 71 @ MM 208 (IWZ 5790S)","3AX - US 71 @ MM 208 (IWZ 5790N)","D2 - I-35 @ MM 196.3 near Clear Lake (D2TV01)","RA35SB196 - Entrance","RA35NB196 - Entrance","D2 - I-35 @ MM 194.2 (US 18 Clear Lake)","2BZ - IA 122 @ S Monroe Ave (IWZ 5785E)","2BZ - IA 122 @ S Monroe Ave (IWZ 5785W)","2BZ - IA 122 @ S Pierce Ave (IWZ 5779W)","2BZ - IA 122 @ S Pierce Ave (IWZ 5779E)","RWIS - US 18 MM 85 @ Spencer","D2 - US 18 @ MM 210 near Floyd (D2TV6)","D2 - US 18 @ MM 190.1 (Thrush Ave)","D2 - US 18 @ Thrush Ave (D2TV74F)","RWIS - US 18 MM 190 @ Mason City US18","D2 - US 18 @ MM 186.3 near Mason City (03)","WWD - US 63 North side of New Hampton (52)","RWIS - US 18 MM 122 @ Algona","WWD - IA 60 @ L22 in Hospers (42)","RWIS - US 18 MM 224 @ New Hampton","RWIS - I-35 MM 187 @ Mason City","RWIS - IA 10 MM 24 @ Alton","RWIS - US 18 MM 257 @ Hawkeye","2CH - I-35 @ MM 178.9 (IWZ 3152)","RWIS - US 218 MM 211 @ Plainfield","R93: Humboldt","R92: Cleghorn","RWIS - IA 3 MM 17 @ Akron","RWIS - US 71 MM 177 @ Storm Lake","D2 - I-35 @ MM 160 near Dows (D2TV08)","RA35DOWS - Car Parking","3BD - IA 7 @ Villa Rd (IWZ 3717)","WWD - IA 7 @ Villa Rd.(TT03)","WWD - US 218 @ Barrick Rd in Janesville E (45)","RWIS - I-35 MM 153 @ Williams","D1 - I-35 @ MM 151.5 (08)","WL - US 218 @ MM 181.6 (Sergeant Rd)","WL - US 218 @ MM 180.7 (W 1st St)","SC - I-29 @ MM 151.8 (Big Sioux River)","SC - I-29 @ MM 148.6 (Bluff)","SC - I-29 @ MM 151.4 (Riverside Blvd)","SC - I-29 @ MM 150.5 (S Riverside Blvd)","SC - I-29 @ MM 149.2 (Hamilton Blvd)","WL - US 218 @ MM 180.3 (W 6th St)","SC - I-29 @ MM 150.1 (S of Riverside Blvd)","SC - I-29 @ MM 148.6 (Wesley Pkwy)","WWD - I-29 @ MM 148.6 (Wesley Pkwy)","RWIS - US 20 MM 316 @ Dubuque","SC - Gordon Dr @ Court St (42)","SC - Gordon Dr @ Virginia St (20)","SC - Gordon Dr @ Nebraska (19)","SC - I-29 @ MM 148.3 (Pavillion)","SC - Nebraska St @ Gordon Dr (24)","SC - S Lewis @ Gordon Dr (25)","WL - US 218 @ MM 179.9 (W 11th St)","SC - Larsen Park Rd @ Virginia St (29)","SC - I-29 @ MM 147.7 (I-29 NB Exit to Gordon Dr)","SC - I-29 @ MM 147.3 (Floyd River)","WL - US 218 @ MM 179.5 (Williston Rd)","3BC - US 20 @ IA 140 (IWZ 3365)","WWD - US 20 @ IA 140 (TT05)","RWIS - US 20 MM 18 @ Moville","3BC - US 20 @ MM 20.9 (IWZ 3359)","3BC - US 20 @ MM 19.1 (IWZ 3361W)","3BC - US 20 @ MM 19.1 (IWZ 3361E)","WL - US 218 @ MM 179.2 (Hawthorn Ave)","SC - I-29 @ MM 146.8","D3 - US 20 @ US 59 Holstein (D3TV01)","D3 - US 20 @ US 59 Holstein - Quad (D3TV01Q)","SC - US 20 @ MM 4.5 (Gordon Dr)","3BC - US 20 @ MM 15 (IWZ 3133)","WL - I-380 @ MM 72.8 (N of San Marnan Dr)","RWIS - US 20 MM 71.4 @ Early","WWD - US 20 @ X49 near Dyersville (62)","SC - I-29 @ MM 146.3 (RR Bridge)","RWIS - US 20 MM 277 @ Manchester","SC - S Lewis @ Golf Course (23)","WL - I-380 @ MM 72.4 (San Marnan Dr)","2CF - US 20 @ MM 222.7 (IWZ 3360)","SC - S Lewis @ Glenn (22)","2CF - US 20 @ MM 225 (IWZ 3153W)","2CF - US 20 @ MM 225 (IWZ 3153E)","2CF - US 20 @ MM 226.3 (IWZ 3154W)","2CF - US 20 @ MM 226.3 (IWZ 3154E)","SC - I-29 @ MM 145.7 (S of RR Bridge)","WL - I-380 @ MM 68.8 (Evansdale Water Tower - W)","WL - I-380 @ MM 71.8 (N of US 20)","WL - I-380 @ MM 68.7 (Evansdale Water Tower - E)","WL - I-380 @ MM 69.7 (River Rd)","SC - US 20 @ MM 3.4 (Morningside Ave)","SC - I-29 @ MM 145.5","WL - I-380 @ MM 70.7 (River Forest Rd)","WL - US 20 @ MM 207.7 (US 63)","WL - I-380 @ MM 68.4 (Evansdale Dr)","RWIS - I-380 MM 71 @ Waterloo","WL - I-380 @ MM 71.5 (US 20 W)","WL - I-380 @ MM 71.3 (Cedar River)","WL - US 20 @ MM 210.7 (Hawkeye Rd)","WL - US 20 @ MM 209.2 (Ansborough Ave)","WL - US 218 @ MM 177.2 (SB Ramp to I-380 SB)","2CF - US 20 @ MM 228.3 (IWZ 3138)","SC - US 20 @ MM 2.9 (Sunnybrook Dr)","RWIS - US 20 MM 181 @ Steamboat Rock","SC - I-29 @ MM 145 (N of US 20/75)","WL - US 20 @ MM 211.2 (Hammond Ave)","D1 - US 20 @ MM 124 (124)","D1 - US 20 @ MM 124.6 (Bus US 20)","WL - US 20 @ MM 220.4 (S Canfield Rd)","WL - I-380 @ MM 67.4 (Gilbertville Rd)","RWIS - US 20 MM 97 @ Rockwell City","WL - I-380 @ MM 64.9 (US 20 East 2)","D1 - US 20 @ MM 126.20 - Quad","D1 - US 20 @ MM 126.20","WL - I-380 @ MM 65.3 (US 20 East 1)","D1 - US 20 @ MM 126.2","WWD - US 20 @ MM 119.6 (Poplar Ave)","D1 - I-35 @ MM 142.5 (US 20)","WL - I-380 @ MM 66.5 (S Raymond Rd)","SC - I-29 @ MM 144.6 (SB exit to I-129/US 20/75)","SC - I-29 @ MM 144.5 (US 20/75)","D1 - US 20 @ MM 121 (121)","D1 - US 20 @ MM 121.5 (US 169)","SC - US 20 @ MM 2.2 (Christy Rd)","SC - US 20 @ MM 1.7 (Lakeport St)","SC - S Lewis @ Singing Hills Blvd (21)","SC - I-29 @ MM 143.7 (Singing Hills Blvd)","WWD - I-29 @ MM 143.7 (Singing Hills Blvd E)","WL - I-380 @ MM 63.5","WL - I-380 @ MM 62.2 (Poyner Rd)","D1 - I-35 @ MM 139.9 (S of US 20)","R84: Williams DMS","SC - I-29 @ MM 141.8 (8th St - Sergeant Bluff)","SC - I-29 @ MM 141.3 (1st St - Sergeant Bluff)","3BA - I-29 @ MM 139.7 (IWZ 3135)","SC - I-29 @ MM 139.3 (Sergeant Bluff Rest Area)","D1 - I-35 @ MM 136 (300th St)","3BA - I-29 @ MM 137.7 (IWZ 3158)","RWIS - US 59 MM 129 @ Ida Grove","D1 - I-35 @ MM 132.9 (IA 175 Ellsworth)","WWD - I-29 @ K25 near Salix (56)","RWIS - I-29 MM 124 @ Sloan","6FA - I-380 @ MM 34.1 (IWZ 3711N)","6FA - I-380 @ MM 34.1 (IWZ 3711S)","Rest Area: I-35 NB MM 120 near Story City","6FA - I-380 @ MM 31.5 (IWZ 3712N)","6FA - I-380 @ MM 31.5 (IWZ 3712S)","D6 - US 151 @ MM 55.3 near Anamosa ICWS (02)","RA35SB119 - Car Parking","CR - I-380 @ MM 28.8 (County Home Rd)","RWIS - US 30 MM 80 @ Carroll","AM - I-35 @ MM 116.6 (E 190th St)","RWIS - US 151 MM 49 @ Anamosa","RWIS - US 61 MM 159 @ Maquoketa","CR - I-380 @ MM 26.5 (Tower Terrace)-Q","CR - I-380 @ MM 26.5 (Tower Terrace)","WWD - I-380 @ MM 26.5 (Tower Terrace Rd)","RWIS - IA 4 MM 25 @ Jefferson","D6 - US 151 @ MM 43.5 near Springville W ICWS (03)","D6 - US 151 @ MM 43.5 near Springville W ICWS QUAD (03Q)","6DW - I-380 @ Boyson Rd (IWZ 3197)","3AZ - I-29 @ MM 113.2 (IWZ 3114S)","3AZ - I-29 @ MM 113.2 (IWZ 3114N)","CR - IA 13 @ MM 8.2 (7th Ave)","BN - US 30 @ MM 134 (Story St)-Q","CR - I-380 @ MM 24.4 (Blairs Ferry Rd NE)","BN - US 30 @ MM 134 (Story St)","WWD - US 30 @ MM 135.6 (Quill Ave)","BN - US 30 @ MM 135.5 (Quill Ave)","BN - US 30 @ MM 137.3 (IA 17)","AM - I-35 @ MM 113.6 (E 13th St)","CR - IA 13 @ MM 8.2 (Linn Aire Dr)","CR - IA 100 @ MM 6.9 (W of Ushers Ferry Rd)","CR - IA 100 @ MM 7.9 (Edgewood Rd NE)","CR - IA 100 @ MM 6.1 (E of Cedar River)","WWD - IA 100 @ MM 7.9 (Edgewood Rd NE W)","WWD - IA 100 @ Edgewood EB Ramp (75)","WWD - IA 100 @ MM 7.9 (Edgewood Rd NE Intersection)","CR - Collins Rd @ Rockwell Dr NE (38)","CR - Collins Rd @ F Ave NE (39)","CR - I-380 @ MM 23.9 (Collins Rd - N)","CR - Collins Rd @ Council St NE (37)","WWD - IA 100 @ I-380 (77)","CR - I-380 @ MM 23.9 (Collins Rd - S)","CR - Collins Rd @ C Ave NE (40)","CR - IA 100 @ MM 6.5","CR - IA 100 @ MM 8.6 (W of I-380)","BN - US 30 @ MM 138.7","WWD - I-29 @ IA 175 in Onawa (54)","CR - IA 100 @ MM 5.6 (W of Cedar River)","CR - Collins Rd @ 1st Ave E (42)","BN - US 30 @ MM 139.6 (U Ave)","AM - I-35 @ MM 112.8 (E Lincoln Way)","AM - US 30 @ MM 142.3 (W Lincoln Way)","CR - I-380 @ MM 23.4 (42nd St NE)","CR - IA 100 @ MM 16.1 (IA 13)","CR - IA 100 @ MM 12.5 (Tama St)","3AZ - I-29 @ MM 111.5 (IWZ 3131S)","3AZ - I-29 @ MM 111.5 (IWZ 3131N)","CR - IA 100 @ MM 13.1 (Menards Ln)","CR - IA 100 @ MM 13.6 (East Post Rd)","CR - IA 100 @ MM 14.1 (S 22nd St)","AM - US 30 @ MM 143.8 (500th Ave)","CR - IA 100 @ MM 4.1 (Covington Rd)","AM - I-35 @ MM 112 (N of US 30)","CR - I-380 @ MM 22.7 (32nd St NE)","WWD - US 30 @ IA 330 N (46)","NV - US 30 @ MM 154.1 (600th Ave)","WWD - US 30 @ IA 330 S (47)","NV - US 30 @ MM 152.1 (580th Ave)","WWD - US 30 @ MM 152.8 (580th Ave)","NV - US 30 @ MM 157.6 (19th St)","AM - US 30 @ MM 151.1 (E of I-35)","WWD - US 30 @ MM 157.6 (S 19th St)","AM - US 30 @ MM 144.9 (S Dakota Ave)","WWD - US 30 @ MM 159.1 (Co Rd S27)","WWD - US 30 @ S27 near Nevada (49)","AM - I-35 @ MM 111.7 (US 30)","CR - I-380 @ MM 22.3 (Coldstream Ave NE)","WWD - US 30 @ MM 149.7 (S Dayton Ave)","AM - US 30 @ MM 149.7 (S Dayton Ave)","NV - US 30 @ MM 156 (SW 4th St)","1FG - US 30 @ MM 149.9 (IWZ 3718)","NV - US 30 @ MM 157.1 (S 11th St)","WWD - US 30 @ MM 148.5 (US 69)","AM - US 30 @ MM 148.5 (S Duff Ave)","AM - I-35 @ MM 111.5 (US 30W Flyover)","WWD - US 30 @ US 59 (23)","AM - US 30 @ MM 146.7 (W of University Blvd)","WWD - US 30 @ MM 147 (S University Blvd)","AM - US 30 @ MM 147 (University Blvd)","CR - IA 100 @ MM 3.1 (Ellis Rd)","CR - I-380 @ MM 21.6 (H Ave NE)","CR - IA 13 @ MM 8.2 (Cottage Grove Pkwy)","CR - I-380 @ MM 20.6 (8th St NE)","CR - I-380 @ MM 20.4 (4th St SE)","WWD - I-380 @ MM 20.3 (2nd St NE)","WWD - I-380 @ 1st St E of River (08)","AM - I-35 @ MM 109.8 (260th St)","CR - IA 100 @ MM 1.6 (E Ave NW )","RWIS - I-380 MM 20 @ Cedar Rapids I-380","CR - IA 13 @ MM 8.2 (Mt Vernon Rd)","CR - I-380 @ MM 19.8 (1st Ave SW)","WWD - I-380 @ MM 19.8 (1st Ave)","AM - I-35 @ MM 109.2","CR - I-380 @ MM 19.1 (Diagonal Dr SW)","RWIS - IA 21 MM 62 @ Tama","WWD - US 30 @ 33rd Ave (79)","RWIS - US 218 S MM 135 @ Van Horne","D6 - US 30 @ US 218 near Van Horne (78)","WWD - US 30 @ US 218 (65)","CR - US 30 @ MM 243.7 (16th Ave SW)","WWD - US 30 @ IA 100 (76)","CR - US 30 @ MM 243.7 (16th Ave SW)-Q","CR - IA 13 @ MM 8.2 (Bertram Rd)","CR - US 30 @ MM 244.2 (80th St SW)","CR - US 30 @ MM 244.2 (80th St SW)-Q","CR - I-380 @ MM 18.3 (Wilson Ave SW)","CR - I-380 @ MM 18.3 (Wilson Ave SW)-Q","WWD - I-380 @ MM 18.3 (Wilson Ave)","AM - I-35 @ MM 107.7","CR - US 30 @ MM 245.3 (Stoney Point Rd)","CR - I-380 @ MM 17.6 (33rd Ave SW)","CR - US 30 @ MM 246.1 (Williams Blvd SW)","WWD - I-380 @ MM 17.5 (33rd Ave)","CR - US 30 @ MM 247.5 (Edgewood Rd SW)","CR - US 30 @ MM 248 (21st St SW)","CR - I-380 @ MM 16.5 (US 30E Flyover)","RWIS - US 30 MM 252 @ Cedar Rapids US 30","CR - US 30 @ MM 249.2 (W of 6th St SW)","WWD - US 30 @ MM 249.7 (6th St SW)","WWD - US 30 @ 6th St SW N (09)","CR - I-380 @ MM 16.3 (US 30)","CR - US 30 @ MM 253.4 (Honey Grove Rd)","CR - US 30 @ MM 256.6 (IA 13)","WWD - US 30 @ MM 250.7 (Kirkwood Blvd SW - N)","CR - US 30 @ MM 250.4 (J St SW)","CR - US 30 @ MM 250.7 (Kirkwood Blvd SW)","CR - US 30 @ MM 251.7 (C St SW)","CR - US 30 @ MM 252.7 (Ivanhoe Rd SW)","WWD - US 30 @ MM 250.7 (Kirkwood Blvd SW - S)","WWD - US 30 @ MM 251.7 (C St SW)","WWD - US 30 @ MM 250.7 (C St SW)","CR - US 30 @ MM 255.2 (E of Jappa Rd)","AM - I-35 @ MM 105.6","RWIS - US 59 MM 95 @ Denison","RWIS - US 30 W MM 266 @ Mount Vernon","CR - I-380 @ MM 14.9 (76th Ave)","AM - I-35 @ MM 104.3 (E 1st St - Huxley)","6DX - I-380 @ Wright Brothers Blvd (IWZ 3701)","WWD - I-380 S @ Wright Bros Blvd W (43)","AM - I-35 @ MM 102.9 (IA 210)","6DX - I-380 @ MM 13 (IWZ 3198)","CR - I-380 @ MM 12.3 (NB Rest Area)","RA380NB11 - Center","RA380SB11 - Entry","Rest Area: I-380 SB MM 11 near Cedar Rapids - Center","D6 - IA 136 @ MM 0.3 (Mississippi River - IA)","D6 - IA 136 @ MM 0 (Mississippi River - IL)","6DX - I-380 @ 120th St (IWZ 3113)","IC - I-380 @ MM 10.9 (Swisher)","1DH - I-35 @ MM 100.3 (IWZ 3364)","D6 - US 30 @ MM 330.9 (Mississippi River - IL)","D6 - US 30 @ MM 330.5 (S 3rd St)","Rest Area: I-35 SB MM 98 near Elkhart","Rest Area: I-35 NB MM 98 near Elkhart","RWIS - US 30 MM 311 @ De Witt","DM - I-35 @ MM 98.8 (NE 142nd Ave)","IC - I-380 @ MM 8.7 (Iowa River)","WWD - US 65 @ IA 330 near Mingo (48)","D4 - I-29 @ Little Sioux River (76)","RWIS - I 29 MM 96 @ Little Sioux","IC - I-380 @ MM 7.4 (Hwy 965)","DM - I-35 @ MM 96.8 (NE 126th Ave Elkhart)","IC - I-380 @ MM 5.6 (Swan Lake)","DM - IA 415 @ MM 13.7 (Mile Long Bridge)","DM - I-35 @ MM 94.7 (NE 36th St)","6DT - I-380 @ W Penn St (IWZ 3141)","DM - I-35 @ MM 93.9 (S of NE 36th St)","DM - IA 141 @ MM 148.4 (NW 121st St - ICWS)-Q","DM - IA 141 @ MM 148.4 (NW 121st St - ICWS)","WWD - IA 141 @ MM 149","DM - IA 141 @ MM 149 (IA 415)","IC - I-380 @ MM 3.1","DM - I-35 @ MM 92.6 (1st St - Ankeny)","WWD - I-35 @ MM 92.6 (1st St - Ankeny)","1FH - US 69 @ MM 95 (IWZ 5786)","1FH - US 69 @ MM 94.7 (IWZ 5788)","IC - I-380 @ MM 2 (Forevergreen Rd)","IC - I-380 @ MM 1 (Oak Hill School)","DM - I-35 @ MM 90.6 (Oralabor Rd)","I-80 @ MM 191.3","I-80 @ MM 199.4","RA80WB208 - Center","RA80EB208-Entry","RA80WB208-Parking","IC - I-380 @ MM 0.2 (I-80 EB Ramp)","RA80WB180 - Center","I-80 @ MM 207.4","I-80 @ MM 187.3","I-80 @ MM 204.4","I-80 @ MM 182.3","I-80 @ MM 196.8","RWIS - I-80 MM 205 @ Victor","I-80 @ MM 203.4","I-80 @ MM 205.4","I-80 @ MM 198.1","I-80 @ MM 211.5","I-80 @ MM 189.3","I-80 @ MM 183.8","NW - I-80 @ MM 177.8 (W of Co Rd T38)","I-80 @ MM 201.4","I-80 @ MM 185.2","IC - I-80 @ MM 238.8 (I-380 NB Flyover)","R82: Grinnell Mini","NW - I-80 @ MM 178.8 (Co Rd T38)","I-80 @ MM 195.8","RA80WB237 - Center","I-80 @ MM 180.2","I-80 @ MM 193.8","IC - I-80 @ MM 239.7 (US 6)","IC - I-80 @ MM 236 (Half Moon Rd)","RA80EB180 - Center","I-80 @ MM 213.5","IC - I-380 @ MM 0.2","RA80EB237 - Center","IC - I-80 @ MM 240.7 (E of Coral Ridge Ave)","IC - I-80 @ MM 238.3 (Jasper Ave)","IC - I-80 @ MM 240.2 (Coral Ridge Ave)","IC - I-80 @ MM 237.3 (Ireland Ave NW)","I-80 @ MM 214.7","IC - I-80 @ MM 238.9 (EB Exit to I-380/US218 split)","IC - US 218 @ MM 96.9 (NB ramp to I-80 W)","IC - I-80 @ MM 232.7 (Eagle Ave NW)","I-80 @ MM 154.9","I-80 @ MM 158.7","I-80 @ MM 216.5","IC - I-80 @ MM 241.7 (12th Ave)","RWIS - I-80 MM 155 @ Colfax","NW - I-80 @ MM 174.5","IC - I-80 @ MM 230 (Black Hawk Ave NW)","DM - IA 141 @ MM 152.5 (E 1st St)","IC - I-80 @ MM 244.6 (Prairie du Chien)","I-80 @ MM 153.9","I-80 @ MM 222.8","RWIS - IA 149 MM 66 @ Williamsburg","I-80 @ MM 224.8","I-80 @ MM 225.8","I-80 @ MM 219.5","IC - I-80 @ MM 229.2","IC - I-80 @ MM 227.6 (Y Ave)","IC - US 218 @ MM 96.6 (S of I-80)","IC - I-80 @ MM 246 (IA 1)","I-80 @ MM 218.1","I-80 @ MM 221.6","IC - I-80 @ 1st Ave (DMTT05)","IC - I-80 @ MM 243.9 (Dubuque St)","IC - I-80 @ MM 242.6 (1st Ave)","WWD - I-80 @ MM 242.6 (1st Ave)","IC - I-80 @ MM 246.9","NW - I-80 @ MM 164 (IA 14)","NW - I-80 @ MM 165 (W 4th St)","NW - I-80 @ MM 167 (Speedway)","NW - I-80 @ MM 163.8 (W of US 6)","NW - I-80 @ MM 166 (E 12th St)","I-80 @ MM 160.9","NW - I-80 @ MM 168 (Speedway Dr)","NW - I-80 @ MM 168 (Speedway Dr)-Q","Weigh Station - I-80 WB MM 151 near Mitchellville","NW - I-80 @ MM 173 (Co Rd T22)","I-80 @ MM 152.1","NW - I-80 @ MM 162 (52nd St)","NW - I-80 @ MM 169.7","I-80 @ MM 150","RA80WB148 - Center","NW - I-80 @ MM 162.8 (Newton DMS)","I-80 @ MM 148.5","NW - I-80 @ MM 171 (E 84th St)","RA80EB148 - Center","DM - I-35 @ MM 89 (Corporate Woods Dr)","I-80 @ MM 146.5","DM - IA 141 @ MM 153.6 (SE 19th St)","IC - I-80 @ MM 249 (Herbert Hoover Hwy)","DM - I-80 @ MM 144.5 (NE 80th St - Altoona)","WWD - I-80 @ MM 249 (Herbert Hoover Hwy)","DM - I-35 @ MM 88.3 (Corporate Woods DMS)","IC - I-80 @ MM 252.9 (Lower West Branch Road)","IC - I-80 @ MM 250.1 (Wapsi Ave)","DM - I-80 @ MM 143.4 (1st Ave - Altoona)","IC - US 218 @ MM 94.7 (Melrose DMS)","IC - I-80 @ MM 254.2 (S Downey Dr)","I-80 @ MM 256.2","DM - I-80 @ MM 142.9 (E of US 65)","DM - I-80 @ MM 141.8 (Hubbell Ave - N of I-80)","DM - I-80 @ MM 141.3 (34th Ave)","DM - I-80 @ MM 141.7 (Hubbell Ave - S of I-80)","WWD - I-80 @ MM 141.7 (Hubbell Ave - S of I-80)","DM - I-80 @ MM 140.4 (US 65)","DM - I-35 @ MM 87.5 (NE 54th Ave - East Mix)","DM - I-80 @ MM 140.0 (Berwick DMS)","DM - IA 141 @ MM 154.7 (SE 37th St)","IC - US 218 @ MM 93.8 (Melrose)","DM - I-35/80 @ MM 137.2 (EB Exit to I-35 NB - East Mix)","DM - I-80 @ MM 138.7","DM - I-35 @ MM 87.2 (I-35 SB Exits to I-80 Split - East Mix)","DM - I-80 @ MM 137.8 (WB Exit to I-35 NB - East Mix)","DM - I-35/80 @ MM 130.2 (72nd St)","DM - I-235 @ MM 14.3 (EB Exit to I-80 WB - East Mix)","DM - I-35/80 @ MM 129.1 (86th St)","DM - I-35/80 @ MM 131.1 (Merle Hay Rd)","DM - I-35/80 @ MM 128.2 (100th St)","WWD - I-80 @ MM 131.2 (Merle Hay Rd)","DM - I-35/80 @ MM 132 (NW Beaver Dr)","DM - I-35/80 @ MM 137.3 (EB Exit to I-35 NB Split - East Mix)","DM - I-235 @ MM 14.2 (I-80 East Mix)","DM - I-35 @ MM 86.8 (SB Exit to I-80 WB - East Mix)","DM - I-35/80 @ MM 136.9","DM - I-35/80 @ MM 137.2 (22nd St - East Mix)","DM - I-35/80 @ MM 133.5 (Morningstar Dr)","DM - I-35/80 @ MM 136.2 (E 14th)","DM - I-35/80 @ MM 135.2 (2nd Ave)","DM - I-35/80 @ MM 136.4","WWD - I-80 @ MM 136.2 (E 14th St)","DM - I-35/80 @ MM 127.2 (IA 141W Flyover)","RA80WB268 - Center","R44: I-80 EB","DM - I-35/80 @ MM 126.8 (Meredith Dr)","DM - US 65 @ MM 81.6 (8th St)","RA80EB268 - Center","WWD - US 65 @ MM 81.5 (8th St SW)","RA80WB270 - Center","DM - I-235 @ MM 13.1 (Broadway DMS)","RA80EB270 - Center","DM - I-235 @ MM 13.1 ( E of Euclid Ave)","IC - US 218 @ MM 91.5 (IA 1)","DM - I-35/80 @ MM 125.8 (Douglas Ave)","DM - I-235 @ MM 12.6 (Euclid Ave)","DM - I-235 @ MM 12.3 (Hull Ave)","1EA - I-35 @ MM 125 (IWZ 3125)","DM - I-235 @ MM 11.7 (Guthrie Ave)","DM - I-235 @ MM 11.3 (E of Easton Blvd)","DM - I-35/80 @ MM 124.2 (Hickman Rd)","QC - I-80 @ MM 287.1 (Walcott DMS)","QC - I-80 @ MM 289.1 (Co Rd Y48)","DM - I-235 @ MM 10.8 (E 21st St)","WWD - I-235 @ E 21St (68)","WWD - I-235 @ MM 10.8","QC - I-80 @ MM 289.5 (I-280)","RWIS - I-280 MM 0 @ Davenport","R91: Prairie City","DM - I-35/80 @ MM 123.8 (University Ave)","QC - I-80 @ MM 292.6 (Northwest Blvd)","DM - IA 163 @ MM 4.3 (Hickory Blvd)","DM - US 65 @ MM 78.2 (University Ave)","6EO - I-80 @ MM 301.5 (IWZ 3117W)","6EO - I-80 @ MM 301.5 (IWZ 3117E)","DM - I-235 @ MM 10.1 (EB Exit to University Ave)","RA80WB300 - Center","QC - I-80 @ MM 295.1 (Brady St)-Q","6E0 - I-80 @ MM 300.25 (IWZ 3118)","QC - I-74 @ MM 0 (I-80)","DM - I-235 @ MM 7.4 (MLK Pkwy)","DM - I-235 @ MM 7.8 (Keo Way)","DM - I-235 @ MM 7.7 (E of Keo Way)","DM - I-235 @ MM 9.8 (E 14th St)","RA80EB300 - Center","WWD - I-235 @ MM 9.8 (E 14th St)","QC - I-80 @ MM 295.1 (Brady St)","WWD - I-235 @ 2nd Ave (67)","DM - I-235 @ MM 8.3 (7th Ave)","WWD - I-235 @ MM 8.7","DM - I-235 @ MM 8.7 (2nd Ave)","DM - I-235 @ MM 6.9 (Cottage Grove Ave)","DM - I-235 @ MM 8.4 (5th Ave)","DM - I-35/80 @ MM 123.5 (Westown Pkwy)","DM - I-235 @ MM 9.6 (E 12th St)","DM - I-235 @ MM 9.2 (Penn Ave)","DM - I-235 @ MM 3.1 (17th St)","DM - I-235 @ MM 6.3 (35th St)","DM - I-235 @ MM 3.6 (73rd St)","DM - I-235 @ MM 6.7 (28th St)","QC - I-80 @ MM 305.4 (Le Claire)","DM - I-235 @ MM 2.6 (22nd St)","WWD - I-235 @ MM 2.6 (22nd St)","DM - I-235 @ MM 4.3 (63rd St)","DM - I-80 @ MM 122.2 (60th St)","DM - I-235 @ MM 4.8 (56th St)","DM - I-80 @ MM 123.3 (EB Exit to N I-35 - West Mix)","DM - I-235 @ MM 1.8 (Valley West Dr)","DM - I-80 @ MM 122.8 (West Mix)-Q","DM - I-80 @ MM 122.8 (West Mix)","DM - I-235 @ MM 2.2 (28th St)","DM - I-80 @ MM 121.2 (Jordan Creek Pkwy)","DM - I-235 @ MM 1.2 (42nd St)","DM - I-235 @ MM 5.4 (Polk Blvd)","QC - I-280 @ MM 1.1 (Kimberly Rd)","WWD - I-280 @ US 6 in Davenport W (22)","WWD - I-280 @ MM 1.1 (Kimberly Rd)","DM - I-235 @ MM 5.8 (42nd St)","DM - I-80 @ MM 120.4 (Ashworth Rd)","QC - I-80 @ MM 306 (S Cody Rd/US 67)","DM - I-35 @ MM 72.1 (Ashworth Ave)","I-80 @ MM 119.7","DM - I-35 @ MM 71.5 (EP True Pkwy)","QC - I-74 @ MM 1.5 (53rd St)","DM - US 65 @ MM 76.1 (Vandalia Rd)","QC - I-80 @ MM 306.4 (Visitor Center - IL)","DM - I-80 @ MM 118.4 (Grand Prairie Pkwy)","WWD - I-80 @ MM 118.4 (Grand Prairie Pkwy N)","WWD - I-80 @ MM 118.4 (Grand Prairie Pkwy S)","I-80 @ MM 117.8","I-80 @ MM 116.9","DM - I-35 @ MM 70.4 (Mills Civic Pkwy)","WWD - I-35 @ MM 70.4 (Mills Civic Pkwy)","I-80 @ MM 115.2","Weigh Station: I-80 EB MM 115 near De Soto","QC - I-74 @ MM 2.9 (Spruce Hills)","I-80 @ MM 114.2","RWIS - I-29 MM 76 @ Missouri Valley","I-80 @ MM 113","1FA - US 65 @ MM 75.6 (IWZ 3168)","I-80 @ MM 111.9","4CF - I-80 @ MM 111.4 (IWZ 3172)","RWIS - I-80 MM 110 @ De Soto","DM - I-35 @ MM 69.2 (Grand Ave)","WWD - I-35 @ MM 69.2 (Grand Ave)","QC - I-74 @ MM 3.9 (Middle Rd)","I-80 @ MM 109.9","I-80 @ MM 108.6","QC - I-74 @ MM 4.5 (Last Iowa Exit)","QC - I-74 @ MM 4.8 (N of US 67/Grant St)","QC - I-74 @ MM 4.9 (Grant St)","DM - US 65 @ MM 72.7 (Army Post Rd)","QC - I-74 @ MM 5.1 (N End of WB Bridge)","QC - I-74 @ MM 5.2 (N End of EB Bridge)","DM - I-35 @ MM 67.9 (IA 5)","DM - IA 5 @ MM 100.7 (SW Connector)","DM - I-35 @ MM 67.7 (Maffitt Lake Rd)","I-80 @ MM 106.2","QC - I-74 @ MM 5.4 (EB Miss River Perch)","QC - US 67 @ MM 0.2 (Centennial Bridge - IA)","QC - I-74 @ MM 5.4 (WB Mississippi River)","I-80 @ MM 101.1","I-80 @ MM 103.8","QC - I-74 @ MM 5.4 (EB Sign Truss)","I-80 @ MM 105.1","QC - I-74 @ MM 5.4 (EB Mississippi River)","QC - I-74 @ MM 5.4 (S End of EB Bridge)","QC - I-74 @ MM 5.4 (S End of WB Bridge)","I-80 @ MM 99.9","DM - IA 5 @ MM 98.5 (IA 28)","CB - I-29 @ MM 73.2","QC - US 67 @ MM 0 (Centennial Bridge - IL)","DM - US 65 @ MM 71.6 (IA 5)","I-80 @ MM 99.3","DM - IA 5 @ MM 96.5 (Fleur Dr)","DM - IA 5 @ MM 92.6 (US 65/69)","DM - I-35 @ MM 66.6 (Adams St)","I-80 @ MM 31","RA80WB32 - Center","I-80 @ MM 42.1","I-80 @ MM 32.6","I-80 @ MM 49.5","I-80 @ MM 34.1","I-80 @ MM 48.5","RA80EB32 - Center","RWIS - I-80 MM 43 @ Avoca","I-80 @ MM 40.1","I-80 @ MM 36.6","I-80 @ MM 52.6","I-80 @ MM 44.5","I-80 @ MM 64.4","CB - I-80 @ MM 27.3 (I-880 Interchange)","I-80 @ MM 38","I-80 @ MM 70.1","RA80WB80 - Center","I-80 @ MM 73.7","I-80 @ MM 80.1","I-80 @ MM 57.4","I-80 @ MM 46","WWD - I-80 @ MM 60.4 (US 71)","I-80 @ MM 62.1","I-80 @ MM 51.4","RA80EB44 - Center","I-80 @ MM 66.1","I-80 @ MM 54.4","I-80 @ MM 83.9","RWIS - I-80 MM 72 @ Adair","I-80 @ MM 71.7","RA80EB80 - Center","CB - I-80 @ MM 29.1 (Minden Interchange)","I-80 @ MM 69.1","I-80 @ MM 82.5","I-80 @ MM 90","I-80 @ MM 88","I-80 @ MM 86","CB - I-29 @ MM 71.7 (I-880 Interchange)","I-80 @ MM 97.9","I-80 @ MM 90.9","I-80 @ MM 95.4","D4 - I-80 @ MM 93.3 near Stuart (D4TV01)","I-80 @ MM 78.5","I-80 @ MM 97","I-80 @ MM 76.1","I-80 @ MM 75.1","I-80 @ MM 93","QC - I-280 @ MM 8.7 (Rockingham Rd)","I-80 @ MM 26.8","R87: Riverside","D5 - US 218 @ MM 80.9 near Riverside (D5TV01)","QC - I-280 @ MM 9.4","DM - I-35 @ MM 65 (Cumming Ave)","D1 - US 65 @ MM 67.3 (Scotch Ridge Rd - ICWS)","QC - I-280 @ MM 9.9 (Centennial Expwy - IL)","I-80 @ MM 24.8","I-80 @ MM 23","DM - I-35 @ MM 61.6 (Fillmore St)","I-80 @ MM 21.8","I-80 @ MM 20.1","RA80WB19 - Center","RA80EB19 - Center","I-80 @ MM 18.6","RWIS - IA 163 MM 45 @ Pella","WWD - IA 163 @ MM 44.90 (69)","DM - I-35 @ MM 58.5 (Hoover St)","WWD - I-80 @ MM 17.3 (Magnolia Rd near Underwood)","I-80 @ MM 17.4","DM - I-35 @ MM 56.8 (IA 92)","R86: Pleasantville","CB - I-29 @ MM 61.9 (I-680 Interchange)","I-80 @ MM 15.1","CB - I-680 @ MM 1.1 (130th St)","CB - I-680 @ MM 0 (31st St - NE)","CB - I-29 @ MM 61.2 (S of I-680 Interchange)","I-80 @ MM 13.4","RWIS - IA 92 MM 199 @ Sigourney","I-80 @ MM 11.9","DM - I-35 @ MM 54.0 (McKinley St)","CB - I-29 @ MM 59.7 (S of Hamilton Ln)","I-80 @ MM 10","DM - I-35 @ MM 52 (Co Rd G50)","R88: Ainsworth","CB - I-29 @ MM 57 (IA 192)","WWD - I-29 @ MM 56.9 (IA 192)","CB - I-80 @ MM 8.3 (US 6)","CB - I-29 @ MM 56 (25th St)","CB - I-29 @ MM 55.1","CB - I-29 @ MM 55","CB - I-80 @ MM 7.3 (Hubbard Rd)","CB - I-29 @ MM 54.1","CB - I-29 @ MM 53.9 (I-480E Flyover)","CB - I-480 @ MM 0.4 (W of 40th St)","CB - I-80 @ MM 6.6 (McPherson Ave)","CB - I-480 @ MM 0.1 (Missouri River Bridge)","CB - I-29 @ MM 53.6","CB - I-29 @ MM 53.4","CB - I-29 @ MM 53.2 (9th Ave DMS)","CB - I-29 @ MM 52.9 (RR Crossing)","CB - I-80 @ MM 5.5","CB - I-29 @ MM 52.7 (Nebraska Ave DMS)","CB - Nebraska Ave @ 35th St (70)","CB - I-29 @ MM 52.5 (Nebraska Ave)","CB - I-80 @ MM 5 (Madison Ave)","CB - I-29 @ MM 52.1 (West I-80 Interchange - N)","CB - I-80 @ MM 4.7 (Woodbury Ave)","CB - I-29 @ MM 52.1 (I-80 EB Ramp)","CB - I-80 @ MM 4.5 (E of Harry Langdon Blvd)","CB - I-80 @ MM 4.3 (Harry Langdon Blvd)","CB - I-29/80 WB @ MM 3.5 (East Interchange)","CB - I-29/80 @ MM 1.2 (W of S 24th St - N)","CB - I-29 @ MM 48.9 (I-80W Interchange)","CB - I-80 @ MM 0.7 (West I-29 Interchange)","CB - I-29/80 @ MM 1.7 (E of S 24th St - N)","CB - I-29/80 @ MM 2.5 (E of Indian Creek)","CB - I-29/80 @ MM 2.7 (S Expressway St WB Ent Ramp)","CB - I-29/80 @ MM 3.1 (S Expressway St)","CB - I-80 @ MM 1 (West I-29 Interchange - E)","CB - I-29/80 @ MM 49.2 (E of S Expressway)","CB - I-29/80 @ MM 2.3 (W of Indian Creek)","CB - I-29/80 @ MM 2.1 (E of S 24th St - S)","CB - I-29/80 @ MM 49.6 (S Expressway)","CB - I-80 @ MM 0.5 (West I-29 Interchange - W)","CB - I-29/80 @ MM 1.4 (W of S 24th St - S)","CB - I-29/80 @ MM 50.8 (S 24th St)","CB - I-29 @ MM 48.8 (E I-29 Interchange)","CB - I-80 @ MM 0.1 (Missouri River Bridge)","CB - I-29 @ MM 48.6 (I-29/80 Interchange)","CB - I-29 @ MM 48.4 (Exit 48A)","CB - I-29 @ MM 48.2 (N of US 275)","CB - US 275 @ MM 55.6 (11th St)","CB - I-29 @ MM 47.9 (US 275)","CB - US 275 @ MM 55 (South Expressway)","CB - I-29 @ MM 47.8 (S of US 275)","CB - US 275 @ MM 56.6 (24th St)","CB - US 275 @ MM 58.6 (E of Missouri River Bridge)","CB - I-29 @ MM 45.6 (Basswood Rd)","CB - I-29 @ MM 44.6 (192nd St)","CB - I-29 @ MM 42.9 (IA 370)","RWIS - IA 137 MM 13 @ Eddyville","R89: Olds","D5 - US 63 @ Eddyville Rd (04)","RA29NB37 - Center","RWIS - US 34 MM 87 @ Creston","R90: Pacific Junction","RWIS - US 34 MM 115 @ Osceola","WWD - I-35 @ US 34 in Osceola (55)","RWIS - IA 149 MM 0 @ Ottumwa","RA35SB33 - Car Parking","RA35NB33 - Entrance","RA35SB31 - Entrance","RWIS - US 34 MM 49 @ Red Oak","D5 - US 34 @ MM 246.75 near New London ICWS QUAD (02Q)","D5 - US 34 @ MM 246.75 near New London ICWS (02)","RWIS - US 218 MM 37 @ Mount Pleasant","RWIS - US 34 MM 263 @ Burlington","R96: Chariton River","5BP - US 63 @ MM 17 (IWZ 3103)","R95: Copper Creek NB","RWIS - IA 2 MM 164 @ Centerville","R81: Bloomfield","RWIS - IA 2 MM 119 @ Leon","R85: Mount Ayr","RWIS - I-29 MM 10 @ Sidney","RWIS - IA 2 MM 66 @ Bedford","RWIS - IA 2 MM 219 @ Cantril","RA35DEC01 - North","RA35DEC02 - Northeast","RA35SB07 - East","RA35NB07 - North","WWD - US 218 @ IA 2 near Donnellson (41)","R80: Argyle","R94: Copper Creek SB"],"m":["アイオワ州交通局（Iowa DOT）"],"a":["アメリカ・アイオワ州"],"p":["https://511ia.org/"],"b":["https://atmsqf.iowadot.gov/snapshots/Public/RestAreas/","https://atmsqf.iowadot.gov/snapshots/Public/RWIS/","https://atmsqf.iowadot.gov/snapshots/public/RWIS/","https://atmsqf.iowadot.gov/SNAPSHOTS/PUBLIC/Metro/","https://atmsqf.iowadot.gov/snapshots/Public/Rural/","https://atmsqf.iowadot.gov/snapshots/Public/WWD/"],"k":["expressway","road"],"c":[[4344541,-9335413,0,0,0,0,0,"RA35TOP-Center.jpg",0],[4343350,-9571510,1,0,0,0,-1,"",1],[4343350,-9571490,2,0,0,0,1,"RWIS_54-00.jpg",1],[4340318,-9334846,3,0,0,0,0,"RA35NB212-Entrance.jpg",0],[4339930,-9479730,4,0,0,0,-1,"",1],[4339217,-9334980,5,0,0,0,2,"RWIS_49-00.jpg",0],[4337150,-9363780,6,0,0,0,2,"RWIS_83-01.jpg",1],[4337072,-9247061,7,0,0,0,1,"RWIS_69-00.jpg",1],[4336761,-9121791,8,0,0,0,-1,"",1],[4336760,-9121791,9,0,0,0,3,"d2tv10hd.jpeg",1],[4336605,-9121104,10,0,0,0,-1,"",1],[4336599,-9121722,11,0,0,0,4,"Lansing-1.jpg",1],[4336599,-9121722,12,0,0,0,4,"Lansing-3.jpg",1],[4336598,-9121721,13,0,0,0,4,"Lansing-2.jpg",1],[4324550,-9169970,14,0,0,0,1,"RWIS_15-00.jpg",1],[4320432,-9515026,15,0,0,0,-1,"",1],[4320431,-9515026,16,0,0,0,-1,"",1],[4318590,-9581110,17,0,0,0,5,"WWD57.jpg",1],[4318313,-9514961,18,0,0,0,-1,"",1],[4318313,-9514962,19,0,0,0,-1,"",1],[4317708,-9335664,20,0,0,0,4,"D2TV01.jpg",0],[4317681,-9335751,21,0,0,0,0,"RA35SB196-Entrance.jpg",0],[4317598,-9335486,22,0,0,0,0,"RA35NB196-Entrance.jpg",0],[4314818,-9335622,23,0,0,0,-1,"",0],[4314760,-9320888,24,0,0,0,3,"iwz5785elb.jpeg",1],[4314760,-9320888,25,0,0,0,3,"iwz5785wlb.jpeg",1],[4312855,-9322074,26,0,0,0,3,"iwz5779wlb.jpeg",1],[4312854,-9322074,27,0,0,0,3,"iwz5779elb.jpeg",1],[4312683,-9508880,28,0,0,0,1,"RWIS_42-00.jpg",1],[4312049,-9273880,29,0,0,0,-1,"",1],[4311168,-9312266,30,0,0,0,3,"d2tv74hd.jpeg",1],[4311168,-9312266,31,0,0,0,-1,"",1],[4311168,-9312266,32,0,0,0,1,"RWIS_74-00.jpg",1],[4310546,-9319534,33,0,0,0,4,"D2TV03.jpg",1],[4308533,-9231018,34,0,0,0,5,"WWD52.jpg",1],[4308300,-9439850,35,0,0,0,-1,"",1],[4306884,-9589604,36,0,0,0,5,"WWD42.jpg",1],[4306717,-9245920,37,0,0,0,2,"RWIS_33-00.jpg",1],[4303800,-9334180,38,0,0,0,1,"RWIS_30-00.jpg",0],[4299783,-9608430,39,0,0,0,-1,"",1],[4296490,-9195340,40,0,0,0,1,"RWIS_70-00.jpg",1],[4292857,-9335118,41,0,0,0,3,"iwz3152lb.jpeg",0],[4283320,-9253710,42,0,0,0,2,"RWIS_58-00.jpg",1],[4281320,-9422850,43,0,0,0,2,"RWIS_93-01.jpg",1],[4280880,-9572280,44,0,0,0,2,"RWIS_92-01.jpg",1],[4280800,-9637180,45,0,0,0,1,"RWIS_79-01.jpg",1],[4274750,-9515150,46,0,0,0,2,"RWIS_43-00.jpg",1],[4267369,-9345523,47,0,0,0,4,"D2TV08.jpg",0],[4267191,-9346014,48,0,0,0,0,"RA35DOWS-CarParking.jpg",0],[4266430,-9527028,49,0,0,0,3,"iwz3717lb.jpeg",1],[4266429,-9527025,50,0,0,0,5,"WWDDMTT03.jpg",1],[4264922,-9245288,51,0,0,0,-1,"",1],[4258750,-9353150,52,0,0,0,2,"RWIS_47-00.jpg",0],[4257345,-9354857,53,0,0,0,-1,"",0],[4249989,-9236242,54,0,0,0,3,"wltv27hd.jpeg",1],[4249611,-9234605,55,0,0,0,3,"wltv26hd.jpeg",1],[4249502,-9647557,56,0,0,0,3,"sctv30hd.jpeg",0],[4249291,-9641331,57,0,0,0,3,"sctv26hd.jpeg",0],[4249271,-9646757,58,0,0,0,3,"sctv13hd.jpeg",0],[4249238,-9645079,59,0,0,0,3,"sctv27hd.jpeg",0],[4249226,-9642381,60,0,0,0,3,"sctv11hd.jpeg",0],[4249171,-9233946,61,0,0,0,3,"wltv25hd.jpeg",1],[4249127,-9644183,62,0,0,0,3,"sctv12hd.jpeg",0],[4249085,-9641269,63,0,0,0,3,"sctv10hd.jpeg",0],[4249066,-9641294,64,0,0,0,3,"wwdtv070hd.jpeg",0],[4249033,-9073100,65,0,0,0,-1,"",1],[4249004,-9639570,66,0,0,0,3,"sctv42hd.jpeg",1],[4248973,-9639767,67,0,0,0,3,"sctv20hd.jpeg",1],[4248961,-9640394,68,0,0,0,3,"sctv19hd.jpeg",1],[4248952,-9640827,69,0,0,0,3,"sctv43hd.jpeg",0],[4248932,-9640324,70,0,0,0,3,"sctv24hd.jpeg",1],[4248924,-9638055,71,0,0,0,3,"sctv25hd.jpeg",1],[4248855,-9233465,72,0,0,0,3,"wltv24hd.jpeg",1],[4248802,-9640007,73,0,0,0,3,"sctv29hd.jpeg",1],[4248780,-9639639,74,0,0,0,3,"sctv09hd.jpeg",0],[4248407,-9639140,75,0,0,0,3,"sctv44hd.jpeg",0],[4248374,-9232861,76,0,0,0,3,"wltv23hd.jpeg",1],[4248263,-9607596,77,0,0,0,3,"iwz3365lb.jpeg",1],[4248262,-9607593,78,0,0,0,5,"WWDDMTT05.jpg",1],[4248220,-9607870,79,0,0,0,2,"RWIS_41-00.jpg",1],[4248190,-9602280,80,0,0,0,3,"iwz3359lb.jpeg",1],[4248158,-9605636,81,0,0,0,3,"iwz3361wlb.jpeg",1],[4248157,-9605636,82,0,0,0,-1,"",1],[4248131,-9232338,83,0,0,0,3,"wltv22hd.jpeg",1],[4247778,-9638563,84,0,0,0,3,"sctv31hd.jpeg",0],[4247558,-9554457,85,0,0,0,4,"D3TV01.jpg",1],[4247556,-9554419,86,0,0,0,4,"D3TV01Q.jpg",1],[4247523,-9632347,87,0,0,0,3,"sctv18hd.jpeg",1],[4247459,-9613268,88,0,0,0,3,"iwz3133lb.jpeg",1],[4247380,-9232226,89,0,0,0,3,"wltv21hd.jpeg",1],[4247260,-9514760,90,0,0,0,1,"RWIS_73-00.jpg",1],[4247240,-9114566,91,0,0,0,5,"WWD62.jpg",1],[4247120,-9638169,92,0,0,0,3,"sctv08hd.jpeg",0],[4247100,-9144730,93,0,0,0,2,"RWIS_27-00.jpg",1],[4247008,-9637771,94,0,0,0,3,"sctv23hd.jpeg",1],[4246904,-9231846,95,0,0,0,3,"wltv20hd.jpeg",1],[4246535,-9249350,96,0,0,0,3,"iwz3360lb.jpeg",1],[4246523,-9637550,97,0,0,0,3,"sctv22hd.jpeg",1],[4246453,-9245392,98,0,0,0,3,"iwz3153wlb.jpeg",1],[4246452,-9245392,99,0,0,0,3,"iwz3153elb.jpeg",1],[4246362,-9242722,100,0,0,0,3,"iwz3154wlb.jpeg",1],[4246361,-9242722,101,0,0,0,3,"iwz3154elb.jpeg",1],[4246184,-9637937,102,0,0,0,3,"sctv28hd.jpeg",0],[4246128,-9226097,103,0,0,0,3,"wltv16hd.jpeg",1],[4246089,-9231386,104,0,0,0,3,"wltv19hd.jpeg",0],[4246083,-9225876,105,0,0,0,3,"wltv17hd.jpeg",1],[4246051,-9227910,106,0,0,0,3,"wltv08hd.jpeg",0],[4246003,-9632759,107,0,0,0,3,"sctv17hd.jpeg",1],[4245970,-9637878,108,0,0,0,3,"sctv46hd.jpeg",0],[4245939,-9229766,109,0,0,0,-1,"",0],[4245856,-9240426,110,0,0,0,3,"wltv28hd.jpeg",1],[4245797,-9225336,111,0,0,0,3,"wltv09hd.jpeg",0],[4245567,-9230900,112,0,0,0,-1,"",0],[4245564,-9231436,113,0,0,0,3,"wltv05hd.jpeg",0],[4245542,-9230919,114,0,0,0,-1,"",0],[4245437,-9234657,115,0,0,0,3,"wltv02hd.jpeg",1],[4245398,-9237637,116,0,0,0,-1,"",1],[4245396,-9231253,117,0,0,0,3,"wltv04hd.jpeg",1],[4245390,-9238945,118,0,0,0,3,"iwz3138lb.jpeg",1],[4245379,-9633437,119,0,0,0,3,"sctv16hd.jpeg",1],[4245340,-9305830,120,0,0,0,-1,"",1],[4245278,-9637586,121,0,0,0,3,"sctv07hd.jpeg",0],[4245233,-9233685,122,0,0,0,3,"wltv03hd.jpeg",1],[4245139,-9412336,123,0,0,0,4,"D1TV124.jpg",1],[4245133,-9412334,124,0,0,0,3,"d1tv124hd.jpeg",1],[4245128,-9216201,125,0,0,0,3,"wltv18hd.jpeg",1],[4245055,-9223643,126,0,0,0,3,"wltv10hd.jpeg",0],[4245010,-9467000,127,0,0,0,2,"RWIS_63-00.jpg",1],[4244952,-9218707,128,0,0,0,3,"wltv13hd.jpeg",0],[4244936,-9409205,129,0,0,0,4,"D1TV126Q.jpg",1],[4244936,-9409205,130,0,0,0,4,"D1TV126.jpg",1],[4244926,-9219557,131,0,0,0,3,"wltv12hd.jpeg",0],[4244919,-9409238,132,0,0,0,3,"d1tv126hd.jpeg",1],[4244917,-9409223,133,0,0,0,3,"wwdtv064hd.jpeg",1],[4244892,-9356554,134,0,0,0,3,"d1tv10hd.jpeg",0],[4244890,-9221943,135,0,0,0,3,"wltv11hd.jpeg",0],[4244699,-9637829,136,0,0,0,3,"sctv06hd.jpeg",0],[4244599,-9637465,137,0,0,0,3,"sctv05hd.jpeg",0],[4244531,-9418361,138,0,0,0,-1,"",1],[4244530,-9418365,139,0,0,0,3,"d1tv121hd.jpeg",1],[4244458,-9633843,140,0,0,0,3,"sctv15hd.jpeg",1],[4244334,-9634742,141,0,0,0,3,"sctv14hd.jpeg",1],[4243519,-9637016,142,0,0,0,3,"sctv21hd.jpeg",1],[4243382,-9637527,143,0,0,0,3,"sctv04hd.jpeg",0],[4243369,-9637515,144,0,0,0,3,"wwdtv059hd.jpeg",0],[4242791,-9218592,145,0,0,0,3,"wltv14hd.jpeg",0],[4241326,-9217255,146,0,0,0,3,"wltv15hd.jpeg",0],[4241133,-9356841,147,0,0,0,3,"d1tv02hd.jpeg",0],[4240930,-9357110,148,0,0,0,2,"RWIS_84-01.jpg",0],[4240816,-9636503,149,0,0,0,-1,"",0],[4240042,-9636719,150,0,0,0,3,"sctv02hd.jpeg",0],[4237986,-9635752,151,0,0,0,3,"iwz3135lb.jpeg",0],[4237403,-9635342,152,0,0,0,3,"sctv01hd.jpeg",0],[4235479,-9357003,153,0,0,0,3,"d1tv11hd.jpeg",0],[4235454,-9633734,154,0,0,0,3,"iwz3158lb.jpeg",0],[4235150,-9547830,155,0,0,0,2,"RWIS_51-00.jpg",1],[4230980,-9356936,156,0,0,0,3,"d1tv09hd.jpeg",0],[4230844,-9630098,157,0,0,0,5,"WWD56.jpg",0],[4217130,-9622950,158,0,0,0,2,"RWIS_34-00.jpg",0],[4215553,-9175296,159,0,0,0,3,"iwz3711nlb.jpeg",0],[4215552,-9175295,160,0,0,0,3,"iwz3711slb.jpeg",0],[4212812,-9355354,161,0,0,0,0,"RA35NB120-01-CENTER.jpg",0],[4212621,-9171779,162,0,0,0,3,"iwz3712nlb.jpeg",0],[4212620,-9171779,163,0,0,0,3,"iwz3712slb.jpeg",0],[4211722,-9126653,164,0,0,0,-1,"",1],[4211018,-9355661,165,0,0,0,0,"RA35SB119-CarParking.jpg",0],[4209226,-9170204,166,0,0,0,3,"crtv21hd.jpeg",0],[4207850,-9489750,167,0,0,0,-1,"",1],[4207800,-9356650,168,0,0,0,3,"amtv10hd.jpeg",0],[4207119,-9133570,169,0,0,0,2,"RWIS_52-00.jpg",1],[4206850,-9068350,170,0,0,0,2,"RWIS_28-00.jpg",1],[4205884,-9170063,171,0,0,0,3,"crtv20qhd.jpeg",0],[4205883,-9170062,172,0,0,0,3,"crtv20hd.jpeg",0],[4205875,-9170054,173,0,0,0,3,"wwdtv071hd.jpeg",0],[4205183,-9437830,174,0,0,0,2,"RWIS_25-00.jpg",1],[4205010,-9144324,175,0,0,0,4,"D6TV03.jpg",1],[4204994,-9144303,176,0,0,0,4,"D6TV03Q.jpg",1],[4204607,-9168366,177,0,0,0,-1,"",1],[4203790,-9614100,178,0,0,0,3,"iwz3114slb.jpeg",0],[4203790,-9614100,179,0,0,0,3,"iwz3114nlb.jpeg",0],[4203571,-9155063,180,0,0,0,3,"crtv52hd.jpeg",1],[4203522,-9387960,181,0,0,0,-1,"",1],[4203494,-9167624,182,0,0,0,3,"crtv18hd.jpeg",0],[4203485,-9387948,183,0,0,0,3,"bntv01hd.jpeg",1],[4203454,-9384912,184,0,0,0,-1,"",1],[4203445,-9385020,185,0,0,0,3,"bntv02hd.jpeg",1],[4203433,-9381554,186,0,0,0,3,"bntv03hd.jpeg",1],[4203433,-9357023,187,0,0,0,3,"amtv09hd.jpeg",0],[4203140,-9155052,188,0,0,0,3,"crtv51hd.jpeg",1],[4202993,-9171948,189,0,0,0,3,"crtv53hd.jpeg",1],[4202951,-9170115,190,0,0,0,3,"crtv35hd.jpeg",1],[4202928,-9173610,191,0,0,0,3,"crtv55hd.jpeg",1],[4202926,-9170135,192,0,0,0,3,"wwdtv074hd.jpeg",1],[4202926,-9170139,193,0,0,0,5,"WWD75.jpg",1],[4202911,-9170064,194,0,0,0,3,"wwdtv020hd.jpeg",1],[4202855,-9164913,195,0,0,0,3,"crtv38hd.jpeg",1],[4202846,-9164367,196,0,0,0,3,"crtv39hd.jpeg",1],[4202829,-9167327,197,0,0,0,3,"crtv17hd.jpeg",0],[4202824,-9165810,198,0,0,0,3,"crtv37hd.jpeg",1],[4202822,-9167403,199,0,0,0,5,"WWD77.jpg",1],[4202819,-9167270,200,0,0,0,3,"crtv16hd.jpeg",0],[4202810,-9163894,201,0,0,0,3,"crtv40hd.jpeg",1],[4202806,-9172704,202,0,0,0,3,"crtv54hd.jpeg",1],[4202796,-9168846,203,0,0,0,3,"crtv36hd.jpeg",1],[4202782,-9379391,204,0,0,0,3,"bntv04hd.jpeg",1],[4202689,-9612876,205,0,0,0,5,"WWD54.jpg",0],[4202650,-9174464,206,0,0,0,3,"crtv56hd.jpeg",1],[4202560,-9162111,207,0,0,0,3,"crtv42hd.jpeg",1],[4202305,-9377696,208,0,0,0,3,"bntv05hd.jpeg",1],[4202287,-9357173,209,0,0,0,3,"amtv08hd.jpeg",0],[4202265,-9372437,210,0,0,0,3,"amtv11hd.jpeg",1],[4202179,-9166871,211,0,0,0,3,"crtv15hd.jpeg",0],[4201972,-9155048,212,0,0,0,3,"crtv47hd.jpeg",1],[4201950,-9161767,213,0,0,0,3,"crtv43hd.jpeg",1],[4201700,-9612400,214,0,0,0,3,"iwz3131slb.jpeg",0],[4201699,-9612400,215,0,0,0,-1,"",0],[4201614,-9160846,216,0,0,0,3,"crtv44hd.jpeg",1],[4201558,-9159885,217,0,0,0,3,"crtv45hd.jpeg",1],[4201527,-9158858,218,0,0,0,3,"crtv46hd.jpeg",1],[4201486,-9369878,219,0,0,0,3,"amtv12hd.jpeg",1],[4201264,-9176693,220,0,0,0,3,"crtv57hd.jpeg",1],[4201236,-9357127,221,0,0,0,-1,"",0],[4201217,-9166713,222,0,0,0,3,"crtv14hd.jpeg",0],[4200864,-9302024,223,0,0,0,5,"WWD46.jpg",1],[4200858,-9350164,224,0,0,0,3,"nvtv02hd.jpeg",1],[4200849,-9302047,225,0,0,0,5,"WWD47.jpg",1],[4200849,-9354146,226,0,0,0,3,"nvtv01hd.jpeg",1],[4200847,-9353949,227,0,0,0,3,"wwdtv051hd.jpeg",1],[4200838,-9343479,228,0,0,0,3,"nvtv05hd.jpeg",1],[4200823,-9356012,229,0,0,0,3,"amtv19hd.jpeg",1],[4200810,-9343477,230,0,0,0,3,"wwdtv061hd.jpeg",1],[4200807,-9367886,231,0,0,0,3,"amtv13hd.jpeg",1],[4200763,-9340522,232,0,0,0,3,"wwd49hd.jpeg",1],[4200763,-9340521,233,0,0,0,5,"WWD49.jpg",1],[4200730,-9357141,234,0,0,0,3,"amtv06hd.jpeg",1],[4200660,-9166628,235,0,0,0,3,"crtv13hd.jpeg",0],[4200629,-9358648,236,0,0,0,3,"wwdtv03hd.jpeg",1],[4200627,-9358651,237,0,0,0,3,"amtv18hd.jpeg",1],[4200624,-9346530,238,0,0,0,3,"nvtv03hd.jpeg",1],[4200584,-9360001,239,0,0,0,3,"iwz3718lb.jpeg",1],[4200546,-9344460,240,0,0,0,3,"nvtv04hd.jpeg",1],[4200472,-9360969,241,0,0,0,3,"wwdtv02hd.jpeg",1],[4200470,-9361048,242,0,0,0,-1,"",1],[4200458,-9357033,243,0,0,0,3,"amtv21hd.jpeg",1],[4200448,-9536915,244,0,0,0,5,"WWD23.jpg",1],[4200335,-9364614,245,0,0,0,3,"amtv15hd.jpeg",1],[4200268,-9363989,246,0,0,0,3,"wwdtv01hd.jpeg",1],[4200268,-9363986,247,0,0,0,3,"amtv16hd.jpeg",1],[4200026,-9177498,248,0,0,0,3,"crtv58hd.jpeg",1],[4199557,-9166656,249,0,0,0,3,"crtv12hd.jpeg",0],[4199488,-9155087,250,0,0,0,3,"crtv50hd.jpeg",1],[4198361,-9166395,251,0,0,0,3,"crtv11hd.jpeg",0],[4198168,-9166693,252,0,0,0,3,"crtv10hd.jpeg",0],[4198024,-9166916,253,0,0,0,3,"wwdtv08hd.jpeg",0],[4198002,-9167005,254,0,0,0,5,"WWD08.jpg",0],[4197932,-9357102,255,0,0,0,3,"amtv05hd.jpeg",0],[4197888,-9177648,256,0,0,0,3,"crtv59hd.jpeg",1],[4197800,-9167450,257,0,0,0,-1,"",0],[4197610,-9155141,258,0,0,0,3,"crtv49hd.jpeg",1],[4197568,-9167577,259,0,0,0,3,"crtv09hd.jpeg",0],[4197558,-9167604,260,0,0,0,3,"wwdtv013hd.jpeg",0],[4197158,-9357090,261,0,0,0,3,"amtv20hd.jpeg",0],[4196759,-9167057,262,0,0,0,3,"crtv08hd.jpeg",0],[4196490,-9229830,263,0,0,0,-1,"",1],[4196423,-9185283,264,0,0,0,5,"WWDTV79.jpg",1],[4196410,-9202780,265,0,0,0,1,"RWIS_78-00.jpg",1],[4196397,-9202780,266,0,0,0,-1,"",1],[4196387,-9202781,267,0,0,0,5,"WWD65.jpg",1],[4196313,-9178160,268,0,0,0,3,"crtv22hd.jpeg",1],[4196271,-9178198,269,0,0,0,5,"WWD76.jpg",1],[4196270,-9178198,270,0,0,0,3,"crtv22qhd.jpeg",1],[4195910,-9155552,271,0,0,0,3,"crtv48hd.jpeg",1],[4195761,-9177475,272,0,0,0,3,"crtv60hd.jpeg",1],[4195741,-9177488,273,0,0,0,3,"crtv60qhd.jpeg",1],[4195603,-9167087,274,0,0,0,3,"crtv07hd.jpeg",0],[4195572,-9167111,275,0,0,0,3,"crtv07qhd.jpeg",0],[4195487,-9167034,276,0,0,0,3,"wwdtv011hd.jpeg",0],[4194980,-9356930,277,0,0,0,3,"amtv04hd.jpeg",0],[4194873,-9175525,278,0,0,0,3,"crtv23hd.jpeg",1],[4194556,-9167162,279,0,0,0,3,"crtv06hd.jpeg",0],[4194530,-9174173,280,0,0,0,3,"crtv24hd.jpeg",1],[4194430,-9167071,281,0,0,0,3,"wwdtv012hd.jpeg",0],[4193843,-9171588,282,0,0,0,3,"crtv25hd.jpeg",1],[4193587,-9170575,283,0,0,0,3,"crtv26hd.jpeg",1],[4193011,-9167003,284,0,0,0,3,"crtv05hd.jpeg",0],[4193000,-9168380,285,0,0,0,1,"RWIS_10-00.jpg",1],[4192982,-9168391,286,0,0,0,3,"crtv27hd.jpeg",1],[4192774,-9167662,287,0,0,0,3,"wwdtv010hd.jpeg",1],[4192774,-9167662,288,0,0,0,-1,"",1],[4192694,-9167001,289,0,0,0,-1,"",0],[4192682,-9160339,290,0,0,0,3,"crtv32hd.jpeg",1],[4192680,-9154233,291,0,0,0,3,"crtv34hd.jpeg",1],[4192672,-9165687,292,0,0,0,3,"wwdtv016hd.jpeg",1],[4192668,-9166319,293,0,0,0,3,"crtv28hd.jpeg",1],[4192649,-9165656,294,0,0,0,3,"crtv29hd.jpeg",1],[4192636,-9163703,295,0,0,0,3,"crtv30hd.jpeg",1],[4192634,-9161755,296,0,0,0,3,"crtv31hd.jpeg",1],[4192613,-9165689,297,0,0,0,3,"wwdtv017hd.jpeg",1],[4192580,-9163732,298,0,0,0,3,"wwdtv019hd.jpeg",1],[4192579,-9163732,299,0,0,0,3,"wwdtv018hd.jpeg",1],[4192491,-9156990,300,0,0,0,3,"crtv33hd.jpeg",1],[4191928,-9356984,301,0,0,0,3,"amtv03hd.jpeg",0],[4191570,-9534390,302,0,0,0,2,"RWIS_60-00.jpg",1],[4191160,-9142270,303,0,0,0,1,"RWIS_77-00.jpg",1],[4190692,-9167206,304,0,0,0,3,"crtv03hd.jpeg",0],[4189967,-9357194,305,0,0,0,3,"amtv02hd.jpeg",0],[4189098,-9167183,306,0,0,0,-1,"",0],[4189044,-9167145,307,0,0,0,-1,"",0],[4187788,-9357181,308,0,0,0,3,"amtv01hd.jpeg",0],[4187699,-9167059,309,0,0,0,3,"iwz3198lb.jpeg",0],[4186808,-9166917,310,0,0,0,3,"crtv01hd.jpeg",0],[4186796,-9166783,311,0,0,0,0,"RA380NB11-01-CENTER.jpg",0],[4186796,-9166784,312,0,0,0,0,"RA380SB11-01-ENTRY.jpg",0],[4186698,-9167096,313,0,0,0,0,"RA380SB11-01-CENTER.jpg",0],[4186577,-9017928,314,0,0,0,3,"d6tv05hd.jpeg",1],[4186402,-9016799,315,0,0,0,3,"d6tv04hd.jpeg",1],[4184827,-9166447,316,0,0,0,3,"iwz3113lb.jpeg",1],[4184782,-9166758,317,0,0,0,3,"ictv18hd.jpeg",0],[4184194,-9357080,318,0,0,0,3,"iwz3364lb.jpeg",0],[4183796,-9017363,319,0,0,0,3,"d6tv06hd.jpeg",1],[4183767,-9019092,320,0,0,0,3,"d6tv07hd.jpeg",1],[4183252,-9357268,321,0,0,0,0,"RA35SB98-01-CENTER.jpg",0],[4182923,-9356932,322,0,0,0,0,"RA35NB98-01-CENTER.jpg",0],[4182617,-9057050,323,0,0,0,2,"RWIS_19-00.jpg",1],[4182031,-9357016,324,0,0,0,3,"dmtv063hd.jpeg",0],[4181884,-9165441,325,0,0,0,3,"ictv17hd.jpeg",0],[4181434,-9329911,326,0,0,0,5,"WWD48.jpg",1],[4180217,-9605510,327,0,0,0,-1,"",0],[4180210,-9605480,328,0,0,0,-1,"",0],[4180055,-9164628,329,0,0,0,3,"ictv16hd.jpeg",0],[4179129,-9357088,330,0,0,0,3,"dmtv062hd.jpeg",0],[4177491,-9164653,331,0,0,0,3,"ictv15hd.jpeg",0],[4176561,-9372977,332,0,0,0,-1,"",1],[4176124,-9356896,333,0,0,0,3,"dmtv061hd.jpeg",0],[4175254,-9164167,334,0,0,0,3,"iwz3141lb.jpeg",0],[4175068,-9357409,335,0,0,0,3,"dmtv060hd.jpeg",0],[4174418,-9378565,336,0,0,0,3,"dmtv094qhd.jpeg",1],[4174390,-9378526,337,0,0,0,3,"dmtv094hd.jpeg",1],[4173971,-9377560,338,0,0,0,3,"wwd40hd.jpeg",1],[4173961,-9377561,339,0,0,0,3,"dmtv093hd.jpeg",1],[4173838,-9164276,340,0,0,0,3,"ictv37hd.jpeg",0],[4173246,-9357672,341,0,0,0,3,"dmtv041hd.jpeg",0],[4173244,-9357668,342,0,0,0,3,"wwdtv072hd.jpeg",0],[4173021,-9360056,343,0,0,0,3,"iwz5786lb.jpeg",1],[4172724,-9360057,344,0,0,0,3,"iwz5788lb.jpeg",1],[4172301,-9164220,345,0,0,0,3,"ictv13hd.jpeg",0],[4170849,-9164309,346,0,0,0,3,"ictv36hd.jpeg",0],[4170284,-9357620,347,0,0,0,3,"dmtv040hd.jpeg",0],[4169666,-9255272,348,0,0,0,3,"80TV192hd.jpeg",0],[4169649,-9239656,349,0,0,0,3,"80TV200hd.jpeg",0],[4169636,-9223183,350,0,0,0,0,"RA80WB208-01-CENTER.jpg",0],[4169634,-9223243,351,0,0,0,0,"RA80EB208-01-Entry.jpg",0],[4169634,-9223244,352,0,0,0,0,"RA80WB208-01-Parking.jpg",0],[4169622,-9164151,353,0,0,0,3,"ictv41hd.jpeg",0],[4169618,-9277275,354,0,0,0,0,"RA80WB180-01-CENTER.jpg",0],[4169618,-9224117,355,0,0,0,3,"80TV208hd.jpeg",0],[4169617,-9262944,356,0,0,0,3,"80TV188hd.jpeg",0],[4169608,-9230028,357,0,0,0,3,"80TV205hd.jpeg",0],[4169608,-9272665,358,0,0,0,3,"80TV183hd.jpeg",0],[4169592,-9244643,359,0,0,0,3,"80TV197hd.jpeg",0],[4169591,-9227912,360,0,0,0,1,"RWIS_72-00.jpg",0],[4169590,-9231950,361,0,0,0,3,"80TV204hd.jpeg",0],[4169585,-9228009,362,0,0,0,3,"80tv206hd.jpeg",0],[4169577,-9242146,363,0,0,0,3,"80TV198hd.jpeg",0],[4169576,-9216288,364,0,0,0,3,"80tv212hd.jpeg",0],[4169551,-9259087,365,0,0,0,3,"80TV190hd.jpeg",0],[4169533,-9269732,366,0,0,0,3,"80TV184hd.jpeg",0],[4169530,-9281327,367,0,0,0,3,"nwtv16hd.jpeg",0],[4169526,-9235748,368,0,0,0,-1,"",0],[4169522,-9267011,369,0,0,0,3,"80TV186hd.jpeg",0],[4169521,-9163632,370,0,0,0,3,"ictv39hd.jpeg",0],[4169520,-9278050,371,0,0,0,2,"RWIS_82-01.jpg",0],[4169510,-9279524,372,0,0,0,3,"nwtv12hd.jpeg",0],[4169506,-9246564,373,0,0,0,3,"80TV196hd.jpeg",0],[4169488,-9168049,374,0,0,0,0,"RA80WB237-CENTER.jpg",0],[4169485,-9276718,375,0,0,0,3,"80TV181hd.jpeg",0],[4169447,-9250419,376,0,0,0,3,"80TV194hd.jpeg",0],[4169443,-9161886,377,0,0,0,3,"ictv40hd.jpeg",0],[4169440,-9169095,378,0,0,0,3,"ictv01hd.jpeg",0],[4169415,-9277365,379,0,0,0,0,"RA80EB180-01-CENTER.jpg",0],[4169413,-9212394,380,0,0,0,3,"80TV214hd.jpeg",0],[4169380,-9163830,381,0,0,0,3,"ictv03hd.jpeg",0],[4169378,-9168280,382,0,0,0,0,"RA80EB237-01-CENTER.jpg",0],[4169378,-9160014,383,0,0,0,3,"ictv05hd.jpeg",0],[4169378,-9164635,384,0,0,0,3,"ictv35hd.jpeg",0],[4169370,-9160892,385,0,0,0,3,"ictv04hd.jpeg",0],[4169360,-9166626,386,0,0,0,3,"ictv02ahd.jpeg",0],[4169297,-9210167,387,0,0,0,3,"80TV215hd.jpeg",0],[4169258,-9164279,388,0,0,0,3,"ictv33hd.jpeg",1],[4169232,-9163469,389,0,0,0,3,"ictv32hd.jpeg",1],[4169223,-9175495,390,0,0,0,3,"ictv28hd.jpeg",0],[4169200,-9324752,391,0,0,0,3,"80TV155hd.jpeg",0],[4168945,-9317672,392,0,0,0,3,"80TV159hd.jpeg",0],[4168923,-9206583,393,0,0,0,3,"80TV217hd.jpeg",0],[4168919,-9158182,394,0,0,0,3,"ictv23hd.jpeg",0],[4168900,-9325970,395,0,0,0,2,"RWIS_53-00.jpg",0],[4168855,-9287639,396,0,0,0,3,"nwtv11hd.jpeg",0],[4168840,-9180506,397,0,0,0,3,"ictv27hd.jpeg",0],[4168825,-9377406,398,0,0,0,3,"dmtv092hd.jpeg",1],[4168812,-9152576,399,0,0,0,3,"ictv24hd.jpeg",0],[4168809,-9326598,400,0,0,0,3,"80TV154hd.jpeg",0],[4168775,-9194462,401,0,0,0,3,"80TV223hd.jpeg",0],[4168767,-9200870,402,0,0,0,-1,"",1],[4168764,-9190614,403,0,0,0,3,"80TV225hd.jpeg",0],[4168735,-9188655,404,0,0,0,3,"80TV226hd.jpeg",0],[4168729,-9200858,405,0,0,0,3,"80tv220hd.jpeg",0],[4168715,-9182092,406,0,0,0,3,"ictv29hd.jpeg",0],[4168705,-9185275,407,0,0,0,3,"ictv26hd.jpeg",0],[4168683,-9163458,408,0,0,0,3,"ictv34hd.jpeg",1],[4168683,-9149957,409,0,0,0,-1,"",0],[4168663,-9203488,410,0,0,0,3,"80TV219hd.jpeg",0],[4168658,-9196851,411,0,0,0,3,"80TV222hd.jpeg",0],[4168657,-9156469,412,0,0,0,-1,"",0],[4168646,-9153989,413,0,0,0,3,"ictv07hd.jpeg",0],[4168516,-9156526,414,0,0,0,3,"ictv06hd.jpeg",0],[4168508,-9156513,415,0,0,0,3,"wwdtv073hd.jpeg",0],[4168499,-9148290,416,0,0,0,3,"ictv09hd.jpeg",0],[4168365,-9307728,417,0,0,0,3,"nwtv03hd.jpeg",0],[4168352,-9305841,418,0,0,0,3,"nwtv04hd.jpeg",0],[4168330,-9302001,419,0,0,0,3,"nwtv06hd.jpeg",0],[4168297,-9308136,420,0,0,0,3,"nwtv13hd.jpeg",0],[4168296,-9303913,421,0,0,0,3,"nwtv05hd.jpeg",0],[4168292,-9313743,422,0,0,0,3,"80TV161hd.jpeg",0],[4168272,-9299991,423,0,0,0,3,"nwtv07hd.jpeg",0],[4168272,-9300017,424,0,0,0,3,"nwtv07qhd.jpeg",0],[4168247,-9333434,425,0,0,0,0,"JS80WB151-CENTER.jpg",0],[4168231,-9290258,426,0,0,0,3,"nwtv09hd.jpeg",0],[4168180,-9329984,427,0,0,0,3,"80TV152hd.jpeg",0],[4168155,-9311635,428,0,0,0,3,"nwtv01hd.jpeg",0],[4168139,-9296778,429,0,0,0,3,"nwtv14hd.jpeg",0],[4168108,-9333983,430,0,0,0,3,"80TV150hd.jpeg",0],[4168092,-9339047,431,0,0,0,0,"RA80WB148-01-CENTER.jpg",0],[4168081,-9310049,432,0,0,0,3,"nwtv02hd.jpeg",0],[4168073,-9336764,433,0,0,0,3,"80TV149hd.jpeg",0],[4168017,-9294162,434,0,0,0,-1,"",0],[4167998,-9339470,435,0,0,0,0,"RA80EB148-01-CENTER.jpg",0],[4167993,-9357641,436,0,0,0,3,"dmtv053hd.jpeg",0],[4167982,-9340634,437,0,0,0,3,"80TV147hd.jpeg",0],[4167321,-9377456,438,0,0,0,3,"dmtv091hd.jpeg",1],[4167194,-9144500,439,0,0,0,3,"ictv19hd.jpeg",0],[4167194,-9344383,440,0,0,0,3,"dmtv038hd.jpeg",0],[4167166,-9144492,441,0,0,0,3,"wwdtv066hd.jpeg",0],[4166930,-9357827,442,0,0,0,3,"dmtv037hd.jpeg",0],[4166836,-9137921,443,0,0,0,3,"ictv20hd.jpeg",0],[4166790,-9142479,444,0,0,0,3,"ictv10hd.jpeg",0],[4166732,-9346447,445,0,0,0,3,"dmtv039hd.jpeg",0],[4166638,-9161036,446,0,0,0,3,"ictv25hd.jpeg",1],[4166376,-9134700,447,0,0,0,3,"ictv21hd.jpeg",0],[4166324,-9130767,448,0,0,0,3,"80tv256hd.jpeg",0],[4166272,-9347871,449,0,0,0,3,"dmtv047hd.jpeg",0],[4166216,-9349355,450,0,0,0,3,"dmtv059hd.jpeg",0],[4166172,-9350343,451,0,0,0,3,"dmtv056hd.jpeg",0],[4166172,-9349568,452,0,0,0,3,"dmtv025hd.jpeg",0],[4166170,-9349598,453,0,0,0,-1,"",0],[4165988,-9352185,454,0,0,0,3,"dmtv026hd.jpeg",0],[4165849,-9357477,455,0,0,0,3,"dmtv069hd.jpeg",0],[4165760,-9353692,456,0,0,0,3,"dmtv105hd.jpeg",0],[4165708,-9377548,457,0,0,0,3,"dmtv090hd.jpeg",1],[4165707,-9159832,458,0,0,0,3,"ictv12hd.jpeg",1],[4165640,-9357426,459,0,0,0,3,"dmtv102hd.jpeg",0],[4165552,-9355375,460,0,0,0,3,"dmtv104hd.jpeg",0],[4165520,-9357621,461,0,0,0,3,"dmtv087hd.jpeg",0],[4165470,-9357020,462,0,0,0,3,"dmtv103hd.jpeg",0],[4165294,-9371686,463,0,0,0,3,"dmtv101hd.jpeg",0],[4165239,-9357380,464,0,0,0,3,"dmtv01hd.jpeg",0],[4165232,-9373662,465,0,0,0,3,"dmtv021hd.jpeg",0],[4165224,-9369784,466,0,0,0,3,"dmtv022hd.jpeg",0],[4165185,-9375566,467,0,0,0,3,"dmtv097hd.jpeg",0],[4165170,-9369724,468,0,0,0,3,"wwdtv030hd.jpeg",0],[4165137,-9368075,469,0,0,0,3,"dmtv095hd.jpeg",0],[4165029,-9358025,470,0,0,0,3,"dmtv085hd.jpeg",0],[4165026,-9357544,471,0,0,0,3,"dmtv099hd.jpeg",0],[4165026,-9357728,472,0,0,0,3,"dmtv088hd.jpeg",0],[4165019,-9359126,473,0,0,0,-1,"",0],[4165011,-9358166,474,0,0,0,3,"dmtv086hd.jpeg",0],[4164998,-9365257,475,0,0,0,3,"dmtv043hd.jpeg",0],[4164979,-9360017,476,0,0,0,3,"dmtv024hd.jpeg",0],[4164958,-9362016,477,0,0,0,3,"dmtv023hd.jpeg",0],[4164956,-9360309,478,0,0,0,3,"dmtv020hd.jpeg",0],[4164939,-9359992,479,0,0,0,3,"wwdtv032hd.jpeg",0],[4164936,-9377375,480,0,0,0,3,"dmtv096hd.jpeg",0],[4164543,-9108629,481,0,0,0,0,"RA80WB268-01-CENTER.jpg",0],[4164480,-9112720,482,0,0,0,2,"RWIS_44-00.jpg",0],[4164386,-9377673,483,0,0,0,3,"dmtv057hd.jpeg",0],[4164384,-9350993,484,0,0,0,3,"dmtv027hd.jpeg",1],[4164358,-9108667,485,0,0,0,0,"RA80EB268-01-CENTER.jpg",0],[4164331,-9350969,486,0,0,0,3,"wwdtv033hd.jpeg",1],[4164191,-9105474,487,0,0,0,0,"RA80WB270-01-CENTER.jpg",0],[4164060,-9357598,488,0,0,0,3,"dmtv098hd.jpeg",0],[4163949,-9105390,489,0,0,0,0,"RA80EB270-01-CENTER.jpg",0],[4163523,-9357542,490,0,0,0,3,"dmtv109hd.jpeg",0],[4163357,-9156744,491,0,0,0,3,"ictv11hd.jpeg",1],[4162936,-9377676,492,0,0,0,3,"dmtv042hd.jpeg",0],[4162786,-9357521,493,0,0,0,3,"dmtv02hd.jpeg",0],[4162280,-9357619,494,0,0,0,3,"dmtv108hd.jpeg",0],[4161948,-9377648,495,0,0,0,3,"iwz3125lb.jpeg",1],[4161505,-9357747,496,0,0,0,3,"dmtv03hd.jpeg",0],[4160902,-9357871,497,0,0,0,3,"dmtv107hd.jpeg",0],[4160719,-9377737,498,0,0,0,3,"dmtv019hd.jpeg",0],[4160433,-9072476,499,0,0,0,3,"qctv14hd.jpeg",0],[4160345,-9068565,500,0,0,0,3,"qctv15hd.jpeg",0],[4160288,-9358053,501,0,0,0,3,"dmtv04hd.jpeg",0],[4160287,-9358053,502,0,0,0,5,"WWD68.jpg",0],[4160282,-9358048,503,0,0,0,3,"wwd68hd.jpeg",0],[4160263,-9067735,504,0,0,0,-1,"",0],[4160233,-9067770,505,0,0,0,-1,"",0],[4160200,-9337090,506,0,0,0,2,"RWIS_91-01.jpg",1],[4160038,-9377668,507,0,0,0,3,"dmtv051hd.jpeg",0],[4159964,-9061850,508,0,0,0,3,"qctv17hd.jpeg",0],[4159937,-9351700,509,0,0,0,3,"dmtv046hd.jpeg",1],[4159877,-9349728,510,0,0,0,3,"dmtv028hd.jpeg",1],[4159746,-9045804,511,0,0,0,3,"iwz3117wlb.jpeg",1],[4159746,-9045804,512,0,0,0,3,"iwz3117elb.jpeg",1],[4159739,-9359239,513,0,0,0,3,"dmtv106hd.jpeg",0],[4159726,-9047904,514,0,0,0,0,"RA80WB300-01-CENTER.jpg",0],[4159662,-9056969,515,0,0,0,3,"qctv18qhd.jpeg",0],[4159651,-9047820,516,0,0,0,3,"iwz3118lb.jpeg",0],[4159641,-9052528,517,0,0,0,3,"qctv19hd.jpeg",0],[4159635,-9364445,518,0,0,0,3,"dmtv010hd.jpeg",0],[4159621,-9363604,519,0,0,0,3,"dmtv09hd.jpeg",0],[4159605,-9363250,520,0,0,0,3,"dmtv113hd.jpeg",0],[4159604,-9359886,521,0,0,0,3,"dmtv05hd.jpeg",0],[4159596,-9049105,522,0,0,0,0,"RA80EB300-01-CENTER.jpg",0],[4159590,-9359901,523,0,0,0,3,"wwdtv024hd.jpeg",0],[4159585,-9057049,524,0,0,0,3,"qctv18hd.jpeg",0],[4159579,-9361961,525,0,0,0,5,"WWD67.jpg",0],[4159578,-9362684,526,0,0,0,3,"dmtv08hd.jpeg",0],[4159574,-9361956,527,0,0,0,3,"wwd67hd.jpeg",0],[4159572,-9361978,528,0,0,0,3,"dmtv07hd.jpeg",0],[4159551,-9364830,529,0,0,0,3,"dmtv112hd.jpeg",0],[4159534,-9362455,530,0,0,0,3,"dmtv114hd.jpeg",0],[4159530,-9377827,531,0,0,0,3,"dmtv068hd.jpeg",0],[4159505,-9360287,532,0,0,0,3,"dmtv06hd.jpeg",0],[4159477,-9360937,533,0,0,0,3,"dmtv115hd.jpeg",0],[4159354,-9372684,534,0,0,0,3,"dmtv116hd.jpeg",0],[4159342,-9366572,535,0,0,0,3,"dmtv012hd.jpeg",0],[4159309,-9371568,536,0,0,0,3,"dmtv121hd.jpeg",0],[4159308,-9365452,537,0,0,0,3,"dmtv011hd.jpeg",0],[4159307,-9037284,538,0,0,0,3,"qctv20hd.jpeg",0],[4159302,-9373567,539,0,0,0,3,"dmtv016hd.jpeg",0],[4159301,-9373568,540,0,0,0,3,"wwdtv026hd.jpeg",0],[4159299,-9370355,541,0,0,0,3,"dmtv015hd.jpeg",0],[4159261,-9379039,542,0,0,0,3,"dmtv120hd.jpeg",0],[4159260,-9369386,543,0,0,0,3,"dmtv111hd.jpeg",0],[4159254,-9377273,544,0,0,0,3,"dmtv067hd.jpeg",0],[4159226,-9375179,545,0,0,0,3,"dmtv017hd.jpeg",0],[4159225,-9377784,546,0,0,0,3,"dmtv044qhd.jpeg",0],[4159222,-9377754,547,0,0,0,3,"dmtv044hd.jpeg",0],[4159213,-9374369,548,0,0,0,3,"dmtv117hd.jpeg",0],[4159209,-9380925,549,0,0,0,3,"dmtv018hd.jpeg",0],[4159207,-9376205,550,0,0,0,3,"dmtv072hd.jpeg",0],[4159175,-9368160,551,0,0,0,3,"dmtv014hd.jpeg",0],[4159152,-9067541,552,0,0,0,3,"qctv22hd.jpeg",0],[4159148,-9067538,553,0,0,0,5,"WWD22.jpg",0],[4159122,-9067549,554,0,0,0,3,"wwdtv022hd.jpeg",0],[4159119,-9367437,555,0,0,0,3,"dmtv013hd.jpeg",0],[4158498,-9382202,556,0,0,0,-1,"",0],[4158458,-9036786,557,0,0,0,3,"qctv61hd.jpeg",0],[4158390,-9377726,558,0,0,0,3,"dmtv055hd.jpeg",0],[4157987,-9383366,559,0,0,0,3,"80tv120hd.jpeg",0],[4157542,-9377698,560,0,0,0,3,"dmtv119hd.jpeg",0],[4157473,-9052217,561,0,0,0,3,"qctv11hd.jpeg",0],[4157229,-9351314,562,0,0,0,3,"dmtv029hd.jpeg",1],[4157095,-9036033,563,0,0,0,3,"qctv60hd.jpeg",0],[4156906,-9385355,564,0,0,0,3,"dmtv048hd.jpeg",0],[4156840,-9385338,565,0,0,0,3,"wwdtv036hd.jpeg",0],[4156840,-9385338,566,0,0,0,3,"wwdtv037hd.jpeg",0],[4156502,-9386368,567,0,0,0,3,"80tv118hd.jpeg",0],[4156318,-9388091,568,0,0,0,3,"80tv117hd.jpeg",0],[4155922,-9377664,569,0,0,0,3,"dmtv050hd.jpeg",0],[4155917,-9377665,570,0,0,0,3,"wwdtv039hd.jpeg",0],[4155614,-9391248,571,0,0,0,3,"80tv115hd.jpeg",0],[4155464,-9391529,572,0,0,0,0,"DS80EB115-01-CENTER.jpg",0],[4155463,-9052219,573,0,0,0,3,"qctv10hd.jpeg",0],[4155325,-9393048,574,0,0,0,3,"80tv114hd.jpeg",0],[4154950,-9591730,575,0,0,0,2,"RWIS_31-00.jpg",0],[4154742,-9395362,576,0,0,0,3,"80tv113hd.jpeg",0],[4154699,-9351351,577,0,0,0,3,"iwz3168lb.jpeg",1],[4154419,-9397390,578,0,0,0,3,"80tv112hd.jpeg",0],[4154301,-9398888,579,0,0,0,3,"iwz3172lb.jpeg",0],[4154150,-9401120,580,0,0,0,2,"RWIS_18-00.jpg",0],[4154147,-9377581,581,0,0,0,3,"dmtv049hd.jpeg",0],[4154136,-9377570,582,0,0,0,3,"wwdtv038hd.jpeg",0],[4154092,-9051799,583,0,0,0,3,"qctv09hd.jpeg",0],[4154033,-9401318,584,0,0,0,3,"80tv110hd.jpeg",0],[4153513,-9403571,585,0,0,0,3,"80tv109hd.jpeg",0],[4153411,-9051564,586,0,0,0,3,"qctv08hd.jpeg",0],[4152845,-9051374,587,0,0,0,3,"qctv30hd.jpeg",0],[4152632,-9051404,588,0,0,0,-1,"",0],[4152482,-9351914,589,0,0,0,3,"dmtv030hd.jpeg",1],[4152348,-9051211,590,0,0,0,3,"qctv31hd.jpeg",0],[4152318,-9051264,591,0,0,0,3,"qctv32hd.jpeg",0],[4152257,-9377307,592,0,0,0,3,"dmtv036hd.jpeg",0],[4152165,-9371993,593,0,0,0,3,"dmtv035hd.jpeg",1],[4151959,-9377416,594,0,0,0,3,"dmtv073hd.jpeg",0],[4151955,-9407707,595,0,0,0,3,"80tv106hd.jpeg",0],[4151932,-9051201,596,0,0,0,3,"qctv33hd.jpeg",0],[4151837,-9058343,597,0,0,0,3,"qctv13hd.jpeg",1],[4151820,-9051075,598,0,0,0,-1,"",0],[4151760,-9417563,599,0,0,0,3,"80tv101hd.jpeg",0],[4151736,-9412322,600,0,0,0,3,"80tv104hd.jpeg",0],[4151729,-9051128,601,0,0,0,3,"qctv34fhd.jpeg",0],[4151718,-9409906,602,0,0,0,3,"80tv105hd.jpeg",0],[4151700,-9051145,603,0,0,0,3,"qctv34hd.jpeg",0],[4151446,-9051082,604,0,0,0,3,"qctv36hd.jpeg",0],[4151415,-9050978,605,0,0,0,3,"qctv37hd.jpeg",0],[4151401,-9419627,606,0,0,0,3,"80tv100hd.jpeg",0],[4151396,-9368177,607,0,0,0,-1,"",1],[4151308,-9591167,608,0,0,0,3,"cbtv43hd.jpeg",0],[4151186,-9057979,609,0,0,0,3,"qctv12hd.jpeg",1],[4151115,-9352745,610,0,0,0,3,"dmtv031hd.jpeg",1],[4150780,-9420413,611,0,0,0,3,"80tv099hd.jpeg",0],[4150757,-9364469,612,0,0,0,3,"dmtv033hd.jpeg",1],[4150626,-9357480,613,0,0,0,3,"dmtv032hd.jpeg",1],[4150491,-9378085,614,0,0,0,3,"dmtv074hd.jpeg",0],[4150014,-9551093,615,0,0,0,3,"80tv031hd.jpeg",0],[4149959,-9549207,616,0,0,0,0,"RA80WB32-01-CENTER.jpg",0],[4149879,-9529656,617,0,0,0,3,"80tv042hd.jpeg",0],[4149872,-9547979,618,0,0,0,3,"80tv033hd.jpeg",0],[4149868,-9515563,619,0,0,0,3,"80tv050hd.jpeg",0],[4149840,-9545126,620,0,0,0,3,"80tv034hd.jpeg",0],[4149836,-9517387,621,0,0,0,3,"80tv049hd.jpeg",0],[4149836,-9549441,622,0,0,0,0,"RA80EB32-01-CENTER.jpg",0],[4149817,-9529150,623,0,0,0,-1,"",0],[4149797,-9533629,624,0,0,0,3,"80tv040hd.jpeg",0],[4149791,-9540296,625,0,0,0,3,"80tv037hd.jpeg",0],[4149787,-9509620,626,0,0,0,-1,"",0],[4149775,-9525118,627,0,0,0,-1,"",0],[4149756,-9486830,628,0,0,0,3,"80tv065hd.jpeg",0],[4149734,-9558292,629,0,0,0,3,"cbtv38hd.jpeg",0],[4149731,-9537545,630,0,0,0,3,"80tv038hd.jpeg",0],[4149724,-9475811,631,0,0,0,3,"80tv070hd.jpeg",0],[4149724,-9457301,632,0,0,0,0,"RA80WB80-01-CENTER.jpg",0],[4149710,-9468854,633,0,0,0,-1,"",0],[4149710,-9456676,634,0,0,0,3,"80tv080hd.jpeg",0],[4149698,-9494478,635,0,0,0,3,"80tv058hd.jpeg",0],[4149697,-9522205,636,0,0,0,3,"80tv046hd.jpeg",0],[4149696,-9494481,637,0,0,0,3,"wwdtv063hd.jpeg",0],[4149688,-9491180,638,0,0,0,3,"80tv062hd.jpeg",0],[4149683,-9511810,639,0,0,0,3,"80tv052hd.jpeg",0],[4149679,-9526093,640,0,0,0,0,"RA80EB44-01-CENTER.jpg",0],[4149675,-9483509,641,0,0,0,3,"80tv066hd.jpeg",0],[4149664,-9526094,640,0,0,0,0,"RA80EB44-02-CENTER.jpg",0],[4149650,-9506008,642,0,0,0,3,"80tv055hd.jpeg",0],[4149644,-9449419,643,0,0,0,3,"80tv084hd.jpeg",0],[4149633,-9472630,644,0,0,0,-1,"",0],[4149632,-9472817,645,0,0,0,3,"80tv072hd.jpeg",0],[4149625,-9456170,646,0,0,0,0,"RA80EB80-01-CENTER.jpg",0],[4149620,-9554662,647,0,0,0,3,"cbtv39hd.jpeg",0],[4149616,-9477726,648,0,0,0,3,"80tv069hd.jpeg",0],[4149594,-9452047,649,0,0,0,3,"80tv083hd.jpeg",0],[4149574,-9437576,650,0,0,0,3,"80tv090hd.jpeg",0],[4149562,-9441417,651,0,0,0,3,"80tv088hd.jpeg",0],[4149551,-9445267,652,0,0,0,3,"80tv086hd.jpeg",0],[4149422,-9590118,653,0,0,0,3,"cbtv37hd.jpeg",0],[4149374,-9422358,654,0,0,0,3,"80tv098hd.jpeg",0],[4149343,-9435974,655,0,0,0,3,"80tv091hd.jpeg",0],[4149331,-9427347,656,0,0,0,-1,"",0],[4149327,-9431831,657,0,0,0,-1,"",0],[4149322,-9459749,658,0,0,0,3,"80tv079hd.jpeg",0],[4149304,-9424167,659,0,0,0,3,"80tv097hd.jpeg",0],[4149287,-9464358,660,0,0,0,3,"80tv076hd.jpeg",0],[4149279,-9466251,661,0,0,0,3,"80tv075hd.jpeg",0],[4149264,-9431858,662,0,0,0,3,"80tv093hd.jpeg",0],[4149135,-9064726,663,0,0,0,3,"qctv21hd.jpeg",0],[4149069,-9558555,664,0,0,0,3,"80tv027hd.jpeg",0],[4148740,-9155250,665,0,0,0,2,"RWIS_87-01.jpg",1],[4148663,-9155166,666,0,0,0,-1,"",1],[4148335,-9063820,667,0,0,0,3,"qctv51hd.jpeg",0],[4148297,-9378108,668,0,0,0,3,"dmtv075hd.jpeg",0],[4147204,-9355968,669,0,0,0,3,"D1TV12hd.jpeg",1],[4146490,-9061432,670,0,0,0,3,"qctv50hd.jpeg",0],[4146217,-9559638,671,0,0,0,3,"80tv025hd.jpeg",0],[4144040,-9561198,672,0,0,0,3,"80tv023hd.jpeg",0],[4143234,-9378140,673,0,0,0,-1,"",0],[4142938,-9563015,674,0,0,0,3,"80tv022hd.jpeg",0],[4141062,-9565041,675,0,0,0,3,"80tv020hd.jpeg",0],[4140384,-9565871,676,0,0,0,0,"RA80WB19-01-CENTER.jpg",0],[4140140,-9565872,677,0,0,0,0,"RA80EB19-01-CENTER.jpg",0],[4139283,-9566820,678,0,0,0,3,"80tv019hd.jpeg",0],[4139017,-9287250,679,0,0,0,2,"RWIS_37-00.jpg",1],[4138988,-9287260,680,0,0,0,5,"WWD69.jpg",1],[4138838,-9378110,681,0,0,0,3,"dmtv077hd.jpeg",0],[4137630,-9567781,682,0,0,0,3,"wwdtv060hd.jpeg",0],[4137615,-9567487,683,0,0,0,3,"80tv018hd.jpeg",0],[4136289,-9377981,684,0,0,0,3,"dmtv078hd.jpeg",0],[4135510,-9326370,685,0,0,0,2,"RWIS_86-01.jpg",1],[4135380,-9590056,686,0,0,0,3,"cbtv36hd.jpeg",0],[4135026,-9570165,687,0,0,0,3,"80tv015hd.jpeg",0],[4134607,-9593579,688,0,0,0,3,"cbtv74hd.jpeg",0],[4134436,-9596469,689,0,0,0,3,"cbtv75hd.jpeg",0],[4134413,-9589090,690,0,0,0,3,"cbtv35hd.jpeg",0],[4134132,-9573034,691,0,0,0,3,"80tv014hd.jpeg",0],[4133633,-9231450,692,0,0,0,-1,"",1],[4132434,-9575004,693,0,0,0,3,"80tv012hd.jpeg",0],[4132268,-9378043,694,0,0,0,3,"dmtv079hd.jpeg",0],[4132222,-9588286,695,0,0,0,3,"cbtv34hd.jpeg",0],[4130159,-9577093,696,0,0,0,3,"80tv010hd.jpeg",0],[4129354,-9377947,697,0,0,0,3,"dmtv080hd.jpeg",0],[4129120,-9153530,698,0,0,0,2,"RWIS_88-01.jpg",1],[4128628,-9586627,699,0,0,0,3,"cbtv23hd.jpeg",0],[4128565,-9586712,700,0,0,0,3,"wwdtv021hd.jpeg",0],[4127969,-9578520,701,0,0,0,3,"cbtv12hd.jpeg",0],[4127499,-9587812,702,0,0,0,3,"cbtv22hd.jpeg",0],[4127396,-9589397,703,0,0,0,3,"cbtv29hd.jpeg",0],[4127348,-9589656,704,0,0,0,3,"cbtv21hd.jpeg",0],[4126754,-9579533,705,0,0,0,3,"cbtv11hd.jpeg",0],[4126545,-9590855,706,0,0,0,3,"cbtv19hd.jpeg",0],[4126259,-9590966,707,0,0,0,3,"cbtv71hd.jpeg",0],[4126147,-9591382,708,0,0,0,3,"cbtv72hd.jpeg",0],[4126057,-9580385,709,0,0,0,3,"cbtv10hd.jpeg",0],[4125958,-9591985,710,0,0,0,3,"cbtv20hd.jpeg",0],[4125837,-9590698,711,0,0,0,3,"cbtv73hd.jpeg",0],[4125453,-9590713,712,0,0,0,3,"cbtv18hd.jpeg",0],[4125230,-9590732,713,0,0,0,3,"cbtv69hd.jpeg",0],[4124805,-9590638,714,0,0,0,3,"cbtv68hd.jpeg",0],[4124652,-9581480,715,0,0,0,3,"cbtv09hd.jpeg",0],[4124448,-9590591,716,0,0,0,3,"cbtv16hd.jpeg",0],[4124404,-9590119,717,0,0,0,3,"cbtv70hd.jpeg",1],[4124213,-9590411,718,0,0,0,3,"cbtv17hd.jpeg",0],[4124195,-9582408,719,0,0,0,3,"cbtv08hd.jpeg",0],[4123805,-9590037,720,0,0,0,3,"cbtv52hd.jpeg",0],[4123778,-9582620,721,0,0,0,3,"cbtv58hd.jpeg",0],[4123707,-9590010,722,0,0,0,3,"cbtv45hd.jpeg",0],[4123478,-9582647,723,0,0,0,3,"cbtv07hd.jpeg",0],[4123336,-9582974,724,0,0,0,3,"cbtv64hd.jpeg",0],[4123324,-9584414,725,0,0,0,3,"cbtv56hd.jpeg",0],[4123300,-9588712,726,0,0,0,3,"cbtv46hd.jpeg",0],[4123287,-9584237,727,0,0,0,3,"cbtv62hd.jpeg",0],[4123282,-9589718,728,0,0,0,3,"cbtv02hd.jpeg",0],[4123280,-9587819,729,0,0,0,3,"cbtv47hd.jpeg",0],[4123260,-9586293,730,0,0,0,3,"cbtv48hd.jpeg",0],[4123260,-9585907,731,0,0,0,3,"cbtv59hd.jpeg",0],[4123251,-9585183,732,0,0,0,3,"cbtv55hd.jpeg",0],[4123226,-9589170,733,0,0,0,3,"cbtv50hd.jpeg",0],[4123200,-9584700,734,0,0,0,3,"cbtv65hd.jpeg",0],[4123193,-9586670,735,0,0,0,3,"cbtv61hd.jpeg",0],[4123192,-9587035,736,0,0,0,3,"cbtv60hd.jpeg",0],[4123187,-9585514,737,0,0,0,3,"cbtv05hd.jpeg",0],[4123185,-9590050,738,0,0,0,3,"cbtv49hd.jpeg",0],[4123184,-9588480,739,0,0,0,3,"cbtv51hd.jpeg",0],[4123180,-9587867,740,0,0,0,3,"cbtv03hd.jpeg",0],[4123120,-9583976,741,0,0,0,3,"cbtv57hd.jpeg",0],[4123107,-9590850,742,0,0,0,3,"cbtv01hd.jpeg",0],[4122867,-9583881,743,0,0,0,3,"cbtv66hd.jpeg",0],[4122721,-9583674,744,0,0,0,3,"cbtv63hd.jpeg",0],[4122400,-9583600,745,0,0,0,3,"cbtv67hd.jpeg",0],[4122012,-9586106,746,0,0,0,3,"cbtv27hd.jpeg",1],[4121984,-9583264,747,0,0,0,3,"cbtv53hd.jpeg",0],[4121982,-9584966,748,0,0,0,3,"cbtv28hd.jpeg",1],[4121939,-9583092,749,0,0,0,3,"cbtv54hd.jpeg",0],[4121886,-9587955,750,0,0,0,3,"cbtv26hd.jpeg",1],[4120746,-9591657,751,0,0,0,3,"cbtv25hd.jpeg",1],[4118974,-9582265,752,0,0,0,3,"cbtv15hd.jpeg",0],[4117440,-9582391,753,0,0,0,3,"cbtv14hd.jpeg",0],[4114938,-9582258,754,0,0,0,3,"cbtv13hd.jpeg",0],[4114650,-9264360,755,0,0,0,2,"RWIS_56-00.jpg",1],[4114250,-9154080,756,0,0,0,2,"RWIS_89-01.jpg",1],[4109444,-9251373,757,0,0,0,4,"D5TV04.jpg",1],[4107997,-9582548,758,0,0,0,0,"RA29NB37-01-CENTER.jpg",0],[4104983,-9430800,759,0,0,0,2,"RWIS_13-00.jpg",1],[4104480,-9582400,760,0,0,0,2,"RWIS_90-01.jpg",1],[4102670,-9379430,761,0,0,0,2,"RWIS_35-00.jpg",1],[4102605,-9379449,762,0,0,0,5,"WWD55.jpg",0],[4101683,-9242120,763,0,0,0,-1,"",1],[4101349,-9379687,764,0,0,0,0,"RA35SB33-CarParking.jpg",0],[4101297,-9379517,765,0,0,0,0,"RA35NB33-Entrance.jpg",0],[4099163,-9379950,766,0,0,0,0,"RA35SB31-Entrance.jpg",0],[4098000,-9498380,767,0,0,0,-1,"",1],[4090592,-9137213,768,0,0,0,4,"D5TV02Q.jpg",1],[4090591,-9137215,769,0,0,0,4,"D5TV02.jpg",1],[4089567,-9155550,770,0,0,0,1,"RWIS_32-00.jpg",1],[4081300,-9109920,771,0,0,0,-1,"",1],[4079063,-9285797,772,0,0,0,2,"RWIS_96-01.jpg",1],[4076304,-9240725,773,0,0,0,3,"iwz3103lb.jpeg",1],[4075312,-9286129,774,0,0,0,2,"RWIS_95-01.jpg",1],[4073967,-9300270,775,0,0,0,2,"RWIS_11-00.jpg",1],[4073900,-9250560,776,0,0,0,2,"RWIS_81-01.jpg",1],[4073867,-9384170,777,0,0,0,-1,"",1],[4071210,-9427210,778,0,0,0,2,"RWIS_85-01.jpg",1],[4068950,-9578340,779,0,0,0,2,"RWIS_39-00.jpg",0],[4067730,-9478080,780,0,0,0,2,"RWIS_55-00.jpg",1],[4065780,-9206200,781,0,0,0,2,"RWIS_59-00.jpg",1],[4065609,-9385364,782,0,0,0,0,"RA35DEC01-North.jpg",0],[4065529,-9385454,783,0,0,0,0,"RA35DEC02-Northeast.jpg",0],[4065344,-9386121,784,0,0,0,0,"RA35SB07-East.jpg",0],[4065261,-9385860,785,0,0,0,0,"RA35NB07-North.jpg",0],[4063912,-9155790,786,0,0,0,5,"WWD41.jpg",1],[4046480,-9157060,787,0,0,0,2,"RWIS_80-01.jpg",1],[4043624,-9142580,788,0,0,0,2,"RWIS_94-01.jpg",1]]}
+</script>
+<script>
+'use strict';
+
+// ============================================================ データの読み込み
+// （build_world.py → export.py --target world が、上のscriptタグに圧縮した台帳を埋め込みます）
+var CAMS = [];
+var DATA_UPDATED = '';
+try {
+  var raw = JSON.parse(document.getElementById('livecam-world-data').textContent);
+  DATA_UPDATED = raw.u || '';
+  var kinds = raw.k || [];
+  CAMS = (raw.c || []).map(function (row, i) {
+    return {
+      id: i,
+      lat: row[0] / 1e5,
+      lon: row[1] / 1e5,
+      name: raw.n[row[2]] || 'カメラ',
+      owner: row[3] >= 0 ? (raw.m[row[3]] || '') : '',
+      place: row[4] >= 0 ? (raw.a[row[4]] || '') : '',
+      page: row[5] >= 0 ? (raw.p[row[5]] || '') : '',
+      img: row[6] >= 0 ? (raw.b[row[6]] || '') + (row[7] || '') : '',
+      cat: (row.length > 8 && row[8] >= 0) ? (kinds[row[8]] || 'road') : 'road'
+    };
+  });
+} catch (e) { CAMS = []; }
+
+var $ = function (id) { return document.getElementById(id); };
+$('updated').textContent = DATA_UPDATED || '不明';
+
+var CAT_LABEL = { expressway: '高速道路', road: '一般道など' };
+function pinColor(cam) {
+  var css = getComputedStyle(document.documentElement);
+  if (!cam.img) { return css.getPropertyValue('--pin-nocam').trim(); }
+  return css.getPropertyValue(cam.cat === 'expressway' ? '--pin-express' : '--pin').trim();
+}
+
+// ============================================================ 絞り込み
+function filteredCams() {
+  var q = ($('search').value || '').trim().toLowerCase();
+  var ex = $('cat-express').checked;
+  var rd = $('cat-road').checked;
+  return CAMS.filter(function (c) {
+    if (c.cat === 'expressway' ? !ex : !rd) { return false; }
+    if (q && c.name.toLowerCase().indexOf(q) < 0) { return false; }
+    return true;
+  });
+}
+
+// ============================================================ 一覧（20台ずつ）
+var PAGE = 20;
+var shownCount = 0;
+var currentList = [];
+
+function renderList(reset) {
+  if (reset) { shownCount = 0; currentList = filteredCams(); }
+  var list = $('cam-list');
+  if (reset) { list.textContent = ''; }
+  var end = Math.min(shownCount + PAGE, currentList.length);
+  for (var i = shownCount; i < end; i++) {
+    (function (cam) {
+      var li = document.createElement('li');
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'cam-btn';
+      var dot = document.createElement('span');
+      dot.className = 'cam-dot';
+      dot.style.background = pinColor(cam);
+      var nameBox = document.createElement('span');
+      nameBox.className = 'cam-name';
+      nameBox.textContent = cam.name;
+      var sub = document.createElement('span');
+      sub.className = 'cam-sub';
+      sub.textContent = (CAT_LABEL[cam.cat] || cam.cat) + '・' + cam.place;
+      nameBox.appendChild(sub);
+      var go = document.createElement('span');
+      go.className = 'cam-go';
+      go.textContent = cam.img ? '▶ 見る' : '🔗 公式で';
+      btn.appendChild(dot); btn.appendChild(nameBox); btn.appendChild(go);
+      btn.addEventListener('click', function () { openViewer(cam); });
+      li.appendChild(btn);
+      list.appendChild(li);
+    })(currentList[i]);
+  }
+  shownCount = end;
+  $('count-note').textContent = currentList.length
+    ? shownCount + ' 台を表示中（あてはまるカメラ ' + currentList.length + ' 台）'
+    : 'あてはまるカメラが見つかりませんでした';
+  $('btn-more').hidden = shownCount >= currentList.length;
+  drawMap();
+}
+
+$('search').addEventListener('input', function () { renderList(true); });
+$('cat-express').addEventListener('change', function () { renderList(true); });
+$('cat-road').addEventListener('change', function () { renderList(true); });
+$('btn-more').addEventListener('click', function () { renderList(false); });
+
+// ============================================================ 分布図（背景地図なしの点プロット）
+var MAP = { west: -96.7, east: -90.0, south: 40.3, north: 43.6 };  // アイオワ州のだいたいの範囲
+
+function drawMap() {
+  var canvas = $('iowa-map');
+  var boxW = canvas.parentElement.clientWidth;
+  if (!boxW) { return; }
+  // 縦横の比率：経度の幅は緯度42度ぶん縮めて、実際の形に近づける
+  var aspect = ((MAP.north - MAP.south) / ((MAP.east - MAP.west) * Math.cos(42 * Math.PI / 180)));
+  var boxH = Math.round(boxW * aspect);
+  var dpr = window.devicePixelRatio || 1;
+  canvas.width = boxW * dpr;
+  canvas.height = boxH * dpr;
+  canvas.style.height = boxH + 'px';
+  var ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, boxW, boxH);
+
+  var visible = currentList;
+  for (var i = 0; i < visible.length; i++) {
+    var c = visible[i];
+    var x = (c.lon - MAP.west) / (MAP.east - MAP.west) * boxW;
+    var y = (MAP.north - c.lat) / (MAP.north - MAP.south) * boxH;
+    ctx.beginPath();
+    ctx.arc(x, y, 3, 0, Math.PI * 2);
+    ctx.fillStyle = pinColor(c);
+    ctx.globalAlpha = c.img ? 0.85 : 0.45;
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
+$('iowa-map').addEventListener('click', function (ev) {
+  var rect = ev.currentTarget.getBoundingClientRect();
+  var px = ev.clientX - rect.left;
+  var py = ev.clientY - rect.top;
+  var best = null, bestD = 20 * 20;  // 20px以内で一番近い点
+  for (var i = 0; i < currentList.length; i++) {
+    var c = currentList[i];
+    var x = (c.lon - MAP.west) / (MAP.east - MAP.west) * rect.width;
+    var y = (MAP.north - c.lat) / (MAP.north - MAP.south) * rect.height;
+    var d = (x - px) * (x - px) + (y - py) * (y - py);
+    if (d < bestD) { bestD = d; best = c; }
+  }
+  if (best) { openViewer(best); }
+});
+
+var resizeTimer = null;
+window.addEventListener('resize', function () {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(drawMap, 200);
+});
+
+// ============================================================ カメラを見る画面
+var viewerCam = null;
+var reloadTimer = null;
+var lastFocus = null;
+
+function showShot(cam, bustCache) {
+  var shot = $('viewer-shot');
+  shot.textContent = '';
+  if (!cam.img) {
+    var msg = document.createElement('p');
+    msg.className = 'viewer-msg';
+    msg.textContent = 'このカメラの映像は、このページには出せません。「🔗 公式ページ」からご覧ください。';
+    shot.appendChild(msg);
+    return;
+  }
+  var img = document.createElement('img');
+  img.alt = cam.name + ' の今の様子';
+  var url = cam.img;
+  if (bustCache) { url += (url.indexOf('?') < 0 ? '?' : '&') + 't=' + Date.now(); }
+  img.onerror = function () {
+    // 「?t=」を受け付けないサーバーだったときは、素のURLでもう一度だけ試す
+    if (bustCache && img.src !== cam.img) { img.onerror = showError; img.src = cam.img; return; }
+    showError();
+  };
+  function showError() {
+    shot.textContent = '';
+    var msg = document.createElement('p');
+    msg.className = 'viewer-msg';
+    msg.textContent = '写真を読み込めませんでした（通信・カメラの一時的な不調かもしれません）。「🔄 今すぐ更新」か「🔗 公式ページ」をお試しください。';
+    shot.appendChild(msg);
+  }
+  img.src = url;
+  shot.appendChild(img);
+}
+
+function openViewer(cam) {
+  viewerCam = cam;
+  lastFocus = document.activeElement;
+  $('viewer-title').textContent = cam.name;
+  $('viewer-sub').textContent = (CAT_LABEL[cam.cat] || cam.cat) + '・' + cam.place + '・' + cam.owner;
+  $('viewer-page').href = cam.page || 'https://511ia.org/';
+  showShot(cam, false);
+  $('viewer').hidden = false;
+  $('viewer-close').focus();
+  clearInterval(reloadTimer);
+  reloadTimer = setInterval(function () { if (viewerCam) { showShot(viewerCam, true); } }, 30000);
+}
+
+function closeViewer() {
+  $('viewer').hidden = true;
+  viewerCam = null;
+  clearInterval(reloadTimer);
+  if (lastFocus && lastFocus.focus) { lastFocus.focus(); }
+}
+
+function stepViewer(delta) {
+  if (!viewerCam) { return; }
+  var idx = currentList.indexOf(viewerCam);
+  if (idx < 0) { return; }
+  var next = currentList[(idx + delta + currentList.length) % currentList.length];
+  openViewer(next);
+}
+
+$('viewer-close').addEventListener('click', closeViewer);
+$('viewer-reload').addEventListener('click', function () { if (viewerCam) { showShot(viewerCam, true); } });
+$('viewer-prev').addEventListener('click', function () { stepViewer(-1); });
+$('viewer-next').addEventListener('click', function () { stepViewer(1); });
+$('viewer').addEventListener('click', function (ev) { if (ev.target === ev.currentTarget) { closeViewer(); } });
+document.addEventListener('keydown', function (ev) {
+  if (ev.key === 'Escape' && !$('viewer').hidden) { closeViewer(); }
+});
+
+// 見ていないあいだは自動更新を止める（電池の節約）
+document.addEventListener('visibilitychange', function () {
+  if (document.hidden) { clearInterval(reloadTimer); }
+  else if (viewerCam) {
+    showShot(viewerCam, true);
+    reloadTimer = setInterval(function () { if (viewerCam) { showShot(viewerCam, true); } }, 30000);
+  }
+});
+
+// ============================================================ 起動
+renderList(true);
+</script>
+</body>
+</html>

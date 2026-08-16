@@ -29,13 +29,17 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DB_PATH = Path(__file__).resolve().parent / "data" / "livecams.json"
+WORLD_DB_PATH = Path(__file__).resolve().parent / "data" / "livecams_world.json"
 
 TRAFFIC_JSON = ROOT / "traffic-app" / "data" / "livecams.json"
 TRAFFIC_HTML = ROOT / "traffic-app" / "index.html"
+WORLD_HTML = ROOT / "traffic-app" / "world.html"
 
 # index.html の中の、台帳を書き込む場所の目印
 EMBED_START = '<script id="livecam-data" type="application/json">'
 EMBED_END = "</script>"
+# world.html（🌍 世界版ページ）の目印
+EMBED_START_WORLD = '<script id="livecam-world-data" type="application/json">'
 
 
 def to_compact(db: dict) -> dict:
@@ -80,18 +84,18 @@ def to_compact(db: dict) -> dict:
     }
 
 
-def write_html_embed(db: dict, html_path: Path) -> bool:
-    """index.html の中の台帳を書き換える。"""
+def write_html_embed(db: dict, html_path: Path, marker: str = EMBED_START) -> bool:
+    """ページの中の台帳（埋め込み）を書き換える。"""
     if not html_path.exists():
         print(f"⚠️ {html_path} が見つからないので、埋め込みは省略します", file=sys.stderr)
         return False
 
     html = html_path.read_text(encoding="utf-8")
-    start = html.find(EMBED_START)
+    start = html.find(marker)
     if start < 0:
         print(f"⚠️ {html_path.name} に台帳の目印が見つかりませんでした", file=sys.stderr)
         return False
-    body_start = start + len(EMBED_START)
+    body_start = start + len(marker)
     end = html.find(EMBED_END, body_start)
     if end < 0:
         print(f"⚠️ {html_path.name} の台帳の終わりが見つかりませんでした", file=sys.stderr)
@@ -129,7 +133,23 @@ def export_traffic_app(db: dict) -> None:
         print(f"💾 ページにも埋め込みました: {TRAFFIC_HTML}（{TRAFFIC_HTML.stat().st_size / 1024:.0f} KB）")
 
 
-TARGETS = {"traffic-app": export_traffic_app}
+def export_world(_db: dict) -> None:
+    """🌍 世界版ページ（traffic-app/world.html）に配る。
+
+    読むのは日本の台帳ではなく **世界台帳**（data/livecams_world.json）です。
+    日本の台帳（引数の db）は使いません。
+    """
+    if not WORLD_DB_PATH.exists():
+        print(f"⚠️ 世界台帳がありません: {WORLD_DB_PATH}\n"
+              "   先に『python3 livecam-db/build_world.py』を実行してください。", file=sys.stderr)
+        return
+    world = json.loads(WORLD_DB_PATH.read_text(encoding="utf-8"))
+    print(f"🌍 世界台帳: {world['count']} 台（映像を出せる {world['withImage']} 台）")
+    if write_html_embed(world, WORLD_HTML, marker=EMBED_START_WORLD):
+        print(f"💾 世界版ページに埋め込みました: {WORLD_HTML}（{WORLD_HTML.stat().st_size / 1024:.0f} KB）")
+
+
+TARGETS = {"traffic-app": export_traffic_app, "world": export_world}
 
 
 def main() -> int:

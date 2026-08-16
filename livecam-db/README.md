@@ -146,10 +146,11 @@ python3 livecam-db/build_world.py --no-verify  # 写真の確認をとばす
 ```
 
 - できあがる場所：`data/livecams_world.json`（日本の `livecams.json` とは**別ファイル**）
-- **日本のアプリには配りません**（`export.py` は日本の台帳だけを配るので、交通ページが重くならない）。
-  世界版のページを作るときの土台です。
+- 配り先は **🌍 世界版ページ `traffic-app/world.html` だけ**（`export.py --target world` が埋め込む）。
+  日本版ページ（`traffic-app/index.html`）には混ぜないので、日本のページは重くなりません。
 - 市区町村付け（国土地理院＝日本専用）は使えないため、場所は「アメリカ・アイオワ州」のような州単位です。
-- いまは**手動更新**（試験中のため）。本採用するときに週1の自動更新へ入れるか判断します。
+- 更新は日本の台帳と同じ**毎週火曜 5:10** に自動実行（`livecam-update.yml`）。
+  世界分の取得に失敗しても、日本の台帳の更新は止めません（おまけレイヤーの考え方）。
 
 | 情報源 | 中身 | 利用条件 |
 |---|---|---|
@@ -262,13 +263,13 @@ python3 livecam-db/build_world.py --no-verify  # 写真の確認をとばす
 |---|---|
 | `build.py` | 台帳を作る司令塔（集める→まとめる→確認→保存） |
 | `build_world.py` | 🌍 世界台帳（試験）を作る司令塔（日本版とは別ファイルを作る） |
-| `export.py` | 台帳を各アプリに配る係（**日本の台帳だけ**を配る） |
+| `export.py` | 台帳を各アプリに配る係（日本→`traffic-app`／世界→`world.html`。混ぜない） |
 | `livecam.py` | 台帳を**使う**ための小さな道具（近くを探す・ルート沿いを探す・検索） |
 | `sources/base.py` | どの情報源でも使う共通の道具（取得・https確認・市区町村） |
 | `sources/jice.py` | 情報源①：JICE の道路／河川ライブカメラ |
 | `sources/kaiho.py` | 情報源②：海上保安庁のライブカメラ（灯台・港・岬） |
 | `sources/us_iowa.py` | 情報源③：🌍 アイオワ州交通局の道路カメラ（世界台帳・試験） |
 | `data/livecams.json` | できあがった台帳（**大もと**） |
-| `data/livecams_world.json` | 🌍 世界台帳（試験・**日本のアプリには配らない**） |
+| `data/livecams_world.json` | 🌍 世界台帳（試験・配り先は `traffic-app/world.html` のみ） |
 
 すべて **Python 3 の標準機能のみ**で動きます（追加インストール不要）。
