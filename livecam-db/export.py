@@ -12,6 +12,10 @@
       ※ ①②の両方を同時に書き換えるので、ズレません。
       ※ ページに埋め込むのは、index.html をダブルクリックで開いたとき
          （file://）でも動くようにするためです。
+      ③ traffic-app/data/livecams_world.json … 🌍 世界台帳（試験）のコピー
+      ※ 世界分は日本とは**別のファイル**にしています。ページには埋め込まず、
+         「🇺🇸 アイオワ州のカメラを見る」ボタンを押したときだけ読み込む形なので、
+         このファイルが増えてもページの表示は重くなりません。
 
 使い方:
     python3 livecam-db/export.py              # 全部の配り先に配る
@@ -29,8 +33,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DB_PATH = Path(__file__).resolve().parent / "data" / "livecams.json"
+WORLD_DB_PATH = Path(__file__).resolve().parent / "data" / "livecams_world.json"
 
 TRAFFIC_JSON = ROOT / "traffic-app" / "data" / "livecams.json"
+TRAFFIC_WORLD_JSON = ROOT / "traffic-app" / "data" / "livecams_world.json"
 TRAFFIC_HTML = ROOT / "traffic-app" / "index.html"
 
 # index.html の中の、台帳を書き込む場所の目印
@@ -127,6 +133,29 @@ def export_traffic_app(db: dict) -> None:
 
     if write_html_embed(db, TRAFFIC_HTML):
         print(f"💾 ページにも埋め込みました: {TRAFFIC_HTML}（{TRAFFIC_HTML.stat().st_size / 1024:.0f} KB）")
+
+    export_world_to_traffic()
+
+
+def export_world_to_traffic() -> None:
+    """🌍 世界台帳（試験）を交通ページに配る。
+
+    まだ試験なので、世界台帳が無くても何も言わずに飛ばします
+    （build_world.py を動かしていない環境でも export.py が普通に終わるように）。
+    ⚖️ アイオワ州のデータは CC BY 4.0（出典を書けば再利用可）。
+       出典は `sources` と各カメラの `owner` に入っているので、消さないでください。
+    """
+    if not WORLD_DB_PATH.exists():
+        return
+
+    world = json.loads(WORLD_DB_PATH.read_text(encoding="utf-8"))
+    TRAFFIC_WORLD_JSON.parent.mkdir(parents=True, exist_ok=True)
+    TRAFFIC_WORLD_JSON.write_text(
+        json.dumps(world, ensure_ascii=False, separators=(",", ":")) + "\n",
+        encoding="utf-8",
+    )
+    print(f"🌍 世界台帳も配りました: {TRAFFIC_WORLD_JSON}"
+          f"（{world.get('count', 0)} 台・{TRAFFIC_WORLD_JSON.stat().st_size / 1024:.0f} KB）")
 
 
 TARGETS = {"traffic-app": export_traffic_app}
