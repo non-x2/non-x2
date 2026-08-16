@@ -50,7 +50,8 @@ CLASS_JP = {
     "STS": "亜熱帯暴風",
     "HU": "ハリケーン",
     "MH": "ハリケーン",
-    "PTC": "温帯低気圧化",
+    # ⚠️ 略号の PTC は Potential（たまご）。Post（温帯低気圧化）は PC。混同しないこと
+    "PTC": "熱帯低気圧のたまご",
     "PC": "温帯低気圧化",
 }
 DVLP_JP = {
@@ -132,9 +133,16 @@ def to_num(value):
 
 
 def to_int(value):
-    """気圧などを整数に（「991.0hPa」と表示されるのを防ぐ）。"""
+    """整数に（「991.0hPa」と表示されるのを防ぐ）。"""
     f = to_num(value)
     return round(f) if f is not None else None
+
+
+def to_pressure(value):
+    """気圧を整数に。NHCは「値なし」を 9999 という数字で送ってくるので、
+    地球の気圧としてありえない値（800〜1100hPaの外）は「無し」として捨てる。"""
+    p = to_int(value)
+    return p if p is not None and 800 <= p <= 1100 else None
 
 
 def kt_to_ms(kt):
@@ -254,7 +262,7 @@ def build_storm(entry: dict, layers: dict, now_utc: datetime) -> dict:
                     "lon": to_num(xy[0]),
                     "windMs": kt_to_ms(props.get("maxwind")),
                     "gustMs": kt_to_ms(props.get("gust")),
-                    "pressure": to_int(props.get("mslp")),
+                    "pressure": to_pressure(props.get("mslp")),
                 }
             )
         points = [p for p in points if p["hours"] is not None and p["lat"] is not None]
@@ -277,7 +285,7 @@ def build_storm(entry: dict, layers: dict, now_utc: datetime) -> dict:
             "lon": lon,
             "windMs": kt_to_ms(entry.get("intensity")),
             "gustMs": None,
-            "pressure": to_int(entry.get("pressure")),
+            "pressure": to_pressure(entry.get("pressure")),
         }
 
     basin_code = bin_no[:2] if bin_no else str(entry.get("id") or "")[:2].upper()
@@ -461,15 +469,26 @@ def main() -> int:
         "storms": storms,
     }
 
-    # 中身が前回と同じなら書き換えない（無意味なコミットを増やさないため）
+    # 中身が前回と同じなら書き換えない（無意味なコミットを増やさないため）。
+    # ⚠️ ただし日付（generatedAt）だけは、11時間より古くなったら書き直す。
+    # ページ側は「控えが12時間より古い＝確認できていない」と表示を休む決まりなので、
+    # 台風0個の平和な時期に日付が止まったままだと、毎時ちゃんと確認できているのに
+    # 「休んでいます」と誤解させてしまうため（書き直しても最大で1日2コミット程度）。
     if OUT_PATH.exists():
         try:
             before = json.loads(OUT_PATH.read_text(encoding="utf-8"))
             if {k: v for k, v in before.items() if k != "generatedAt"} == {
                 k: v for k, v in payload.items() if k != "generatedAt"
             }:
-                print("✅ 発表に変わりはありませんでした（ファイルはそのまま）")
-                return 0
+                prev_dt = None
+                try:
+                    prev_dt = datetime.fromisoformat(str(before.get("generatedAt")))
+                except ValueError:
+                    pass
+                if prev_dt and datetime.now(JST) - prev_dt < timedelta(hours=11):
+                    print("✅ 発表に変わりはありませんでした（ファイルはそのまま）")
+                    return 0
+                print("🕐 発表は同じですが、控えの日付が古くなったので日付だけ書き直します")
         except (OSError, ValueError):
             pass
 
