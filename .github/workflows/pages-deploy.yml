@@ -10,7 +10,8 @@
 # 公開後のURL： https://non-x2.github.io/non-x2/typhoon-app/
 #
 # 🔒 公開するのは「入口ページ（index.html）」「台風ページ（typhoon-app/）」
-#    「防災ページ（bousai-app/）」「交通・ライブカメラ（traffic-app/）」だけです。
+#    「防災ページ（bousai-app/）」「交通・ライブカメラ（traffic-app/）」
+#    「世界のライブカメラ（world-livecam/）」だけです。
 #    作業ログ・脚本・YouTubeの型などは、ホームページとしては公開しません。
 
 name: 🌐 ページを公開（GitHub Pages）
@@ -68,7 +69,8 @@ jobs:
       - name: リポジトリを取得
         uses: actions/checkout@v4
 
-      # 🔒 公開するのは「入口ページ」「台風ページ」「防災ページ」「交通ページ」だけ。
+      # 🔒 公開するのは「入口ページ」「台風ページ」「防災ページ」「交通ページ」
+      #    「世界のライブカメラ」だけ。
       #    作業ログ・脚本・YouTubeの型などはGitHub上に置いたままにして、
       #    ホームページとしては出しません（検索に載る範囲を必要最小限にするため）。
       - name: 公開するファイルだけを集める
@@ -78,6 +80,7 @@ jobs:
           cp -r typhoon-app _site/
           cp -r bousai-app _site/
           cp -r traffic-app _site/
+          cp -r world-livecam _site/
           echo "--- 公開されるファイル ---"
           find _site -type f | sort
 
