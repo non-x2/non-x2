@@ -32,6 +32,13 @@ jobs:
       - name: 気象庁から台風情報を取得
         run: python3 typhoon-app/scripts/fetch_typhoon.py
 
+      - name: 世界の台風を取得（米国ハリケーンセンター）
+        # 🌐 3D地球儀タブ用のおまけレイヤー。ここが失敗しても
+        # 気象庁ぶんの更新は止めない（continue-on-error）。
+        # スクリプト自体にも「失敗したら書き換えない」安全装置が入っている。
+        run: python3 typhoon-app/scripts/fetch_world.py
+        continue-on-error: true
+
       - name: 変わっていればコミットして反映
         run: |
           if [ -z "$(git status --porcelain typhoon-app/data)" ]; then
@@ -41,7 +48,7 @@ jobs:
           git config user.name  'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add typhoon-app/data
-          git commit -m '🌀 台風情報データを自動更新（気象庁）'
+          git commit -m '🌀 台風情報データを自動更新（気象庁・世界はNHC）'
           # 同時刻に他の更新が入っていた場合に備えて、取り込んでから押す
           for i in 1 2 3; do
             git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" && exit 0
