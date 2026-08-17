@@ -19,18 +19,29 @@
 //
 //   ☁️ クラウドの作業部屋には Chromium が最初から入っています。
 //      その場合は自動で /opt/pw-browsers/chromium を使います（追加のダウンロード不要）。
-//   ページを足したいときは、下の PAGES に1行足すだけです。
+//   ページを足したいときは、下の ALL_PAGES に1行足すだけです。
+//
+//   3) 1ページだけ測りたいとき（直したページだけ測り直す）
+//        ONLY=world node tools/check_a11y.js     # 🌍 世界のライブカメラだけ
+//        ONLY=bousai node tools/check_a11y.js    # 🛟 防災情報だけ
 // ------------------------------------------------------------------
 
 const fs = require('fs');
 const { chromium } = require('playwright');
 
 const BASE = process.env.BASE || 'http://localhost:8898';
-const PAGES = [
+const ALL_PAGES = [
   ['🌀 台風情報', 'typhoon-app/'],
   ['🛟 防災情報', 'bousai-app/'],
   ['🚗 交通・ライブカメラ', 'traffic-app/'],
+  ['🌍 世界のライブカメラ', 'world-livecam/'],
 ];
+// 1ページだけ点検したいときは ONLY を使います。
+//   例： ONLY=world node tools/check_a11y.js   → 🌍 世界のライブカメラだけ測る
+// 名前か置き場所にその文字が入っているページだけを測ります（直したページだけ測り直したいときに便利）。
+const PAGES = process.env.ONLY
+  ? ALL_PAGES.filter(([name, path]) => `${name} ${path}`.includes(process.env.ONLY))
+  : ALL_PAGES;
 const NARROW = [320, 280];          // 測る画面の幅（いちばん狭いスマホを想定）
 const TAP_MIN = 44;                 // 押しやすさのめやす（px）
 
