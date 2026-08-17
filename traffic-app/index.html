@@ -498,9 +498,26 @@
   }
   footer a { color: var(--accent); }
   /* 出典の段落は「読むもの」なので、行の間隔だけ少しゆったりさせる
-     （ここで押せる範囲を広げると、折り返した行のリンク同士が重なって
-       押し間違いのもとになります） */
+     （ここで padding を足して押せる範囲を広げると、折り返した行のリンク同士が
+       重なって押し間違いのもとになります） */
   .footer-credit { line-height: 2.1; }
+  /* 行内リンク6件は、.obs（交通量の丸）と同じ「透明な当たり判定を疑似要素で
+     ひとまわり足す」方式で押しやすくします。文字の大きさ・色・改行位置は
+     1つも変えていません（::after は content:'' で見た目を持たず、position:absolute
+     なので文字の並び＝レイアウトにも影響しません）。
+     横には広げません（「・」「（」のように文字1つぶんしか隙間が無い場所があり、
+     隣のリンクと当たり判定が重なって押し間違うのを避けるため）。
+     縦は line-height: 2.1 が作る行の余白（半分で約7px）より少しだけ小さい6pxまで
+     広げるので、折り返した次の行のリンクの当たり判定とは重なりません。 */
+  .footer-credit a { position: relative; }
+  .footer-credit a::after {
+    content: '';
+    position: absolute;
+    top: -6px;
+    bottom: -6px;
+    left: 0;
+    right: 0;
+  }
   /* いっぽう、行き来に使うリンクは押しやすさが大事なので、
      1行に1つ・高さ44pxのボタンのように並べます */
   .footer-nav {
@@ -871,6 +888,29 @@
     t = Math.max(0, Math.min(1, t));
     var dx = px - vx * t, dy = py - vy * t;
     return Math.sqrt(dx * dx + dy * dy) * Math.PI / 180 * R_EARTH;
+  }
+
+  // ↓の2つは distMeters / distToSegment と同じ計算を「平方根を取る前の2乗」のまま返す版。
+  // カメラが何百台もある中から一番近い1点を探すときは、候補ひとつひとつで平方根を
+  // 取らなくても、2乗のままの大小比較で同じ「一番近い」が求まります（平方根は
+  // 値が大きいほど結果も大きくなる関数なので、順序が入れ替わらないため）。
+  // 見つかった後に呼び出し側で1回だけ平方根を取れば、実際のメートルに戻せます。
+  function distMetersSq(lat1, lon1, lat2, lon2) {
+    var la = (lat1 + lat2) / 2 * Math.PI / 180;
+    var dx = (lon2 - lon1) * Math.PI / 180 * Math.cos(la);
+    var dy = (lat2 - lat1) * Math.PI / 180;
+    return (dx * dx + dy * dy) * R_EARTH * R_EARTH;
+  }
+
+  function distToSegmentSq(lat, lon, aLat, aLon, bLat, bLon) {
+    var k = Math.cos((aLat + bLat) / 2 * Math.PI / 180);
+    var px = (lon - aLon) * k, py = lat - aLat;
+    var vx = (bLon - aLon) * k, vy = bLat - aLat;
+    var len2 = vx * vx + vy * vy;
+    var t = len2 > 0 ? (px * vx + py * vy) / len2 : 0;
+    t = Math.max(0, Math.min(1, t));
+    var dx = px - vx * t, dy = py - vy * t;
+    return (dx * dx + dy * dy) * (Math.PI / 180 * R_EARTH) * (Math.PI / 180 * R_EARTH);
   }
 
   function fmtKm(m) {
@@ -1345,10 +1385,48 @@
   //
   // すべてのカメラ×すべてのルート点を総当たりすると重いので、
   // ルートの点を「マス目」に登録しておいて、カメラの近くのマスだけを調べます。
-
+  //
+  // 🚀 追加の高速化（カメラが0台で60km四方まで探索を広げる場面向け。
+  //    やっているのは「明らかに対象外なものを、確定の計算に入る前に安く捨てる」
+  //    「同じ答えを、より安い計算で出す」の2つだけなので、選ばれるカメラや
+  //    その順番（＝結果）は一切変わりません）：
+  //   ① 先に緯度経度の「四角い箱」でふるい落とす。ルートの外周から maxRadiusM ぶん
+  //      広げた範囲の外にいるカメラは、マス目を1つも調べなくても対象外と分かるので、
+  //      安い引き算の比較だけで先に除外します（全国1,412台のうち、ルートから遠い
+  //      都道府県のカメラはこれで早々に脱落します）。箱は必ず本来の候補を包み込む
+  //      広さで作るので、除外され過ぎて結果が変わることはありません
+  //      （緯度1度ぶんの距離は場所によらず一定、経度1度ぶんの距離は高緯度ほど短くなる
+  //      ので、箱の中でいちばん高緯度な場所を基準にした安全側＝広めの余白にしています）。
+  //   ② マス目の中を調べるときは、距離をメートルに直す平方根（Math.sqrt）を候補点
+  //      ひとつひとつでは取らず、カメラ1台につき「一番近い候補が決まった後」に
+  //      1回だけ取ります（平方根は値が大きいほど結果も大きくなる関数なので、
+  //      2乗のままの大小比較でも「一番近い」の答えは変わりません）。
   function camsNearRoute(coords, maxRadiusM, pool) {
     pool = pool || CAMS;
-    if (!pool.length) return [];
+    if (!pool.length || !coords.length) return [];
+
+    // ① 四角い箱でふるい落とす
+    var minLat = Infinity, maxLat = -Infinity, minLon = Infinity, maxLon = -Infinity;
+    for (var ci = 0; ci < coords.length; ci++) {
+      var cLat = coords[ci][0], cLon = coords[ci][1];
+      if (cLat < minLat) minLat = cLat;
+      if (cLat > maxLat) maxLat = cLat;
+      if (cLon < minLon) minLon = cLon;
+      if (cLon > maxLon) maxLon = cLon;
+    }
+    var latMarginDeg = maxRadiusM / R_EARTH * 180 / Math.PI; // 緯度1度＝どこでも同じ距離
+    var boxMinLat = minLat - latMarginDeg, boxMaxLat = maxLat + latMarginDeg;
+    // 経度1度ぶんの距離は緯度が高いほど縮む（cos）。箱の中でいちばん極寄りの緯度を
+    // 基準にすれば、箱のどこでも「本来必要な幅」以上の余白になり安全側です。
+    var refLat = Math.min(89, Math.max(Math.abs(boxMinLat), Math.abs(boxMaxLat)));
+    var lonMarginDeg = maxRadiusM / (R_EARTH * Math.cos(refLat * Math.PI / 180)) * 180 / Math.PI;
+    var boxMinLon = minLon - lonMarginDeg, boxMaxLon = maxLon + lonMarginDeg;
+    var candidates = pool.filter(function (cam) {
+      return cam.lat >= boxMinLat && cam.lat <= boxMaxLat &&
+             cam.lon >= boxMinLon && cam.lon <= boxMaxLon;
+    });
+    if (!candidates.length) return [];
+
     var cell = 0.05;                                    // マス目の大きさ（度）。約5.5km四方。
     var span = Math.max(1, Math.ceil(maxRadiusM / 5500)); // 何マス先まで見るか
     var grid = {};
@@ -1363,10 +1441,12 @@
       cum[j] = cum[j - 1] + distMeters(coords[j - 1][0], coords[j - 1][1], coords[j][0], coords[j][1]);
     }
 
+    var maxRadiusSq = maxRadiusM * maxRadiusM;
     var found = [];
-    pool.forEach(function (cam) {
+    candidates.forEach(function (cam) {
       var gy = Math.floor(cam.lat / cell), gx = Math.floor(cam.lon / cell);
-      var best = Infinity, bestIdx = -1;
+      // ② 平方根はまだ取らず、2乗のままで「一番近い」を探す
+      var bestSq = Infinity, bestIdx = -1;
       for (var dy = -span; dy <= span; dy++) {
         for (var dx = -span; dx <= span; dx++) {
           var list = grid[(gy + dy) + ':' + (gx + dx)];
@@ -1374,15 +1454,16 @@
           for (var k = 0; k < list.length; k++) {
             var idx = list[k];
             // 手前の点との線分で測る（点と点のすき間に入っているカメラも拾うため）
-            var d = idx > 0
-              ? distToSegment(cam.lat, cam.lon, coords[idx - 1][0], coords[idx - 1][1], coords[idx][0], coords[idx][1])
-              : distMeters(cam.lat, cam.lon, coords[idx][0], coords[idx][1]);
-            if (d < best) { best = d; bestIdx = idx; }
+            var dSq = idx > 0
+              ? distToSegmentSq(cam.lat, cam.lon, coords[idx - 1][0], coords[idx - 1][1], coords[idx][0], coords[idx][1])
+              : distMetersSq(cam.lat, cam.lon, coords[idx][0], coords[idx][1]);
+            if (dSq < bestSq) { bestSq = dSq; bestIdx = idx; }
           }
         }
       }
-      if (bestIdx >= 0 && best <= maxRadiusM) {
-        found.push({ cam: cam, offRoute: best, along: cum[bestIdx] });
+      if (bestIdx >= 0 && bestSq <= maxRadiusSq) {
+        // 平方根はカメラ1台につき、ここで最後に1回だけ
+        found.push({ cam: cam, offRoute: Math.sqrt(bestSq), along: cum[bestIdx] });
       }
     });
 
