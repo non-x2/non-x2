@@ -283,6 +283,16 @@
     background: var(--obs-na);
     box-shadow: 0 1px 3px rgba(0,0,0,.35);
   }
+  /* 丸そのものは 15px のまま（大きくすると地図が丸で埋まって道が見えなくなるため）。
+     指で押せる範囲だけを、透明な当たり判定でひとまわり広げます。見た目は1ドットも変わりません。
+     実測：押せる範囲が直径 14px → 18〜24px。
+     （隣の丸が近いところでは、その丸に取られるぶん少し狭くなります） */
+  .obs::before {
+    content: '';
+    position: absolute;
+    inset: -8px;
+    border-radius: 50%;
+  }
   .obs.is-lot { background: var(--obs-lot); }
   .obs.is-more { background: var(--obs-more); }
   .obs.is-usual { background: var(--obs-usual); }
