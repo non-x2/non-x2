@@ -78,6 +78,9 @@
     padding: 0.4rem 0.8rem;
     margin: 0.5rem 0 0;
   }
+  /* ⚠️ これが無いと、hidden を付けても消えません（上の display が hidden より強いため）。
+     過去に同じ失敗をしています → docs/トラブル解決記録.md の T18 */
+  .stale-note[hidden] { display: none; }
   #refresh-btn {
     font: inherit;
     font-size: 0.85rem;
