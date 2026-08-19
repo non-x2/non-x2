@@ -100,6 +100,34 @@ def is_shallow_clone() -> bool:
     return (REPO_ROOT / ".git" / "shallow").is_file()
 
 
+def try_unshallow() -> bool:
+    """浅いクローンなら、GitHubから全履歴を取り直す。成功したら True。
+
+    ⚠️ これが無いと数字が「増えたり減ったり」します。
+    クラウドの作業部屋は毎回ちがう深さの履歴しか持たないため、
+    そのまま数えると「総コミット数 85 →50」のように**後ろ向きに**書き換わり、
+    成長を見るはずの進化レポートが逆走してしまいます（2026-08-17 に実際に発生）。
+    全履歴を取ってから数えれば、どの部屋で実行しても同じ数字になります。
+
+    ネットにつながらない・取得に失敗したときは False を返し、
+    呼び出し側が「一部の履歴での数字です」と正直に注記します。
+    """
+    if not is_shallow_clone():
+        return True  # もともと全履歴を持っている（ローカルなど）
+    try:
+        subprocess.run(
+            ["git", "fetch", "--unshallow", "--quiet"],
+            cwd=REPO_ROOT,
+            capture_output=True,
+            text=True,
+            check=True,
+            timeout=120,
+        )
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, OSError):
+        return False
+    return not is_shallow_clone()
+
+
 def daily_commit_counts(days: int = 14) -> tuple[list[tuple[str, int]], str | None]:
     """直近days日間の日別コミット数を [(表示ラベル, 件数), ...] の順（古い→新しい）で返す。
     コミットが無い日は0。
@@ -195,9 +223,10 @@ def build_report(
     lines.append("")
     if shallow and history_start:
         lines.append(
-            f"> ⚠️ この環境はGit履歴の一部（{history_start} 以降）しか持っていません（クラウドの部屋の仕様）。"
-            "そのため総コミット数・マージPR数・グラフは**その範囲での数字**です。"
-            "全期間の正確な数字は、ローカル（全履歴あり）で実行すると出ます。"
+            f"> ⚠️ **今回は全履歴を取れませんでした**（ネットにつながらない等）。"
+            f"手元にある範囲（{history_start} 以降）だけで数えているので、"
+            "総コミット数・マージPR数・グラフは**実際より少なめ**です。"
+            "ネットにつながる場所でもう一度実行すると、正しい数字に直ります。"
         )
         lines.append("")
     lines.append("## 📈 グラフ2: カテゴリ別の数")
@@ -243,6 +272,17 @@ def count_public_pages() -> int:
 
 
 def main() -> None:
+    # ★ 数える前に、必ず全履歴を取りに行く。
+    #   クラウドの作業部屋は毎回ちがう深さの履歴しか持たないため、これをしないと
+    #   総コミット数・マージPR数・グラフが実行するたびに増えたり減ったりする。
+    if is_shallow_clone():
+        print("📥 履歴の一部しかないので、GitHubから全履歴を取り直します…")
+    full_history = try_unshallow()
+    if full_history:
+        print("✅ 全履歴で数えます。")
+    else:
+        print("⚠️ 全履歴を取れませんでした（ネットにつながらない等）。手元にある範囲の数字で作ります。")
+
     docs = list_docs()
 
     metrics = {
@@ -258,7 +298,7 @@ def main() -> None:
 
     daily_counts, history_start = daily_commit_counts(days=14)
 
-    report = build_report(metrics, daily_counts, history_start, is_shallow_clone())
+    report = build_report(metrics, daily_counts, history_start, not full_history)
 
     out_path = REPO_ROOT / "docs" / "進化レポート.md"
     out_path.write_text(report, encoding="utf-8")
