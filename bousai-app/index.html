@@ -65,6 +65,22 @@
     margin: 0.6rem 0 0;
   }
   .updated-badge.is-live { border-color: var(--accent); }
+  /* 🕐 情報の古さの相対表示（台風ページ typhoon-app/index.html の仕組みを移植） */
+  #stale-age { margin-left: 0.2rem; }
+  .updated-badge.is-stale { border-width: 2px; border-color: var(--warn-line); }
+  .stale-note {
+    display: inline-block;
+    font-size: 0.8rem;
+    color: var(--warn-ink);
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-line);
+    border-radius: 10px;
+    padding: 0.4rem 0.8rem;
+    margin: 0.5rem 0 0;
+  }
+  /* ⚠️ これが無いと、hidden を付けても消えません（上の display が hidden より強いため）。
+     過去に同じ失敗をしています → docs/トラブル解決記録.md の T18 */
+  .stale-note[hidden] { display: none; }
   #refresh-btn {
     font: inherit;
     font-size: 0.85rem;
@@ -249,7 +265,8 @@
 <header>
   <h1>🛟 防災情報まとめ（地震・津波・雷・大雨）</h1>
   <p class="lead">気象庁の発表をもとに自動でまとめています。防災の判断は必ず公式の最新発表で。</p>
-  <p><span class="updated-badge"><span id="updated-label">🕐 最終確認：</span><time id="updated-at" datetime="2026-08-02T09:00+09:00">まだ確認できていません</time></span></p>
+  <p><span class="updated-badge"><span id="updated-label">🕐 最終確認：</span><time id="updated-at" datetime="2026-08-02T09:00+09:00">まだ確認できていません</time><span id="stale-age"></span></span></p>
+  <p class="stale-note" id="stale-note" hidden></p>
   <!-- JSが動くときだけ表示される手動更新ボタン（10分ごとの自動更新もある） -->
   <p><button type="button" id="refresh-btn" hidden>🔄 いま更新する</button></p>
 </header>
@@ -421,6 +438,55 @@
     var last = localStorage.getItem('bousai-tab-v1');
     if (last && tabs.some(function (t) { return t.key === last; })) selectTab(last);
   } catch (e) {}
+
+  /* ============================================================
+     🕐 情報の古さを相対表示。古いほど強く注意を出す。
+     （台風ページ typhoon-app/index.html の refreshStale() と同じ考え方）
+     ⚠️ まだ一度も実データが取れていない（is-live が付く前＝「まだ確認できていません」）
+        ときは何も表示しない。ここで古さを出すと「未取得」を「古い」と誤解させてしまうため。
+     ============================================================ */
+  function refreshStale() {
+    var t = document.getElementById('updated-at');
+    if (!t) return;
+    var badge = t.closest ? t.closest('.updated-badge') : null;
+    var age = document.getElementById('stale-age');
+    var note = document.getElementById('stale-note');
+    if (!badge || !badge.classList.contains('is-live')) {
+      if (age) age.textContent = '';
+      if (note) { note.hidden = true; note.textContent = ''; }
+      return;
+    }
+    var then = new Date(t.getAttribute('datetime'));
+    if (isNaN(then)) return;
+    var hours = (Date.now() - then.getTime()) / 36e5;
+    if (hours < 0) hours = 0;
+    var days = Math.floor(hours / 24);
+    if (age) {
+      age.textContent = hours < 1
+        ? '（さっき）'
+        : hours < 24
+          ? '（' + Math.floor(hours) + '時間前）'
+          : '（' + days + '日前）';
+    }
+    badge.classList.remove('is-stale');
+    if (note) { note.hidden = true; note.textContent = ''; }
+    if (hours >= 72) {
+      badge.classList.add('is-stale');
+      if (note) {
+        note.textContent = 'この情報は' + days + '日前のもので、古すぎます。必ず気象庁の公式サイトで最新をご確認ください。';
+        note.hidden = false;
+      }
+    } else if (hours >= 24) {
+      badge.classList.add('is-stale');
+      if (note) {
+        note.textContent = 'この情報は' + days + '日前のものです。';
+        note.hidden = false;
+      }
+    }
+  }
+  refreshStale();
+  /* 開きっぱなしでも「◯時間前」の表示が古くならないよう、1分ごとに数え直す */
+  setInterval(refreshStale, 60 * 1000);
 
   /* ============================================================
      気象庁のデータを取ってきて表示する
@@ -898,6 +964,7 @@
       var badge = timeEl.closest ? timeEl.closest('.updated-badge') : null;
       if (badge) badge.classList.add('is-live');
     }
+    refreshStale();
   }
 
   function readCache() {

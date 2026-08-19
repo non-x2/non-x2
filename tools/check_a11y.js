@@ -19,18 +19,29 @@
 //
 //   ☁️ クラウドの作業部屋には Chromium が最初から入っています。
 //      その場合は自動で /opt/pw-browsers/chromium を使います（追加のダウンロード不要）。
-//   ページを足したいときは、下の PAGES に1行足すだけです。
+//   ページを足したいときは、下の ALL_PAGES に1行足すだけです。
+//
+//   3) 1ページだけ測りたいとき（直したページだけ測り直す）
+//        ONLY=world node tools/check_a11y.js     # 🌍 世界のライブカメラだけ
+//        ONLY=bousai node tools/check_a11y.js    # 🛟 防災情報だけ
 // ------------------------------------------------------------------
 
 const fs = require('fs');
 const { chromium } = require('playwright');
 
 const BASE = process.env.BASE || 'http://localhost:8898';
-const PAGES = [
+const ALL_PAGES = [
   ['🌀 台風情報', 'typhoon-app/'],
   ['🛟 防災情報', 'bousai-app/'],
   ['🚗 交通・ライブカメラ', 'traffic-app/'],
+  ['🌍 世界のライブカメラ', 'world-livecam/'],
 ];
+// 1ページだけ点検したいときは ONLY を使います。
+//   例： ONLY=world node tools/check_a11y.js   → 🌍 世界のライブカメラだけ測る
+// 名前か置き場所にその文字が入っているページだけを測ります（直したページだけ測り直したいときに便利）。
+const PAGES = process.env.ONLY
+  ? ALL_PAGES.filter(([name, path]) => `${name} ${path}`.includes(process.env.ONLY))
+  : ALL_PAGES;
 const NARROW = [320, 280];          // 測る画面の幅（いちばん狭いスマホを想定）
 const TAP_MIN = 44;                 // 押しやすさのめやす（px）
 
@@ -73,10 +84,38 @@ const collect = (sel) => {
     return { rgb: [0, 1, 2].map((i) => p[i] * a + under.rgb[i] * (1 - a)) };
   };
 
+  // 「実際に指で押せる高さ」を測ります。
+  //
+  // のんラボには、見た目を1ドットも変えずに“透明な当たり判定だけ”を広げている場所が
+  // あります（地図の交通量の丸・出典の行内リンク＝ ::before / ::after を使う手法）。
+  // 見た目の高さだけで判定すると、こうした工夫を「押しにくい」と誤って報告してしまうので、
+  // 「その位置を押したらこの部品に当たるか」を上下に1pxずつ実際に試して確かめます。
+  // 測れないとき（画面の外・何かに隠れている）は null を返し、見た目の高さで判定します。
+  const tapHeight = (el) => {
+    el.scrollIntoView({ block: 'center' });   // 押せるか試すため、いったん画面の中央へ
+    const r = el.getBoundingClientRect();
+    if (r.width <= 0 || r.height <= 0) return null;
+    const cx = r.left + r.width / 2;
+    if (cx < 0 || cx > innerWidth - 1) return null;
+    const hits = (y) => {
+      if (y < 0 || y > innerHeight - 1) return false;
+      const e = document.elementFromPoint(cx, y);
+      return e === el || (!!e && el.contains(e));   // 自分か、自分の中身に当たればOK
+    };
+    if (!hits(r.top + r.height / 2)) return null;   // 真ん中すら当たらない＝何かに隠れている
+    let up = 0, down = 0;
+    for (let d = 1; d <= 24; d++) { if (hits(r.top - d)) up = d; else break; }
+    for (let d = 1; d <= 24; d++) { if (hits(r.bottom + d)) down = d; else break; }
+    return r.height + up + down;
+  };
+
   return Array.from(document.querySelectorAll(sel)).map((el) => {
     const cs = getComputedStyle(el);
     const bg = resolveBg(el);
     const r = el.getBoundingClientRect();
+    // 押して使うもの（ボタン・タブ・一覧のリンク）だけ「押しやすさ」を測ります。
+    // 文章の中のリンクは「読むためのもの」なので、大きさの対象にしません。
+    const tappable = el.matches('button, [role="tab"], .link-list a');
     return {
       label: (el.textContent || '').trim().slice(0, 24),
       color: cs.color,
@@ -84,9 +123,8 @@ const collect = (sel) => {
       unmeasurable: !!bg.unmeasurable,
       size: parseFloat(cs.fontSize), weight: parseInt(cs.fontWeight, 10) || 400,
       h: r.height, visible: r.width > 0 && r.height > 0,
-      // 押して使うもの（ボタン・タブ・一覧のリンク）だけ「押しやすさ」を測ります。
-      // 文章の中のリンクは「読むためのもの」なので、大きさの対象にしません。
-      tappable: el.matches('button, [role="tab"], .link-list a'),
+      tappable,
+      tapH: tappable && r.width > 0 && r.height > 0 ? tapHeight(el) : null,
     };
   });
 };
@@ -112,11 +150,19 @@ const collect = (sel) => {
 
     // ① 色のコントラスト＋② 押しやすさ
     const items = await page.evaluate(collect, '[role="tab"], button, .link-list a, .note a');
-    let worst = null, skipped = 0;
+    let worst = null, skipped = 0, widened = 0;
     const small = [], thin = new Set();
     for (const it of items) {
       if (!it.visible) continue;
-      if (it.tappable && it.h > 0 && it.h < TAP_MIN) small.push(`「${it.label || '(文字なし)'}」${it.h.toFixed(0)}px`);
+      if (it.tappable && it.h > 0) {
+        // 透明な当たり判定を広げているものは、その「実際に押せる高さ」で判定します
+        const eff = it.tapH != null ? it.tapH : it.h;
+        if (it.tapH != null && it.tapH > it.h + 0.5) widened++;
+        if (eff < TAP_MIN) {
+          small.push(`「${it.label || '(文字なし)'}」${eff.toFixed(0)}px` +
+                     (it.tapH != null && it.tapH > it.h + 0.5 ? `（見た目 ${it.h.toFixed(0)}px）` : ''));
+        }
+      }
       // 文字が入っていないもの（アイコンだけの飾りなど）は、色の読みやすさの対象外です
       if (!it.label) continue;
       // 背景がグラデーション・画像のところは、場所で色が変わるので数字では測れません
@@ -135,9 +181,10 @@ const collect = (sel) => {
                   `（「${worst.label}」／必要 ${worst.need}:1）${worst.ratio >= worst.need ? '✅' : '❌'}` +
                   (skipped ? `　※背景がグラデーションの ${skipped} 個は数字で測れないので目で確認を` : ''));
     }
+    const widenNote = widened ? `　※うち ${widened} 個は透明な当たり判定で広げてあります` : '';
     console.log(small.length
-      ? `  ② 押しやすさ: ${TAP_MIN}px より低いものが ${small.length} 個 ⚠️ … ${small.slice(0, 4).join('、')}`
-      : `  ② 押しやすさ: すべて ${TAP_MIN}px 以上 ✅`);
+      ? `  ② 押しやすさ: ${TAP_MIN}px より低いものが ${small.length} 個 ⚠️ … ${small.slice(0, 4).join('、')}${widenNote}`
+      : `  ② 押しやすさ: すべて ${TAP_MIN}px 以上 ✅${widenNote}`);
 
     // ③ 狭い画面のはみ出し
     for (const w of NARROW) {

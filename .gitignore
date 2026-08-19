@@ -8,3 +8,9 @@ _site/
 # Obsidian（ノートアプリ）が自動で作る個人設定とゴミ箱（人それぞれの設定なので保存しません）
 .obsidian/
 .trash/
+
+# 👀 見やすさ点検の道具（tools/check_a11y.js）を動かすときに `npm install playwright` で
+# 自動で作られる部品置き場です。19MBほどあり、使うときに入れ直せばよいので保存しません。
+node_modules/
+package.json
+package-lock.json
