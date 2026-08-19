@@ -285,17 +285,14 @@
   }
   /* 丸そのものは 15px のまま（大きくすると地図が丸で埋まって道が見えなくなるため）。
      指で押せる範囲だけを、透明な当たり判定でひとまわり広げます。見た目は1ドットも変わりません。
-     広げ幅（上下左右）は JS の fitObsHitAreas() が丸を描き直すたびに計算し、
-     --obs-pt/--obs-pr/--obs-pb/--obs-pl として1個ずつ書き込みます
-     （隣の丸との実際のすき間ぶんだけ広げ、重ならない範囲で目いっぱい伸ばす）。
-     指定が無いとき（保険）は従来どおり一律8pxまで。 */
+     広げ幅は一律8px＝**目いっぱい**にしてあります。隣の丸と当たり判定が重なってもかまいません。
+     重なったところを押したときに「どの丸が反応するか」は、JSのほうで
+     **押した場所にいちばん近い丸**に必ず振り直すからです
+     （「🎯 押した場所に『いちばん近い丸』を必ず開く（ボロノイ方式）」のコメントを参照）。 */
   .obs::before {
     content: '';
     position: absolute;
-    top: calc(-1 * var(--obs-pt, 8px));
-    right: calc(-1 * var(--obs-pr, 8px));
-    bottom: calc(-1 * var(--obs-pb, 8px));
-    left: calc(-1 * var(--obs-pl, 8px));
+    inset: -8px;
     border-radius: 50%;
   }
   .obs.is-lot { background: var(--obs-lot); }
@@ -2055,53 +2052,44 @@
       });
       layerEl.appendChild(b);
       obsEls.push(b);
-      drawn.push({ el: b, x: x, y: y });
     });
-
-    fitObsHitAreas(drawn);
   }
 
-  // 交通量の丸の「押せる範囲」を、隣の丸とぶつからない範囲まで上下左右それぞれ広げ直す。
-  // 丸の見た目（15px）はいっさい変えない。以前は上下左右いつも8pxで固定していたが、
-  // それだと近くに丸があるところは（先に描かれたほうが下敷きになって）広げた分がムダになっていた。
-  // ここでは丸どうしを「実際の当たり判定の四角形」として扱い、隣とのすき間を上下左右で
-  // 別々に測って、重ならないギリギリまで広げ幅を伸ばす（隣が無い方向は今までどおり8px）。
-  function fitObsHitAreas(drawn) {
-    var MAX_PAD = 8;    // これまでの固定値と同じ上限（丸15px→当たり判定31px角）
-    var VISIBLE = 15;   // 丸そのものの直径
-    var SAFETY = 1;     // 隣とぴったりくっつかないための余白（丸1px）
-    var pad = drawn.map(function () { return { t: MAX_PAD, r: MAX_PAD, b: MAX_PAD, l: MAX_PAD }; });
+  // 🎯 押した場所に「いちばん近い丸」を必ず開く（ボロノイ方式）
+  //
+  // 丸の当たり判定は一律8px広げてあるので、隣どうしで重なります。重なったところは
+  // ブラウザの決まりで「あとから描かれたほう」が反応するため、以前は
+  // **指で押した場所といちばん近い丸が食い違う**ことがありました（実測で約6回に1回）。
+  //
+  // そこで、丸のクリックを layerEl でいったん横取りし、押した座標から
+  // いちばん近い丸を計算して、そちらに振り直します。こうすると
+  // 「押せる範囲は目いっぱい広い」まま「開くのは必ずいちばん近い丸」になり、
+  // 広さと正確さが両立します。
+  //
+  // ⚠️ キーボードで押したとき（Enter/Space）は座標が無いので何もしません。
+  //    そのときイベントの detail は 0 になります。この判定は
+  //    振り直しで呼ぶ best.click() （同じく detail 0）が
+  //    無限に繰り返さないための歯止めも兼ねています。
+  layerEl.addEventListener('click', function (ev) {
+    if (!ev.detail) return;                       // キーボード操作・振り直し済みのクリック
+    if (suppressClick) return;                    // 地図をドラッグした直後は無視（従来どおり）
+    if (obsEls.length < 2) return;                // 丸が1個以下なら振り直す先が無い
+    var hit = ev.target && ev.target.closest ? ev.target.closest('.obs') : null;
+    if (!hit) return;                             // 丸以外（カメラのピン・地図）は触らない
 
-    for (var i = 0; i < drawn.length; i++) {
-      for (var j = i + 1; j < drawn.length; j++) {
-        var dx = drawn[j].x - drawn[i].x, dy = drawn[j].y - drawn[i].y;
-        var adx = Math.abs(dx), ady = Math.abs(dy);
-        // どちらの向きも最大まで広げて絶対にぶつからない距離なら、何もしない
-        if (adx >= VISIBLE + MAX_PAD * 2 && ady >= VISIBLE + MAX_PAD * 2) continue;
-        // より離れているほうの軸だけを狭める（そちらを狭めれば重なりを防げるので、
-        // もう片方の軸はムダに狭めない＝広げ幅をなるべく大きく保つ）
-        if (adx >= ady) {
-          var freeX = Math.max(0, adx - VISIBLE - SAFETY);
-          var eachX = Math.min(MAX_PAD, Math.floor(freeX / 2));
-          if (dx >= 0) { pad[i].r = Math.min(pad[i].r, eachX); pad[j].l = Math.min(pad[j].l, eachX); }
-          else { pad[i].l = Math.min(pad[i].l, eachX); pad[j].r = Math.min(pad[j].r, eachX); }
-        } else {
-          var freeY = Math.max(0, ady - VISIBLE - SAFETY);
-          var eachY = Math.min(MAX_PAD, Math.floor(freeY / 2));
-          if (dy >= 0) { pad[i].b = Math.min(pad[i].b, eachY); pad[j].t = Math.min(pad[j].t, eachY); }
-          else { pad[i].t = Math.min(pad[i].t, eachY); pad[j].b = Math.min(pad[j].b, eachY); }
-        }
-      }
+    var best = null, bestDist = Infinity;
+    for (var i = 0; i < obsEls.length; i++) {
+      var r = obsEls[i].getBoundingClientRect();
+      var dx = r.left + r.width / 2 - ev.clientX;
+      var dy = r.top + r.height / 2 - ev.clientY;
+      var d = dx * dx + dy * dy;                  // ルートは取らなくても大小は比べられる
+      if (d < bestDist) { bestDist = d; best = obsEls[i]; }
     }
+    if (!best || best === hit) return;            // もともと正しい丸だった＝そのままでよい
 
-    drawn.forEach(function (d, idx) {
-      var p = pad[idx];
-      d.el.style.setProperty('--obs-pt', p.t + 'px');
-      d.el.style.setProperty('--obs-pr', p.r + 'px');
-      d.el.style.setProperty('--obs-pb', p.b + 'px');
-      d.el.style.setProperty('--obs-pl', p.l + 'px');
-    });
-  }
+    ev.stopPropagation();                         // 間違ったほうの丸には届かせない
+    best.click();                                 // いちばん近い丸を開く（detail 0 で戻ってくる）
+  }, true);                                       // ← true＝丸より先に受け取る（横取り）
 
   function obsDetailText(o) {
     var lv = OBS_LEVELS[o.level];
