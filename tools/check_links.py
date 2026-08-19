@@ -33,6 +33,7 @@ import os
 import re
 import sys
 import ssl
+import time
 import urllib.request
 import urllib.error
 from concurrent.futures import ThreadPoolExecutor
@@ -116,11 +117,24 @@ def main():
 
     print(f"👀 リンクの見張り番：{len(pages)}ページ・{len(where)}本のリンクを確かめます\n")
 
+    urls = list(where.keys())
     with ThreadPoolExecutor(max_workers=WORKERS) as pool:
-        results = list(pool.map(check, where.keys()))
+        results = list(pool.map(check, urls))
+
+    # ⚠️ 同時にたくさんたたくと、生きているサイトでも接続を切られることがあります
+    #    （実際に阪神高速・本四高速がそうなり、あとから1本ずつ試したら普通に開けました）。
+    #    「届かない」と報告したものだけ、時間をおいて1本ずつ確かめ直します。
+    #    ＝ 自分の測り方を先に疑う。誤って「切れている」と言わないための保険です。
+    retry_idx = [i for i, r in enumerate(results) if r[0] is UNREACHABLE]
+    if retry_idx:
+        print(f"（{len(retry_idx)}本が届きませんでした。混み合っただけかもしれないので、"
+              f"1本ずつ確かめ直します…）\n")
+        for i in retry_idx:
+            time.sleep(1.0)
+            results[i] = check(urls[i])
 
     buckets = {OK: [], MOVED: [], DEAD: [], ODD: [], UNREACHABLE: []}
-    for url, (mark, detail, _final) in zip(where.keys(), results):
+    for url, (mark, detail, _final) in zip(urls, results):
         buckets[mark].append((url, detail, where[url]))
 
     titles = {

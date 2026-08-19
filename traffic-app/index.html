@@ -285,12 +285,17 @@
   }
   /* 丸そのものは 15px のまま（大きくすると地図が丸で埋まって道が見えなくなるため）。
      指で押せる範囲だけを、透明な当たり判定でひとまわり広げます。見た目は1ドットも変わりません。
-     実測：押せる範囲が直径 14px → 18〜24px。
-     （隣の丸が近いところでは、その丸に取られるぶん少し狭くなります） */
+     広げ幅（上下左右）は JS の fitObsHitAreas() が丸を描き直すたびに計算し、
+     --obs-pt/--obs-pr/--obs-pb/--obs-pl として1個ずつ書き込みます
+     （隣の丸との実際のすき間ぶんだけ広げ、重ならない範囲で目いっぱい伸ばす）。
+     指定が無いとき（保険）は従来どおり一律8pxまで。 */
   .obs::before {
     content: '';
     position: absolute;
-    inset: -8px;
+    top: calc(-1 * var(--obs-pt, 8px));
+    right: calc(-1 * var(--obs-pr, 8px));
+    bottom: calc(-1 * var(--obs-pb, 8px));
+    left: calc(-1 * var(--obs-pl, 8px));
     border-radius: 50%;
   }
   .obs.is-lot { background: var(--obs-lot); }
@@ -745,7 +750,7 @@
     </ul>
     <h3>🌍 欧州</h3>
     <ul class="link-list">
-      <li><a href="https://www.vegvesen.no/en/traffic-information/traffic-information/webkamera/" target="_blank" rel="noopener">🇳🇴 ノルウェー　公共道路管理局 道路カメラ（全国449台）</a></li>
+      <li><a href="https://www.vegvesen.no/trafikk/hvaskjer?layers=ctv" target="_blank" rel="noopener">🇳🇴 ノルウェー　公共道路管理局 道路カメラ（地図に表示）</a></li>
       <li><a href="https://www.traffic.gov.scot/traffic-cameras" target="_blank" rel="noopener">🇬🇧 スコットランド　Traffic Scotland 交通カメラ</a></li>
       <li><a href="https://www.rwsverkeersinfo.nl/cameras/" target="_blank" rel="noopener">🇳🇱 オランダ　国道水管理庁 交通カメラ</a></li>
       <li><a href="https://umferdin.is/" target="_blank" rel="noopener">🇮🇸 アイスランド　道路情報 Umferðin</a></li>
@@ -796,7 +801,7 @@
 <footer>
   <p class="footer-credit">
     カメラの位置：<a href="https://www.jice.or.jp/knowledge/maps/roads" target="_blank" rel="noopener">国土技術研究センター「道路チェック地図」</a>・<a href="https://www.jice.or.jp/knowledge/maps/rivers" target="_blank" rel="noopener">「河川チェック地図」</a>／
-    出典：<a href="https://camera.mics.kaiho.mlit.go.jp/" target="_blank" rel="noopener">海上保安庁ホームページ</a>（灯台・港のカメラ。公共データ利用規約 PDL1.0）／
+    出典：<a href="https://www.kaiho.mlit.go.jp/" target="_blank" rel="noopener">海上保安庁ホームページ</a>（灯台・港のカメラ。公共データ利用規約 PDL1.0）／
     映像：各管理者（国土交通省 各地方整備局・海上保安庁ほか）／
     交通量：国土交通省API機能による交通量(参考値)を加工して作成／
     地図：<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル</a>／
@@ -2021,6 +2026,7 @@
     var pts = obsPoints.slice().sort(function (a, b) {
       return (OBS_ORDER[a.level] || 9) - (OBS_ORDER[b.level] || 9);
     });
+    var drawn = []; // あたり判定を計算するため、描いた丸の座標も控えておく
 
     pts.forEach(function (o) {
       var p = project(o.lat, o.lon, view.zoom);
@@ -2049,6 +2055,51 @@
       });
       layerEl.appendChild(b);
       obsEls.push(b);
+      drawn.push({ el: b, x: x, y: y });
+    });
+
+    fitObsHitAreas(drawn);
+  }
+
+  // 交通量の丸の「押せる範囲」を、隣の丸とぶつからない範囲まで上下左右それぞれ広げ直す。
+  // 丸の見た目（15px）はいっさい変えない。以前は上下左右いつも8pxで固定していたが、
+  // それだと近くに丸があるところは（先に描かれたほうが下敷きになって）広げた分がムダになっていた。
+  // ここでは丸どうしを「実際の当たり判定の四角形」として扱い、隣とのすき間を上下左右で
+  // 別々に測って、重ならないギリギリまで広げ幅を伸ばす（隣が無い方向は今までどおり8px）。
+  function fitObsHitAreas(drawn) {
+    var MAX_PAD = 8;    // これまでの固定値と同じ上限（丸15px→当たり判定31px角）
+    var VISIBLE = 15;   // 丸そのものの直径
+    var SAFETY = 1;     // 隣とぴったりくっつかないための余白（丸1px）
+    var pad = drawn.map(function () { return { t: MAX_PAD, r: MAX_PAD, b: MAX_PAD, l: MAX_PAD }; });
+
+    for (var i = 0; i < drawn.length; i++) {
+      for (var j = i + 1; j < drawn.length; j++) {
+        var dx = drawn[j].x - drawn[i].x, dy = drawn[j].y - drawn[i].y;
+        var adx = Math.abs(dx), ady = Math.abs(dy);
+        // どちらの向きも最大まで広げて絶対にぶつからない距離なら、何もしない
+        if (adx >= VISIBLE + MAX_PAD * 2 && ady >= VISIBLE + MAX_PAD * 2) continue;
+        // より離れているほうの軸だけを狭める（そちらを狭めれば重なりを防げるので、
+        // もう片方の軸はムダに狭めない＝広げ幅をなるべく大きく保つ）
+        if (adx >= ady) {
+          var freeX = Math.max(0, adx - VISIBLE - SAFETY);
+          var eachX = Math.min(MAX_PAD, Math.floor(freeX / 2));
+          if (dx >= 0) { pad[i].r = Math.min(pad[i].r, eachX); pad[j].l = Math.min(pad[j].l, eachX); }
+          else { pad[i].l = Math.min(pad[i].l, eachX); pad[j].r = Math.min(pad[j].r, eachX); }
+        } else {
+          var freeY = Math.max(0, ady - VISIBLE - SAFETY);
+          var eachY = Math.min(MAX_PAD, Math.floor(freeY / 2));
+          if (dy >= 0) { pad[i].b = Math.min(pad[i].b, eachY); pad[j].t = Math.min(pad[j].t, eachY); }
+          else { pad[i].t = Math.min(pad[i].t, eachY); pad[j].b = Math.min(pad[j].b, eachY); }
+        }
+      }
+    }
+
+    drawn.forEach(function (d, idx) {
+      var p = pad[idx];
+      d.el.style.setProperty('--obs-pt', p.t + 'px');
+      d.el.style.setProperty('--obs-pr', p.r + 'px');
+      d.el.style.setProperty('--obs-pb', p.b + 'px');
+      d.el.style.setProperty('--obs-pl', p.l + 'px');
     });
   }
 
