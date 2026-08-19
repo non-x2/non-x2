@@ -49,10 +49,13 @@ EMBED_END = "</script>"
 def to_compact(db: dict) -> dict:
     """同じ文字のくり返しをまとめて、ページに載せる用の軽い形にする。
 
-    n=名前 / m=管理者 / a=市区町村 / p=カメラのページ / b=写真URLの前半 / k=種類
-    c=カメラ本体 [緯度*10万, 経度*10万, n番号, m番号, a番号, p番号, b番号, 写真URLの後半, k番号]
+    n=名前 / m=管理者 / a=市区町村 / p=カメラのページ / b=写真URLの前半 / k=種類 / s=情報源
+    c=カメラ本体 [緯度*10万, 経度*10万, n番号, m番号, a番号, p番号, b番号, 写真URLの後半, k番号, s番号]
+
+    ⚠️ s（情報源）は、世界のページで「🇺🇸アイオワ州だけ／🇨🇦BC州だけ」と
+       しぼりこむために必要です。無いと地域のしぼりこみが全部0台になります。
     """
-    tables: dict[str, list[str]] = {"n": [], "m": [], "a": [], "p": [], "b": [], "k": []}
+    tables: dict[str, list[str]] = {"n": [], "m": [], "a": [], "p": [], "b": [], "k": [], "s": []}
     index: dict[str, dict[str, int]] = {key: {} for key in tables}
 
     def idx(kind: str, value: str) -> int:
@@ -78,12 +81,13 @@ def to_compact(db: dict) -> dict:
             idx("b", head),
             tail,
             idx("k", cam.get("cat", "road")),
+            idx("s", cam.get("src", "")),
         ])
 
     return {
         "u": db["updated"][:10],
         "n": tables["n"], "m": tables["m"], "a": tables["a"],
-        "p": tables["p"], "b": tables["b"], "k": tables["k"],
+        "p": tables["p"], "b": tables["b"], "k": tables["k"], "s": tables["s"],
         "c": rows,
     }
 
