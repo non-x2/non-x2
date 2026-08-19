@@ -9,7 +9,7 @@
   2. 市区町村付け（国土地理院＝日本専用）など、日本専用の処理を通さないため
 
 やることは build.py と同じ流れの世界版です:
-  1. `sources/` の世界の係に「取ってきて」と頼む（いまはアイオワ州だけ）
+  1. `sources/` の世界の係に「取ってきて」と頼む（いまはアイオワ州とBC州）
   2. 重複をまとめる（build.py の関数をそのまま再利用）
   3. 写真URLが本当に開けるかを1台ずつ確かめる
   4. `data/livecams_world.json` に保存する
@@ -32,7 +32,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from build import dedupe  # noqa: E402  （重複をまとめる係は日本版と共通）
-from sources import base, us_iowa  # noqa: E402
+from sources import base, ca_bc, us_iowa  # noqa: E402
 
 DB_PATH = Path(__file__).resolve().parent / "data" / "livecams_world.json"
 
@@ -40,10 +40,12 @@ DB_PATH = Path(__file__).resolve().parent / "data" / "livecams_world.json"
 # ⚠️ 足す前に必ず利用条件を確かめること（livecam-db/README.md の「情報源を選ぶときの約束」）
 COLLECTORS = {
     "us-iowa": us_iowa.collect_all,
+    "ca-bc": ca_bc.collect_all,
 }
 
 # 台帳がこの数を下回ったら「こわれている」とみなして上書きしない（安全装置）
-MIN_EXPECTED = 700
+# 内訳の目安：アイオワ州 約790台 ＋ BC州 約1,026台 ＝ 約1,800台
+MIN_EXPECTED = 1500
 
 # 情報源ごとに、前回の台数のこの割合を下回ったら中止する（安全装置・build.py と同じ）
 SOURCE_MIN_RATIO = 0.7
