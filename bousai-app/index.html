@@ -290,13 +290,14 @@
       </div>
       <div id="quake-live" hidden></div>
       <p class="source-note" id="quake-note" hidden></p>
+      <p class="source-note" id="quake-age" hidden></p>
     </div>
     <div class="card">
       <h2>📡 地震の公式リンク</h2>
       <ul class="link-list">
         <li><a href="https://www.jma.go.jp/bosai/map.html#5/34.5/137/&elem=int&contents=earthquake_map" target="_blank" rel="noopener noreferrer"><span>気象庁｜地震情報（震度マップ）</span><span class="arrow" aria-hidden="true">→</span></a></li>
         <li><a href="https://www.nhk.or.jp/kishou-saigai/earthquake/" target="_blank" rel="noopener noreferrer"><span>NHK｜地震情報</span><span class="arrow" aria-hidden="true">→</span></a></li>
-        <li><a href="https://www.jma.go.jp/bosai/nankai/" target="_blank" rel="noopener noreferrer"><span>気象庁｜南海トラフ地震関連情報</span><span class="arrow" aria-hidden="true">→</span></a></li>
+        <li><a href="https://www.jma.go.jp/bosai/nteq/" target="_blank" rel="noopener noreferrer"><span>気象庁｜南海トラフ地震関連情報</span><span class="arrow" aria-hidden="true">→</span></a></li>
         <li><a href="https://www.data.jma.go.jp/multi/quake/index.html?lang=jp" target="_blank" rel="noopener noreferrer"><span>気象庁｜地震情報（多言語・やさしい日本語）</span><span class="arrow" aria-hidden="true">→</span></a></li>
       </ul>
     </div>
@@ -320,6 +321,7 @@
       </div>
       <div id="tsunami-live" hidden></div>
       <p class="source-note" id="tsunami-note" hidden></p>
+      <p class="source-note" id="tsunami-age" hidden></p>
     </div>
     <div class="card">
       <h2>📡 津波の公式リンク</h2>
@@ -349,6 +351,7 @@
       </div>
       <div id="thunder-live" hidden></div>
       <p class="source-note" id="thunder-note" hidden></p>
+      <p class="source-note" id="thunder-age" hidden></p>
     </div>
     <div class="card">
       <h2>📡 雷の公式リンク</h2>
@@ -378,6 +381,7 @@
       </div>
       <div id="rain-live" hidden></div>
       <p class="source-note" id="rain-note" hidden></p>
+      <p class="source-note" id="rain-age" hidden></p>
     </div>
     <div class="card">
       <h2>📡 大雨の公式リンク</h2>
@@ -487,6 +491,44 @@
   refreshStale();
   /* 開きっぱなしでも「◯時間前」の表示が古くならないよう、1分ごとに数え直す */
   setInterval(refreshStale, 60 * 1000);
+
+  /* ============================================================
+     ⏱ タブごとの「情報の古さ」（自己改良バックログ 候補4）
+     地震・津波・雷・大雨は別々のタイミングで確認しているので、
+     ページ全体の #stale-age とは別に、タブの中にも小さく出す。
+     ⚠️ 安全装置（警報判定・4段構え・「確認できていません」表示）には触れず、
+        既に各タブで使っている「stamp（確認できた時刻）」を読むだけ。
+     ⚠️ まだそのタブのデータが一度も届いていない（SECTION_AGE_STAMPS未設定）ときは
+        何も表示しない＝「未取得」を「新しい」と誤解させない。
+     ============================================================ */
+  var SECTION_AGE_STAMPS = {};
+  function formatAgeShort(ms) {
+    var minutes = ms / 60000;
+    if (minutes < 1) return 'たった今';
+    if (minutes < 60) return Math.floor(minutes) + '分前';
+    var hours = minutes / 60;
+    if (hours < 24) return Math.floor(hours) + '時間前';
+    return Math.floor(hours / 24) + '日前';
+  }
+  function refreshSectionAges() {
+    ['quake', 'tsunami', 'thunder', 'rain'].forEach(function (key) {
+      var el = document.getElementById(key + '-age');
+      if (!el) return;
+      var stamp = SECTION_AGE_STAMPS[key];
+      var d = stamp ? new Date(stamp) : null;
+      if (!d || isNaN(d)) {
+        el.hidden = true;
+        el.textContent = '';
+        return;
+      }
+      var ms = Date.now() - d.getTime();
+      if (ms < 0) ms = 0;
+      el.textContent = '⏱ この情報は' + formatAgeShort(ms) + 'のものです';
+      el.hidden = false;
+    });
+  }
+  refreshSectionAges();
+  setInterval(refreshSectionAges, 60 * 1000);
 
   /* ============================================================
      気象庁のデータを取ってきて表示する
@@ -1009,6 +1051,8 @@
     }
     updateBadge(stamp);
     if (via !== 'cache') writeCache(section, data, stamp);
+    SECTION_AGE_STAMPS[section] = stamp;
+    refreshSectionAges();
   }
 
   /* section: 画面の場所の名前 / direct: ①のやり方 / fromLocal: ②のファイルから取り出す係 /

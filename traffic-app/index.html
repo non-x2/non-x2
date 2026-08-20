@@ -285,8 +285,10 @@
   }
   /* 丸そのものは 15px のまま（大きくすると地図が丸で埋まって道が見えなくなるため）。
      指で押せる範囲だけを、透明な当たり判定でひとまわり広げます。見た目は1ドットも変わりません。
-     実測：押せる範囲が直径 14px → 18〜24px。
-     （隣の丸が近いところでは、その丸に取られるぶん少し狭くなります） */
+     広げ幅は一律8px＝**目いっぱい**にしてあります。隣の丸と当たり判定が重なってもかまいません。
+     重なったところを押したときに「どの丸が反応するか」は、JSのほうで
+     **押した場所にいちばん近い丸**に必ず振り直すからです
+     （「🎯 押した場所に『いちばん近い丸』を必ず開く（ボロノイ方式）」のコメントを参照）。 */
   .obs::before {
     content: '';
     position: absolute;
@@ -745,7 +747,7 @@
     </ul>
     <h3>🌍 欧州</h3>
     <ul class="link-list">
-      <li><a href="https://www.vegvesen.no/en/traffic-information/traffic-information/webkamera/" target="_blank" rel="noopener">🇳🇴 ノルウェー　公共道路管理局 道路カメラ（全国449台）</a></li>
+      <li><a href="https://www.vegvesen.no/trafikk/hvaskjer?layers=ctv" target="_blank" rel="noopener">🇳🇴 ノルウェー　公共道路管理局 道路カメラ（地図に表示）</a></li>
       <li><a href="https://www.traffic.gov.scot/traffic-cameras" target="_blank" rel="noopener">🇬🇧 スコットランド　Traffic Scotland 交通カメラ</a></li>
       <li><a href="https://www.rwsverkeersinfo.nl/cameras/" target="_blank" rel="noopener">🇳🇱 オランダ　国道水管理庁 交通カメラ</a></li>
       <li><a href="https://umferdin.is/" target="_blank" rel="noopener">🇮🇸 アイスランド　道路情報 Umferðin</a></li>
@@ -796,7 +798,7 @@
 <footer>
   <p class="footer-credit">
     カメラの位置：<a href="https://www.jice.or.jp/knowledge/maps/roads" target="_blank" rel="noopener">国土技術研究センター「道路チェック地図」</a>・<a href="https://www.jice.or.jp/knowledge/maps/rivers" target="_blank" rel="noopener">「河川チェック地図」</a>／
-    出典：<a href="https://camera.mics.kaiho.mlit.go.jp/" target="_blank" rel="noopener">海上保安庁ホームページ</a>（灯台・港のカメラ。公共データ利用規約 PDL1.0）／
+    出典：<a href="https://www.kaiho.mlit.go.jp/" target="_blank" rel="noopener">海上保安庁ホームページ</a>（灯台・港のカメラ。公共データ利用規約 PDL1.0）／
     映像：各管理者（国土交通省 各地方整備局・海上保安庁ほか）／
     交通量：国土交通省API機能による交通量(参考値)を加工して作成／
     地図：<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル</a>／
@@ -2021,6 +2023,7 @@
     var pts = obsPoints.slice().sort(function (a, b) {
       return (OBS_ORDER[a.level] || 9) - (OBS_ORDER[b.level] || 9);
     });
+    var drawn = []; // あたり判定を計算するため、描いた丸の座標も控えておく
 
     pts.forEach(function (o) {
       var p = project(o.lat, o.lon, view.zoom);
@@ -2051,6 +2054,42 @@
       obsEls.push(b);
     });
   }
+
+  // 🎯 押した場所に「いちばん近い丸」を必ず開く（ボロノイ方式）
+  //
+  // 丸の当たり判定は一律8px広げてあるので、隣どうしで重なります。重なったところは
+  // ブラウザの決まりで「あとから描かれたほう」が反応するため、以前は
+  // **指で押した場所といちばん近い丸が食い違う**ことがありました（実測で約6回に1回）。
+  //
+  // そこで、丸のクリックを layerEl でいったん横取りし、押した座標から
+  // いちばん近い丸を計算して、そちらに振り直します。こうすると
+  // 「押せる範囲は目いっぱい広い」まま「開くのは必ずいちばん近い丸」になり、
+  // 広さと正確さが両立します。
+  //
+  // ⚠️ キーボードで押したとき（Enter/Space）は座標が無いので何もしません。
+  //    そのときイベントの detail は 0 になります。この判定は
+  //    振り直しで呼ぶ best.click() （同じく detail 0）が
+  //    無限に繰り返さないための歯止めも兼ねています。
+  layerEl.addEventListener('click', function (ev) {
+    if (!ev.detail) return;                       // キーボード操作・振り直し済みのクリック
+    if (suppressClick) return;                    // 地図をドラッグした直後は無視（従来どおり）
+    if (obsEls.length < 2) return;                // 丸が1個以下なら振り直す先が無い
+    var hit = ev.target && ev.target.closest ? ev.target.closest('.obs') : null;
+    if (!hit) return;                             // 丸以外（カメラのピン・地図）は触らない
+
+    var best = null, bestDist = Infinity;
+    for (var i = 0; i < obsEls.length; i++) {
+      var r = obsEls[i].getBoundingClientRect();
+      var dx = r.left + r.width / 2 - ev.clientX;
+      var dy = r.top + r.height / 2 - ev.clientY;
+      var d = dx * dx + dy * dy;                  // ルートは取らなくても大小は比べられる
+      if (d < bestDist) { bestDist = d; best = obsEls[i]; }
+    }
+    if (!best || best === hit) return;            // もともと正しい丸だった＝そのままでよい
+
+    ev.stopPropagation();                         // 間違ったほうの丸には届かせない
+    best.click();                                 // いちばん近い丸を開く（detail 0 で戻ってくる）
+  }, true);                                       // ← true＝丸より先に受け取る（横取り）
 
   function obsDetailText(o) {
     var lv = OBS_LEVELS[o.level];
