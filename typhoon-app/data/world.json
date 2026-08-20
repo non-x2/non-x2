@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-20T14:54:53+09:00",
+ "generatedAt": "2026-08-20T16:21:43+09:00",
  "source": "米国ハリケーンセンター（NHC/CPHC、https://www.nhc.noaa.gov/）＋米軍合同台風警報センター（JTWC、https://www.metoc.navy.mil/jtwc/）",
  "note": "日本周辺（北西太平洋）は気象庁が担当（latest.json）。このファイルは含みません。",
  "count": 1,
@@ -13,10 +13,10 @@
    "issue": "2026-08-20T06:00:00.000Z",
    "analysis": {
     "hours": 0,
-    "validTime": "2026-08-20T00:00:00+00:00",
+    "validTime": "2026-08-20T03:00:00+00:00",
     "category": "ハリケーン（カテゴリ3）",
-    "lat": 22.8,
-    "lon": -171.6,
+    "lat": 23.2,
+    "lon": -171.7,
     "windMs": 51,
     "gustMs": 62,
     "pressure": 959
