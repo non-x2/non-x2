@@ -1,7 +1,15 @@
 {
- "generatedAt": "2026-08-20T18:08:27+09:00",
+ "generatedAt": "2026-08-21T01:02:45+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20260821004621",
+   "time": "2026-08-21T00:46:00+09:00",
+   "place": "和歌山県北部",
+   "magnitude": 2.5,
+   "maxIntensity": "1",
+   "depthKm": 10.0
+  },
   {
    "id": "20260820174830",
    "time": "2026-08-20T17:48:00+09:00",
@@ -113,14 +121,6 @@
    "magnitude": 4.6,
    "maxIntensity": "1",
    "depthKm": 200.0
-  },
-  {
-   "id": "20260819094205",
-   "time": "2026-08-19T09:42:00+09:00",
-   "place": "石川県能登地方",
-   "magnitude": 1.9,
-   "maxIntensity": "1",
-   "depthKm": 10.0
   }
  ],
  "tsunami": {
