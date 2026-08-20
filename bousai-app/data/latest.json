@@ -1,7 +1,15 @@
 {
- "generatedAt": "2026-08-21T06:00:04+09:00",
+ "generatedAt": "2026-08-21T07:59:01+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20260821073404",
+   "time": "2026-08-21T07:34:00+09:00",
+   "place": "鹿児島県薩摩地方",
+   "magnitude": 2.1,
+   "maxIntensity": "1",
+   "depthKm": 10.0
+  },
   {
    "id": "20260821051324",
    "time": "2026-08-21T05:13:00+09:00",
@@ -112,14 +120,6 @@
    "place": "浦河沖",
    "magnitude": 3.5,
    "maxIntensity": "2",
-   "depthKm": 40.0
-  },
-  {
-   "id": "20260820005028",
-   "time": "2026-08-20T00:50:00+09:00",
-   "place": "浦河沖",
-   "magnitude": 4.0,
-   "maxIntensity": "3",
    "depthKm": 40.0
   }
  ],
