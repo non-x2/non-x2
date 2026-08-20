@@ -5,7 +5,7 @@
 //
 //   ① 色のコントラスト … 文字と背景の明るさの差。小さいと読みづらい
 //        基準（WCAG 2.1 AA）：ふつうの文字 4.5:1 ／ 大きい文字 3:1
-//   ② 押しやすさ       … ボタンの高さ。指で押すには 44px 以上がめやす
+//   ② 押しやすさ       … ボタンの大きさ（縦と横の短いほう）。指で押すには 44px 以上がめやす
 //   ③ はみ出し         … 画面が狭いとき、横スクロールが出てしまわないか
 //
 // ------------------------------------------------------------------
@@ -84,29 +84,42 @@ const collect = (sel) => {
     return { rgb: [0, 1, 2].map((i) => p[i] * a + under.rgb[i] * (1 - a)) };
   };
 
-  // 「実際に指で押せる高さ」を測ります。
+  // 「実際に指で押せる大きさ」を、縦と横の両方で測ります。
   //
   // のんラボには、見た目を1ドットも変えずに“透明な当たり判定だけ”を広げている場所が
-  // あります（地図の交通量の丸・出典の行内リンク＝ ::before / ::after を使う手法）。
-  // 見た目の高さだけで判定すると、こうした工夫を「押しにくい」と誤って報告してしまうので、
-  // 「その位置を押したらこの部品に当たるか」を上下に1pxずつ実際に試して確かめます。
-  // 測れないとき（画面の外・何かに隠れている）は null を返し、見た目の高さで判定します。
-  const tapHeight = (el) => {
+  // あります（出典の行内リンク＝ ::before / ::after を使う手法）。
+  // 見た目の大きさだけで判定すると、こうした工夫を「押しにくい」と誤って報告してしまうので、
+  // 「その位置を押したらこの部品に当たるか」を上下・左右に1pxずつ実際に試して確かめます。
+  //
+  // 縦と横を**両方**測るのが大事です。指は丸いので、細長い部品は押しにくいからです。
+  //   例）横200px・縦20pxのボタンは、横は十分でも指では押しにくい
+  //       丸いボタンは、縦だけ測ると本当の押しやすさが分からない
+  // そこで「縦と横の**短いほう**」を、その部品の押しやすさとして扱います。
+  // 測れないとき（画面の外・何かに隠れている）は null を返し、見た目の大きさで判定します。
+  const tapSize = (el) => {
     el.scrollIntoView({ block: 'center' });   // 押せるか試すため、いったん画面の中央へ
     const r = el.getBoundingClientRect();
     if (r.width <= 0 || r.height <= 0) return null;
     const cx = r.left + r.width / 2;
+    const cy = r.top + r.height / 2;
     if (cx < 0 || cx > innerWidth - 1) return null;
-    const hits = (y) => {
-      if (y < 0 || y > innerHeight - 1) return false;
-      const e = document.elementFromPoint(cx, y);
+    const hits = (x, y) => {
+      if (x < 0 || x > innerWidth - 1 || y < 0 || y > innerHeight - 1) return false;
+      const e = document.elementFromPoint(x, y);
       return e === el || (!!e && el.contains(e));   // 自分か、自分の中身に当たればOK
     };
-    if (!hits(r.top + r.height / 2)) return null;   // 真ん中すら当たらない＝何かに隠れている
-    let up = 0, down = 0;
-    for (let d = 1; d <= 24; d++) { if (hits(r.top - d)) up = d; else break; }
-    for (let d = 1; d <= 24; d++) { if (hits(r.bottom + d)) down = d; else break; }
-    return r.height + up + down;
+    if (!hits(cx, cy)) return null;   // 真ん中すら当たらない＝何かに隠れている
+    // 中心から外へ1pxずつ、当たらなくなるまで伸ばして「はみ出しぶん」を数えます
+    const grow = (at) => {
+      let n = 0;
+      for (let d = 1; d <= 24; d++) { const p = at(d); if (hits(p.x, p.y)) n = d; else break; }
+      return n;
+    };
+    const up    = grow((d) => ({ x: cx, y: r.top - d }));
+    const down  = grow((d) => ({ x: cx, y: r.bottom + d }));
+    const left  = grow((d) => ({ x: r.left - d, y: cy }));
+    const right = grow((d) => ({ x: r.right + d, y: cy }));
+    return { h: r.height + up + down, w: r.width + left + right };
   };
 
   return Array.from(document.querySelectorAll(sel)).map((el) => {
@@ -122,9 +135,9 @@ const collect = (sel) => {
       bgRgb: bg.rgb || null,
       unmeasurable: !!bg.unmeasurable,
       size: parseFloat(cs.fontSize), weight: parseInt(cs.fontWeight, 10) || 400,
-      h: r.height, visible: r.width > 0 && r.height > 0,
+      h: r.height, w: r.width, visible: r.width > 0 && r.height > 0,
       tappable,
-      tapH: tappable && r.width > 0 && r.height > 0 ? tapHeight(el) : null,
+      tap: tappable && r.width > 0 && r.height > 0 ? tapSize(el) : null,
     };
   });
 };
@@ -155,12 +168,16 @@ const collect = (sel) => {
     for (const it of items) {
       if (!it.visible) continue;
       if (it.tappable && it.h > 0) {
-        // 透明な当たり判定を広げているものは、その「実際に押せる高さ」で判定します
-        const eff = it.tapH != null ? it.tapH : it.h;
-        if (it.tapH != null && it.tapH > it.h + 0.5) widened++;
+        // 透明な当たり判定を広げているものは、その「実際に押せる大きさ」で判定します
+        const effH = it.tap ? it.tap.h : it.h;
+        const effW = it.tap ? it.tap.w : it.w;
+        const eff = Math.min(effH, effW);   // 細長いと押しにくいので、短いほうで見る
+        const isWide = !!it.tap && (it.tap.h > it.h + 0.5 || it.tap.w > it.w + 0.5);
+        if (isWide) widened++;
         if (eff < TAP_MIN) {
           small.push(`「${it.label || '(文字なし)'}」${eff.toFixed(0)}px` +
-                     (it.tapH != null && it.tapH > it.h + 0.5 ? `（見た目 ${it.h.toFixed(0)}px）` : ''));
+                     `（横${effW.toFixed(0)}×縦${effH.toFixed(0)}）` +
+                     (isWide ? `（見た目 ${it.w.toFixed(0)}×${it.h.toFixed(0)}px）` : ''));
         }
       }
       // 文字が入っていないもの（アイコンだけの飾りなど）は、色の読みやすさの対象外です
@@ -185,6 +202,13 @@ const collect = (sel) => {
     console.log(small.length
       ? `  ② 押しやすさ: ${TAP_MIN}px より低いものが ${small.length} 個 ⚠️ … ${small.slice(0, 4).join('、')}${widenNote}`
       : `  ② 押しやすさ: すべて ${TAP_MIN}px 以上 ✅${widenNote}`);
+    if (small.length) {
+      // ⚠️ を見て慌てて「直そう」としないための注意書きです（過去に一度、直す必要のない
+      // ものを直しかけました）。押した先を別の層で振り分けている部品は、この測り方
+      // （その1点を押したら何に当たるか）では本当の押しやすさが分かりません。
+      console.log('     ↑ 交通ページの「交通量の丸」は、押した場所からいちばん近い丸へ' +
+                  '開く先を振り分ける方式（PR #79）なので、実際はこの数字より押しやすいです。');
+    }
 
     // ③ 狭い画面のはみ出し
     for (const w of NARROW) {
