@@ -2023,7 +2023,6 @@
     var pts = obsPoints.slice().sort(function (a, b) {
       return (OBS_ORDER[a.level] || 9) - (OBS_ORDER[b.level] || 9);
     });
-    var drawn = []; // あたり判定を計算するため、描いた丸の座標も控えておく
 
     pts.forEach(function (o) {
       var p = project(o.lat, o.lon, view.zoom);
