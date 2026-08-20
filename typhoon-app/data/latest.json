@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-20T16:21:19+09:00",
+ "generatedAt": "2026-08-20T18:58:47+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
  "count": 1,
  "typhoons": [
@@ -10,11 +10,11 @@
    "name": "ソウデル",
    "nameEn": "Saudel",
    "category": "台風",
-   "issue": "2026-08-20T15:50:00+09:00",
+   "issue": "2026-08-20T18:45:00+09:00",
    "analysis": {
     "hours": 0,
     "label": "実況",
-    "validTime": "2026-08-20T15:00:00+09:00",
+    "validTime": "2026-08-20T18:00:00+09:00",
     "category": "台風",
     "intensity": "-",
     "scale": "",
@@ -25,7 +25,7 @@
     "windMs": 23.0,
     "gustMs": 35.0,
     "lat": 11.5,
-    "lon": 150.5,
+    "lon": 150.2,
     "circleKm": null,
     "galeRadiusKm": 330.0
    },
@@ -33,7 +33,7 @@
     {
      "hours": 12,
      "label": "予報　１２時間後",
-     "validTime": "2026-08-21T03:00:00+09:00",
+     "validTime": "2026-08-21T06:00:00+09:00",
      "category": "台風",
      "intensity": "-",
      "scale": "",
@@ -43,15 +43,15 @@
      "pressure": 985.0,
      "windMs": 30.0,
      "gustMs": 40.0,
-     "lat": 13.6,
-     "lon": 149.8,
+     "lat": 13.8,
+     "lon": 149.4,
      "circleKm": 75.0,
      "stormRadiusKm": 130.0
     },
     {
      "hours": 24,
      "label": "予報　２４時間後",
-     "validTime": "2026-08-21T15:00:00+09:00",
+     "validTime": "2026-08-21T18:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
      "scale": "",
@@ -61,14 +61,14 @@
      "pressure": 975.0,
      "windMs": 35.0,
      "gustMs": 50.0,
-     "lat": 15.6,
-     "lon": 148.8,
+     "lat": 15.8,
+     "lon": 148.3,
      "circleKm": 105.0,
      "stormRadiusKm": 190.0
     },
     {
-     "hours": 48,
-     "label": "予報　４８時間後",
+     "hours": 45,
+     "label": "予報　４５時間後",
      "validTime": "2026-08-22T15:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
@@ -85,8 +85,8 @@
      "stormRadiusKm": 290.0
     },
     {
-     "hours": 72,
-     "label": "予報　７２時間後",
+     "hours": 69,
+     "label": "予報　６９時間後",
      "validTime": "2026-08-23T15:00:00+09:00",
      "category": "台風",
      "intensity": "非常に強い",
@@ -103,8 +103,8 @@
      "stormRadiusKm": 390.0
     },
     {
-     "hours": 96,
-     "label": "予報　９６時間後",
+     "hours": 93,
+     "label": "予報　９３時間後",
      "validTime": "2026-08-24T15:00:00+09:00",
      "category": "台風",
      "intensity": "非常に強い",
@@ -121,8 +121,8 @@
      "stormRadiusKm": 440.0
     },
     {
-     "hours": 120,
-     "label": "予報　１２０時間後",
+     "hours": 117,
+     "label": "予報　１１７時間後",
      "validTime": "2026-08-25T15:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
@@ -179,6 +179,10 @@
     [
      11.5,
      150.5
+    ],
+    [
+     11.5,
+     150.2
     ]
    ]
   }
