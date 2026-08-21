@@ -1,7 +1,15 @@
 {
- "generatedAt": "2026-08-21T11:10:30+09:00",
+ "generatedAt": "2026-08-21T22:28:56+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20260821210216",
+   "time": "2026-08-21T21:02:00+09:00",
+   "place": "八丈島東方沖",
+   "magnitude": 5.5,
+   "maxIntensity": "3",
+   "depthKm": 60.0
+  },
   {
    "id": "20260821091118",
    "time": "2026-08-21T09:11:00+09:00",
@@ -113,14 +121,6 @@
    "magnitude": 1.9,
    "maxIntensity": "1",
    "depthKm": 10.0
-  },
-  {
-   "id": "20260820083831",
-   "time": "2026-08-20T08:38:00+09:00",
-   "place": "茨城県北部",
-   "magnitude": 3.6,
-   "maxIntensity": "2",
-   "depthKm": 60.0
   }
  ],
  "tsunami": {
