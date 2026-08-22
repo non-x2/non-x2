@@ -1,7 +1,15 @@
 {
- "generatedAt": "2026-08-23T07:54:13+09:00",
+ "generatedAt": "2026-08-23T08:52:52+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20260823075637",
+   "time": "2026-08-23T07:56:00+09:00",
+   "place": "石川県能登地方",
+   "magnitude": 2.3,
+   "maxIntensity": "1",
+   "depthKm": 10.0
+  },
   {
    "id": "20260823070737",
    "time": "2026-08-23T07:07:00+09:00",
@@ -113,14 +121,6 @@
    "magnitude": 2.2,
    "maxIntensity": "1",
    "depthKm": 0.0
-  },
-  {
-   "id": "20260821090130",
-   "time": "2026-08-21T09:01:00+09:00",
-   "place": "沖縄本島近海",
-   "magnitude": 4.2,
-   "maxIntensity": "3",
-   "depthKm": 40.0
   }
  ],
  "tsunami": {
