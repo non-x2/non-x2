@@ -523,7 +523,12 @@
       }
       var ms = Date.now() - d.getTime();
       if (ms < 0) ms = 0;
-      el.textContent = '⏱ この情報は' + formatAgeShort(ms) + 'のものです';
+      /* ⚡雷と☔大雨は同じ警報データを見ているので、古さの数字はいつも同じになる。
+         不具合と誤解されないよう、この2タブだけ理由を一言添える（自己改良バックログ 候補5） */
+      var sharedNote = (key === 'thunder' || key === 'rain')
+        ? '（雷と大雨は同じ元データなので、いつも同じ数字になります）'
+        : '';
+      el.textContent = '⏱ この情報は' + formatAgeShort(ms) + 'のものです' + sharedNote;
       el.hidden = false;
     });
   }
