@@ -1,7 +1,15 @@
 {
- "generatedAt": "2026-08-22T19:55:16+09:00",
+ "generatedAt": "2026-08-22T22:55:13+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20260822224620",
+   "time": "2026-08-22T22:46:00+09:00",
+   "place": "釧路沖",
+   "magnitude": 2.9,
+   "maxIntensity": "1",
+   "depthKm": 50.0
+  },
   {
    "id": "20260822193028",
    "time": "2026-08-22T19:30:00+09:00",
@@ -113,14 +121,6 @@
    "magnitude": 3.9,
    "maxIntensity": "1",
    "depthKm": 30.0
-  },
-  {
-   "id": "20260821004621",
-   "time": "2026-08-21T00:46:00+09:00",
-   "place": "和歌山県北部",
-   "magnitude": 2.5,
-   "maxIntensity": "1",
-   "depthKm": 10.0
   }
  ],
  "tsunami": {
