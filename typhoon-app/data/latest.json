@@ -1,8 +1,81 @@
 {
- "generatedAt": "2026-08-22T16:08:29+09:00",
+ "generatedAt": "2026-08-22T16:52:54+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
  "count": 3,
  "typhoons": [
+  {
+   "id": "TC2623",
+   "number": "2620",
+   "numberShort": "20",
+   "name": "ケナリ",
+   "nameEn": "Gaenari",
+   "category": "台風",
+   "issue": "2026-08-22T16:15:00+09:00",
+   "analysis": {
+    "hours": 0,
+    "label": "実況",
+    "validTime": "2026-08-22T15:00:00+09:00",
+    "category": "台風",
+    "intensity": "-",
+    "scale": "",
+    "location": "宮古島の北北西約120km",
+    "course": "西北西",
+    "speedKmh": null,
+    "pressure": 998.0,
+    "windMs": 18.0,
+    "gustMs": 25.0,
+    "lat": 25.7,
+    "lon": 124.7,
+    "circleKm": null,
+    "galeRadiusKm": 390.0
+   },
+   "forecast": [
+    {
+     "hours": 24,
+     "label": "予報　２４時間後",
+     "validTime": "2026-08-23T15:00:00+09:00",
+     "category": "台風",
+     "intensity": "-",
+     "scale": "",
+     "location": "与那国島の北北西約100km",
+     "course": "西",
+     "speedKmh": null,
+     "pressure": 998.0,
+     "windMs": 18.0,
+     "gustMs": 25.0,
+     "lat": 25.3,
+     "lon": 122.5,
+     "circleKm": 120.0
+    },
+    {
+     "hours": 48,
+     "label": "予報　４８時間後",
+     "validTime": "2026-08-24T15:00:00+09:00",
+     "category": "熱帯低気圧",
+     "intensity": "-",
+     "scale": "",
+     "location": "東シナ海",
+     "course": "西",
+     "speedKmh": null,
+     "pressure": 1000.0,
+     "windMs": 0.0,
+     "gustMs": 0.0,
+     "lat": 25.5,
+     "lon": 120.9,
+     "circleKm": 210.0
+    }
+   ],
+   "track": [
+    [
+     25.5,
+     124.9
+    ],
+    [
+     25.7,
+     124.7
+    ]
+   ]
+  },
   {
    "id": "TC2622",
    "number": "2619",
@@ -355,75 +428,6 @@
     [
      18.5,
      146.0
-    ]
-   ]
-  },
-  {
-   "id": "TC2623",
-   "number": "2620",
-   "numberShort": "20",
-   "name": "ケナリ",
-   "nameEn": "Gaenari",
-   "category": "台風",
-   "issue": "2026-08-22T13:30:00+09:00",
-   "analysis": {
-    "hours": 0,
-    "label": "実況",
-    "validTime": "2026-08-22T12:00:00+09:00",
-    "category": "台風",
-    "intensity": "-",
-    "scale": "",
-    "location": "宮古島の北北西約90km",
-    "course": "西",
-    "speedKmh": null,
-    "pressure": 998.0,
-    "windMs": 18.0,
-    "gustMs": 25.0,
-    "lat": 25.5,
-    "lon": 124.9,
-    "circleKm": null,
-    "galeRadiusKm": 390.0
-   },
-   "forecast": [
-    {
-     "hours": 24,
-     "label": "予報　２４時間後",
-     "validTime": "2026-08-23T12:00:00+09:00",
-     "category": "台風",
-     "intensity": "-",
-     "scale": "",
-     "location": "与那国島の北西約80km",
-     "course": "西",
-     "speedKmh": null,
-     "pressure": 998.0,
-     "windMs": 18.0,
-     "gustMs": 25.0,
-     "lat": 24.9,
-     "lon": 122.4,
-     "circleKm": 120.0
-    },
-    {
-     "hours": 45,
-     "label": "予報　４５時間後",
-     "validTime": "2026-08-24T09:00:00+09:00",
-     "category": "熱帯低気圧",
-     "intensity": "-",
-     "scale": "",
-     "location": "東シナ海",
-     "course": "西北西",
-     "speedKmh": null,
-     "pressure": 1000.0,
-     "windMs": 0.0,
-     "gustMs": 0.0,
-     "lat": 25.4,
-     "lon": 121.8,
-     "circleKm": 200.0
-    }
-   ],
-   "track": [
-    [
-     25.5,
-     124.9
     ]
    ]
   }
