@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-23T02:53:55+09:00",
+ "generatedAt": "2026-08-23T04:51:54+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
   {
@@ -16,7 +16,7 @@
    "place": "茨城県南部",
    "magnitude": 5.9,
    "maxIntensity": "5-",
-   "depthKm": 70.0
+   "depthKm": 68.0
   },
   {
    "id": "20260822224620",
