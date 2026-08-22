@@ -1,8 +1,71 @@
 {
- "generatedAt": "2026-08-22T22:08:19+09:00",
+ "generatedAt": "2026-08-22T22:50:16+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
- "count": 3,
+ "count": 4,
  "typhoons": [
+  {
+   "id": "TC2624",
+   "number": "d",
+   "numberShort": "d",
+   "name": "",
+   "nameEn": "",
+   "category": "熱帯低気圧",
+   "issue": "2026-08-22T22:25:00+09:00",
+   "analysis": {
+    "hours": 0,
+    "label": "実況",
+    "validTime": "2026-08-22T21:00:00+09:00",
+    "category": "熱帯低気圧",
+    "intensity": "-",
+    "scale": "",
+    "location": "フィリピンの東",
+    "course": "不定",
+    "speedKmh": null,
+    "pressure": 1002.0,
+    "windMs": 15.0,
+    "gustMs": 23.0,
+    "lat": 12.1,
+    "lon": 134.6,
+    "circleKm": null
+   },
+   "forecast": [
+    {
+     "hours": 24,
+     "label": "予報　２４時間後",
+     "validTime": "2026-08-23T21:00:00+09:00",
+     "category": "台風",
+     "intensity": "-",
+     "scale": "",
+     "location": "フィリピンの東",
+     "course": "東北東",
+     "speedKmh": "20",
+     "pressure": 998.0,
+     "windMs": 18.0,
+     "gustMs": 25.0,
+     "lat": 14.1,
+     "lon": 138.4,
+     "circleKm": 130.0
+    },
+    {
+     "hours": 48,
+     "label": "予報　４８時間後",
+     "validTime": "2026-08-24T21:00:00+09:00",
+     "category": "熱帯低気圧",
+     "intensity": "-",
+     "scale": "",
+     "location": "マリアナ諸島",
+     "course": "北北東",
+     "speedKmh": "20",
+     "pressure": 1002.0,
+     "windMs": 0.0,
+     "gustMs": 0.0,
+     "lat": 17.5,
+     "lon": 140.8,
+     "circleKm": 200.0
+    }
+   ],
+   "track": []
+  },
   {
    "id": "TC2623",
    "number": "2620",
