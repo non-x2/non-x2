@@ -1,7 +1,15 @@
 {
- "generatedAt": "2026-08-24T07:53:59+09:00",
+ "generatedAt": "2026-08-24T08:53:11+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20260824081215",
+   "time": "2026-08-24T08:12:00+09:00",
+   "place": "熊本県熊本地方",
+   "magnitude": 2.2,
+   "maxIntensity": "1",
+   "depthKm": 0.0
+  },
   {
    "id": "20260824073240",
    "time": "2026-08-24T07:32:00+09:00",
@@ -113,14 +121,6 @@
    "magnitude": 2.0,
    "maxIntensity": "1",
    "depthKm": 0.0
-  },
-  {
-   "id": "20260822183216",
-   "time": "2026-08-22T18:32:00+09:00",
-   "place": "オホーツク海南部",
-   "magnitude": 3.4,
-   "maxIntensity": "1",
-   "depthKm": 10.0
   }
  ],
  "tsunami": {
