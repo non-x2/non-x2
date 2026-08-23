@@ -1,8 +1,176 @@
 {
- "generatedAt": "2026-08-23T16:09:46+09:00",
+ "generatedAt": "2026-08-23T16:54:52+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
  "count": 4,
  "typhoons": [
+  {
+   "id": "TC2624",
+   "number": "d",
+   "numberShort": "d",
+   "name": "",
+   "nameEn": "",
+   "category": "熱帯低気圧",
+   "issue": "2026-08-23T16:25:00+09:00",
+   "analysis": {
+    "hours": 0,
+    "label": "実況",
+    "validTime": "2026-08-23T15:00:00+09:00",
+    "category": "熱帯低気圧",
+    "intensity": "-",
+    "scale": "",
+    "location": "フィリピンの東",
+    "course": "東北東",
+    "speedKmh": "15",
+    "pressure": 1000.0,
+    "windMs": 15.0,
+    "gustMs": 23.0,
+    "lat": 13.3,
+    "lon": 135.9,
+    "circleKm": null
+   },
+   "forecast": [
+    {
+     "hours": 12,
+     "label": "予報　１２時間後",
+     "validTime": "2026-08-24T03:00:00+09:00",
+     "category": "台風",
+     "intensity": "-",
+     "scale": "",
+     "location": "フィリピンの東",
+     "course": "北東",
+     "speedKmh": "15",
+     "pressure": 998.0,
+     "windMs": 18.0,
+     "gustMs": 25.0,
+     "lat": 14.6,
+     "lon": 137.3,
+     "circleKm": 85.0
+    },
+    {
+     "hours": 24,
+     "label": "予報　２４時間後",
+     "validTime": "2026-08-24T15:00:00+09:00",
+     "category": "台風",
+     "intensity": "-",
+     "scale": "",
+     "location": "フィリピンの東",
+     "course": "北東",
+     "speedKmh": "20",
+     "pressure": 998.0,
+     "windMs": 18.0,
+     "gustMs": 25.0,
+     "lat": 16.4,
+     "lon": 138.8,
+     "circleKm": 110.0
+    },
+    {
+     "hours": 48,
+     "label": "予報　４８時間後",
+     "validTime": "2026-08-25T15:00:00+09:00",
+     "category": "熱帯低気圧",
+     "intensity": "-",
+     "scale": "",
+     "location": "日本の南",
+     "course": "北",
+     "speedKmh": "20",
+     "pressure": 1002.0,
+     "windMs": 0.0,
+     "gustMs": 0.0,
+     "lat": 20.2,
+     "lon": 138.5,
+     "circleKm": 165.0
+    }
+   ],
+   "track": []
+  },
+  {
+   "id": "TC2623",
+   "number": "2620",
+   "numberShort": "20",
+   "name": "ケナリ",
+   "nameEn": "Gaenari",
+   "category": "台風",
+   "issue": "2026-08-23T16:15:00+09:00",
+   "analysis": {
+    "hours": 0,
+    "label": "実況",
+    "validTime": "2026-08-23T15:00:00+09:00",
+    "category": "台風",
+    "intensity": "-",
+    "scale": "",
+    "location": "台湾海峡",
+    "course": "西",
+    "speedKmh": "10",
+    "pressure": 998.0,
+    "windMs": 18.0,
+    "gustMs": 25.0,
+    "lat": 25.3,
+    "lon": 120.9,
+    "circleKm": null,
+    "galeRadiusKm": 560.0
+   },
+   "forecast": [
+    {
+     "hours": 24,
+     "label": "予報　２４時間後",
+     "validTime": "2026-08-24T15:00:00+09:00",
+     "category": "熱帯低気圧",
+     "intensity": "-",
+     "scale": "",
+     "location": "台湾海峡",
+     "course": "西南西",
+     "speedKmh": null,
+     "pressure": 1000.0,
+     "windMs": 0.0,
+     "gustMs": 0.0,
+     "lat": 24.5,
+     "lon": 119.0,
+     "circleKm": 120.0
+    }
+   ],
+   "track": [
+    [
+     25.5,
+     124.9
+    ],
+    [
+     25.7,
+     124.7
+    ],
+    [
+     25.9,
+     124.0
+    ],
+    [
+     26.0,
+     123.3
+    ],
+    [
+     25.5,
+     123.1
+    ],
+    [
+     25.4,
+     122.9
+    ],
+    [
+     25.3,
+     122.6
+    ],
+    [
+     25.4,
+     122.6
+    ],
+    [
+     25.5,
+     122.5
+    ],
+    [
+     25.3,
+     120.9
+    ]
+   ]
+  },
   {
    "id": "TC2622",
    "number": "2619",
@@ -401,187 +569,6 @@
     [
      21.9,
      141.1
-    ]
-   ]
-  },
-  {
-   "id": "TC2624",
-   "number": "d",
-   "numberShort": "d",
-   "name": "",
-   "nameEn": "",
-   "category": "熱帯低気圧",
-   "issue": "2026-08-23T13:25:00+09:00",
-   "analysis": {
-    "hours": 0,
-    "label": "実況",
-    "validTime": "2026-08-23T12:00:00+09:00",
-    "category": "熱帯低気圧",
-    "intensity": "-",
-    "scale": "",
-    "location": "フィリピンの東",
-    "course": "北東",
-    "speedKmh": "10",
-    "pressure": 1000.0,
-    "windMs": 15.0,
-    "gustMs": 23.0,
-    "lat": 13.1,
-    "lon": 135.5,
-    "circleKm": null
-   },
-   "forecast": [
-    {
-     "hours": 12,
-     "label": "予報　１２時間後",
-     "validTime": "2026-08-24T00:00:00+09:00",
-     "category": "台風",
-     "intensity": "-",
-     "scale": "",
-     "location": "フィリピンの東",
-     "course": "東北東",
-     "speedKmh": "20",
-     "pressure": 998.0,
-     "windMs": 18.0,
-     "gustMs": 25.0,
-     "lat": 14.2,
-     "lon": 137.5,
-     "circleKm": 85.0
-    },
-    {
-     "hours": 24,
-     "label": "予報　２４時間後",
-     "validTime": "2026-08-24T12:00:00+09:00",
-     "category": "台風",
-     "intensity": "-",
-     "scale": "",
-     "location": "フィリピンの東",
-     "course": "北東",
-     "speedKmh": "20",
-     "pressure": 998.0,
-     "windMs": 18.0,
-     "gustMs": 25.0,
-     "lat": 15.9,
-     "lon": 138.9,
-     "circleKm": 110.0
-    },
-    {
-     "hours": 45,
-     "label": "予報　４５時間後",
-     "validTime": "2026-08-25T09:00:00+09:00",
-     "category": "熱帯低気圧",
-     "intensity": "-",
-     "scale": "",
-     "location": "フィリピンの東",
-     "course": "北",
-     "speedKmh": "15",
-     "pressure": 1002.0,
-     "windMs": 0.0,
-     "gustMs": 0.0,
-     "lat": 19.0,
-     "lon": 138.9,
-     "circleKm": 165.0
-    }
-   ],
-   "track": []
-  },
-  {
-   "id": "TC2623",
-   "number": "2620",
-   "numberShort": "20",
-   "name": "ケナリ",
-   "nameEn": "Gaenari",
-   "category": "台風",
-   "issue": "2026-08-23T13:15:00+09:00",
-   "analysis": {
-    "hours": 0,
-    "label": "実況",
-    "validTime": "2026-08-23T12:00:00+09:00",
-    "category": "台風",
-    "intensity": "-",
-    "scale": "",
-    "location": "与那国島の北北西約120km",
-    "course": "不定",
-    "speedKmh": null,
-    "pressure": 998.0,
-    "windMs": 18.0,
-    "gustMs": 25.0,
-    "lat": 25.5,
-    "lon": 122.5,
-    "circleKm": null,
-    "galeRadiusKm": 560.0
-   },
-   "forecast": [
-    {
-     "hours": 24,
-     "label": "予報　２４時間後",
-     "validTime": "2026-08-24T12:00:00+09:00",
-     "category": "台風",
-     "intensity": "-",
-     "scale": "",
-     "location": "台湾海峡",
-     "course": "西南西",
-     "speedKmh": "10",
-     "pressure": 998.0,
-     "windMs": 18.0,
-     "gustMs": 25.0,
-     "lat": 24.5,
-     "lon": 119.9,
-     "circleKm": 120.0
-    },
-    {
-     "hours": 45,
-     "label": "予報　４５時間後",
-     "validTime": "2026-08-25T09:00:00+09:00",
-     "category": "熱帯低気圧",
-     "intensity": "-",
-     "scale": "",
-     "location": "台湾海峡",
-     "course": "南西",
-     "speedKmh": null,
-     "pressure": 1000.0,
-     "windMs": 0.0,
-     "gustMs": 0.0,
-     "lat": 23.5,
-     "lon": 119.0,
-     "circleKm": 210.0
-    }
-   ],
-   "track": [
-    [
-     25.5,
-     124.9
-    ],
-    [
-     25.7,
-     124.7
-    ],
-    [
-     25.9,
-     124.0
-    ],
-    [
-     26.0,
-     123.3
-    ],
-    [
-     25.5,
-     123.1
-    ],
-    [
-     25.4,
-     122.9
-    ],
-    [
-     25.3,
-     122.6
-    ],
-    [
-     25.4,
-     122.6
-    ],
-    [
-     25.5,
-     122.5
     ]
    ]
   }
