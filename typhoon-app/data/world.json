@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-24T18:11:44+09:00",
+ "generatedAt": "2026-08-24T19:09:47+09:00",
  "source": "米国ハリケーンセンター（NHC/CPHC、https://www.nhc.noaa.gov/）＋米軍合同台風警報センター（JTWC、https://www.metoc.navy.mil/jtwc/）",
  "note": "日本周辺（北西太平洋）は気象庁が担当（latest.json）。このファイルは含みません。",
  "count": 3,
@@ -10,7 +10,7 @@
    "name": "Iselle",
    "basin": "東太平洋",
    "category": "熱帯暴風",
-   "issue": "2026-08-24T03:00:00.000Z",
+   "issue": "2026-08-24T09:00:00.000Z",
    "analysis": {
     "hours": 0,
     "validTime": "2026-08-24T00:00:00+00:00",
@@ -151,6 +151,10 @@
     [
      16.8,
      -114.9
+    ],
+    [
+     17.6,
+     -115.8
     ]
    ]
   },
@@ -160,7 +164,7 @@
    "name": "Lala",
    "basin": "中部太平洋",
    "category": "熱帯暴風",
-   "issue": "2026-08-24T03:00:00.000Z",
+   "issue": "2026-08-24T09:00:00.000Z",
    "analysis": {
     "hours": 0,
     "validTime": "2026-08-23T18:00:00+00:00",
