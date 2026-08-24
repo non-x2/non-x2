@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-24T06:44:25+09:00",
+ "generatedAt": "2026-08-24T12:30:46+09:00",
  "source": "米国ハリケーンセンター（NHC/CPHC、https://www.nhc.noaa.gov/）＋米軍合同台風警報センター（JTWC、https://www.metoc.navy.mil/jtwc/）",
  "note": "日本周辺（北西太平洋）は気象庁が担当（latest.json）。このファイルは含みません。",
  "count": 3,
@@ -10,33 +10,33 @@
    "name": "Iselle",
    "basin": "東太平洋",
    "category": "熱帯暴風",
-   "issue": "2026-08-23T21:00:00.000Z",
+   "issue": "2026-08-24T03:00:00.000Z",
    "analysis": {
     "hours": 0,
-    "validTime": "2026-08-23T18:00:00+00:00",
+    "validTime": "2026-08-24T00:00:00+00:00",
     "category": "熱帯暴風",
-    "lat": 16.9,
-    "lon": -115.1,
+    "lat": 17.1,
+    "lon": -115.3,
     "windMs": 23,
     "gustMs": 28,
-    "pressure": 1001
+    "pressure": 999
    },
    "forecast": [
     {
      "hours": 12,
-     "validTime": "2026-08-24T06:00:00+00:00",
+     "validTime": "2026-08-24T12:00:00+00:00",
      "category": "熱帯暴風",
-     "lat": 18.2,
-     "lon": -116.3,
+     "lat": 18.1,
+     "lon": -116.4,
      "windMs": 26,
      "gustMs": 31,
      "pressure": null
     },
     {
      "hours": 24,
-     "validTime": "2026-08-24T18:00:00+00:00",
+     "validTime": "2026-08-25T00:00:00+00:00",
      "category": "熱帯暴風",
-     "lat": 19.6,
+     "lat": 19.4,
      "lon": -117.8,
      "windMs": 31,
      "gustMs": 39,
@@ -44,60 +44,60 @@
     },
     {
      "hours": 36,
-     "validTime": "2026-08-25T06:00:00+00:00",
+     "validTime": "2026-08-25T12:00:00+00:00",
      "category": "ハリケーン（カテゴリ1）",
-     "lat": 20.8,
-     "lon": -119.4,
+     "lat": 20.4,
+     "lon": -119.6,
      "windMs": 33,
      "gustMs": 41,
      "pressure": null
     },
     {
      "hours": 48,
-     "validTime": "2026-08-25T18:00:00+00:00",
-     "category": "ハリケーン（カテゴリ1）",
-     "lat": 21.4,
-     "lon": -121.1,
-     "windMs": 33,
-     "gustMs": 41,
-     "pressure": null
-    },
-    {
-     "hours": 60,
-     "validTime": "2026-08-26T06:00:00+00:00",
+     "validTime": "2026-08-26T00:00:00+00:00",
      "category": "熱帯暴風",
-     "lat": 21.9,
-     "lon": -122.8,
+     "lat": 21.0,
+     "lon": -121.4,
      "windMs": 31,
      "gustMs": 39,
      "pressure": null
     },
     {
-     "hours": 72,
-     "validTime": "2026-08-26T18:00:00+00:00",
+     "hours": 60,
+     "validTime": "2026-08-26T12:00:00+00:00",
      "category": "熱帯暴風",
-     "lat": 22.4,
-     "lon": -124.6,
+     "lat": 21.5,
+     "lon": -123.1,
+     "windMs": 28,
+     "gustMs": 33,
+     "pressure": null
+    },
+    {
+     "hours": 72,
+     "validTime": "2026-08-27T00:00:00+00:00",
+     "category": "熱帯暴風",
+     "lat": 21.9,
+     "lon": -125.1,
      "windMs": 26,
      "gustMs": 31,
      "pressure": null
     },
     {
      "hours": 96,
-     "validTime": "2026-08-27T18:00:00+00:00",
+     "validTime": "2026-08-28T00:00:00+00:00",
      "category": "熱帯暴風",
-     "lat": 23.3,
-     "lon": -128.4,
-     "windMs": 23,
-     "gustMs": 28,
+     "lat": 22.8,
+     "lon": -128.8,
+     "windMs": 21,
+     "gustMs": 26,
      "pressure": null
     },
     {
      "hours": 120,
-     "validTime": "2026-08-28T18:00:00+00:00",
+     "validTime": "2026-08-29T00:00:00+00:00",
      "category": "亜熱帯低気圧",
-     "lat": 24.2,
-     "lon": -132.2,
+     "lat": 23.6,
+     "lon": -132.5,
      "windMs": 15,
      "gustMs": 21,
      "pressure": null
@@ -147,6 +147,10 @@
     [
      16.6,
      -114.6
+    ],
+    [
+     16.8,
+     -114.9
     ]
    ]
   },
@@ -156,7 +160,7 @@
    "name": "Lala",
    "basin": "中部太平洋",
    "category": "熱帯暴風",
-   "issue": "2026-08-23T21:00:00.000Z",
+   "issue": "2026-08-24T03:00:00.000Z",
    "analysis": {
     "hours": 0,
     "validTime": "2026-08-23T18:00:00+00:00",
@@ -521,6 +525,10 @@
     [
      32.3,
      -174.2
+    ],
+    [
+     32.9,
+     -174.6
     ]
    ]
   },
@@ -530,7 +538,7 @@
    "name": "Moke",
    "basin": "中部太平洋",
    "category": "熱帯暴風",
-   "issue": "2026-08-23T21:00:00.000Z",
+   "issue": "2026-08-24T03:00:00.000Z",
    "analysis": {
     "hours": 0,
     "validTime": "2026-08-23T18:00:00+00:00",
@@ -689,6 +697,10 @@
     [
      15.1,
      -155.7
+    ],
+    [
+     15.2,
+     -156.7
     ]
    ]
   }
