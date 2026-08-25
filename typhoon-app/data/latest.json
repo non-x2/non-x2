@@ -1,197 +1,8 @@
 {
- "generatedAt": "2026-08-26T04:07:16+09:00",
+ "generatedAt": "2026-08-26T04:53:50+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
  "count": 3,
  "typhoons": [
-  {
-   "id": "TC2622",
-   "number": "2619",
-   "numberShort": "19",
-   "name": "ナーラ",
-   "nameEn": "Narra",
-   "category": "台風",
-   "issue": "2026-08-26T04:05:00+09:00",
-   "analysis": {
-    "hours": 0,
-    "label": "実況",
-    "validTime": "2026-08-26T03:00:00+09:00",
-    "category": "台風",
-    "intensity": "-",
-    "scale": "",
-    "location": "トンキン湾",
-    "course": "北東",
-    "speedKmh": "15",
-    "pressure": 996.0,
-    "windMs": 18.0,
-    "gustMs": 25.0,
-    "lat": 20.6,
-    "lon": 109.6,
-    "circleKm": null,
-    "galeRadiusKm": 165.0
-   },
-   "forecast": [
-    {
-     "hours": 12,
-     "label": "予報　１２時間後",
-     "validTime": "2026-08-26T15:00:00+09:00",
-     "category": "熱帯低気圧",
-     "intensity": "-",
-     "scale": "",
-     "location": "華南",
-     "course": "北北東",
-     "speedKmh": "15",
-     "pressure": 998.0,
-     "windMs": 0.0,
-     "gustMs": 0.0,
-     "lat": 21.8,
-     "lon": 110.3,
-     "circleKm": 85.0
-    },
-    {
-     "hours": 24,
-     "label": "予報　２４時間後",
-     "validTime": "2026-08-27T03:00:00+09:00",
-     "category": "熱帯低気圧",
-     "intensity": "-",
-     "scale": "",
-     "location": "華南",
-     "course": "北西",
-     "speedKmh": null,
-     "pressure": 1000.0,
-     "windMs": 0.0,
-     "gustMs": 0.0,
-     "lat": 22.5,
-     "lon": 109.4,
-     "circleKm": 120.0
-    }
-   ],
-   "track": [
-    [
-     21.2,
-     108.0
-    ],
-    [
-     21.1,
-     107.9
-    ],
-    [
-     21.0,
-     108.0
-    ],
-    [
-     21.1,
-     108.2
-    ],
-    [
-     21.1,
-     108.1
-    ],
-    [
-     20.9,
-     108.0
-    ],
-    [
-     20.8,
-     107.8
-    ],
-    [
-     20.8,
-     107.7
-    ],
-    [
-     20.7,
-     107.7
-    ],
-    [
-     21.1,
-     108.4
-    ],
-    [
-     20.7,
-     108.3
-    ],
-    [
-     20.6,
-     108.1
-    ],
-    [
-     20.5,
-     108.2
-    ],
-    [
-     20.5,
-     108.3
-    ],
-    [
-     20.4,
-     107.9
-    ],
-    [
-     20.5,
-     107.7
-    ],
-    [
-     20.6,
-     107.6
-    ],
-    [
-     20.5,
-     107.7
-    ],
-    [
-     20.3,
-     107.5
-    ],
-    [
-     20.1,
-     107.2
-    ],
-    [
-     19.8,
-     107.5
-    ],
-    [
-     19.3,
-     107.6
-    ],
-    [
-     19.5,
-     107.9
-    ],
-    [
-     19.8,
-     107.9
-    ],
-    [
-     19.9,
-     108.0
-    ],
-    [
-     19.2,
-     107.5
-    ],
-    [
-     19.3,
-     108.2
-    ],
-    [
-     19.5,
-     108.5
-    ],
-    [
-     20.0,
-     108.9
-    ],
-    [
-     20.3,
-     109.4
-    ],
-    [
-     20.6,
-     109.6
-    ]
-   ]
-  },
   {
    "id": "TC2621",
    "number": "2618",
@@ -199,22 +10,22 @@
    "name": "ソウデル",
    "nameEn": "Saudel",
    "category": "台風",
-   "issue": "2026-08-26T03:50:00+09:00",
+   "issue": "2026-08-26T04:45:00+09:00",
    "analysis": {
     "hours": 0,
     "label": "実況",
-    "validTime": "2026-08-26T03:00:00+09:00",
+    "validTime": "2026-08-26T04:00:00+09:00",
     "category": "台風",
     "intensity": "強い",
     "scale": "",
-    "location": "沖永良部島の西約60km",
+    "location": "沖永良部島の西北西約80km",
     "course": "西北西",
     "speedKmh": "15",
     "pressure": 960.0,
     "windMs": 40.0,
     "gustMs": 55.0,
-    "lat": 27.4,
-    "lon": 128.1,
+    "lat": 27.6,
+    "lon": 127.9,
     "circleKm": null,
     "stormRadiusKm": 165.0,
     "galeRadiusKm": 390.0
@@ -223,25 +34,25 @@
     {
      "hours": 1,
      "label": "推定　１時間後",
-     "validTime": "2026-08-26T04:00:00+09:00",
+     "validTime": "2026-08-26T05:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
      "scale": "",
-     "location": "沖永良部島の西約70km",
+     "location": "沖永良部島の西北西約100km",
      "course": "西北西",
      "speedKmh": "15",
      "pressure": 960.0,
      "windMs": 40.0,
      "gustMs": 55.0,
-     "lat": 27.5,
-     "lon": 128.0,
+     "lat": 27.7,
+     "lon": 127.7,
      "circleKm": null,
      "stormRadiusKm": 165.0,
      "galeRadiusKm": 390.0
     },
     {
-     "hours": 3,
-     "label": "予報　３時間後",
+     "hours": 2,
+     "label": "予報　２時間後",
      "validTime": "2026-08-26T06:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
@@ -258,8 +69,8 @@
      "stormRadiusKm": 190.0
     },
     {
-     "hours": 6,
-     "label": "予報　６時間後",
+     "hours": 5,
+     "label": "予報　５時間後",
      "validTime": "2026-08-26T09:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
@@ -276,8 +87,8 @@
      "stormRadiusKm": 200.0
     },
     {
-     "hours": 9,
-     "label": "予報　９時間後",
+     "hours": 8,
+     "label": "予報　８時間後",
      "validTime": "2026-08-26T12:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
@@ -294,8 +105,8 @@
      "stormRadiusKm": 200.0
     },
     {
-     "hours": 12,
-     "label": "予報　１２時間後",
+     "hours": 11,
+     "label": "予報　１１時間後",
      "validTime": "2026-08-26T15:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
@@ -312,8 +123,8 @@
      "stormRadiusKm": 210.0
     },
     {
-     "hours": 15,
-     "label": "予報　１５時間後",
+     "hours": 14,
+     "label": "予報　１４時間後",
      "validTime": "2026-08-26T18:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
@@ -330,8 +141,8 @@
      "stormRadiusKm": 210.0
     },
     {
-     "hours": 18,
-     "label": "予報　１８時間後",
+     "hours": 17,
+     "label": "予報　１７時間後",
      "validTime": "2026-08-26T21:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
@@ -348,8 +159,8 @@
      "stormRadiusKm": 220.0
     },
     {
-     "hours": 21,
-     "label": "予報　２１時間後",
+     "hours": 20,
+     "label": "予報　２０時間後",
      "validTime": "2026-08-27T00:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
@@ -366,8 +177,8 @@
      "stormRadiusKm": 220.0
     },
     {
-     "hours": 24,
-     "label": "予報　２４時間後",
+     "hours": 23,
+     "label": "予報　２３時間後",
      "validTime": "2026-08-27T03:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
@@ -384,8 +195,8 @@
      "stormRadiusKm": 230.0
     },
     {
-     "hours": 48,
-     "label": "予報　４８時間後",
+     "hours": 47,
+     "label": "予報　４７時間後",
      "validTime": "2026-08-28T03:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
@@ -402,8 +213,8 @@
      "stormRadiusKm": 230.0
     },
     {
-     "hours": 72,
-     "label": "予報　７２時間後",
+     "hours": 71,
+     "label": "予報　７１時間後",
      "validTime": "2026-08-29T03:00:00+09:00",
      "category": "熱帯低気圧",
      "intensity": "-",
@@ -715,6 +526,199 @@
     [
      27.4,
      128.1
+    ],
+    [
+     27.6,
+     127.9
+    ]
+   ]
+  },
+  {
+   "id": "TC2622",
+   "number": "2619",
+   "numberShort": "19",
+   "name": "ナーラ",
+   "nameEn": "Narra",
+   "category": "台風",
+   "issue": "2026-08-26T04:05:00+09:00",
+   "analysis": {
+    "hours": 0,
+    "label": "実況",
+    "validTime": "2026-08-26T03:00:00+09:00",
+    "category": "台風",
+    "intensity": "-",
+    "scale": "",
+    "location": "トンキン湾",
+    "course": "北東",
+    "speedKmh": "15",
+    "pressure": 996.0,
+    "windMs": 18.0,
+    "gustMs": 25.0,
+    "lat": 20.6,
+    "lon": 109.6,
+    "circleKm": null,
+    "galeRadiusKm": 165.0
+   },
+   "forecast": [
+    {
+     "hours": 12,
+     "label": "予報　１２時間後",
+     "validTime": "2026-08-26T15:00:00+09:00",
+     "category": "熱帯低気圧",
+     "intensity": "-",
+     "scale": "",
+     "location": "華南",
+     "course": "北北東",
+     "speedKmh": "15",
+     "pressure": 998.0,
+     "windMs": 0.0,
+     "gustMs": 0.0,
+     "lat": 21.8,
+     "lon": 110.3,
+     "circleKm": 85.0
+    },
+    {
+     "hours": 24,
+     "label": "予報　２４時間後",
+     "validTime": "2026-08-27T03:00:00+09:00",
+     "category": "熱帯低気圧",
+     "intensity": "-",
+     "scale": "",
+     "location": "華南",
+     "course": "北西",
+     "speedKmh": null,
+     "pressure": 1000.0,
+     "windMs": 0.0,
+     "gustMs": 0.0,
+     "lat": 22.5,
+     "lon": 109.4,
+     "circleKm": 120.0
+    }
+   ],
+   "track": [
+    [
+     21.2,
+     108.0
+    ],
+    [
+     21.1,
+     107.9
+    ],
+    [
+     21.0,
+     108.0
+    ],
+    [
+     21.1,
+     108.2
+    ],
+    [
+     21.1,
+     108.1
+    ],
+    [
+     20.9,
+     108.0
+    ],
+    [
+     20.8,
+     107.8
+    ],
+    [
+     20.8,
+     107.7
+    ],
+    [
+     20.7,
+     107.7
+    ],
+    [
+     21.1,
+     108.4
+    ],
+    [
+     20.7,
+     108.3
+    ],
+    [
+     20.6,
+     108.1
+    ],
+    [
+     20.5,
+     108.2
+    ],
+    [
+     20.5,
+     108.3
+    ],
+    [
+     20.4,
+     107.9
+    ],
+    [
+     20.5,
+     107.7
+    ],
+    [
+     20.6,
+     107.6
+    ],
+    [
+     20.5,
+     107.7
+    ],
+    [
+     20.3,
+     107.5
+    ],
+    [
+     20.1,
+     107.2
+    ],
+    [
+     19.8,
+     107.5
+    ],
+    [
+     19.3,
+     107.6
+    ],
+    [
+     19.5,
+     107.9
+    ],
+    [
+     19.8,
+     107.9
+    ],
+    [
+     19.9,
+     108.0
+    ],
+    [
+     19.2,
+     107.5
+    ],
+    [
+     19.3,
+     108.2
+    ],
+    [
+     19.5,
+     108.5
+    ],
+    [
+     20.0,
+     108.9
+    ],
+    [
+     20.3,
+     109.4
+    ],
+    [
+     20.6,
+     109.6
     ]
    ]
   },
