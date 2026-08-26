@@ -13,7 +13,7 @@ JavaScript（LON0・KX・Y0・KY の定数と px()・py() 関数）と**同じ�
 ⚠️ index.html 側の地図（LON0・KX・Y0・KY やviewBox）を描き直したときは、
 この道具の定数もあわせて直してください（ズレると座標が合わなくなります）。
 
-■ 使い方
+■ 使い方（緯度経度 → x,y）
     python3 tools/typhoon_map_coords.py 24.5 132.0 26.0 135.4 ...
         （緯度 経度 のペアを好きなだけ並べる）
 
@@ -22,6 +22,13 @@ JavaScript（LON0・KX・Y0・KY の定数と px()・py() 関数）と**同じ�
         26.0,135.4 → x=135.2,y=246.1
 
         SVGのpath d用: M101.7,270.3 L135.2,246.1
+
+■ 使い方（逆方向：x,y → 緯度経度）
+    python3 tools/typhoon_map_coords.py --xy 101.7 270.3 135.2 246.1 ...
+        （④の地図を見ながら「ここが今どのへんか」を確かめたいときに使う）
+
+    出力例：
+        x=101.7,y=270.3 → 24.5,132.0
 
 外部のライブラリは使いません（Python 3 の標準機能だけ）。
 """
@@ -44,10 +51,27 @@ def lonlat_to_xy(lat: float, lon: float) -> tuple[float, float]:
     return round(x, 1), round(y, 1)
 
 
+def xy_to_lonlat(x: float, y: float) -> tuple[float, float]:
+    lon = x / KX + LON0
+    lat = (math.atan(math.exp((Y0 - y) / KY)) - math.pi / 4) * 360 / math.pi
+    return round(lat, 1), round(lon, 1)
+
+
 def main(argv: list[str]) -> int:
+    reverse = bool(argv) and argv[0] == "--xy"
+    if reverse:
+        argv = argv[1:]
+
     if len(argv) < 2 or len(argv) % 2 != 0:
         print(__doc__)
         return 1
+
+    if reverse:
+        for i in range(0, len(argv), 2):
+            x, y = float(argv[i]), float(argv[i + 1])
+            lat, lon = xy_to_lonlat(x, y)
+            print(f"x={x},y={y} → {lat},{lon}")
+        return 0
 
     points = []
     for i in range(0, len(argv), 2):
