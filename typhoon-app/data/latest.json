@@ -1,7 +1,7 @@
 {
- "generatedAt": "2026-08-26T08:46:42+09:00",
+ "generatedAt": "2026-08-26T11:07:22+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
- "count": 3,
+ "count": 2,
  "typhoons": [
   {
    "id": "TC2621",
@@ -10,49 +10,49 @@
    "name": "ソウデル",
    "nameEn": "Saudel",
    "category": "台風",
-   "issue": "2026-08-26T08:45:00+09:00",
+   "issue": "2026-08-26T10:45:00+09:00",
    "analysis": {
     "hours": 0,
     "label": "実況",
-    "validTime": "2026-08-26T08:00:00+09:00",
+    "validTime": "2026-08-26T10:00:00+09:00",
     "category": "台風",
     "intensity": "強い",
     "scale": "",
-    "location": "沖永良部島の西北西約150km",
+    "location": "沖永良部島の西北西約180km",
     "course": "西北西",
     "speedKmh": "15",
     "pressure": 960.0,
     "windMs": 40.0,
     "gustMs": 55.0,
-    "lat": 27.8,
-    "lon": 127.3,
+    "lat": 27.9,
+    "lon": 127.0,
     "circleKm": null,
-    "stormRadiusKm": 165.0,
+    "stormRadiusKm": 130.0,
     "galeRadiusKm": 390.0
    },
    "forecast": [
     {
      "hours": 1,
      "label": "推定　１時間後",
-     "validTime": "2026-08-26T09:00:00+09:00",
+     "validTime": "2026-08-26T11:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
      "scale": "",
-     "location": "沖永良部島の西北西約170km",
+     "location": "久米島の北約190km",
      "course": "西北西",
      "speedKmh": "15",
      "pressure": 960.0,
      "windMs": 40.0,
      "gustMs": 55.0,
-     "lat": 27.9,
-     "lon": 127.1,
+     "lat": 28.0,
+     "lon": 126.8,
      "circleKm": null,
-     "stormRadiusKm": 165.0,
+     "stormRadiusKm": 130.0,
      "galeRadiusKm": 390.0
     },
     {
-     "hours": 4,
-     "label": "予報　４時間後",
+     "hours": 2,
+     "label": "予報　２時間後",
      "validTime": "2026-08-26T12:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
@@ -63,14 +63,14 @@
      "pressure": 960.0,
      "windMs": 40.0,
      "gustMs": 55.0,
-     "lat": 28.3,
+     "lat": 28.2,
      "lon": 126.7,
-     "circleKm": 35.0,
-     "stormRadiusKm": 200.0
+     "circleKm": 30.0,
+     "stormRadiusKm": 160.0
     },
     {
-     "hours": 7,
-     "label": "予報　７時間後",
+     "hours": 5,
+     "label": "予報　５時間後",
      "validTime": "2026-08-26T15:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
@@ -81,50 +81,50 @@
      "pressure": 965.0,
      "windMs": 35.0,
      "gustMs": 50.0,
-     "lat": 28.4,
+     "lat": 28.3,
      "lon": 126.4,
-     "circleKm": 40.0,
-     "stormRadiusKm": 200.0
+     "circleKm": 35.0,
+     "stormRadiusKm": 165.0
     },
     {
-     "hours": 10,
-     "label": "予報　１０時間後",
+     "hours": 8,
+     "label": "予報　８時間後",
      "validTime": "2026-08-26T18:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
      "scale": "",
-     "location": "久米島の北北西約250km",
+     "location": "",
      "course": "西北西",
      "speedKmh": "15",
      "pressure": 965.0,
      "windMs": 35.0,
      "gustMs": 50.0,
-     "lat": 28.5,
+     "lat": 28.3,
      "lon": 126.1,
-     "circleKm": 45.0,
-     "stormRadiusKm": 210.0
+     "circleKm": 40.0,
+     "stormRadiusKm": 170.0
     },
     {
-     "hours": 13,
-     "label": "予報　１３時間後",
+     "hours": 11,
+     "label": "予報　１１時間後",
      "validTime": "2026-08-26T21:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
      "scale": "",
-     "location": "",
-     "course": "西",
+     "location": "久米島の北北西約250km",
+     "course": "西北西",
      "speedKmh": "10",
      "pressure": 965.0,
      "windMs": 35.0,
      "gustMs": 50.0,
-     "lat": 28.5,
+     "lat": 28.4,
      "lon": 125.8,
-     "circleKm": 50.0,
-     "stormRadiusKm": 210.0
+     "circleKm": 45.0,
+     "stormRadiusKm": 175.0
     },
     {
-     "hours": 16,
-     "label": "予報　１６時間後",
+     "hours": 14,
+     "label": "予報　１４時間後",
      "validTime": "2026-08-27T00:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
@@ -135,14 +135,14 @@
      "pressure": 965.0,
      "windMs": 35.0,
      "gustMs": 50.0,
-     "lat": 28.5,
-     "lon": 125.4,
-     "circleKm": 55.0,
-     "stormRadiusKm": 220.0
+     "lat": 28.4,
+     "lon": 125.5,
+     "circleKm": 50.0,
+     "stormRadiusKm": 180.0
     },
     {
-     "hours": 19,
-     "label": "予報　１９時間後",
+     "hours": 17,
+     "label": "予報　１７時間後",
      "validTime": "2026-08-27T03:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
@@ -154,61 +154,79 @@
      "windMs": 35.0,
      "gustMs": 50.0,
      "lat": 28.5,
-     "lon": 125.1,
-     "circleKm": 60.0,
-     "stormRadiusKm": 220.0
+     "lon": 125.2,
+     "circleKm": 55.0,
+     "stormRadiusKm": 185.0
     },
     {
-     "hours": 22,
-     "label": "予報　２２時間後",
+     "hours": 20,
+     "label": "予報　２０時間後",
      "validTime": "2026-08-27T06:00:00+09:00",
+     "category": "台風",
+     "intensity": "強い",
+     "scale": "",
+     "location": "",
+     "course": "西",
+     "speedKmh": null,
+     "pressure": 965.0,
+     "windMs": 35.0,
+     "gustMs": 50.0,
+     "lat": 28.5,
+     "lon": 125.0,
+     "circleKm": 60.0,
+     "stormRadiusKm": 185.0
+    },
+    {
+     "hours": 23,
+     "label": "予報　２３時間後",
+     "validTime": "2026-08-27T09:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
      "scale": "",
      "location": "東シナ海",
      "course": "西",
-     "speedKmh": "10",
+     "speedKmh": null,
      "pressure": 965.0,
      "windMs": 35.0,
      "gustMs": 50.0,
      "lat": 28.5,
-     "lon": 124.8,
+     "lon": 124.7,
      "circleKm": 65.0,
-     "stormRadiusKm": 230.0
+     "stormRadiusKm": 190.0
     },
     {
-     "hours": 43,
-     "label": "予報　４３時間後",
-     "validTime": "2026-08-28T03:00:00+09:00",
+     "hours": 47,
+     "label": "予報　４７時間後",
+     "validTime": "2026-08-28T09:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
      "scale": "",
      "location": "東シナ海",
-     "course": "西南西",
+     "course": "西",
      "speedKmh": "15",
      "pressure": 970.0,
      "windMs": 35.0,
      "gustMs": 50.0,
-     "lat": 27.7,
-     "lon": 122.0,
+     "lat": 27.9,
+     "lon": 121.2,
      "circleKm": 100.0,
-     "stormRadiusKm": 230.0
+     "stormRadiusKm": 210.0
     },
     {
-     "hours": 67,
-     "label": "予報　６７時間後",
-     "validTime": "2026-08-29T03:00:00+09:00",
+     "hours": 71,
+     "label": "予報　７１時間後",
+     "validTime": "2026-08-29T09:00:00+09:00",
      "category": "熱帯低気圧",
      "intensity": "-",
      "scale": "",
      "location": "華南",
-     "course": "西南西",
+     "course": "西",
      "speedKmh": "25",
-     "pressure": 992.0,
+     "pressure": 996.0,
      "windMs": 0.0,
      "gustMs": 0.0,
-     "lat": 26.2,
-     "lon": 116.3,
+     "lat": 26.4,
+     "lon": 115.4,
      "circleKm": 220.0
     }
    ],
@@ -528,6 +546,14 @@
     [
      27.8,
      127.3
+    ],
+    [
+     27.9,
+     127.2
+    ],
+    [
+     27.9,
+     127.0
     ]
    ]
   },
@@ -538,22 +564,22 @@
    "name": "ナーラ",
    "nameEn": "Narra",
    "category": "台風",
-   "issue": "2026-08-26T07:05:00+09:00",
+   "issue": "2026-08-26T10:10:00+09:00",
    "analysis": {
     "hours": 0,
     "label": "実況",
-    "validTime": "2026-08-26T06:00:00+09:00",
+    "validTime": "2026-08-26T09:00:00+09:00",
     "category": "台風",
     "intensity": "-",
     "scale": "",
-    "location": "トンキン湾",
+    "location": "華南",
     "course": "北東",
     "speedKmh": null,
-    "pressure": 996.0,
+    "pressure": 998.0,
     "windMs": 18.0,
     "gustMs": 25.0,
-    "lat": 20.7,
-    "lon": 109.7,
+    "lat": 20.8,
+    "lon": 109.8,
     "circleKm": null,
     "galeRadiusKm": 165.0
    },
@@ -561,35 +587,35 @@
     {
      "hours": 12,
      "label": "予報　１２時間後",
-     "validTime": "2026-08-26T18:00:00+09:00",
+     "validTime": "2026-08-26T21:00:00+09:00",
      "category": "熱帯低気圧",
      "intensity": "-",
      "scale": "",
      "location": "華南",
-     "course": "北北東",
+     "course": "北",
      "speedKmh": "15",
      "pressure": 998.0,
      "windMs": 0.0,
      "gustMs": 0.0,
-     "lat": 22.0,
-     "lon": 110.1,
+     "lat": 22.3,
+     "lon": 110.0,
      "circleKm": 85.0
     },
     {
      "hours": 24,
      "label": "予報　２４時間後",
-     "validTime": "2026-08-27T06:00:00+09:00",
+     "validTime": "2026-08-27T09:00:00+09:00",
      "category": "熱帯低気圧",
      "intensity": "-",
      "scale": "",
      "location": "華南",
-     "course": "北西",
+     "course": "北",
      "speedKmh": null,
      "pressure": 1000.0,
      "windMs": 0.0,
      "gustMs": 0.0,
-     "lat": 22.7,
-     "lon": 109.2,
+     "lat": 23.0,
+     "lon": 110.0,
      "circleKm": 120.0
     }
    ],
@@ -721,71 +747,10 @@
     [
      20.7,
      109.7
-    ]
-   ]
-  },
-  {
-   "id": "TC2624",
-   "number": "2621",
-   "numberShort": "21",
-   "name": "アッサニー",
-   "nameEn": "Atsani",
-   "category": "熱帯低気圧",
-   "issue": "2026-08-25T10:15:00+09:00",
-   "analysis": {
-    "hours": 0,
-    "label": "実況",
-    "validTime": "2026-08-25T09:00:00+09:00",
-    "category": "熱帯低気圧",
-    "intensity": "-",
-    "scale": "",
-    "location": "フィリピンの東",
-    "course": "北北東",
-    "speedKmh": "20",
-    "pressure": 1000.0,
-    "windMs": null,
-    "gustMs": null,
-    "lat": 19.0,
-    "lon": 138.0,
-    "circleKm": null
-   },
-   "forecast": [],
-   "track": [
-    [
-     15.1,
-     137.3
     ],
     [
-     15.5,
-     137.6
-    ],
-    [
-     16.1,
-     138.1
-    ],
-    [
-     16.4,
-     138.2
-    ],
-    [
-     16.6,
-     138.1
-    ],
-    [
-     17.1,
-     137.8
-    ],
-    [
-     18.1,
-     137.8
-    ],
-    [
-     18.4,
-     138.1
-    ],
-    [
-     19.0,
-     138.0
+     20.8,
+     109.8
     ]
    ]
   }
