@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-08-26T18:09:46+09:00",
+ "generatedAt": "2026-08-27T00:59:26+09:00",
  "source": "米国ハリケーンセンター（NHC/CPHC、https://www.nhc.noaa.gov/）＋米軍合同台風警報センター（JTWC、https://www.metoc.navy.mil/jtwc/）",
  "note": "日本周辺（北西太平洋）は気象庁が担当（latest.json）。このファイルは含みません。",
  "count": 2,
@@ -10,64 +10,64 @@
    "name": "Iselle",
    "basin": "東太平洋",
    "category": "熱帯暴風",
-   "issue": "2026-08-26T09:00:00.000Z",
+   "issue": "2026-08-26T15:00:00.000Z",
    "analysis": {
     "hours": 0,
-    "validTime": "2026-08-26T06:00:00+00:00",
+    "validTime": "2026-08-26T12:00:00+00:00",
     "category": "熱帯暴風",
-    "lat": 21.8,
-    "lon": -123.5,
-    "windMs": 23,
-    "gustMs": 28,
-    "pressure": 996
+    "lat": 22.2,
+    "lon": -124.0,
+    "windMs": 21,
+    "gustMs": 26,
+    "pressure": 999
    },
    "forecast": [
     {
      "hours": 12,
-     "validTime": "2026-08-26T18:00:00+00:00",
-     "category": "熱帯暴風",
-     "lat": 22.2,
-     "lon": -124.6,
-     "windMs": 21,
-     "gustMs": 26,
-     "pressure": null
-    },
-    {
-     "hours": 24,
-     "validTime": "2026-08-27T06:00:00+00:00",
+     "validTime": "2026-08-27T00:00:00+00:00",
      "category": "亜熱帯暴風",
-     "lat": 22.8,
-     "lon": -126.4,
+     "lat": 22.5,
+     "lon": -125.3,
      "windMs": 18,
      "gustMs": 23,
      "pressure": null
     },
     {
-     "hours": 36,
-     "validTime": "2026-08-27T18:00:00+00:00",
+     "hours": 24,
+     "validTime": "2026-08-27T12:00:00+00:00",
      "category": "亜熱帯低気圧",
-     "lat": 23.5,
-     "lon": -128.3,
+     "lat": 23.2,
+     "lon": -127.0,
+     "windMs": 15,
+     "gustMs": 21,
+     "pressure": null
+    },
+    {
+     "hours": 36,
+     "validTime": "2026-08-28T00:00:00+00:00",
+     "category": "亜熱帯低気圧",
+     "lat": 23.9,
+     "lon": -128.8,
      "windMs": 15,
      "gustMs": 21,
      "pressure": null
     },
     {
      "hours": 48,
-     "validTime": "2026-08-28T06:00:00+00:00",
+     "validTime": "2026-08-28T12:00:00+00:00",
      "category": "亜熱帯低気圧",
-     "lat": 23.8,
-     "lon": -130.2,
+     "lat": 24.5,
+     "lon": -130.7,
      "windMs": 13,
      "gustMs": 18,
      "pressure": null
     },
     {
      "hours": 60,
-     "validTime": "2026-08-28T18:00:00+00:00",
+     "validTime": "2026-08-29T00:00:00+00:00",
      "category": "亜熱帯低気圧",
-     "lat": 24.3,
-     "lon": -132.1,
+     "lat": 25.0,
+     "lon": -132.4,
      "windMs": 13,
      "gustMs": 18,
      "pressure": null
@@ -157,6 +157,10 @@
     [
      21.5,
      -122.9
+    ],
+    [
+     21.9,
+     -123.6
     ]
    ]
   },
@@ -166,13 +170,13 @@
    "name": "Lala",
    "basin": "中部太平洋",
    "category": "熱帯暴風",
-   "issue": "2026-08-26T09:00:00.000Z",
+   "issue": "2026-08-26T15:00:00.000Z",
    "analysis": {
     "hours": 0,
-    "validTime": "2026-08-26T06:00:00+00:00",
+    "validTime": "2026-08-26T12:00:00+00:00",
     "category": "熱帯暴風",
-    "lat": 35.4,
-    "lon": -177.7,
+    "lat": 35.8,
+    "lon": -178.0,
     "windMs": 21,
     "gustMs": 26,
     "pressure": 997
@@ -180,70 +184,70 @@
    "forecast": [
     {
      "hours": 12,
-     "validTime": "2026-08-26T18:00:00+00:00",
+     "validTime": "2026-08-27T00:00:00+00:00",
      "category": "熱帯暴風",
-     "lat": 35.9,
-     "lon": -178.2,
+     "lat": 36.3,
+     "lon": -178.4,
      "windMs": 21,
      "gustMs": 26,
      "pressure": null
     },
     {
      "hours": 24,
-     "validTime": "2026-08-27T06:00:00+00:00",
+     "validTime": "2026-08-27T12:00:00+00:00",
      "category": "熱帯暴風",
-     "lat": 36.6,
-     "lon": -178.7,
+     "lat": 37.1,
+     "lon": -178.9,
      "windMs": 21,
      "gustMs": 26,
      "pressure": null
     },
     {
      "hours": 36,
-     "validTime": "2026-08-27T18:00:00+00:00",
+     "validTime": "2026-08-28T00:00:00+00:00",
      "category": "熱帯暴風",
-     "lat": 37.4,
-     "lon": -179.3,
+     "lat": 37.9,
+     "lon": -179.4,
      "windMs": 18,
      "gustMs": 23,
      "pressure": null
     },
     {
      "hours": 48,
-     "validTime": "2026-08-28T06:00:00+00:00",
-     "category": "亜熱帯暴風",
-     "lat": 38.0,
-     "lon": -180.0,
-     "windMs": 18,
-     "gustMs": 23,
+     "validTime": "2026-08-28T12:00:00+00:00",
+     "category": "亜熱帯低気圧",
+     "lat": 38.4,
+     "lon": 179.9,
+     "windMs": 15,
+     "gustMs": 21,
      "pressure": null
     },
     {
      "hours": 60,
-     "validTime": "2026-08-28T18:00:00+00:00",
+     "validTime": "2026-08-29T00:00:00+00:00",
      "category": "亜熱帯低気圧",
-     "lat": 38.6,
-     "lon": 179.0,
+     "lat": 38.9,
+     "lon": 178.7,
      "windMs": 15,
      "gustMs": 21,
      "pressure": null
     },
     {
      "hours": 72,
-     "validTime": "2026-08-29T06:00:00+00:00",
+     "validTime": "2026-08-29T12:00:00+00:00",
      "category": "亜熱帯低気圧",
-     "lat": 39.5,
-     "lon": 177.6,
+     "lat": 40.0,
+     "lon": 177.0,
      "windMs": 13,
      "gustMs": 18,
      "pressure": null
     },
     {
      "hours": 96,
-     "validTime": "2026-08-30T06:00:00+00:00",
+     "validTime": "2026-08-30T12:00:00+00:00",
      "category": "亜熱帯低気圧",
-     "lat": 44.5,
-     "lon": 174.5,
+     "lat": 45.5,
+     "lon": 175.0,
      "windMs": 13,
      "gustMs": 18,
      "pressure": null
@@ -561,6 +565,10 @@
     [
      35.3,
      -177.6
+    ],
+    [
+     35.6,
+     -177.9
     ]
    ]
   }
