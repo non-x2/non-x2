@@ -1,7 +1,15 @@
 {
- "generatedAt": "2026-08-26T14:08:48+09:00",
+ "generatedAt": "2026-08-26T17:21:08+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20260826163246",
+   "time": "2026-08-26T16:32:00+09:00",
+   "place": "択捉島付近",
+   "magnitude": 4.6,
+   "maxIntensity": "1",
+   "depthKm": 160.0
+  },
   {
    "id": "20260826133337",
    "time": "2026-08-26T13:33:00+09:00",
@@ -113,14 +121,6 @@
    "magnitude": null,
    "maxIntensity": "",
    "depthKm": null
-  },
-  {
-   "id": "20260825180733",
-   "time": "2026-08-25T18:07:00+09:00",
-   "place": "根室半島南東沖",
-   "magnitude": 4.8,
-   "maxIntensity": "3",
-   "depthKm": 80.0
   }
  ],
  "tsunami": {
