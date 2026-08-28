@@ -30,6 +30,9 @@ JavaScript（LON0・KX・Y0・KY の定数と px()・py() 関数）と**同じ�
     出力例：
         x=101.7,y=270.3 → 24.5,132.0
 
+    ⚠️ x,y が地図のviewBox（-20〜350, -10〜365）の外を指しているときは、
+       計算はするものの「⚠️ 地図の外です」と併記します（値は参考程度に）。
+
 外部のライブラリは使いません（Python 3 の標準機能だけ）。
 """
 
@@ -43,6 +46,10 @@ LON0 = 122.02
 KX = 10.163
 Y0 = 535.07
 KY = 582.3
+
+# typhoon-app/index.html の <svg id="map-svg" viewBox="..."> と必ず一致させること
+VIEWBOX_X_MIN, VIEWBOX_Y_MIN = -20.0, -10.0
+VIEWBOX_X_MAX, VIEWBOX_Y_MAX = VIEWBOX_X_MIN + 370.0, VIEWBOX_Y_MIN + 375.0
 
 
 def lonlat_to_xy(lat: float, lon: float) -> tuple[float, float]:
@@ -70,7 +77,9 @@ def main(argv: list[str]) -> int:
         for i in range(0, len(argv), 2):
             x, y = float(argv[i]), float(argv[i + 1])
             lat, lon = xy_to_lonlat(x, y)
-            print(f"x={x},y={y} → {lat},{lon}")
+            out_of_bounds = not (VIEWBOX_X_MIN <= x <= VIEWBOX_X_MAX and VIEWBOX_Y_MIN <= y <= VIEWBOX_Y_MAX)
+            note = "　⚠️ 地図の外です（viewBoxの範囲外）" if out_of_bounds else ""
+            print(f"x={x},y={y} → {lat},{lon}{note}")
         return 0
 
     points = []
