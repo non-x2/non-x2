@@ -1,7 +1,31 @@
 {
- "generatedAt": "2026-08-28T07:32:51+09:00",
+ "generatedAt": "2026-08-28T15:19:34+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20260828150958",
+   "time": "2026-08-28T15:09:00+09:00",
+   "place": "熊本県天草・芦北地方",
+   "magnitude": 2.5,
+   "maxIntensity": "1",
+   "depthKm": 10.0
+  },
+  {
+   "id": "20260828133142",
+   "time": "2026-08-28T13:31:00+09:00",
+   "place": "熊本県熊本地方",
+   "magnitude": 2.3,
+   "maxIntensity": "1",
+   "depthKm": 0.0
+  },
+  {
+   "id": "20260828084955",
+   "time": "2026-08-28T08:49:00+09:00",
+   "place": "熊本県天草・芦北地方",
+   "magnitude": 2.7,
+   "maxIntensity": "1",
+   "depthKm": 10.0
+  },
   {
    "id": "20260828071341",
    "time": "2026-08-28T07:13:00+09:00",
@@ -97,30 +121,6 @@
    "magnitude": 2.6,
    "maxIntensity": "1",
    "depthKm": 0.0
-  },
-  {
-   "id": "20260826113348",
-   "time": "2026-08-26T11:33:00+09:00",
-   "place": "熊本県熊本地方",
-   "magnitude": 3.3,
-   "maxIntensity": "2",
-   "depthKm": 10.0
-  },
-  {
-   "id": "20260826094234",
-   "time": "2026-08-26T09:42:00+09:00",
-   "place": "沖縄本島近海",
-   "magnitude": 2.7,
-   "maxIntensity": "1",
-   "depthKm": 0.0
-  },
-  {
-   "id": "20260826093510",
-   "time": "2026-08-26T09:35:00+09:00",
-   "place": "沖縄本島近海",
-   "magnitude": 2.6,
-   "maxIntensity": "1",
-   "depthKm": 10.0
   }
  ],
  "tsunami": {
