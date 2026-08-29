@@ -23,6 +23,9 @@ JavaScript（LON0・KX・Y0・KY の定数と px()・py() 関数）と**同じ�
 
         SVGのpath d用: M101.7,270.3 L135.2,246.1
 
+    ⚠️ 出た x,y が地図のviewBox（-20〜350, -10〜365）の外になるときは、
+       計算はするものの「⚠️ 地図の外です」と併記します（値は参考程度に）。
+
 ■ 使い方（逆方向：x,y → 緯度経度）
     python3 tools/typhoon_map_coords.py --xy 101.7 270.3 135.2 246.1 ...
         （④の地図を見ながら「ここが今どのへんか」を確かめたいときに使う）
@@ -87,7 +90,9 @@ def main(argv: list[str]) -> int:
         lat, lon = float(argv[i]), float(argv[i + 1])
         x, y = lonlat_to_xy(lat, lon)
         points.append((lat, lon, x, y))
-        print(f"{lat},{lon} → x={x},y={y}")
+        out_of_bounds = not (VIEWBOX_X_MIN <= x <= VIEWBOX_X_MAX and VIEWBOX_Y_MIN <= y <= VIEWBOX_Y_MAX)
+        note = "　⚠️ 地図の外です（viewBoxの範囲外）" if out_of_bounds else ""
+        print(f"{lat},{lon} → x={x},y={y}{note}")
 
     path = " L".join(f"{'M' if i == 0 else ''}{x},{y}" for i, (_, _, x, y) in enumerate(points))
     print(f"\nSVGのpath d用: {path}")
