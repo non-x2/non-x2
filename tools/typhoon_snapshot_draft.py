@@ -19,8 +19,21 @@
 
 ■ 使い方
     python3 tools/typhoon_snapshot_draft.py            # 控え（data/latest.json）から下書きを作る
+    python3 tools/typhoon_snapshot_draft.py --live     # 気象庁から直接いま取ってきて下書きを作る
     python3 tools/typhoon_snapshot_draft.py --main 18  # 「今後の見通し」に使う台風を番号で選ぶ
     python3 tools/typhoon_snapshot_draft.py --json 別のファイル.json
+
+■ --live（気象庁から直接）について
+控え（data/latest.json）は毎時25分に自動で新しくなりますが、
+「控えが古いまま止まっている」ときや「たったいまの発表で下書きを作りたい」ときは
+`--live` を付けると気象庁から直接取ってきます。
+取ってくる中身の組み立ては `typhoon-app/scripts/fetch_typhoon.py`（毎時の取得係）の
+部品をそのまま呼んで使うので、控え経由で作った下書きと**同じかたち**になります
+（同じ処理を2か所に書き写さないため。あちらを直せばこちらも直ります）。
+
+⚠️ こちらにも安全装置があります：気象庁から**1個でも取れなかったら下書きを作りません**。
+   台風が1つ抜けた下書きをそのまま貼ってしまうと、
+   「その台風は無い」と読めてしまい危ないためです（控えを作る側と同じ考え方）。
 
 ■ この道具が作らないもの（＝手作業のまま残るところ）
     ・✅ すでに通過した台風 …… 過去の話なので、いまの控えには入っていません
@@ -39,6 +52,7 @@
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import re
 import sys
@@ -47,6 +61,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_JSON = ROOT / "typhoon-app" / "data" / "latest.json"
+# --live のときに部品を借りる「毎時の取得係」（同じ処理を書き写さないため）
+FETCH_SCRIPT = ROOT / "typhoon-app" / "scripts" / "fetch_typhoon.py"
 JST = timezone(timedelta(hours=9))
 WD = "日月火水木金土"
 
@@ -198,6 +214,53 @@ def draft_timeline(t: dict) -> str:
     return "\n".join(out)
 
 
+def load_live() -> dict:
+    """気象庁から直接取ってきて、控え（latest.json）と同じかたちのデータを作る。
+
+    台風データの読み取り方は `typhoon-app/scripts/fetch_typhoon.py`（毎時の取得係）に
+    すでに書いてあるので、それをそのまま**借りて**使います。同じ処理を2か所に
+    書き写すと、片方だけ直して食い違う事故が起きるためです。
+    """
+    if not FETCH_SCRIPT.exists():
+        sys.exit(f"❌ 取得の係が見つかりません: {FETCH_SCRIPT}\n"
+                 "   --live なし（控えから作る）でお試しください。")
+
+    spec = importlib.util.spec_from_file_location("fetch_typhoon", FETCH_SCRIPT)
+    fetcher = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(fetcher)
+
+    try:
+        targets = fetcher.fetch_json(fetcher.TARGET_URL)
+    except Exception as err:  # noqa: BLE001 - 何で失敗しても落とさず日本語で伝える
+        sys.exit(f"❌ 気象庁の一覧が取れませんでした: {err}\n"
+                 "   通信の状態を確かめるか、--live なし（控えから作る）でお試しください。")
+
+    entries = targets if isinstance(targets, list) else []
+    typhoons, failed = [], 0
+    for entry in entries:
+        try:
+            built = fetcher.build_typhoon(entry)
+        except Exception as err:  # noqa: BLE001
+            print(f"⚠️ {entry.get('tropicalCyclone')} の取得に失敗: {err}", file=sys.stderr)
+            failed += 1
+            continue
+        if built:
+            typhoons.append(built)
+        else:
+            failed += 1
+
+    # ⚠️ 大事な安全装置（控えを作る側と同じ考え方）
+    # 1個でも取れなかったら下書きを作らない。台風が1つ抜けた下書きを貼ってしまうと
+    # 「その台風は無い」と読めてしまい、④が危ない表示になるため。
+    if failed:
+        sys.exit(f"❌ {len(entries)}個中{failed}個が取れませんでした。\n"
+                 "   抜けたまま下書きを作ると台風を見落とすので、ここでやめます。"
+                 "しばらく置いてからやり直してください。")
+
+    now = datetime.now(JST).replace(microsecond=0)
+    return {"generatedAt": now.isoformat(), "typhoons": typhoons}
+
+
 def pick_main(typhoons: list[dict], want: str | None) -> dict | None:
     """「今後の見通し」に使う台風を選ぶ。番号の指定が無ければ発表の1つめ。"""
     if not typhoons:
@@ -206,35 +269,49 @@ def pick_main(typhoons: list[dict], want: str | None) -> dict | None:
         for t in typhoons:
             if str(t.get("numberShort")) == str(want).lstrip("0"):
                 return t
-        print(f"⚠️ 台風{want}号は控えの中に見つかりませんでした。1つめを使います。\n")
+        # --live のときは「控え」ではないので、どちらでも通じる言い方にする
+        print(f"⚠️ 台風{want}号は見つかりませんでした"
+              f"（いま出ているのは {'・'.join(tc_name(t) for t in typhoons)}）。1つめを使います。\n")
     return typhoons[0]
 
 
 def main() -> int:
     ap = argparse.ArgumentParser(description="台風ページの予備の文章（④）の下書きを作る")
-    ap.add_argument("--json", type=Path, default=DEFAULT_JSON, help="読み込む控えのファイル")
+    src = ap.add_mutually_exclusive_group()
+    src.add_argument("--json", type=Path, default=DEFAULT_JSON, help="読み込む控えのファイル")
+    src.add_argument("--live", action="store_true",
+                     help="控えではなく気象庁から直接いま取ってくる")
     ap.add_argument("--main", help="「今後の見通し」に使う台風の番号（例：18）")
     args = ap.parse_args()
 
-    if not args.json.exists():
-        sys.exit(f"❌ 控えが見つかりません: {args.json}")
-    data = json.loads(args.json.read_text(encoding="utf-8"))
+    if args.live:
+        print("🌐 気象庁から直接取ってきています…", file=sys.stderr)
+        data = load_live()
+    else:
+        if not args.json.exists():
+            sys.exit(f"❌ 控えが見つかりません: {args.json}")
+        data = json.loads(args.json.read_text(encoding="utf-8"))
     typhoons = data.get("typhoons") or []
     gen = jst(data.get("generatedAt", "")) or datetime.now(JST)
 
     print("🌀 ④予備の文章の下書き（この道具はファイルを書き換えません）")
-    # リポジトリの外のファイルを指定されても落ちないようにする
-    try:
-        shown = args.json.resolve().relative_to(ROOT)
-    except ValueError:
-        shown = args.json
-    print(f"   もとにした控え: {shown}")
-    print(f"   控えができた時刻: {gen:%Y-%m-%d %H:%M}（日本時間）")
+    if args.live:
+        print("   もとにした情報: 気象庁から直接取得（--live）")
+        print(f"   取ってきた時刻: {gen:%Y-%m-%d %H:%M}（日本時間）")
+    else:
+        # リポジトリの外のファイルを指定されても落ちないようにする
+        try:
+            shown = args.json.resolve().relative_to(ROOT)
+        except ValueError:
+            shown = args.json
+        print(f"   もとにした控え: {shown}")
+        print(f"   控えができた時刻: {gen:%Y-%m-%d %H:%M}（日本時間）")
     print(f"   発生中の台風: {'・'.join(tc_name(t) for t in typhoons) or '（なし）'}")
     age_h = (datetime.now(JST) - gen).total_seconds() / 3600
-    if age_h > 6:
+    # --live は取ってきたばかりなので古さの心配はない（控えから作ったときだけ見張る）
+    if not args.live and age_h > 6:
         print(f"   ⚠️ この控え自体が {age_h:.1f} 時間前のものです。"
-              "先に気象庁の最新発表を確認してください。")
+              "先に気象庁の最新発表を確認するか、--live をお使いください。")
     print()
 
     if not typhoons:
