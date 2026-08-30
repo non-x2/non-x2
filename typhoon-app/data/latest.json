@@ -1,170 +1,8 @@
 {
- "generatedAt": "2026-08-30T22:04:34+09:00",
+ "generatedAt": "2026-08-31T02:39:29+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
  "count": 2,
  "typhoons": [
-  {
-   "id": "TC2626",
-   "number": "2623",
-   "numberShort": "23",
-   "name": "バンラン",
-   "nameEn": "Bang-lang",
-   "category": "台風",
-   "issue": "2026-08-30T21:50:00+09:00",
-   "analysis": {
-    "hours": 0,
-    "label": "実況",
-    "validTime": "2026-08-30T21:00:00+09:00",
-    "category": "台風",
-    "intensity": "-",
-    "scale": "",
-    "location": "日本のはるか東",
-    "course": "北北西",
-    "speedKmh": "35",
-    "pressure": 994.0,
-    "windMs": 23.0,
-    "gustMs": 35.0,
-    "lat": 34.5,
-    "lon": 166.3,
-    "circleKm": null,
-    "galeRadiusKm": 220.0
-   },
-   "forecast": [
-    {
-     "hours": 12,
-     "label": "予報　１２時間後",
-     "validTime": "2026-08-31T09:00:00+09:00",
-     "category": "台風",
-     "intensity": "-",
-     "scale": "",
-     "location": "日本のはるか東",
-     "course": "北北西",
-     "speedKmh": "10",
-     "pressure": 998.0,
-     "windMs": 20.0,
-     "gustMs": 30.0,
-     "lat": 35.6,
-     "lon": 165.5,
-     "circleKm": 85.0
-    },
-    {
-     "hours": 24,
-     "label": "予報　２４時間後",
-     "validTime": "2026-08-31T21:00:00+09:00",
-     "category": "台風",
-     "intensity": "-",
-     "scale": "",
-     "location": "日本のはるか東",
-     "course": "北",
-     "speedKmh": "25",
-     "pressure": 994.0,
-     "windMs": 23.0,
-     "gustMs": 35.0,
-     "lat": 38.4,
-     "lon": 166.2,
-     "circleKm": 120.0
-    },
-    {
-     "hours": 48,
-     "label": "予報　４８時間後",
-     "validTime": "2026-09-01T21:00:00+09:00",
-     "category": "温帯低気圧",
-     "intensity": "-",
-     "scale": "",
-     "location": "カムチャツカの東",
-     "course": "北",
-     "speedKmh": "65",
-     "pressure": 992.0,
-     "windMs": 20.0,
-     "gustMs": 30.0,
-     "lat": 52.4,
-     "lon": 169.7,
-     "circleKm": 210.0
-    }
-   ],
-   "track": [
-    [
-     18.4,
-     165.1
-    ],
-    [
-     18.8,
-     165.3
-    ],
-    [
-     19.4,
-     165.8
-    ],
-    [
-     19.6,
-     165.8
-    ],
-    [
-     20.3,
-     166.6
-    ],
-    [
-     20.8,
-     167.1
-    ],
-    [
-     21.1,
-     167.5
-    ],
-    [
-     22.2,
-     167.9
-    ],
-    [
-     23.1,
-     167.9
-    ],
-    [
-     23.9,
-     168.1
-    ],
-    [
-     24.5,
-     168.6
-    ],
-    [
-     25.1,
-     169.1
-    ],
-    [
-     25.7,
-     169.2
-    ],
-    [
-     27.2,
-     169.4
-    ],
-    [
-     29.6,
-     168.7
-    ],
-    [
-     30.8,
-     168.0
-    ],
-    [
-     32.1,
-     167.4
-    ],
-    [
-     33.1,
-     167.4
-    ],
-    [
-     34.2,
-     166.9
-    ],
-    [
-     34.5,
-     166.3
-    ]
-   ]
-  },
   {
    "id": "TC2625",
    "number": "2622",
@@ -172,22 +10,22 @@
    "name": "アータウ",
    "nameEn": "Etau",
    "category": "台風",
-   "issue": "2026-08-30T19:05:00+09:00",
+   "issue": "2026-08-31T01:05:00+09:00",
    "analysis": {
     "hours": 0,
     "label": "実況",
-    "validTime": "2026-08-30T18:00:00+09:00",
+    "validTime": "2026-08-31T00:00:00+09:00",
     "category": "台風",
     "intensity": "-",
     "scale": "",
     "location": "日本のはるか東",
     "course": "東",
-    "speedKmh": "15",
+    "speedKmh": "20",
     "pressure": 996.0,
     "windMs": 18.0,
     "gustMs": 25.0,
-    "lat": 31.0,
-    "lon": 165.7,
+    "lat": 31.2,
+    "lon": 166.9,
     "circleKm": null,
     "galeRadiusKm": 220.0
    },
@@ -195,53 +33,36 @@
     {
      "hours": 24,
      "label": "予報　２４時間後",
-     "validTime": "2026-08-31T18:00:00+09:00",
-     "category": "台風",
-     "intensity": "-",
-     "scale": "",
-     "location": "日本のはるか東",
-     "course": "北東",
-     "speedKmh": "10",
-     "pressure": 996.0,
-     "windMs": 18.0,
-     "gustMs": 25.0,
-     "lat": 32.9,
-     "lon": 167.5,
-     "circleKm": 120.0
-    },
-    {
-     "hours": 45,
-     "label": "予報　４５時間後",
-     "validTime": "2026-09-01T15:00:00+09:00",
+     "validTime": "2026-09-01T00:00:00+09:00",
      "category": "台風",
      "intensity": "-",
      "scale": "",
      "location": "日本のはるか東",
      "course": "北",
-     "speedKmh": "20",
-     "pressure": 998.0,
-     "windMs": 18.0,
-     "gustMs": 25.0,
-     "lat": 36.2,
-     "lon": 168.4,
-     "circleKm": 210.0
+     "speedKmh": "25",
+     "pressure": 994.0,
+     "windMs": 20.0,
+     "gustMs": 30.0,
+     "lat": 36.5,
+     "lon": 168.1,
+     "circleKm": 120.0
     },
     {
-     "hours": 69,
-     "label": "予報　６９時間後",
-     "validTime": "2026-09-02T15:00:00+09:00",
-     "category": "熱帯低気圧",
+     "hours": 45,
+     "label": "予報　４５時間後",
+     "validTime": "2026-09-01T21:00:00+09:00",
+     "category": "温帯低気圧",
      "intensity": "-",
      "scale": "",
      "location": "アリューシャンの南",
      "course": "北北東",
-     "speedKmh": "20",
-     "pressure": 1000.0,
-     "windMs": 0.0,
-     "gustMs": 0.0,
-     "lat": 40.5,
-     "lon": 170.4,
-     "circleKm": 300.0
+     "speedKmh": "50",
+     "pressure": 992.0,
+     "windMs": 23.0,
+     "gustMs": 35.0,
+     "lat": 45.2,
+     "lon": 172.1,
+     "circleKm": 210.0
     }
    ],
    "track": [
@@ -348,6 +169,180 @@
     [
      31.0,
      165.7
+    ],
+    [
+     31.1,
+     166.0
+    ],
+    [
+     31.2,
+     166.9
+    ]
+   ]
+  },
+  {
+   "id": "TC2626",
+   "number": "2623",
+   "numberShort": "23",
+   "name": "バンラン",
+   "nameEn": "Bang-lang",
+   "category": "台風",
+   "issue": "2026-08-31T00:45:00+09:00",
+   "analysis": {
+    "hours": 0,
+    "label": "実況",
+    "validTime": "2026-08-31T00:00:00+09:00",
+    "category": "台風",
+    "intensity": "-",
+    "scale": "",
+    "location": "日本のはるか東",
+    "course": "北西",
+    "speedKmh": "25",
+    "pressure": 994.0,
+    "windMs": 23.0,
+    "gustMs": 35.0,
+    "lat": 35.2,
+    "lon": 165.9,
+    "circleKm": null,
+    "galeRadiusKm": 220.0
+   },
+   "forecast": [
+    {
+     "hours": 12,
+     "label": "予報　１２時間後",
+     "validTime": "2026-08-31T12:00:00+09:00",
+     "category": "台風",
+     "intensity": "-",
+     "scale": "",
+     "location": "日本のはるか東",
+     "course": "北",
+     "speedKmh": "10",
+     "pressure": 998.0,
+     "windMs": 20.0,
+     "gustMs": 30.0,
+     "lat": 36.3,
+     "lon": 165.7,
+     "circleKm": 85.0
+    },
+    {
+     "hours": 24,
+     "label": "予報　２４時間後",
+     "validTime": "2026-09-01T00:00:00+09:00",
+     "category": "台風",
+     "intensity": "-",
+     "scale": "",
+     "location": "日本のはるか東",
+     "course": "北",
+     "speedKmh": "35",
+     "pressure": 994.0,
+     "windMs": 23.0,
+     "gustMs": 35.0,
+     "lat": 40.2,
+     "lon": 166.6,
+     "circleKm": 120.0
+    },
+    {
+     "hours": 45,
+     "label": "予報　４５時間後",
+     "validTime": "2026-09-01T21:00:00+09:00",
+     "category": "温帯低気圧",
+     "intensity": "-",
+     "scale": "",
+     "location": "カムチャツカの東",
+     "course": "北",
+     "speedKmh": "65",
+     "pressure": 992.0,
+     "windMs": 20.0,
+     "gustMs": 30.0,
+     "lat": 52.4,
+     "lon": 169.7,
+     "circleKm": 210.0
+    }
+   ],
+   "track": [
+    [
+     18.4,
+     165.1
+    ],
+    [
+     18.8,
+     165.3
+    ],
+    [
+     19.4,
+     165.8
+    ],
+    [
+     19.6,
+     165.8
+    ],
+    [
+     20.3,
+     166.6
+    ],
+    [
+     20.8,
+     167.1
+    ],
+    [
+     21.1,
+     167.5
+    ],
+    [
+     22.2,
+     167.9
+    ],
+    [
+     23.1,
+     167.9
+    ],
+    [
+     23.9,
+     168.1
+    ],
+    [
+     24.5,
+     168.6
+    ],
+    [
+     25.1,
+     169.1
+    ],
+    [
+     25.7,
+     169.2
+    ],
+    [
+     27.2,
+     169.4
+    ],
+    [
+     29.6,
+     168.7
+    ],
+    [
+     30.8,
+     168.0
+    ],
+    [
+     32.1,
+     167.4
+    ],
+    [
+     33.1,
+     167.4
+    ],
+    [
+     34.2,
+     166.9
+    ],
+    [
+     34.5,
+     166.3
+    ],
+    [
+     35.2,
+     165.9
     ]
    ]
   }
