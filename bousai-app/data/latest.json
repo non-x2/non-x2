@@ -1,7 +1,31 @@
 {
- "generatedAt": "2026-08-31T06:29:35+09:00",
+ "generatedAt": "2026-08-31T23:22:26+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20260831184947",
+   "time": "2026-08-31T18:49:00+09:00",
+   "place": "福島県中通り",
+   "magnitude": 3.3,
+   "maxIntensity": "1",
+   "depthKm": 80.0
+  },
+  {
+   "id": "20260831160216",
+   "time": "2026-08-31T16:02:00+09:00",
+   "place": "熊本県天草・芦北地方",
+   "magnitude": 3.1,
+   "maxIntensity": "2",
+   "depthKm": 10.0
+  },
+  {
+   "id": "20260831115536",
+   "time": "2026-08-31T11:55:00+09:00",
+   "place": "奄美大島近海",
+   "magnitude": 3.5,
+   "maxIntensity": "1",
+   "depthKm": 10.0
+  },
   {
    "id": "20260831032944",
    "time": "2026-08-31T03:29:00+09:00",
@@ -97,30 +121,6 @@
    "magnitude": 3.7,
    "maxIntensity": "1",
    "depthKm": 10.0
-  },
-  {
-   "id": "20260829081037",
-   "time": "2026-08-29T08:10:00+09:00",
-   "place": "三陸沖",
-   "magnitude": 4.7,
-   "maxIntensity": "1",
-   "depthKm": 10.0
-  },
-  {
-   "id": "20260828233150",
-   "time": "2026-08-28T23:31:00+09:00",
-   "place": "岩手県沖",
-   "magnitude": 4.3,
-   "maxIntensity": "2",
-   "depthKm": 40.0
-  },
-  {
-   "id": "20260828191156",
-   "time": "2026-08-28T19:11:00+09:00",
-   "place": "宮古島北西沖",
-   "magnitude": 4.5,
-   "maxIntensity": "1",
-   "depthKm": 130.0
   }
  ],
  "tsunami": {
