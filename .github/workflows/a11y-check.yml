@@ -1,0 +1,76 @@
+# 👀 見やすさ点検（アクセシビリティ）
+#
+# 公開している4ページが「誰にとっても見やすいか」を、本物のブラウザで測ります。
+#   ① 色のコントラスト … 文字と背景の明るさの差（WCAG 2.1 AA：ふつう4.5:1／大きい文字3:1）
+#   ② 押しやすさ       … ボタンの大きさ（44pxがめやす）※⚠️表示のみ・失敗にはしません
+#   ③ はみ出し         … 幅320px・280pxで横スクロールが出ないか
+#
+# ①③に問題があると ❌（赤いバツ）になります。②は「読むための文章内リンク」など
+# 直す必要のないものが混じるため、警告の表示だけにとどめています（tools/check_a11y.js 参照）。
+#
+# 💡 なぜ Actions で回すのか：
+#    この点検には playwright（ブラウザを動かす部品）が必要ですが、
+#    のんさんのパソコンに入れると環境が変わってしまいます。
+#    Actions の使い捨ての部屋でだけ入れれば、手元は何も変わりません。
+
+name: 👀 見やすさ点検（アクセシビリティ）
+
+on:
+  push:
+    branches: [main] # PR中は下の pull_request 側が点検するので、pushはmainだけ（2重に走らせない）
+    paths:
+      - 'typhoon-app/index.html'
+      - 'bousai-app/index.html'
+      - 'traffic-app/index.html'
+      - 'world-livecam/index.html'
+      - 'tools/check_a11y.js'
+      - '.github/workflows/a11y-check.yml'
+  pull_request:
+    paths:
+      - 'typhoon-app/index.html'
+      - 'bousai-app/index.html'
+      - 'traffic-app/index.html'
+      - 'world-livecam/index.html'
+      - 'tools/check_a11y.js'
+      - '.github/workflows/a11y-check.yml'
+  workflow_dispatch: # 手動実行用のボタン
+
+permissions:
+  contents: read # 読むだけ（書き換えはしない）
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15 # 万一ブラウザが固まっても、ここで打ち切る
+    steps:
+      - name: リポジトリを取得
+        uses: actions/checkout@v4
+
+      - name: Node.js を用意
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: ブラウザを動かす部品を入れる
+        # 使い捨ての部屋なので、のんさんのパソコンには何も入りません
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+
+      - name: ページを配る係を起動
+        run: |
+          # nohup を付けて、このステップが終わっても配る係が生き残るようにする
+          nohup python3 -m http.server 8898 > /dev/null 2>&1 &
+          # 配る係が立ち上がるまで最大10秒待つ（固定のsleepだと遅い日に落ちるため）
+          for i in $(seq 1 20); do
+            if curl -sf -o /dev/null http://localhost:8898/typhoon-app/; then
+              echo "配る係が立ち上がりました（${i}回目の確認）"
+              exit 0
+            fi
+            sleep 0.5
+          done
+          echo "❌ ページを配る係が立ち上がりませんでした"
+          exit 1
+
+      - name: 見やすさを点検
+        run: node tools/check_a11y.js
