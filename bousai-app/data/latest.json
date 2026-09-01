@@ -1,7 +1,31 @@
 {
- "generatedAt": "2026-09-02T01:53:02+09:00",
+ "generatedAt": "2026-09-02T05:08:20+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20260902042131",
+   "time": "2026-09-02T04:21:00+09:00",
+   "place": "浦河沖",
+   "magnitude": 4.3,
+   "maxIntensity": "2",
+   "depthKm": 50.0
+  },
+  {
+   "id": "20260902030541",
+   "time": "2026-09-02T03:05:00+09:00",
+   "place": "高知県中部",
+   "magnitude": 2.9,
+   "maxIntensity": "1",
+   "depthKm": 0.0
+  },
+  {
+   "id": "20260902025012",
+   "time": "2026-09-02T02:50:00+09:00",
+   "place": "浦河沖",
+   "magnitude": 4.1,
+   "maxIntensity": "1",
+   "depthKm": 60.0
+  },
   {
    "id": "20260902005811",
    "time": "2026-09-02T00:58:00+09:00",
@@ -97,30 +121,6 @@
    "magnitude": 1.9,
    "maxIntensity": "1",
    "depthKm": 10.0
-  },
-  {
-   "id": "20260830094536",
-   "time": "2026-08-30T09:45:00+09:00",
-   "place": "奈良県",
-   "magnitude": 3.7,
-   "maxIntensity": "1",
-   "depthKm": 60.0
-  },
-  {
-   "id": "20260830091429",
-   "time": "2026-08-30T09:14:00+09:00",
-   "place": "浦河沖",
-   "magnitude": 4.0,
-   "maxIntensity": "1",
-   "depthKm": 60.0
-  },
-  {
-   "id": "20260830001711",
-   "time": "2026-08-30T00:17:00+09:00",
-   "place": "千葉県東方沖",
-   "magnitude": 4.8,
-   "maxIntensity": "4",
-   "depthKm": 30.0
   }
  ],
  "tsunami": {
