@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-01T19:21:54+09:00",
+ "generatedAt": "2026-09-02T00:03:46+09:00",
  "source": "米国ハリケーンセンター（NHC/CPHC、https://www.nhc.noaa.gov/）＋米軍合同台風警報センター（JTWC、https://www.metoc.navy.mil/jtwc/）",
  "note": "日本周辺（北西太平洋）は気象庁が担当（latest.json）。このファイルは含みません。",
  "count": 4,
@@ -10,16 +10,16 @@
    "name": "Edouard",
    "basin": "AT",
    "category": "熱帯暴風",
-   "issue": "2026-09-01T09:00:00.000Z",
+   "issue": "2026-09-01T15:00:00.000Z",
    "analysis": {
     "hours": 0,
-    "validTime": "2026-09-01T06:00:00+00:00",
+    "validTime": "2026-09-01T09:00:00+00:00",
     "category": "熱帯暴風",
-    "lat": 29.0,
-    "lon": -92.8,
+    "lat": 29.3,
+    "lon": -93.0,
     "windMs": 18,
     "gustMs": 23,
-    "pressure": 1005
+    "pressure": 1003
    },
    "forecast": [
     {
@@ -125,6 +125,10 @@
     [
      28.9,
      -92.4
+    ],
+    [
+     29.3,
+     -93.0
     ]
    ]
   },
@@ -134,7 +138,7 @@
    "name": "Karina",
    "basin": "東太平洋",
    "category": "ハリケーン（カテゴリ4）",
-   "issue": "2026-09-01T09:00:00.000Z",
+   "issue": "2026-09-01T15:00:00.000Z",
    "analysis": {
     "hours": 0,
     "validTime": "2026-09-01T06:00:00+00:00",
@@ -372,7 +376,7 @@
    "name": "Marie",
    "basin": "東太平洋",
    "category": "熱帯暴風",
-   "issue": "2026-09-01T09:00:00.000Z",
+   "issue": "2026-09-01T15:00:00.000Z",
    "analysis": {
     "hours": 0,
     "validTime": "2026-09-01T06:00:00+00:00",
@@ -562,7 +566,7 @@
    "name": "Lowell",
    "basin": "中部太平洋",
    "category": "熱帯暴風",
-   "issue": "2026-09-01T09:00:00.000Z",
+   "issue": "2026-09-01T15:00:00.000Z",
    "analysis": {
     "hours": 0,
     "validTime": "2026-09-01T06:00:00+00:00",
