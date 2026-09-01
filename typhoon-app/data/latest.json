@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-01T14:24:02+09:00",
+ "generatedAt": "2026-09-01T19:21:25+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
  "count": 2,
  "typhoons": [
@@ -10,11 +10,11 @@
    "name": "ソウデル",
    "nameEn": "Saudel",
    "category": "台風",
-   "issue": "2026-09-01T13:05:00+09:00",
+   "issue": "2026-09-01T19:10:00+09:00",
    "analysis": {
     "hours": 0,
     "label": "実況",
-    "validTime": "2026-09-01T12:00:00+09:00",
+    "validTime": "2026-09-01T18:00:00+09:00",
     "category": "台風",
     "intensity": "-",
     "scale": "",
@@ -24,8 +24,8 @@
     "pressure": 994.0,
     "windMs": 18.0,
     "gustMs": 25.0,
-    "lat": 19.8,
-    "lon": 113.9,
+    "lat": 20.3,
+    "lon": 115.1,
     "circleKm": null,
     "galeRadiusKm": 390.0
    },
@@ -33,24 +33,24 @@
     {
      "hours": 12,
      "label": "予報　１２時間後",
-     "validTime": "2026-09-02T00:00:00+09:00",
+     "validTime": "2026-09-02T06:00:00+09:00",
      "category": "台風",
      "intensity": "-",
      "scale": "",
      "location": "南シナ海",
-     "course": "東北東",
-     "speedKmh": "20",
+     "course": "北東",
+     "speedKmh": "15",
      "pressure": 994.0,
      "windMs": 18.0,
      "gustMs": 25.0,
-     "lat": 21.0,
-     "lon": 115.8,
+     "lat": 21.4,
+     "lon": 116.3,
      "circleKm": 65.0
     },
     {
      "hours": 24,
      "label": "予報　２４時間後",
-     "validTime": "2026-09-02T12:00:00+09:00",
+     "validTime": "2026-09-02T18:00:00+09:00",
      "category": "台風",
      "intensity": "-",
      "scale": "",
@@ -60,31 +60,31 @@
      "pressure": 994.0,
      "windMs": 18.0,
      "gustMs": 25.0,
-     "lat": 21.5,
-     "lon": 116.9,
+     "lat": 22.0,
+     "lon": 117.4,
      "circleKm": 95.0
     },
     {
      "hours": 45,
      "label": "予報　４５時間後",
-     "validTime": "2026-09-03T09:00:00+09:00",
+     "validTime": "2026-09-03T15:00:00+09:00",
      "category": "台風",
      "intensity": "-",
      "scale": "",
      "location": "南シナ海",
-     "course": "北東",
+     "course": "不定",
      "speedKmh": null,
      "pressure": 994.0,
      "windMs": 18.0,
      "gustMs": 25.0,
-     "lat": 22.6,
-     "lon": 118.0,
+     "lat": 22.9,
+     "lon": 117.5,
      "circleKm": 155.0
     },
     {
      "hours": 69,
      "label": "予報　６９時間後",
-     "validTime": "2026-09-04T09:00:00+09:00",
+     "validTime": "2026-09-04T15:00:00+09:00",
      "category": "台風",
      "intensity": "-",
      "scale": "",
@@ -94,25 +94,25 @@
      "pressure": 994.0,
      "windMs": 18.0,
      "gustMs": 25.0,
-     "lat": 22.4,
-     "lon": 117.3,
+     "lat": 22.7,
+     "lon": 118.3,
      "circleKm": 260.0
     },
     {
      "hours": 93,
      "label": "予報　９３時間後",
-     "validTime": "2026-09-05T09:00:00+09:00",
+     "validTime": "2026-09-05T15:00:00+09:00",
      "category": "熱帯低気圧",
      "intensity": "-",
      "scale": "",
      "location": "南シナ海",
-     "course": "不定",
-     "speedKmh": null,
-     "pressure": 998.0,
+     "course": "西南西",
+     "speedKmh": "10",
+     "pressure": 1000.0,
      "windMs": 0.0,
      "gustMs": 0.0,
-     "lat": 21.8,
-     "lon": 116.6,
+     "lat": 21.6,
+     "lon": 116.0,
      "circleKm": 370.0
     }
    ],
@@ -132,6 +132,14 @@
     [
      19.8,
      113.9
+    ],
+    [
+     19.9,
+     114.4
+    ],
+    [
+     20.3,
+     115.1
     ]
    ]
   },
@@ -142,11 +150,11 @@
    "name": "クロヴァン",
    "nameEn": "Krovanh",
    "category": "台風",
-   "issue": "2026-09-01T12:45:00+09:00",
+   "issue": "2026-09-01T18:45:00+09:00",
    "analysis": {
     "hours": 0,
     "label": "実況",
-    "validTime": "2026-09-01T12:00:00+09:00",
+    "validTime": "2026-09-01T18:00:00+09:00",
     "category": "台風",
     "intensity": "-",
     "scale": "",
@@ -156,8 +164,8 @@
     "pressure": 996.0,
     "windMs": 18.0,
     "gustMs": 25.0,
-    "lat": 22.5,
-    "lon": 131.8,
+    "lat": 22.6,
+    "lon": 131.7,
     "circleKm": null,
     "galeRadiusKm": 560.0
    },
@@ -165,41 +173,41 @@
     {
      "hours": 24,
      "label": "予報　２４時間後",
-     "validTime": "2026-09-02T12:00:00+09:00",
+     "validTime": "2026-09-02T18:00:00+09:00",
      "category": "台風",
      "intensity": "-",
      "scale": "",
-     "location": "日本の南",
-     "course": "不定",
+     "location": "南大東島の南南東約210km",
+     "course": "北",
      "speedKmh": null,
      "pressure": 994.0,
      "windMs": 18.0,
      "gustMs": 25.0,
-     "lat": 23.1,
-     "lon": 132.4,
-     "circleKm": 95.0
+     "lat": 24.1,
+     "lon": 132.0,
+     "circleKm": 80.0
     },
     {
      "hours": 45,
      "label": "予報　４５時間後",
-     "validTime": "2026-09-03T09:00:00+09:00",
+     "validTime": "2026-09-03T15:00:00+09:00",
      "category": "台風",
      "intensity": "-",
      "scale": "",
-     "location": "南大東島の北西約150km",
+     "location": "奄美市の南約130km",
      "course": "北北西",
-     "speedKmh": "20",
+     "speedKmh": "15",
      "pressure": 994.0,
      "windMs": 18.0,
      "gustMs": 25.0,
-     "lat": 26.6,
-     "lon": 130.0,
+     "lat": 27.3,
+     "lon": 129.8,
      "circleKm": 130.0
     },
     {
      "hours": 69,
      "label": "予報　６９時間後",
-     "validTime": "2026-09-04T09:00:00+09:00",
+     "validTime": "2026-09-04T15:00:00+09:00",
      "category": "台風",
      "intensity": "-",
      "scale": "",
@@ -209,31 +217,31 @@
      "pressure": 994.0,
      "windMs": 18.0,
      "gustMs": 25.0,
-     "lat": 29.5,
-     "lon": 129.3,
+     "lat": 29.9,
+     "lon": 129.8,
      "circleKm": 185.0
     },
     {
      "hours": 93,
      "label": "予報　９３時間後",
-     "validTime": "2026-09-05T09:00:00+09:00",
+     "validTime": "2026-09-05T15:00:00+09:00",
      "category": "台風",
      "intensity": "-",
      "scale": "",
      "location": "日本の南",
-     "course": "東",
+     "course": "東南東",
      "speedKmh": null,
      "pressure": 994.0,
      "windMs": 18.0,
      "gustMs": 25.0,
-     "lat": 29.9,
-     "lon": 131.1,
+     "lat": 29.4,
+     "lon": 130.9,
      "circleKm": 280.0
     },
     {
      "hours": 117,
      "label": "予報　１１７時間後",
-     "validTime": "2026-09-06T09:00:00+09:00",
+     "validTime": "2026-09-06T15:00:00+09:00",
      "category": "台風",
      "intensity": "-",
      "scale": "",
@@ -243,8 +251,8 @@
      "pressure": 994.0,
      "windMs": 18.0,
      "gustMs": 25.0,
-     "lat": 29.4,
-     "lon": 131.4,
+     "lat": 28.8,
+     "lon": 131.6,
      "circleKm": 400.0
     }
    ],
@@ -256,6 +264,14 @@
     [
      22.5,
      131.8
+    ],
+    [
+     22.3,
+     131.4
+    ],
+    [
+     22.6,
+     131.7
     ]
    ]
   }
