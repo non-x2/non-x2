@@ -13,15 +13,29 @@ JavaScript（LON0・KX・Y0・KY の定数と px()・py() 関数）と**同じ�
 ⚠️ index.html 側の地図（LON0・KX・Y0・KY やviewBox）を描き直したときは、
 この道具の定数もあわせて直してください（ズレると座標が合わなくなります）。
 
-■ 使い方
+■ 使い方（緯度経度 → x,y）
     python3 tools/typhoon_map_coords.py 24.5 132.0 26.0 135.4 ...
         （緯度 経度 のペアを好きなだけ並べる）
 
-    出力例：
-        24.5,132.0 → x=101.7,y=270.3
-        26.0,135.4 → x=135.2,y=246.1
+    出力例（実際にこの道具を走らせた結果をそのまま載せています）：
+        24.5,132.0 → x=101.4,y=278.1
+        26.0,135.4 → x=136.0,y=261.3
 
-        SVGのpath d用: M101.7,270.3 L135.2,246.1
+        SVGのpath d用: M101.4,278.1 L136.0,261.3
+
+    ⚠️ 出た x,y が地図のviewBox（-20〜350, -10〜365）の外になるときは、
+       計算はするものの「⚠️ 地図の外です」と併記します（値は参考程度に）。
+
+■ 使い方（逆方向：x,y → 緯度経度）
+    python3 tools/typhoon_map_coords.py --xy 101.4 278.1 136.0 261.3 ...
+        （④の地図を見ながら「ここが今どのへんか」を確かめたいときに使う）
+
+    出力例（上の順方向の結果をそのまま戻すと、元の緯度経度に帰ってきます）：
+        x=101.4,y=278.1 → 24.5,132.0
+        x=136.0,y=261.3 → 26.0,135.4
+
+    ⚠️ x,y が地図のviewBox（-20〜350, -10〜365）の外を指しているときは、
+       計算はするものの「⚠️ 地図の外です」と併記します（値は参考程度に）。
 
 外部のライブラリは使いません（Python 3 の標準機能だけ）。
 """
@@ -37,6 +51,10 @@ KX = 10.163
 Y0 = 535.07
 KY = 582.3
 
+# typhoon-app/index.html の <svg id="map-svg" viewBox="..."> と必ず一致させること
+VIEWBOX_X_MIN, VIEWBOX_Y_MIN = -20.0, -10.0
+VIEWBOX_X_MAX, VIEWBOX_Y_MAX = VIEWBOX_X_MIN + 370.0, VIEWBOX_Y_MIN + 375.0
+
 
 def lonlat_to_xy(lat: float, lon: float) -> tuple[float, float]:
     x = (lon - LON0) * KX
@@ -44,17 +62,38 @@ def lonlat_to_xy(lat: float, lon: float) -> tuple[float, float]:
     return round(x, 1), round(y, 1)
 
 
+def xy_to_lonlat(x: float, y: float) -> tuple[float, float]:
+    lon = x / KX + LON0
+    lat = (math.atan(math.exp((Y0 - y) / KY)) - math.pi / 4) * 360 / math.pi
+    return round(lat, 1), round(lon, 1)
+
+
 def main(argv: list[str]) -> int:
+    reverse = bool(argv) and argv[0] == "--xy"
+    if reverse:
+        argv = argv[1:]
+
     if len(argv) < 2 or len(argv) % 2 != 0:
         print(__doc__)
         return 1
+
+    if reverse:
+        for i in range(0, len(argv), 2):
+            x, y = float(argv[i]), float(argv[i + 1])
+            lat, lon = xy_to_lonlat(x, y)
+            out_of_bounds = not (VIEWBOX_X_MIN <= x <= VIEWBOX_X_MAX and VIEWBOX_Y_MIN <= y <= VIEWBOX_Y_MAX)
+            note = "　⚠️ 地図の外です（viewBoxの範囲外）" if out_of_bounds else ""
+            print(f"x={x},y={y} → {lat},{lon}{note}")
+        return 0
 
     points = []
     for i in range(0, len(argv), 2):
         lat, lon = float(argv[i]), float(argv[i + 1])
         x, y = lonlat_to_xy(lat, lon)
         points.append((lat, lon, x, y))
-        print(f"{lat},{lon} → x={x},y={y}")
+        out_of_bounds = not (VIEWBOX_X_MIN <= x <= VIEWBOX_X_MAX and VIEWBOX_Y_MIN <= y <= VIEWBOX_Y_MAX)
+        note = "　⚠️ 地図の外です（viewBoxの範囲外）" if out_of_bounds else ""
+        print(f"{lat},{lon} → x={x},y={y}{note}")
 
     path = " L".join(f"{'M' if i == 0 else ''}{x},{y}" for i, (_, _, x, y) in enumerate(points))
     print(f"\nSVGのpath d用: {path}")

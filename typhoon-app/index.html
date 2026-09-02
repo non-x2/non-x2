@@ -1741,12 +1741,16 @@
             esc(isTyphoon(t) ? (a ? strengthWord(a, t) : '台風') : '台風のたまご') + '</span>' +
             '<h3>' + esc(tcName(t)) + '</h3>';
           if (a) {
+            var infoParts = [];
+            if (a.pressure) infoParts.push('中心気圧' + a.pressure + 'hPa');
+            if (a.windMs) infoParts.push('最大風速' + a.windMs + 'm/s' + (a.gustMs ? '（最大瞬間' + a.gustMs + 'm/s）' : ''));
+            else if (a.gustMs) infoParts.push('最大瞬間' + a.gustMs + 'm/s');
+            var infoStr = infoParts.join('、');
             html += '<p>' + esc(fmtShort(a.validTime)) + '現在、<strong>' + esc(a.location) + '</strong>' +
-              moveText(a) + '。' +
-              (a.pressure ? '中心気圧' + a.pressure + 'hPa、' : '') +
-              (a.windMs ? '最大風速' + a.windMs + 'm/s' : '') +
-              (a.gustMs ? '（最大瞬間' + a.gustMs + 'm/s）' : '') +
-              (isTyphoon(t) ? '、強さは<strong>「' + esc(strengthWord(a, t)) + '」</strong>です。' : '。') +
+              moveText(a) + '。' + infoStr +
+              (isTyphoon(t) ?
+                (infoStr ? '、' : '') + '強さは<strong>「' + esc(strengthWord(a, t)) + '」</strong>です。' :
+                (infoStr ? '。' : '')) +
               (a.stormRadiusKm ? '暴風域は半径およそ' + Math.round(a.stormRadiusKm) + 'km、' : '') +
               (a.galeRadiusKm ? '強風域は半径およそ' + Math.round(a.galeRadiusKm) + 'kmです。' : '') +
               '</p>';
@@ -1769,16 +1773,21 @@
           '<ol class="forecast-timeline">';
         pts.forEach(function (p) {
           var isNow = p.hours === 0;
+          var infoParts = [];
+          if (p.pressure) infoParts.push('中心気圧' + p.pressure + 'hPa');
+          if (p.windMs) infoParts.push('最大風速' + p.windMs + 'm/s');
+          var infoStr = infoParts.join('・');
+          var circleParts = [];
+          if (p.circleKm) circleParts.push('予報円の半径は約' + Math.round(p.circleKm) + 'km');
+          if (p.stormRadiusKm) circleParts.push('暴風域は半径約' + Math.round(p.stormRadiusKm) + 'km');
+          var circleStr = circleParts.join('、');
           html += '<li class="tl-item ' + sevClass(p.intensity) + (isNow ? ' is-now' : ' is-forecast') + '">' +
             '<span class="tl-dot"></span><div class="tl-head">' +
             '<span class="tl-date">' + esc(fmtShort(p.validTime)) + (isNow ? '（現在）' : '（予報）') + '</span>' +
             '<span class="tl-badge">' + esc(strengthWord(p, t)) + '</span></div>' +
             '<p class="tl-body">' + (isNow ? '<strong>' : '') + esc(p.location) + (isNow ? '</strong>' : '') +
-            moveText(p) + '。' +
-            (p.pressure ? '中心気圧' + p.pressure + 'hPa・' : '') +
-            (p.windMs ? '最大風速' + p.windMs + 'm/s' : '') +
-            (p.circleKm ? '。予報円の半径は約' + Math.round(p.circleKm) + 'km' : '') +
-            (p.stormRadiusKm ? '、暴風域は半径約' + Math.round(p.stormRadiusKm) + 'km' : '') +
+            moveText(p) + '。' + infoStr +
+            (infoStr && circleStr ? '。' : '') + circleStr +
             '。</p></li>';
         });
         return html + '</ol></section>';
