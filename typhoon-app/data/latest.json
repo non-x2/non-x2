@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-03T03:50:06+09:00",
+ "generatedAt": "2026-09-03T06:54:28+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
  "count": 2,
  "typhoons": [
@@ -10,22 +10,22 @@
    "name": "クロヴァン",
    "nameEn": "Krovanh",
    "category": "台風",
-   "issue": "2026-09-03T03:45:00+09:00",
+   "issue": "2026-09-03T06:45:00+09:00",
    "analysis": {
     "hours": 0,
     "label": "実況",
-    "validTime": "2026-09-03T03:00:00+09:00",
+    "validTime": "2026-09-03T06:00:00+09:00",
     "category": "台風",
     "intensity": "-",
     "scale": "",
-    "location": "南大東島の南約140km",
+    "location": "南大東島の南西約100km",
     "course": "北北西",
     "speedKmh": "20",
     "pressure": 992.0,
     "windMs": 18.0,
     "gustMs": 25.0,
-    "lat": 24.6,
-    "lon": 130.9,
+    "lat": 25.1,
+    "lon": 130.6,
     "circleKm": null,
     "galeRadiusKm": 280.0
    },
@@ -33,40 +33,40 @@
     {
      "hours": 12,
      "label": "予報　１２時間後",
-     "validTime": "2026-09-03T15:00:00+09:00",
+     "validTime": "2026-09-03T18:00:00+09:00",
      "category": "台風",
      "intensity": "-",
      "scale": "",
-     "location": "奄美市の南約130km",
+     "location": "奄美市の南西約110km",
      "course": "北北西",
      "speedKmh": "30",
      "pressure": 992.0,
      "windMs": 18.0,
      "gustMs": 25.0,
-     "lat": 27.3,
-     "lon": 129.2,
+     "lat": 27.6,
+     "lon": 128.8,
      "circleKm": 85.0
     },
     {
      "hours": 24,
      "label": "予報　２４時間後",
-     "validTime": "2026-09-04T03:00:00+09:00",
+     "validTime": "2026-09-04T06:00:00+09:00",
      "category": "台風",
      "intensity": "-",
      "scale": "",
-     "location": "奄美市の西約200km",
+     "location": "奄美市の西約220km",
      "course": "北西",
-     "speedKmh": "20",
+     "speedKmh": "15",
      "pressure": 992.0,
      "windMs": 18.0,
      "gustMs": 25.0,
-     "lat": 28.8,
-     "lon": 127.5,
+     "lat": 28.7,
+     "lon": 127.3,
      "circleKm": 120.0
     },
     {
-     "hours": 48,
-     "label": "予報　４８時間後",
+     "hours": 45,
+     "label": "予報　４５時間後",
      "validTime": "2026-09-05T03:00:00+09:00",
      "category": "台風",
      "intensity": "-",
@@ -82,8 +82,8 @@
      "circleKm": 210.0
     },
     {
-     "hours": 72,
-     "label": "予報　７２時間後",
+     "hours": 69,
+     "label": "予報　６９時間後",
      "validTime": "2026-09-06T03:00:00+09:00",
      "category": "台風",
      "intensity": "-",
@@ -99,8 +99,8 @@
      "circleKm": 300.0
     },
     {
-     "hours": 96,
-     "label": "予報　９６時間後",
+     "hours": 93,
+     "label": "予報　９３時間後",
      "validTime": "2026-09-07T03:00:00+09:00",
      "category": "台風",
      "intensity": "-",
@@ -116,8 +116,8 @@
      "circleKm": 370.0
     },
     {
-     "hours": 120,
-     "label": "予報　１２０時間後",
+     "hours": 117,
+     "label": "予報　１１７時間後",
      "validTime": "2026-09-08T03:00:00+09:00",
      "category": "台風",
      "intensity": "-",
@@ -193,6 +193,10 @@
     [
      24.6,
      130.9
+    ],
+    [
+     25.1,
+     130.6
     ]
    ]
   },
@@ -203,22 +207,22 @@
    "name": "ソウデル",
    "nameEn": "Saudel",
    "category": "台風",
-   "issue": "2026-09-03T01:05:00+09:00",
+   "issue": "2026-09-03T04:10:00+09:00",
    "analysis": {
     "hours": 0,
     "label": "実況",
-    "validTime": "2026-09-03T00:00:00+09:00",
+    "validTime": "2026-09-03T03:00:00+09:00",
     "category": "台風",
     "intensity": "-",
     "scale": "",
     "location": "南シナ海",
-    "course": "北東",
+    "course": "北北東",
     "speedKmh": null,
     "pressure": 992.0,
     "windMs": 18.0,
     "gustMs": 25.0,
-    "lat": 22.8,
-    "lon": 118.1,
+    "lat": 23.2,
+    "lon": 118.2,
     "circleKm": null,
     "galeRadiusKm": 390.0
    },
@@ -226,36 +230,19 @@
     {
      "hours": 24,
      "label": "予報　２４時間後",
-     "validTime": "2026-09-04T00:00:00+09:00",
-     "category": "台風",
-     "intensity": "-",
-     "scale": "",
-     "location": "南シナ海",
-     "course": "西北西",
-     "speedKmh": null,
-     "pressure": 994.0,
-     "windMs": 18.0,
-     "gustMs": 25.0,
-     "lat": 23.2,
-     "lon": 116.7,
-     "circleKm": 105.0
-    },
-    {
-     "hours": 45,
-     "label": "予報　４５時間後",
-     "validTime": "2026-09-04T21:00:00+09:00",
+     "validTime": "2026-09-04T03:00:00+09:00",
      "category": "熱帯低気圧",
      "intensity": "-",
      "scale": "",
      "location": "華南",
      "course": "西",
-     "speedKmh": "10",
+     "speedKmh": null,
      "pressure": 998.0,
      "windMs": 0.0,
      "gustMs": 0.0,
-     "lat": 22.7,
-     "lon": 114.5,
-     "circleKm": 210.0
+     "lat": 23.2,
+     "lon": 116.2,
+     "circleKm": 105.0
     }
    ],
    "track": [
@@ -322,6 +309,10 @@
     [
      22.8,
      118.1
+    ],
+    [
+     23.2,
+     118.2
     ]
    ]
   }
