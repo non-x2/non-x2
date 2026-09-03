@@ -312,6 +312,17 @@ def main() -> int:
     if not args.live and age_h > 6:
         print(f"   ⚠️ この控え自体が {age_h:.1f} 時間前のものです。"
               "先に気象庁の最新発表を確認するか、--live をお使いください。")
+    # --live は「取ってきた時刻」は新しくても、気象庁の発表そのもの（実況の時刻）が
+    # 古いことはありうる（発表の間隔が空いているとき等）。取ってきた時刻ではなく
+    # 実況時刻の古さを見て、こちらでも一言添える。
+    if args.live and typhoons:
+        obs_times = [d for t in typhoons
+                     if (d := jst((t.get("analysis") or {}).get("validTime", "")))]
+        if obs_times:
+            obs_age_h = (datetime.now(JST) - max(obs_times)).total_seconds() / 3600
+            if obs_age_h > 6:
+                print(f"   ⚠️ 気象庁の実況そのものが {obs_age_h:.1f} 時間前のものです"
+                      "（--live で取ってきましたが、発表自体が古い可能性があります）。")
     print()
 
     if not typhoons:
