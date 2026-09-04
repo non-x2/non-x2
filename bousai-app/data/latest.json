@@ -1,7 +1,15 @@
 {
- "generatedAt": "2026-09-05T01:34:29+09:00",
+ "generatedAt": "2026-09-05T04:08:01+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20260905025000",
+   "time": "2026-09-05T02:50:00+09:00",
+   "place": "インドネシア付近",
+   "magnitude": null,
+   "maxIntensity": "",
+   "depthKm": null
+  },
   {
    "id": "20260904235244",
    "time": "2026-09-04T23:52:00+09:00",
@@ -111,14 +119,6 @@
    "time": "2026-09-03T08:22:00+09:00",
    "place": "鹿児島県薩摩地方",
    "magnitude": 2.3,
-   "maxIntensity": "1",
-   "depthKm": 10.0
-  },
-  {
-   "id": "20260903063940",
-   "time": "2026-09-03T06:39:00+09:00",
-   "place": "熊本県天草・芦北地方",
-   "magnitude": 1.8,
    "maxIntensity": "1",
    "depthKm": 10.0
   }
