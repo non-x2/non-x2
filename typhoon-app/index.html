@@ -1781,14 +1781,17 @@
           if (p.circleKm) circleParts.push('予報円の半径は約' + Math.round(p.circleKm) + 'km');
           if (p.stormRadiusKm) circleParts.push('暴風域は半径約' + Math.round(p.stormRadiusKm) + 'km');
           var circleStr = circleParts.join('、');
+          var tailParts = [];
+          if (infoStr) tailParts.push(infoStr);
+          if (circleStr) tailParts.push(circleStr);
+          var tailStr = tailParts.length ? tailParts.join('。') + '。' : '';
           html += '<li class="tl-item ' + sevClass(p.intensity) + (isNow ? ' is-now' : ' is-forecast') + '">' +
             '<span class="tl-dot"></span><div class="tl-head">' +
             '<span class="tl-date">' + esc(fmtShort(p.validTime)) + (isNow ? '（現在）' : '（予報）') + '</span>' +
             '<span class="tl-badge">' + esc(strengthWord(p, t)) + '</span></div>' +
             '<p class="tl-body">' + (isNow ? '<strong>' : '') + esc(p.location) + (isNow ? '</strong>' : '') +
-            moveText(p) + '。' + infoStr +
-            (infoStr && circleStr ? '。' : '') + circleStr +
-            '。</p></li>';
+            moveText(p) + '。' + tailStr +
+            '</p></li>';
         });
         return html + '</ol></section>';
       }
