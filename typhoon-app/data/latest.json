@@ -1,7 +1,7 @@
 {
- "generatedAt": "2026-09-04T20:32:25+09:00",
+ "generatedAt": "2026-09-05T01:30:46+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
- "count": 2,
+ "count": 1,
  "typhoons": [
   {
    "id": "TC2628",
@@ -10,64 +10,64 @@
    "name": "クロヴァン",
    "nameEn": "Krovanh",
    "category": "台風",
-   "issue": "2026-09-04T18:45:00+09:00",
+   "issue": "2026-09-05T00:45:00+09:00",
    "analysis": {
     "hours": 0,
     "label": "実況",
-    "validTime": "2026-09-04T18:00:00+09:00",
+    "validTime": "2026-09-05T00:00:00+09:00",
     "category": "台風",
     "intensity": "-",
     "scale": "",
-    "location": "奄美市の西北西約250km",
-    "course": "南西",
-    "speedKmh": "15",
-    "pressure": 992.0,
+    "location": "奄美市の西北西約220km",
+    "course": "南南西",
+    "speedKmh": null,
+    "pressure": 994.0,
     "windMs": 18.0,
     "gustMs": 25.0,
-    "lat": 29.2,
-    "lon": 127.1,
+    "lat": 28.9,
+    "lon": 127.3,
     "circleKm": null,
-    "galeRadiusKm": 390.0
+    "galeRadiusKm": 440.0
    },
    "forecast": [
     {
      "hours": 24,
      "label": "予報　２４時間後",
-     "validTime": "2026-09-05T18:00:00+09:00",
+     "validTime": "2026-09-06T00:00:00+09:00",
      "category": "台風",
      "intensity": "-",
      "scale": "",
-     "location": "久米島の北北西約50km",
+     "location": "久米島の南南西約70km",
      "course": "南",
-     "speedKmh": "10",
-     "pressure": 994.0,
-     "windMs": 18.0,
-     "gustMs": 25.0,
-     "lat": 26.7,
-     "lon": 126.6,
-     "circleKm": 105.0
-    },
-    {
-     "hours": 45,
-     "label": "予報　４５時間後",
-     "validTime": "2026-09-06T15:00:00+09:00",
-     "category": "台風",
-     "intensity": "-",
-     "scale": "",
-     "location": "沖縄の南",
-     "course": "南南東",
      "speedKmh": "15",
      "pressure": 994.0,
      "windMs": 18.0,
      "gustMs": 25.0,
-     "lat": 25.1,
-     "lon": 128.8,
-     "circleKm": 185.0
+     "lat": 25.7,
+     "lon": 126.6,
+     "circleKm": 95.0
+    },
+    {
+     "hours": 45,
+     "label": "予報　４５時間後",
+     "validTime": "2026-09-06T21:00:00+09:00",
+     "category": "台風",
+     "intensity": "-",
+     "scale": "",
+     "location": "南大東島の南西約210km",
+     "course": "東南東",
+     "speedKmh": "15",
+     "pressure": 994.0,
+     "windMs": 18.0,
+     "gustMs": 25.0,
+     "lat": 24.6,
+     "lon": 129.6,
+     "circleKm": 155.0
     },
     {
      "hours": 69,
      "label": "予報　６９時間後",
-     "validTime": "2026-09-07T15:00:00+09:00",
+     "validTime": "2026-09-07T21:00:00+09:00",
      "category": "台風",
      "intensity": "-",
      "scale": "",
@@ -77,25 +77,25 @@
      "pressure": 994.0,
      "windMs": 18.0,
      "gustMs": 25.0,
-     "lat": 26.8,
-     "lon": 132.5,
-     "circleKm": 300.0
+     "lat": 26.3,
+     "lon": 132.6,
+     "circleKm": 260.0
     },
     {
      "hours": 93,
      "label": "予報　９３時間後",
-     "validTime": "2026-09-08T15:00:00+09:00",
+     "validTime": "2026-09-08T21:00:00+09:00",
      "category": "熱帯低気圧",
      "intensity": "-",
      "scale": "",
      "location": "日本の南",
      "course": "北",
-     "speedKmh": "20",
+     "speedKmh": "15",
      "pressure": 998.0,
      "windMs": 0.0,
      "gustMs": 0.0,
-     "lat": 30.7,
-     "lon": 133.6,
+     "lat": 29.9,
+     "lon": 132.8,
      "circleKm": 370.0
     }
    ],
@@ -211,127 +211,14 @@
     [
      29.2,
      127.1
-    ]
-   ]
-  },
-  {
-   "id": "TC2621",
-   "number": "2618",
-   "numberShort": "18",
-   "name": "ソウデル",
-   "nameEn": "Saudel",
-   "category": "熱帯低気圧",
-   "issue": "2026-09-03T22:05:00+09:00",
-   "analysis": {
-    "hours": 0,
-    "label": "実況",
-    "validTime": "2026-09-03T21:00:00+09:00",
-    "category": "熱帯低気圧",
-    "intensity": "-",
-    "scale": "",
-    "location": "華南",
-    "course": "南西",
-    "speedKmh": null,
-    "pressure": 998.0,
-    "windMs": null,
-    "gustMs": null,
-    "lat": 24.0,
-    "lon": 116.0,
-    "circleKm": null
-   },
-   "forecast": [],
-   "track": [
-    [
-     19.2,
-     112.0
     ],
     [
-     19.3,
-     112.1
+     28.7,
+     127.5
     ],
     [
-     19.5,
-     112.7
-    ],
-    [
-     19.8,
-     113.9
-    ],
-    [
-     19.9,
-     114.4
-    ],
-    [
-     20.3,
-     115.1
-    ],
-    [
-     20.6,
-     115.7
-    ],
-    [
-     21.2,
-     116.3
-    ],
-    [
-     21.5,
-     116.4
-    ],
-    [
-     22.0,
-     116.8
-    ],
-    [
-     22.3,
-     117.0
-    ],
-    [
-     22.5,
-     116.7
-    ],
-    [
-     21.8,
-     117.5
-    ],
-    [
-     22.3,
-     117.7
-    ],
-    [
-     22.4,
-     118.2
-    ],
-    [
-     22.8,
-     118.1
-    ],
-    [
-     23.2,
-     118.2
-    ],
-    [
-     23.6,
-     117.8
-    ],
-    [
-     23.6,
-     117.5
-    ],
-    [
-     24.3,
-     116.9
-    ],
-    [
-     24.5,
-     116.5
-    ],
-    [
-     24.5,
-     116.0
-    ],
-    [
-     24.0,
-     116.0
+     28.9,
+     127.3
     ]
    ]
   }
