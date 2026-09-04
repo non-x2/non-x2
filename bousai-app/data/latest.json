@@ -1,7 +1,31 @@
 {
- "generatedAt": "2026-09-04T20:42:22+09:00",
+ "generatedAt": "2026-09-05T01:34:29+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20260904235244",
+   "time": "2026-09-04T23:52:00+09:00",
+   "place": "釧路沖",
+   "magnitude": 3.5,
+   "maxIntensity": "2",
+   "depthKm": 50.0
+  },
+  {
+   "id": "20260904211003",
+   "time": "2026-09-04T21:10:00+09:00",
+   "place": "宮城県沖",
+   "magnitude": 3.8,
+   "maxIntensity": "2",
+   "depthKm": 70.0
+  },
+  {
+   "id": "20260904204023",
+   "time": "2026-09-04T20:40:00+09:00",
+   "place": "熊本県熊本地方",
+   "magnitude": 2.9,
+   "maxIntensity": "1",
+   "depthKm": 10.0
+  },
   {
    "id": "20260904182321",
    "time": "2026-09-04T18:23:00+09:00",
@@ -96,30 +120,6 @@
    "place": "熊本県天草・芦北地方",
    "magnitude": 1.8,
    "maxIntensity": "1",
-   "depthKm": 10.0
-  },
-  {
-   "id": "20260903055410",
-   "time": "2026-09-03T05:54:00+09:00",
-   "place": "熊本県天草・芦北地方",
-   "magnitude": 3.2,
-   "maxIntensity": "2",
-   "depthKm": 10.0
-  },
-  {
-   "id": "20260902225039",
-   "time": "2026-09-02T22:50:00+09:00",
-   "place": "陸奥湾",
-   "magnitude": 3.0,
-   "maxIntensity": "2",
-   "depthKm": 0.0
-  },
-  {
-   "id": "20260902191244",
-   "time": "2026-09-02T19:12:00+09:00",
-   "place": "秋田県内陸北部",
-   "magnitude": 3.5,
-   "maxIntensity": "2",
    "depthKm": 10.0
   }
  ],
