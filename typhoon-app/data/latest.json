@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-04T10:07:28+09:00",
+ "generatedAt": "2026-09-04T15:12:02+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
  "count": 2,
  "typhoons": [
@@ -10,21 +10,21 @@
    "name": "クロヴァン",
    "nameEn": "Krovanh",
    "category": "台風",
-   "issue": "2026-09-04T09:50:00+09:00",
+   "issue": "2026-09-04T12:45:00+09:00",
    "analysis": {
     "hours": 0,
     "label": "実況",
-    "validTime": "2026-09-04T09:00:00+09:00",
+    "validTime": "2026-09-04T12:00:00+09:00",
     "category": "台風",
     "intensity": "-",
     "scale": "",
-    "location": "奄美市の北西約200km",
-    "course": "北西",
-    "speedKmh": "15",
+    "location": "奄美市の北西約220km",
+    "course": "北北西",
+    "speedKmh": "10",
     "pressure": 992.0,
     "windMs": 18.0,
     "gustMs": 25.0,
-    "lat": 29.5,
+    "lat": 29.8,
     "lon": 127.9,
     "circleKm": null,
     "galeRadiusKm": 390.0
@@ -33,23 +33,23 @@
     {
      "hours": 24,
      "label": "予報　２４時間後",
-     "validTime": "2026-09-05T09:00:00+09:00",
+     "validTime": "2026-09-05T12:00:00+09:00",
      "category": "台風",
      "intensity": "-",
      "scale": "",
-     "location": "奄美市の西約220km",
+     "location": "奄美市の西約210km",
      "course": "南南西",
      "speedKmh": null,
      "pressure": 994.0,
      "windMs": 18.0,
      "gustMs": 25.0,
-     "lat": 28.3,
-     "lon": 127.3,
+     "lat": 28.2,
+     "lon": 127.4,
      "circleKm": 105.0
     },
     {
-     "hours": 48,
-     "label": "予報　４８時間後",
+     "hours": 45,
+     "label": "予報　４５時間後",
      "validTime": "2026-09-06T09:00:00+09:00",
      "category": "台風",
      "intensity": "-",
@@ -65,8 +65,8 @@
      "circleKm": 185.0
     },
     {
-     "hours": 72,
-     "label": "予報　７２時間後",
+     "hours": 69,
+     "label": "予報　６９時間後",
      "validTime": "2026-09-07T09:00:00+09:00",
      "category": "台風",
      "intensity": "-",
@@ -82,8 +82,8 @@
      "circleKm": 260.0
     },
     {
-     "hours": 96,
-     "label": "予報　９６時間後",
+     "hours": 93,
+     "label": "予報　９３時間後",
      "validTime": "2026-09-08T09:00:00+09:00",
      "category": "熱帯低気圧",
      "intensity": "-",
@@ -198,6 +198,10 @@
     ],
     [
      29.5,
+     127.9
+    ],
+    [
+     29.8,
      127.9
     ]
    ]
