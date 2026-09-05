@@ -1746,13 +1746,16 @@
             if (a.windMs) infoParts.push('最大風速' + a.windMs + 'm/s' + (a.gustMs ? '（最大瞬間' + a.gustMs + 'm/s）' : ''));
             else if (a.gustMs) infoParts.push('最大瞬間' + a.gustMs + 'm/s');
             var infoStr = infoParts.join('、');
+            var radiusParts = [];
+            if (a.stormRadiusKm) radiusParts.push('暴風域は半径およそ' + Math.round(a.stormRadiusKm) + 'km');
+            if (a.galeRadiusKm) radiusParts.push('強風域は半径およそ' + Math.round(a.galeRadiusKm) + 'km');
+            var radiusStr = radiusParts.length ? radiusParts.join('、') + 'です。' : '';
             html += '<p>' + esc(fmtShort(a.validTime)) + '現在、<strong>' + esc(a.location) + '</strong>' +
               moveText(a) + '。' + infoStr +
               (isTyphoon(t) ?
                 (infoStr ? '、' : '') + '強さは<strong>「' + esc(strengthWord(a, t)) + '」</strong>です。' :
                 (infoStr ? '。' : '')) +
-              (a.stormRadiusKm ? '暴風域は半径およそ' + Math.round(a.stormRadiusKm) + 'km、' : '') +
-              (a.galeRadiusKm ? '強風域は半径およそ' + Math.round(a.galeRadiusKm) + 'kmです。' : '') +
+              radiusStr +
               '</p>';
           }
           if (last) {
