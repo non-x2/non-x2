@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-05T10:11:24+09:00",
+ "generatedAt": "2026-09-05T14:59:44+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
  "count": 1,
  "typhoons": [
@@ -10,22 +10,22 @@
    "name": "クロヴァン",
    "nameEn": "Krovanh",
    "category": "台風",
-   "issue": "2026-09-05T09:45:00+09:00",
+   "issue": "2026-09-05T12:45:00+09:00",
    "analysis": {
     "hours": 0,
     "label": "実況",
-    "validTime": "2026-09-05T09:00:00+09:00",
+    "validTime": "2026-09-05T12:00:00+09:00",
     "category": "台風",
     "intensity": "-",
     "scale": "",
-    "location": "久米島の北約170km",
-    "course": "南南西",
+    "location": "久米島の北北東約90km",
+    "course": "南",
     "speedKmh": "15",
-    "pressure": 990.0,
-    "windMs": 20.0,
-    "gustMs": 30.0,
-    "lat": 27.8,
-    "lon": 126.5,
+    "pressure": 992.0,
+    "windMs": 18.0,
+    "gustMs": 25.0,
+    "lat": 27.1,
+    "lon": 127.1,
     "circleKm": null,
     "galeRadiusKm": 440.0
    },
@@ -33,23 +33,23 @@
     {
      "hours": 24,
      "label": "予報　２４時間後",
-     "validTime": "2026-09-06T09:00:00+09:00",
+     "validTime": "2026-09-06T12:00:00+09:00",
      "category": "台風",
      "intensity": "-",
      "scale": "",
-     "location": "久米島の南南東約190km",
+     "location": "久米島の南東約210km",
      "course": "南南東",
-     "speedKmh": "15",
+     "speedKmh": "10",
      "pressure": 994.0,
      "windMs": 18.0,
      "gustMs": 25.0,
-     "lat": 24.7,
-     "lon": 127.5,
+     "lat": 24.8,
+     "lon": 128.1,
      "circleKm": 95.0
     },
     {
-     "hours": 48,
-     "label": "予報　４８時間後",
+     "hours": 45,
+     "label": "予報　４５時間後",
      "validTime": "2026-09-07T09:00:00+09:00",
      "category": "台風",
      "intensity": "-",
@@ -65,8 +65,8 @@
      "circleKm": 155.0
     },
     {
-     "hours": 72,
-     "label": "予報　７２時間後",
+     "hours": 69,
+     "label": "予報　６９時間後",
      "validTime": "2026-09-08T09:00:00+09:00",
      "category": "台風",
      "intensity": "-",
@@ -82,8 +82,8 @@
      "circleKm": 220.0
     },
     {
-     "hours": 96,
-     "label": "予報　９６時間後",
+     "hours": 93,
+     "label": "予報　９３時間後",
      "validTime": "2026-09-09T09:00:00+09:00",
      "category": "熱帯低気圧",
      "intensity": "-",
@@ -231,6 +231,10 @@
     [
      27.8,
      126.5
+    ],
+    [
+     27.1,
+     127.1
     ]
    ]
   }
