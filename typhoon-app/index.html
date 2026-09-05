@@ -1746,13 +1746,16 @@
             if (a.windMs) infoParts.push('最大風速' + a.windMs + 'm/s' + (a.gustMs ? '（最大瞬間' + a.gustMs + 'm/s）' : ''));
             else if (a.gustMs) infoParts.push('最大瞬間' + a.gustMs + 'm/s');
             var infoStr = infoParts.join('、');
+            var radiusParts = [];
+            if (a.stormRadiusKm) radiusParts.push('暴風域は半径およそ' + Math.round(a.stormRadiusKm) + 'km');
+            if (a.galeRadiusKm) radiusParts.push('強風域は半径およそ' + Math.round(a.galeRadiusKm) + 'km');
+            var radiusStr = radiusParts.length ? radiusParts.join('、') + 'です。' : '';
             html += '<p>' + esc(fmtShort(a.validTime)) + '現在、<strong>' + esc(a.location) + '</strong>' +
               moveText(a) + '。' + infoStr +
               (isTyphoon(t) ?
                 (infoStr ? '、' : '') + '強さは<strong>「' + esc(strengthWord(a, t)) + '」</strong>です。' :
                 (infoStr ? '。' : '')) +
-              (a.stormRadiusKm ? '暴風域は半径およそ' + Math.round(a.stormRadiusKm) + 'km、' : '') +
-              (a.galeRadiusKm ? '強風域は半径およそ' + Math.round(a.galeRadiusKm) + 'kmです。' : '') +
+              radiusStr +
               '</p>';
           }
           if (last) {
@@ -1781,14 +1784,17 @@
           if (p.circleKm) circleParts.push('予報円の半径は約' + Math.round(p.circleKm) + 'km');
           if (p.stormRadiusKm) circleParts.push('暴風域は半径約' + Math.round(p.stormRadiusKm) + 'km');
           var circleStr = circleParts.join('、');
+          var tailParts = [];
+          if (infoStr) tailParts.push(infoStr);
+          if (circleStr) tailParts.push(circleStr);
+          var tailStr = tailParts.length ? tailParts.join('。') + '。' : '';
           html += '<li class="tl-item ' + sevClass(p.intensity) + (isNow ? ' is-now' : ' is-forecast') + '">' +
             '<span class="tl-dot"></span><div class="tl-head">' +
             '<span class="tl-date">' + esc(fmtShort(p.validTime)) + (isNow ? '（現在）' : '（予報）') + '</span>' +
             '<span class="tl-badge">' + esc(strengthWord(p, t)) + '</span></div>' +
             '<p class="tl-body">' + (isNow ? '<strong>' : '') + esc(p.location) + (isNow ? '</strong>' : '') +
-            moveText(p) + '。' + infoStr +
-            (infoStr && circleStr ? '。' : '') + circleStr +
-            '。</p></li>';
+            moveText(p) + '。' + tailStr +
+            '</p></li>';
         });
         return html + '</ol></section>';
       }
