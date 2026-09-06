@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-06T09:04:42+09:00",
+ "generatedAt": "2026-09-06T13:55:11+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
  "count": 1,
  "typhoons": [
@@ -10,22 +10,22 @@
    "name": "クロヴァン",
    "nameEn": "Krovanh",
    "category": "台風",
-   "issue": "2026-09-06T06:45:00+09:00",
+   "issue": "2026-09-06T12:45:00+09:00",
    "analysis": {
     "hours": 0,
     "label": "実況",
-    "validTime": "2026-09-06T06:00:00+09:00",
+    "validTime": "2026-09-06T12:00:00+09:00",
     "category": "台風",
     "intensity": "-",
     "scale": "",
-    "location": "那覇市の東南東約130km",
-    "course": "東南東",
-    "speedKmh": "10",
+    "location": "那覇市の東約200km",
+    "course": "東北東",
+    "speedKmh": "15",
     "pressure": 992.0,
     "windMs": 18.0,
     "gustMs": 25.0,
-    "lat": 25.6,
-    "lon": 128.8,
+    "lat": 26.0,
+    "lon": 129.7,
     "circleKm": null,
     "galeRadiusKm": 650.0
    },
@@ -33,53 +33,53 @@
     {
      "hours": 12,
      "label": "予報　１２時間後",
-     "validTime": "2026-09-06T18:00:00+09:00",
+     "validTime": "2026-09-07T00:00:00+09:00",
      "category": "台風",
      "intensity": "-",
      "scale": "",
-     "location": "南大東島の南西約80km",
-     "course": "東",
-     "speedKmh": "15",
-     "pressure": 992.0,
-     "windMs": 18.0,
-     "gustMs": 25.0,
-     "lat": 25.4,
-     "lon": 130.6,
-     "circleKm": 85.0
-    },
-    {
-     "hours": 24,
-     "label": "予報　２４時間後",
-     "validTime": "2026-09-07T06:00:00+09:00",
-     "category": "台風",
-     "intensity": "-",
-     "scale": "",
-     "location": "南大東島の東北東約90km",
+     "location": "南大東島の北約70km",
      "course": "東北東",
      "speedKmh": "15",
      "pressure": 992.0,
      "windMs": 18.0,
      "gustMs": 25.0,
-     "lat": 26.1,
-     "lon": 132.0,
-     "circleKm": 120.0
+     "lat": 26.4,
+     "lon": 131.3,
+     "circleKm": 75.0
+    },
+    {
+     "hours": 24,
+     "label": "予報　２４時間後",
+     "validTime": "2026-09-07T12:00:00+09:00",
+     "category": "台風",
+     "intensity": "-",
+     "scale": "",
+     "location": "南大東島の北東約190km",
+     "course": "北東",
+     "speedKmh": "10",
+     "pressure": 992.0,
+     "windMs": 18.0,
+     "gustMs": 25.0,
+     "lat": 27.1,
+     "lon": 132.4,
+     "circleKm": 105.0
     },
     {
      "hours": 45,
      "label": "予報　４５時間後",
-     "validTime": "2026-09-08T03:00:00+09:00",
+     "validTime": "2026-09-08T09:00:00+09:00",
      "category": "熱帯低気圧",
      "intensity": "-",
      "scale": "",
      "location": "日本の南",
-     "course": "北北東",
+     "course": "北",
      "speedKmh": "15",
      "pressure": 996.0,
      "windMs": 0.0,
      "gustMs": 0.0,
-     "lat": 28.2,
-     "lon": 132.6,
-     "circleKm": 210.0
+     "lat": 29.6,
+     "lon": 132.8,
+     "circleKm": 185.0
     }
    ],
    "track": [
@@ -242,6 +242,14 @@
     [
      25.6,
      128.8
+    ],
+    [
+     26.1,
+     129.6
+    ],
+    [
+     26.0,
+     129.7
     ]
    ]
   }
