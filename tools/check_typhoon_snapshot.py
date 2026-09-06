@@ -37,17 +37,15 @@
 from __future__ import annotations
 
 import argparse
-import json
+import importlib.util
 import re
 import sys
-import urllib.error
-import urllib.request
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 HTML = ROOT / "typhoon-app" / "index.html"
-TARGET_URL = "https://www.jma.go.jp/bosai/typhoon/data/targetTc.json"
+FETCH_SCRIPT = ROOT / "typhoon-app" / "scripts" / "fetch_typhoon.py"
 JST = timezone(timedelta(hours=9))
 
 # 何日たったら「古い」とみなすか。台風シーズンは1週間もあれば顔ぶれが入れ替わるので7日。
@@ -78,13 +76,22 @@ def read_snapshot_numbers(text: str) -> list[str]:
     return re.findall(r"<h3>台風(\d+)号", m.group(1))
 
 
-def fetch_live_numbers(timeout: float = 20.0) -> list[str] | None:
-    """気象庁がいま出している台風の番号を取ってくる。取れなければ None（＝判定しない）。"""
-    req = urllib.request.Request(TARGET_URL, headers={"User-Agent": "non-x2-snapshot-check/1.0"})
+def fetch_live_numbers() -> list[str] | None:
+    """気象庁がいま出している台風の番号を取ってくる。取れなければ None（＝判定しない）。
+
+    通信の書き方は `typhoon-app/scripts/fetch_typhoon.py`（毎時の取得係）の
+    `fetch_json()` を**借りて**使う。同じ処理を2か所に書き写すと、
+    片方だけ直して食い違う事故が起きるため（`tools/typhoon_snapshot_draft.py`
+    の `--live` と同じやり方）。
+    """
+    if not FETCH_SCRIPT.exists():
+        return None
+    spec = importlib.util.spec_from_file_location("fetch_typhoon", FETCH_SCRIPT)
+    fetcher = importlib.util.module_from_spec(spec)
     try:
-        with urllib.request.urlopen(req, timeout=timeout) as res:
-            data = json.loads(res.read().decode("utf-8"))
-    except (urllib.error.URLError, urllib.error.HTTPError, ValueError, TimeoutError, OSError):
+        spec.loader.exec_module(fetcher)
+        data = fetcher.fetch_json(fetcher.TARGET_URL)
+    except Exception:  # noqa: BLE001 - おまけの照合なので、何で失敗しても静かに諦める
         return None
     out = []
     for row in data if isinstance(data, list) else []:
