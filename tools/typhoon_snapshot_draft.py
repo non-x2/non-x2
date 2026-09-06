@@ -65,6 +65,19 @@ DEFAULT_JSON = ROOT / "typhoon-app" / "data" / "latest.json"
 FETCH_SCRIPT = ROOT / "typhoon-app" / "scripts" / "fetch_typhoon.py"
 JST = timezone(timedelta(hours=9))
 WD = "日月火水木金土"
+STALE_HOURS = 6  # これを超えて古いと「⚠️」を出す（控え自体の古さ・--liveの実況の古さで共通）
+
+
+def stale_note(hours: float, subject: str, tail: str) -> str | None:
+    """`hours` が STALE_HOURS を超えていたら注意文を返す（超えていなければ None）。
+
+    控えの古さ（--liveなし）と、--liveで取ってきた実況そのものの古さは、
+    見ている時刻は違うが「6時間を超えたら⚠️を出す」という考え方は同じなので、
+    ここに1つだけ持たせている。`subject` は「〜が」まで含めて渡す。
+    """
+    if hours <= STALE_HOURS:
+        return None
+    return f"   ⚠️ {subject} {hours:.1f} 時間前のものです{tail}"
 
 
 # ── index.html の中の同名の関数と同じ動きにしてある小さな部品 ──────────────
@@ -309,9 +322,23 @@ def main() -> int:
     print(f"   発生中の台風: {'・'.join(tc_name(t) for t in typhoons) or '（なし）'}")
     age_h = (datetime.now(JST) - gen).total_seconds() / 3600
     # --live は取ってきたばかりなので古さの心配はない（控えから作ったときだけ見張る）
-    if not args.live and age_h > 6:
-        print(f"   ⚠️ この控え自体が {age_h:.1f} 時間前のものです。"
-              "先に気象庁の最新発表を確認するか、--live をお使いください。")
+    if not args.live:
+        note = stale_note(age_h, "この控え自体が",
+                          "。先に気象庁の最新発表を確認するか、--live をお使いください。")
+        if note:
+            print(note)
+    # --live は「取ってきた時刻」は新しくても、気象庁の発表そのもの（実況の時刻）が
+    # 古いことはありうる（発表の間隔が空いているとき等）。取ってきた時刻ではなく
+    # 実況時刻の古さを見て、こちらでも一言添える。
+    if args.live and typhoons:
+        obs_times = [d for t in typhoons
+                     if (d := jst((t.get("analysis") or {}).get("validTime", "")))]
+        if obs_times:
+            obs_age_h = (datetime.now(JST) - max(obs_times)).total_seconds() / 3600
+            note = stale_note(obs_age_h, "気象庁の実況そのものが",
+                              "（--live で取ってきましたが、発表自体が古い可能性があります）。")
+            if note:
+                print(note)
     print()
 
     if not typhoons:
