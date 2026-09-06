@@ -1,7 +1,15 @@
 {
- "generatedAt": "2026-09-06T03:33:04+09:00",
+ "generatedAt": "2026-09-06T15:28:21+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20260906141553",
+   "time": "2026-09-06T14:15:00+09:00",
+   "place": "青森県東方沖",
+   "magnitude": 4.7,
+   "maxIntensity": "2",
+   "depthKm": 30.0
+  },
   {
    "id": "20260906030018",
    "time": "2026-09-06T03:00:00+09:00",
@@ -113,14 +121,6 @@
    "magnitude": 3.8,
    "maxIntensity": "1",
    "depthKm": 50.0
-  },
-  {
-   "id": "20260903223458",
-   "time": "2026-09-03T22:34:00+09:00",
-   "place": "福島県会津",
-   "magnitude": 3.5,
-   "maxIntensity": "2",
-   "depthKm": 10.0
   }
  ],
  "tsunami": {
