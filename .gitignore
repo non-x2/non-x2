@@ -9,8 +9,9 @@ _site/
 .obsidian/
 .trash/
 
-# 👀 見やすさ点検の道具（tools/check_a11y.js）を動かすときに `npm install playwright` で
-# 自動で作られる部品置き場です。19MBほどあり、使うときに入れ直せばよいので保存しません。
+# Node.js の依存関係
+# - node_modules/: npm install で自動作成される部品置き場（19MBほど、使うときに入れ直せばよい）
+# - package-lock.json: インストール時の詳細記録（自動生成）
+# ※ package.json（依存関係の定義）はリポジトリに含めます
 node_modules/
-package.json
 package-lock.json

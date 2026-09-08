@@ -1,0 +1,12 @@
+{
+  "name": "non-x2",
+  "version": "1.0.0",
+  "description": "のんラボ プロフィール — 個人開発ラボの制作物リポジトリ",
+  "private": true,
+  "scripts": {
+    "check:a11y": "node tools/check_a11y.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.56.0"
+  }
+}
