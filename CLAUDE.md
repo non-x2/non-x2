@@ -84,6 +84,7 @@
 │   ├── typhoon_snapshot_draft.py   #    🌀 ④予備文章の「下書き」を控えから作る（画面に出すだけ・書き換えない）
 │   ├── typhoon_map_coords.py       #    🗾 ④の手描き地図の座標を出す（緯度経度⇄x,y・SVGのpath dまで）
 │   ├── check_docstrings.py         #    📚 道具の説明書きの「出力例」が実際の出力と合っているか照合
+│   ├── check_map.py                #    🗺 この構成表と実際の tools/ がそろっているか照合（書き足し忘れ防止）
 │   ├── shinka_metrics.py           #    📊 進化メトリクス集計（docs/進化レポート.md を自動生成）
 │   ├── kaiwa_mojiokoshi.py         #    💬 会話の記録を読みやすい文字起こしに変換（/mojiokoshi の中身）
 │   ├── check_a11y.js               #    👀 見やすさ点検（色の濃さ・押しやすさ・狭い画面のはみ出し）
@@ -195,9 +196,10 @@
 
   | コマンド | 何をするか | 通信 |
   |---|---|---|
-  | `npm run check` | **まずこれ**。下の速い2つ（📚出力例・🗾予報区）をまとめて実行 | なし（数秒） |
+  | `npm run check` | **まずこれ**。下の速い3つ（📚出力例・🗾予報区・🗺構成表）をまとめて実行 | なし（数秒） |
   | `npm run check:docstrings` | 📚 道具の説明書きの「出力例」が実際の出力と合っているか | なし |
   | `npm run check:offices` | 🗾 予報区リスト58件が3か所（大もと＋HTML2枚）でそろっているか | なし |
+  | `npm run check:map` | 🗺 CLAUDE.mdの構成表と実際の `tools/` がそろっているか | なし |
   | `npm run check:links` | 👀 公開5ページの外部リンク85本の生存確認 | あり（数分） |
   | `npm run check:typhoon-snapshot` | 🌀 台風ページの④予備文章が古くないか（気象庁と照合） | あり |
   | `npm run check:a11y` | 👀 見やすさ点検（色の濃さ・押しやすさ・狭い画面） | Playwrightが要る |
