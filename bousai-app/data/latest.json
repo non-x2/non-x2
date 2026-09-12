@@ -1,7 +1,15 @@
 {
- "generatedAt": "2026-09-12T20:12:51+09:00",
+ "generatedAt": "2026-09-13T02:25:10+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20260913010309",
+   "time": "2026-09-13T01:03:00+09:00",
+   "place": "富山県東部",
+   "magnitude": 2.9,
+   "maxIntensity": "1",
+   "depthKm": 0.0
+  },
   {
    "id": "20260912164944",
    "time": "2026-09-12T16:49:00+09:00",
@@ -113,14 +121,6 @@
    "magnitude": 3.4,
    "maxIntensity": "1",
    "depthKm": 40.0
-  },
-  {
-   "id": "20260909173819",
-   "time": "2026-09-09T17:38:00+09:00",
-   "place": "秋田県内陸北部",
-   "magnitude": 2.7,
-   "maxIntensity": "1",
-   "depthKm": 10.0
   }
  ],
  "tsunami": {
