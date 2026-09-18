@@ -88,7 +88,7 @@
 │   ├── shinka_metrics.py           #    📊 進化メトリクス集計（docs/進化レポート.md を自動生成）
 │   ├── kaiwa_mojiokoshi.py         #    💬 会話の記録を読みやすい文字起こしに変換（/mojiokoshi の中身）
 │   ├── check_a11y.js               #    👀 見やすさ点検（色の濃さ・押しやすさ・狭い画面のはみ出し）
-│   └── check_links.py              #    👀 リンクの見張り番（公開5ページの外部リンク85本の生存確認）
+│   └── check_links.py              #    👀 リンクの見張り番（公開5ページの外部リンクの生存確認・本数は実行時に表示）
 ├── package.json                    # 📦 点検の道具の呼び出し口（`npm run check:*`）＋Playwrightの指定
 ├── excel-jan-barcode/              # 🏷 JANコード→バーコード付きExcel生成ツール（Python）
 └── ff5-anime-*.md                  # 🎥 FINAL FANTASY V アニメ化の企画・制作キット群
@@ -200,7 +200,7 @@
   | `npm run check:docstrings` | 📚 道具の説明書きの「出力例」が実際の出力と合っているか | なし |
   | `npm run check:offices` | 🗾 予報区リスト58件が3か所（大もと＋HTML2枚）でそろっているか | なし |
   | `npm run check:map` | 🗺 CLAUDE.mdの構成表と実際の `tools/` がそろっているか | なし |
-  | `npm run check:links` | 👀 公開5ページの外部リンク85本の生存確認 | あり（数分） |
+  | `npm run check:links` | 👀 公開5ページの外部リンクの生存確認（いま何本あるかは実行時に表示） | あり（数分） |
   | `npm run check:typhoon-snapshot` | 🌀 台風ページの④予備文章が古くないか（気象庁と照合） | あり |
   | `npm run check:a11y` | 👀 見やすさ点検（色の濃さ・押しやすさ・狭い画面） | Playwrightが要る |
 
