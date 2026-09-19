@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-19T23:35:00+09:00",
+ "generatedAt": "2026-09-20T03:08:30+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
  "count": 1,
  "typhoons": [
@@ -10,22 +10,22 @@
    "name": "ドゥージェン",
    "nameEn": "Dujuan",
    "category": "台風",
-   "issue": "2026-09-19T21:45:00+09:00",
+   "issue": "2026-09-20T00:45:00+09:00",
    "analysis": {
     "hours": 0,
     "label": "実況",
-    "validTime": "2026-09-19T21:00:00+09:00",
+    "validTime": "2026-09-20T00:00:00+09:00",
     "category": "台風",
     "intensity": "強い",
     "scale": "大型",
     "location": "日本の南",
-    "course": "北北西",
-    "speedKmh": "20",
+    "course": "北西",
+    "speedKmh": "15",
     "pressure": 970.0,
     "windMs": 35.0,
     "gustMs": 50.0,
-    "lat": 27.9,
-    "lon": 138.4,
+    "lat": 28.1,
+    "lon": 137.9,
     "circleKm": null,
     "stormRadiusKm": 110.0,
     "galeRadiusKm": 750.0
@@ -34,17 +34,17 @@
     {
      "hours": 12,
      "label": "予報　１２時間後",
-     "validTime": "2026-09-20T09:00:00+09:00",
+     "validTime": "2026-09-20T12:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
      "scale": "",
      "location": "日本の南",
-     "course": "北西",
-     "speedKmh": "10",
+     "course": "北北西",
+     "speedKmh": null,
      "pressure": 970.0,
      "windMs": 35.0,
      "gustMs": 50.0,
-     "lat": 28.8,
+     "lat": 29.1,
      "lon": 137.5,
      "circleKm": 45.0,
      "stormRadiusKm": 155.0
@@ -52,7 +52,7 @@
     {
      "hours": 24,
      "label": "予報　２４時間後",
-     "validTime": "2026-09-20T21:00:00+09:00",
+     "validTime": "2026-09-21T00:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
      "scale": "",
@@ -62,14 +62,14 @@
      "pressure": 970.0,
      "windMs": 35.0,
      "gustMs": 50.0,
-     "lat": 30.1,
+     "lat": 30.5,
      "lon": 137.4,
      "circleKm": 65.0,
      "stormRadiusKm": 175.0
     },
     {
-     "hours": 48,
-     "label": "予報　４８時間後",
+     "hours": 45,
+     "label": "予報　４５時間後",
      "validTime": "2026-09-21T21:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
@@ -86,8 +86,8 @@
      "stormRadiusKm": 250.0
     },
     {
-     "hours": 72,
-     "label": "予報　７２時間後",
+     "hours": 69,
+     "label": "予報　６９時間後",
      "validTime": "2026-09-22T21:00:00+09:00",
      "category": "温帯低気圧",
      "intensity": "-",
@@ -204,6 +204,10 @@
     [
      27.9,
      138.4
+    ],
+    [
+     28.1,
+     137.9
     ]
    ]
   }
