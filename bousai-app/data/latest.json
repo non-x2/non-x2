@@ -1,7 +1,31 @@
 {
- "generatedAt": "2026-09-22T16:55:52+09:00",
+ "generatedAt": "2026-09-22T22:38:27+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20260922215120",
+   "time": "2026-09-22T21:51:00+09:00",
+   "place": "熊本県天草・芦北地方",
+   "magnitude": 2.5,
+   "maxIntensity": "1",
+   "depthKm": 10.0
+  },
+  {
+   "id": "20260922194629",
+   "time": "2026-09-22T19:46:00+09:00",
+   "place": "奄美大島北西沖",
+   "magnitude": 4.9,
+   "maxIntensity": "1",
+   "depthKm": 20.0
+  },
+  {
+   "id": "20260922184907",
+   "time": "2026-09-22T18:49:00+09:00",
+   "place": "奄美大島近海",
+   "magnitude": 3.4,
+   "maxIntensity": "1",
+   "depthKm": 10.0
+  },
   {
    "id": "20260922153424",
    "time": "2026-09-22T15:34:00+09:00",
@@ -97,30 +121,6 @@
    "magnitude": 4.7,
    "maxIntensity": "2",
    "depthKm": 50.0
-  },
-  {
-   "id": "20260921080739",
-   "time": "2026-09-21T08:07:00+09:00",
-   "place": "熊本県天草・芦北地方",
-   "magnitude": 2.1,
-   "maxIntensity": "1",
-   "depthKm": 10.0
-  },
-  {
-   "id": "20260921015756",
-   "time": "2026-09-21T01:57:00+09:00",
-   "place": "熊本県天草・芦北地方",
-   "magnitude": 2.5,
-   "maxIntensity": "2",
-   "depthKm": 0.0
-  },
-  {
-   "id": "20260920163732",
-   "time": "2026-09-20T16:37:00+09:00",
-   "place": "奄美大島近海",
-   "magnitude": 2.6,
-   "maxIntensity": "1",
-   "depthKm": 10.0
   }
  ],
  "tsunami": {
