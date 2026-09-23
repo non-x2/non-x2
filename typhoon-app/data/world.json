@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-24T02:20:25+09:00",
+ "generatedAt": "2026-09-24T05:34:57+09:00",
  "source": "米国ハリケーンセンター（NHC/CPHC、https://www.nhc.noaa.gov/）＋米軍合同台風警報センター（JTWC、https://www.metoc.navy.mil/jtwc/）",
  "note": "日本周辺（北西太平洋）は気象庁が担当（latest.json）。このファイルは含みません。",
  "count": 4,
@@ -232,16 +232,16 @@
    "name": "Polo",
    "basin": "東太平洋",
    "category": "ハリケーン（カテゴリ4）",
-   "issue": "2026-09-23T15:00:00.000Z",
+   "issue": "2026-09-23T18:00:00.000Z",
    "analysis": {
     "hours": 0,
-    "validTime": "2026-09-23T12:00:00+00:00",
+    "validTime": "2026-09-23T15:00:00+00:00",
     "category": "ハリケーン（カテゴリ4）",
-    "lat": 15.4,
-    "lon": -101.8,
-    "windMs": 67,
+    "lat": 15.6,
+    "lon": -102.1,
+    "windMs": 64,
     "gustMs": 82,
-    "pressure": 927
+    "pressure": 931
    },
    "forecast": [
     {
@@ -792,14 +792,14 @@
    "name": "One",
    "basin": "北インド洋",
    "category": "熱帯暴風",
-   "issue": "2026-09-23T12:00:00+00:00",
+   "issue": "2026-09-23T18:00:00+00:00",
    "analysis": {
     "hours": 0,
-    "validTime": "2026-09-23T12:00:00+00:00",
+    "validTime": "2026-09-23T18:00:00+00:00",
     "category": "熱帯暴風",
     "lat": 17.8,
-    "lon": 84.0,
-    "windMs": 23,
+    "lon": 83.7,
+    "windMs": 21,
     "gustMs": null,
     "pressure": null,
     "galeRadiusKm": 83
@@ -807,21 +807,21 @@
    "forecast": [
     {
      "hours": 12,
-     "validTime": "2026-09-24T00:00:00+00:00",
+     "validTime": "2026-09-24T06:00:00+00:00",
      "category": "熱帯暴風",
-     "lat": 18.3,
-     "lon": 83.5,
-     "windMs": 21,
+     "lat": 18.4,
+     "lon": 83.2,
+     "windMs": 18,
      "gustMs": null,
      "pressure": null,
-     "galeRadiusKm": 56
+     "galeRadiusKm": 83
     },
     {
      "hours": 24,
-     "validTime": "2026-09-24T12:00:00+00:00",
+     "validTime": "2026-09-24T18:00:00+00:00",
      "category": "熱帯低気圧",
-     "lat": 18.8,
-     "lon": 83.2,
+     "lat": 19.0,
+     "lon": 82.7,
      "windMs": 15,
      "gustMs": null,
      "pressure": null,
