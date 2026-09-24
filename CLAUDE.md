@@ -65,7 +65,7 @@
 │   ├── data/road_status.json       #    🚦 交通量の控え（毎時45分に自動更新）
 │   ├── data/road_points.json       #    🚦 交通量の観測点台帳（約1000か所・市区町村名つき）
 │   └── scripts/fetch_road_status.py #   交通量を取ってくる係
-├── world-livecam/                  # 🌍 世界のライブカメラ（試験・米アイオワ州＋加BC州 計1,816台を検索＋地図で）
+├── world-livecam/                  # 🌍 世界のライブカメラ（試験・米アイオワ州＋加BC州＋フィンランド 計2,692台を検索＋地図で）
 │   ├── index.html                  #    ページ本体（外部ライブラリ0・台帳は中に埋め込み）
 │   └── data/livecams_world.json    #    台帳のコピー（大もとは livecam-db/）
 ├── livecam-db/                     # 📷 ライブカメラ台帳（★大もと・他のアプリからも使える）
@@ -139,7 +139,8 @@
    - できること：名前・道路番号で検索／🛣高速・一般道でしぼりこみ／点の地図（押すとカメラが開く）／映像は30秒ごとに自動で撮り直し。**見えているカメラだけ**読み込むので通信をむだにしない（最初は48枚・「もっと見る」で追加）。
    - 🗺 **地図の絵は描いていない**：カメラの点そのものが道路の並びなので、点だけで州の形と幹線道路が見える。地図の範囲はデータから自動で決まるので、地域が増えても壊れない。
    - 🌍 **2026-08-19 に🇨🇦カナダBC州 1,026台を追加**（計1,816台）。**地域のしぼりこみボタン**（すべて／🇺🇸アイオワ州／🇨🇦BC州）を新設。検索は名前だけでなく**場所でも**引ける（例：「バンクーバー島」）。
-   - 📄 **出典表記は2つとも消さないこと**（ライセンスの条件）：「Iowa Department of Transportation - Office of Traffic Operations（CC BY 4.0）」と「Contains information licensed under the Open Government Licence – British Columbia.」。
+   - 🇫🇮 **2026-09-24 にフィンランド 810台を追加**（計2,692台・Fintraffic / Digitraffic の道路気象カメラ・**CC BY 4.0**）。定期調査（2026-09）で見つかった候補。1地点に向きちがいのカメラが複数あるが**1地点＝1台**（1つ目の向き）にしてページを軽く保った。写真は約10分ごとに更新。あわせて地図の目盛りを「東経／西経」の出し分け＋文字が重ならない間隔に直した。
+   - 📄 **出典表記は3つとも消さないこと**（ライセンスの条件）：「Iowa Department of Transportation - Office of Traffic Operations（CC BY 4.0）」と「Contains information licensed under the Open Government Licence – British Columbia.」と「Source: Fintraffic / digitraffic.fi, license CC 4.0 BY」。
    - ⚠️ **`export.py` の圧縮データには `s`（情報源）の欄が必要**。無いと地域のしぼりこみが全部0台になる（一度そうなって実ブラウザで発見・修正した）。
    - 直すときは `livecam-db/build_world.py` → `export.py` の順（ページ側のデータを直接いじらない）。毎週火5:10の台帳更新に世界分も相乗り（失敗しても日本側は止めない）。
 ## のんさんへの対応の型（★どの環境でも必ず守る）

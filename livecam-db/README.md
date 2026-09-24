@@ -175,6 +175,8 @@ python3 livecam-db/build_world.py --no-verify  # 写真の確認をとばす
 | 情報源 | 中身 | 利用条件 |
 |---|---|---|
 | 🇺🇸 アイオワ州交通局（Iowa DOT） | 高速道路（I-系）・一般道・休憩施設・道路気象カメラ 約1,200件 | **CC BY 4.0**＝出典を書けば再利用可。出典：Iowa Department of Transportation - Office of Traffic Operations |
+| 🇨🇦 ブリティッシュコロンビア州 DriveBC | 州の道路カメラ 約1,030台 | **Open Government Licence – British Columbia**。出典：Contains information licensed under the Open Government Licence – British Columbia. |
+| 🇫🇮 フィンランド Fintraffic / Digitraffic（2026-09-24 追加） | 道路気象カメラ 810地点（**1地点＝1台**・1つ目の向きの写真） | **CC BY 4.0**。出典：Source: Fintraffic / digitraffic.fi, license CC 4.0 BY |
 
 > 🔎 **なぜアイオワ州から？** 2026-08-16 に米国5州を調査した結果、「機械で読める一括データ」と
 > 「はっきりした利用許可」の両方がそろっていたのがアイオワ州だけだったためです（下の記録を参照）。
@@ -195,7 +197,7 @@ python3 livecam-db/build_world.py --no-verify  # 写真の確認をとばす
 | 🇨🇦 カナダ アルバータ州 511 Alberta（新規調査 2026-08-19） | ⏸ 保留 | `511.alberta.ca/api/v2/get/cameras` から鍵なしJSONで368台・画像も実際のhttps写真を確認できたが、利用規約に「商用目的の複製・配布には書面の許可が必要」と明記＝非商用限定でのんラボの用途に合わない |
 | 🇦🇺 オーストラリア クイーンズランド州（新規調査 2026-08-19） | ⏸ 保留 | 位置データセット（SHP/KML等）はCC BY 3.0 AUだが、ライブ画像を返すQLDTrafficのAPIは**APIキー必須**（鍵ゼロ方針に合わず。NSW州と同じ理由） |
 | 🇺🇸 コロラド州 CDOT・ノースカロライナ州 NCDOT（新規調査 2026-08-19） | ⏸ 保留 | ライセンス文言が確認できず。NCDOTのデータセットは所有者アカウントが `eaglelabs` で、州の公式アカウントかどうか判別できない |
-| 🇫🇮 フィンランド Digitraffic（Fintraffic）道路気象カメラ（新規調査 2026-09-24） | 🟢 **有望・未取り込み** | 3条件そろう。① **CC BY 4.0**（商用も可・出典「Source: Fintraffic / digitraffic.fi, license CC 4.0 BY」）② `tie.digitraffic.fi/api/weathercam/v1/stations` から鍵なしGeoJSON（**809局・カメラの向き2,275件**。※`Accept-Encoding: gzip` が必須）③ `weathercam.digitraffic.fi/<番号>.jpg` が実際にhttpsで画像を返した |
+| 🇫🇮 フィンランド Digitraffic（Fintraffic）道路気象カメラ（新規調査 2026-09-24） | ✅ **取り込み済み**（2026-09-24・810台） | 3条件そろう。① **CC BY 4.0**（商用も可・出典「Source: Fintraffic / digitraffic.fi, license CC 4.0 BY」）② `tie.digitraffic.fi/api/weathercam/v1/stations` から鍵なしGeoJSON（**809局・カメラの向き2,275件**。※`Accept-Encoding: gzip` が必須）③ `weathercam.digitraffic.fi/<番号>.jpg` が実際にhttpsで画像を返した |
 | 🇺🇸 カリフォルニア州 Caltrans CCTV（新規調査 2026-09-24） | 🟢 **有望・未取り込み**（要：念のための確認） | ① 州の公式データカタログ data.ca.gov で **Creative Commons Attribution（CC BY）**・提供元Caltransと確認 ② 鍵なしGeoJSON（**2,936台**・写真URL欄つき）③ `cwwp2.dot.ca.gov/.../*.jpg` がhttpsで画像を返した。⚠️ ライセンスの根拠が**カタログ側の表記だけ**で、Caltrans本体のページには明記が無い。取り込む前にもう一度確かめたい |
 | 🇮🇸 アイスランド 道路庁 Vegagerðin（新規調査 2026-09-24） | 🟢 **有望・未取り込み** | ① 英国の Open Government Licence を手本にした独自の規約で、複製・配布・**商用利用**まで許可（条件は出典「Byggt á gögnum frá Vegagerðinni」）。規約の対象に「ウェブカメラ」が明記 ② 鍵なしXML（**165地点・写真500枚**。緯度経度が「度・分」表記なので変換が要る）③ httpsで画像を確認 |
 | 🇳🇴 ノルウェー 道路庁 Statens vegvesen（新規調査 2026-09-24） | ⏸ 保留 | ライセンス（NLOD）は問題なしだが、データの入口に**事前のアクセス申請**が必要＝鍵ゼロ方針に合わない |
@@ -378,7 +380,7 @@ python3 livecam-db/build_world.py --no-verify  # 写真の確認をとばす
 
 | 情報源 | 規模 | ひとこと |
 |---|---|---|
-| 🇫🇮 フィンランド Digitraffic | 809局（向き2,275件） | いちばん素直。CC BY 4.0・鍵なし・https。取り込むなら最優先 |
+| 🇫🇮 フィンランド Digitraffic | 809局（向き2,275件） | いちばん素直。CC BY 4.0・鍵なし・https。→ **同日、のんさんの「実行して」で取り込み済み（810台）** |
 | 🇺🇸 カリフォルニア州 Caltrans | 2,936台 | いちばん大きい。ただしCC BYの根拠が州カタログ側だけ＝取り込み前にもう一度確かめる |
 | 🇮🇸 アイスランド 道路庁 | 165地点（写真500枚） | 小さめ。緯度経度の変換がひと手間。文字コードにも注意 |
 
@@ -421,7 +423,7 @@ python3 livecam-db/build_world.py --no-verify  # 写真の確認をとばす
 
 - ⚠️ JICE の件は、のんさんの判断が出るまで毎回ここで確認すること。
 - 🇯🇵 富山県オープンデータポータルは、ネットワークがつながる環境（ローカルなど）で見ること。
-- 有望3件（フィンランド・カリフォルニア・アイスランド）は**再調査不要**。取り込むときは「別の作業」として。
+- 有望3件（フィンランド・カリフォルニア・アイスランド）は**再調査不要**。フィンランドは取り込み済み。残る2件は取り込むときに「別の作業」として。
 
 ### 安全装置
 
@@ -541,6 +543,8 @@ python3 livecam-db/build_world.py --no-verify  # 写真の確認をとばす
 | `sources/jice.py` | 情報源①：JICE の道路／河川ライブカメラ |
 | `sources/kaiho.py` | 情報源②：海上保安庁のライブカメラ（灯台・港・岬） |
 | `sources/us_iowa.py` | 情報源③：🌍 アイオワ州交通局の道路カメラ（世界台帳・試験） |
+| `sources/ca_bc.py` | 情報源④：🌍 カナダBC州 DriveBC の道路カメラ（世界台帳・試験） |
+| `sources/fi_digitraffic.py` | 情報源⑤：🌍 フィンランド Fintraffic の道路気象カメラ（世界台帳・試験） |
 | `data/livecams.json` | できあがった台帳（**大もと**） |
 | `data/livecams_world.json` | 🌍 世界台帳（試験・**日本のアプリには配らない**） |
 
