@@ -1,7 +1,23 @@
 {
- "generatedAt": "2026-09-24T06:44:32+09:00",
+ "generatedAt": "2026-09-24T15:41:58+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20260924123920",
+   "time": "2026-09-24T12:39:00+09:00",
+   "place": "岐阜県美濃東部",
+   "magnitude": 3.0,
+   "maxIntensity": "1",
+   "depthKm": 10.0
+  },
+  {
+   "id": "20260924095118",
+   "time": "2026-09-24T09:51:00+09:00",
+   "place": "茨城県沖",
+   "magnitude": 3.7,
+   "maxIntensity": "1",
+   "depthKm": 40.0
+  },
   {
    "id": "20260924063530",
    "time": "2026-09-24T06:35:00+09:00",
@@ -105,22 +121,6 @@
    "magnitude": 3.5,
    "maxIntensity": "3",
    "depthKm": 0.0
-  },
-  {
-   "id": "20260921233246",
-   "time": "2026-09-21T23:32:00+09:00",
-   "place": "茨城県沖",
-   "magnitude": 3.5,
-   "maxIntensity": "1",
-   "depthKm": 40.0
-  },
-  {
-   "id": "20260921223838",
-   "time": "2026-09-21T22:38:00+09:00",
-   "place": "日向灘",
-   "magnitude": 4.8,
-   "maxIntensity": "3",
-   "depthKm": 30.0
   }
  ],
  "tsunami": {
