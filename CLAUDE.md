@@ -21,7 +21,8 @@
 │   ├── traffic-update.yml          #    毎時45分：国土交通省から全国の交通量を取得
 │   ├── pages-deploy.yml            #    Pagesを自動でオンにして公開しなおす
 │   ├── offices-check.yml           #    👀 予報区リストのズレを自動照合（見張り番）
-│   ├── typhoon-snapshot-check.yml  #    🌀 毎週月7:10：台風ページの④予備文章の古さを見張る（古ければIssue）
+│   ├── a11y-check.yml              #    👀 見やすさ点検（色の濃さ・押しやすさ・はみ出し）をPRとmainで自動実行
+│   ├── typhoon-snapshot-check.yml  #    🌀 毎日7:10：台風ページの④予備文章の古さを見張る（古ければIssue）
 │   └── branch-cleanup.yml          #    🧹 マージ済みの古いブランチを自動削除（お掃除係）
 ├── .claude/                        # 🤖 Claudeの設定（クラウド・ローカル共通で効く）
 │   ├── settings.json               #    セッション開始フックの登録＋権限の許可リスト
@@ -114,7 +115,7 @@
    - 🛡 **古い控えで「警報なし」と断言しない**：控えが6時間以上前、または気象庁の発表が24時間以上前なら、緑の「出ていません」ではなく「確認できていません」を出す。`status` は**「解除・なし」以外はすべて“出ている”扱い**（「警報から注意報」等の格下げ表記を取りこぼさないため）。
    - 部品：`scripts/fetch_typhoon.py`（Python標準機能のみ）＋ `.github/workflows/typhoon-update.yml`（毎時25分／変化が無い回はコミットしない／1個でも取得失敗したら上書きしない安全装置つき）。
    - **予備の文章（④）だけは手書き**。直すときは「予備の文章を更新して」と頼み、冒頭の `<time datetime="...">` も更新する。
-   - 🕰 **④は放っておくと古くなる**（2026-08-22 に12日前＝もう無い台風15号のままで見つかった）。そこで `tools/check_typhoon_snapshot.py`＋GitHub Actions「🌀 台風ページの予備文章の見張り番」（毎週月曜7:10）が古さを見張り、7日を超えるか**気象庁の台風番号と顔ぶれがズレたら Issue で知らせる**（直ると自動で閉じる）。**手動でも `python3 tools/check_typhoon_snapshot.py` で確認できる**。
+   - 🕰 **④は放っておくと古くなる**（2026-08-22 に12日前＝もう無い台風15号のままで見つかった）。そこで `tools/check_typhoon_snapshot.py`＋GitHub Actions「🌀 台風ページの予備文章の見張り番」（毎日7:10。2026-09-01 に毎週月曜から毎日へ変更）が古さを見張り、7日を超えるか**気象庁の台風番号と顔ぶれがズレたら Issue で知らせる**（直ると自動で閉じる）。**手動でも `python3 tools/check_typhoon_snapshot.py` で確認できる**。
    - **公開も自動**：`.github/workflows/pages-deploy.yml` が公開を実行（mainの更新時＋データ自動更新の完了時＋手動）。**2026-08-02 に公開開始済み**。※Pagesを最初にオンにする操作だけは自動化できず（→T16）、のんさんが設定済み（Settings → Pages → Source =「GitHub Actions」）。**以後の設定作業は不要**。
    - 公開URL：https://non-x2.github.io/non-x2/typhoon-app/ ／ 入口ページ：ルートの `index.html`
    - 🔒 **Webに出すのは `index.html`・`typhoon-app/`・`bousai-app/`・`traffic-app/`・`world-livecam/` の5つだけ**（作業ログ・脚本・YouTubeの型・`livecam-db/` は公開対象外。検索に載る範囲を最小限にするため）。リポジトリ自体はpublic＝GitHub上では元から誰でも閲覧可。
