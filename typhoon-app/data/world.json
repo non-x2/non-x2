@@ -1,8 +1,8 @@
 {
- "generatedAt": "2026-09-25T07:37:50+09:00",
+ "generatedAt": "2026-09-25T10:41:43+09:00",
  "source": "米国ハリケーンセンター（NHC/CPHC、https://www.nhc.noaa.gov/）＋米軍合同台風警報センター（JTWC、https://www.metoc.navy.mil/jtwc/）",
  "note": "日本周辺（北西太平洋）は気象庁が担当（latest.json）。このファイルは含みません。",
- "count": 5,
+ "count": 4,
  "storms": [
   {
    "id": "al062026",
@@ -730,13 +730,13 @@
    "name": "Nolo",
    "basin": "中部太平洋",
    "category": "熱帯暴風",
-   "issue": "2026-09-24T21:00:00.000Z",
+   "issue": "2026-09-25T00:00:00.000Z",
    "analysis": {
     "hours": 0,
-    "validTime": "2026-09-24T18:00:00+00:00",
+    "validTime": "2026-09-24T21:00:00+00:00",
     "category": "熱帯暴風",
     "lat": 14.9,
-    "lon": -156.1,
+    "lon": -156.0,
     "windMs": 31,
     "gustMs": 39,
     "pressure": 992
@@ -1061,50 +1061,6 @@
      -156.2
     ]
    ]
-  },
-  {
-   "id": "jtwc-01b-2026",
-   "bin": "01B",
-   "name": "One",
-   "basin": "北インド洋",
-   "category": "熱帯暴風",
-   "issue": "2026-09-24T00:00:00+00:00",
-   "analysis": {
-    "hours": 0,
-    "validTime": "2026-09-24T00:00:00+00:00",
-    "category": "熱帯暴風",
-    "lat": 18.1,
-    "lon": 83.7,
-    "windMs": 18,
-    "gustMs": null,
-    "pressure": null,
-    "galeRadiusKm": 83
-   },
-   "forecast": [
-    {
-     "hours": 12,
-     "validTime": "2026-09-24T12:00:00+00:00",
-     "category": "熱帯低気圧",
-     "lat": 19.1,
-     "lon": 83.1,
-     "windMs": 15,
-     "gustMs": null,
-     "pressure": null,
-     "galeRadiusKm": null
-    },
-    {
-     "hours": 24,
-     "validTime": "2026-09-25T00:00:00+00:00",
-     "category": "熱帯低気圧",
-     "lat": 20.1,
-     "lon": 82.7,
-     "windMs": 13,
-     "gustMs": null,
-     "pressure": null,
-     "galeRadiusKm": null
-    }
-   ],
-   "track": []
   }
  ]
 }
