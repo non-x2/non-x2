@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-26T07:35:05+09:00",
+ "generatedAt": "2026-09-26T10:46:36+09:00",
  "source": "米国ハリケーンセンター（NHC/CPHC、https://www.nhc.noaa.gov/）＋米軍合同台風警報センター（JTWC、https://www.metoc.navy.mil/jtwc/）",
  "note": "日本周辺（北西太平洋）は気象庁が担当（latest.json）。このファイルは含みません。",
  "count": 5,
@@ -266,13 +266,13 @@
    "name": "Gonzalo",
    "basin": "AT",
    "category": "熱帯暴風",
-   "issue": "2026-09-25T21:00:00.000Z",
+   "issue": "2026-09-26T00:00:00.000Z",
    "analysis": {
     "hours": 0,
-    "validTime": "2026-09-25T18:00:00+00:00",
+    "validTime": "2026-09-25T21:00:00+00:00",
     "category": "熱帯暴風",
-    "lat": 16.2,
-    "lon": -22.7,
+    "lat": 16.4,
+    "lon": -22.5,
     "windMs": 23,
     "gustMs": 28,
     "pressure": 1000
@@ -958,16 +958,16 @@
    "name": "Nolo",
    "basin": "中部太平洋",
    "category": "ハリケーン（カテゴリ2）",
-   "issue": "2026-09-25T21:00:00.000Z",
+   "issue": "2026-09-26T00:00:00.000Z",
    "analysis": {
     "hours": 0,
-    "validTime": "2026-09-25T18:00:00+00:00",
+    "validTime": "2026-09-25T21:00:00+00:00",
     "category": "ハリケーン（カテゴリ2）",
-    "lat": 16.5,
+    "lat": 16.8,
     "lon": -155.4,
     "windMs": 46,
     "gustMs": 57,
-    "pressure": 978
+    "pressure": 975
    },
    "forecast": [
     {
