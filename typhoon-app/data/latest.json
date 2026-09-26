@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-09-26T22:16:20+09:00",
+ "generatedAt": "2026-09-27T02:19:17+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
  "count": 1,
  "typhoons": [
@@ -10,21 +10,21 @@
    "name": "スリゲ",
    "nameEn": "Surigae",
    "category": "台風",
-   "issue": "2026-09-26T21:45:00+09:00",
+   "issue": "2026-09-27T00:45:00+09:00",
    "analysis": {
     "hours": 0,
     "label": "実況",
-    "validTime": "2026-09-26T21:00:00+09:00",
+    "validTime": "2026-09-27T00:00:00+09:00",
     "category": "台風",
     "intensity": "-",
     "scale": "",
     "location": "沖縄の南",
-    "course": "北北東",
+    "course": "北",
     "speedKmh": null,
-    "pressure": 990.0,
+    "pressure": 985.0,
     "windMs": 30.0,
-    "gustMs": 40.0,
-    "lat": 23.4,
+    "gustMs": 45.0,
+    "lat": 23.6,
     "lon": 127.0,
     "circleKm": null,
     "stormRadiusKm": 55.0,
@@ -34,42 +34,42 @@
     {
      "hours": 12,
      "label": "予報　１２時間後",
-     "validTime": "2026-09-27T09:00:00+09:00",
+     "validTime": "2026-09-27T12:00:00+09:00",
      "category": "台風",
-     "intensity": "-",
+     "intensity": "強い",
      "scale": "",
-     "location": "那覇市の南約210km",
-     "course": "北北東",
-     "speedKmh": null,
-     "pressure": 985.0,
-     "windMs": 30.0,
-     "gustMs": 45.0,
-     "lat": 24.3,
-     "lon": 127.5,
+     "location": "那覇市の南約180km",
+     "course": "北東",
+     "speedKmh": "10",
+     "pressure": 975.0,
+     "windMs": 35.0,
+     "gustMs": 50.0,
+     "lat": 24.6,
+     "lon": 127.8,
      "circleKm": 55.0,
-     "stormRadiusKm": 110.0
+     "stormRadiusKm": 130.0
     },
     {
      "hours": 24,
      "label": "予報　２４時間後",
-     "validTime": "2026-09-27T21:00:00+09:00",
+     "validTime": "2026-09-28T00:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
      "scale": "",
-     "location": "那覇市の南東約130km",
+     "location": "那覇市の東南東約140km",
      "course": "北東",
      "speedKmh": "15",
-     "pressure": 975.0,
-     "windMs": 35.0,
-     "gustMs": 50.0,
-     "lat": 25.3,
-     "lon": 128.5,
+     "pressure": 970.0,
+     "windMs": 40.0,
+     "gustMs": 55.0,
+     "lat": 25.6,
+     "lon": 128.9,
      "circleKm": 80.0,
-     "stormRadiusKm": 150.0
+     "stormRadiusKm": 160.0
     },
     {
-     "hours": 48,
-     "label": "予報　４８時間後",
+     "hours": 45,
+     "label": "予報　４５時間後",
      "validTime": "2026-09-28T21:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
@@ -86,8 +86,8 @@
      "stormRadiusKm": 210.0
     },
     {
-     "hours": 72,
-     "label": "予報　７２時間後",
+     "hours": 69,
+     "label": "予報　６９時間後",
      "validTime": "2026-09-29T21:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
@@ -104,8 +104,8 @@
      "stormRadiusKm": 310.0
     },
     {
-     "hours": 96,
-     "label": "予報　９６時間後",
+     "hours": 93,
+     "label": "予報　９３時間後",
      "validTime": "2026-09-30T21:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
@@ -122,8 +122,8 @@
      "stormRadiusKm": 460.0
     },
     {
-     "hours": 120,
-     "label": "予報　１２０時間後",
+     "hours": 117,
+     "label": "予報　１１７時間後",
      "validTime": "2026-10-01T21:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
@@ -239,6 +239,10 @@
     ],
     [
      23.4,
+     127.0
+    ],
+    [
+     23.6,
      127.0
     ]
    ]
