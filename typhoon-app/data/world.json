@@ -1,8 +1,8 @@
 {
- "generatedAt": "2026-09-27T10:38:04+09:00",
+ "generatedAt": "2026-09-27T17:25:52+09:00",
  "source": "米国ハリケーンセンター（NHC/CPHC、https://www.nhc.noaa.gov/）＋米軍合同台風警報センター（JTWC、https://www.metoc.navy.mil/jtwc/）",
  "note": "日本周辺（北西太平洋）は気象庁が担当（latest.json）。このファイルは含みません。",
- "count": 5,
+ "count": 4,
  "storms": [
   {
    "id": "al062026",
@@ -10,84 +10,74 @@
    "name": "Fay",
    "basin": "AT",
    "category": "熱帯低気圧",
-   "issue": "2026-09-26T21:00:00.000Z",
+   "issue": "2026-09-27T03:00:00.000Z",
    "analysis": {
     "hours": 0,
-    "validTime": "2026-09-26T18:00:00+00:00",
+    "validTime": "2026-09-27T00:00:00+00:00",
     "category": "熱帯低気圧",
-    "lat": 29.8,
+    "lat": 29.6,
     "lon": -43.9,
     "windMs": 15,
     "gustMs": 21,
-    "pressure": 1009
+    "pressure": 1010
    },
    "forecast": [
     {
      "hours": 12,
-     "validTime": "2026-09-27T06:00:00+00:00",
+     "validTime": "2026-09-27T12:00:00+00:00",
      "category": "熱帯低気圧",
-     "lat": 29.6,
-     "lon": -43.9,
-     "windMs": 13,
-     "gustMs": 18,
+     "lat": 29.4,
+     "lon": -43.8,
+     "windMs": 15,
+     "gustMs": 21,
      "pressure": null
     },
     {
      "hours": 24,
-     "validTime": "2026-09-27T18:00:00+00:00",
+     "validTime": "2026-09-28T00:00:00+00:00",
      "category": "熱帯低気圧",
-     "lat": 28.9,
-     "lon": -44.0,
+     "lat": 28.4,
+     "lon": -43.7,
      "windMs": 13,
      "gustMs": 18,
      "pressure": null
     },
     {
      "hours": 36,
-     "validTime": "2026-09-28T06:00:00+00:00",
+     "validTime": "2026-09-28T12:00:00+00:00",
      "category": "熱帯低気圧",
-     "lat": 27.8,
-     "lon": -44.0,
-     "windMs": 13,
-     "gustMs": 18,
+     "lat": 27.4,
+     "lon": -43.6,
+     "windMs": 15,
+     "gustMs": 21,
      "pressure": null
     },
     {
      "hours": 48,
-     "validTime": "2026-09-28T18:00:00+00:00",
+     "validTime": "2026-09-29T00:00:00+00:00",
      "category": "熱帯低気圧",
-     "lat": 26.5,
-     "lon": -44.6,
+     "lat": 25.8,
+     "lon": -44.7,
      "windMs": 15,
      "gustMs": 21,
      "pressure": null
     },
     {
      "hours": 60,
-     "validTime": "2026-09-29T06:00:00+00:00",
+     "validTime": "2026-09-29T12:00:00+00:00",
      "category": "熱帯低気圧",
-     "lat": 25.0,
-     "lon": -45.8,
+     "lat": 24.6,
+     "lon": -46.2,
      "windMs": 15,
      "gustMs": 21,
      "pressure": null
     },
     {
      "hours": 72,
-     "validTime": "2026-09-29T18:00:00+00:00",
-     "category": "熱帯低気圧",
-     "lat": 24.1,
-     "lon": -47.4,
-     "windMs": 15,
-     "gustMs": 21,
-     "pressure": null
-    },
-    {
-     "hours": 96,
-     "validTime": "2026-09-30T18:00:00+00:00",
+     "validTime": "2026-09-30T00:00:00+00:00",
      "category": "亜熱帯低気圧",
-     "lat": 23.4,
-     "lon": -51.3,
+     "lat": 24.0,
+     "lon": -47.9,
      "windMs": 13,
      "gustMs": 18,
      "pressure": null
@@ -277,156 +267,10 @@
     [
      29.9,
      -43.9
-    ]
-   ]
-  },
-  {
-   "id": "al072026",
-   "bin": "AT2",
-   "name": "Gonzalo",
-   "basin": "AT",
-   "category": "熱帯暴風",
-   "issue": "2026-09-26T21:00:00.000Z",
-   "analysis": {
-    "hours": 0,
-    "validTime": "2026-09-26T12:00:00+00:00",
-    "category": "熱帯暴風",
-    "lat": 18.8,
-    "lon": -23.0,
-    "windMs": 18,
-    "gustMs": 26,
-    "pressure": 1005
-   },
-   "forecast": [
-    {
-     "hours": 12,
-     "validTime": "2026-09-27T00:00:00+00:00",
-     "category": "亜熱帯低気圧",
-     "lat": 19.8,
-     "lon": -23.2,
-     "windMs": 15,
-     "gustMs": 21,
-     "pressure": null
-    },
-    {
-     "hours": 24,
-     "validTime": "2026-09-27T12:00:00+00:00",
-     "category": "亜熱帯低気圧",
-     "lat": 20.6,
-     "lon": -23.6,
-     "windMs": 13,
-     "gustMs": 18,
-     "pressure": null
-    },
-    {
-     "hours": 36,
-     "validTime": "2026-09-28T00:00:00+00:00",
-     "category": "亜熱帯低気圧",
-     "lat": 21.2,
-     "lon": -23.9,
-     "windMs": 10,
-     "gustMs": 15,
-     "pressure": null
-    },
-    {
-     "hours": 48,
-     "validTime": "2026-09-28T12:00:00+00:00",
-     "category": "亜熱帯低気圧",
-     "lat": 21.5,
-     "lon": -24.1,
-     "windMs": 10,
-     "gustMs": 15,
-     "pressure": null
-    },
-    {
-     "hours": 60,
-     "validTime": "2026-09-29T00:00:00+00:00",
-     "category": "亜熱帯低気圧",
-     "lat": 21.7,
-     "lon": -24.5,
-     "windMs": 10,
-     "gustMs": 15,
-     "pressure": null
-    },
-    {
-     "hours": 72,
-     "validTime": "2026-09-29T12:00:00+00:00",
-     "category": "亜熱帯低気圧",
-     "lat": 21.8,
-     "lon": -25.2,
-     "windMs": 10,
-     "gustMs": 15,
-     "pressure": null
-    }
-   ],
-   "track": [
-    [
-     8.0,
-     -13.5
     ],
     [
-     8.0,
-     -14.0
-    ],
-    [
-     8.5,
-     -15.5
-    ],
-    [
-     9.3,
-     -16.5
-    ],
-    [
-     10.0,
-     -17.2
-    ],
-    [
-     11.0,
-     -19.0
-    ],
-    [
-     11.5,
-     -20.2
-    ],
-    [
-     11.9,
-     -20.8
-    ],
-    [
-     12.4,
-     -21.4
-    ],
-    [
-     12.9,
-     -22.0
-    ],
-    [
-     12.9,
-     -22.0
-    ],
-    [
-     13.7,
-     -22.3
-    ],
-    [
-     14.6,
-     -22.5
-    ],
-    [
-     15.7,
-     -22.6
-    ],
-    [
-     16.5,
-     -22.5
-    ],
-    [
-     17.2,
-     -22.9
-    ],
-    [
-     18.3,
-     -22.8
+     29.8,
+     -43.9
     ]
    ]
   },
@@ -436,84 +280,74 @@
    "name": "Odalys",
    "basin": "東太平洋",
    "category": "ハリケーン（カテゴリ1）",
-   "issue": "2026-09-26T21:00:00.000Z",
+   "issue": "2026-09-27T03:00:00.000Z",
    "analysis": {
     "hours": 0,
-    "validTime": "2026-09-26T18:00:00+00:00",
+    "validTime": "2026-09-27T00:00:00+00:00",
     "category": "ハリケーン（カテゴリ1）",
-    "lat": 20.5,
+    "lat": 21.1,
     "lon": -123.6,
-    "windMs": 41,
-    "gustMs": 51,
-    "pressure": 973
+    "windMs": 36,
+    "gustMs": 44,
+    "pressure": 979
    },
    "forecast": [
     {
      "hours": 12,
-     "validTime": "2026-09-27T06:00:00+00:00",
+     "validTime": "2026-09-27T12:00:00+00:00",
      "category": "熱帯暴風",
-     "lat": 21.3,
-     "lon": -123.5,
-     "windMs": 31,
-     "gustMs": 39,
+     "lat": 21.9,
+     "lon": -123.4,
+     "windMs": 28,
+     "gustMs": 33,
      "pressure": null
     },
     {
      "hours": 24,
-     "validTime": "2026-09-27T18:00:00+00:00",
+     "validTime": "2026-09-28T00:00:00+00:00",
      "category": "熱帯暴風",
      "lat": 22.3,
-     "lon": -123.2,
+     "lon": -123.1,
      "windMs": 23,
      "gustMs": 28,
      "pressure": null
     },
     {
      "hours": 36,
-     "validTime": "2026-09-28T06:00:00+00:00",
-     "category": "熱帯暴風",
-     "lat": 22.4,
-     "lon": -122.9,
+     "validTime": "2026-09-28T12:00:00+00:00",
+     "category": "亜熱帯暴風",
+     "lat": 22.1,
+     "lon": -122.7,
      "windMs": 18,
      "gustMs": 23,
      "pressure": null
     },
     {
      "hours": 48,
-     "validTime": "2026-09-28T18:00:00+00:00",
+     "validTime": "2026-09-29T00:00:00+00:00",
      "category": "亜熱帯低気圧",
-     "lat": 21.8,
-     "lon": -122.5,
+     "lat": 21.2,
+     "lon": -122.3,
      "windMs": 13,
      "gustMs": 18,
      "pressure": null
     },
     {
      "hours": 60,
-     "validTime": "2026-09-29T06:00:00+00:00",
+     "validTime": "2026-09-29T12:00:00+00:00",
      "category": "亜熱帯低気圧",
-     "lat": 20.7,
-     "lon": -122.1,
+     "lat": 20.1,
+     "lon": -122.0,
      "windMs": 13,
      "gustMs": 18,
      "pressure": null
     },
     {
      "hours": 72,
-     "validTime": "2026-09-29T18:00:00+00:00",
+     "validTime": "2026-09-30T00:00:00+00:00",
      "category": "亜熱帯低気圧",
-     "lat": 19.5,
-     "lon": -121.9,
-     "windMs": 10,
-     "gustMs": 15,
-     "pressure": null
-    },
-    {
-     "hours": 96,
-     "validTime": "2026-09-30T18:00:00+00:00",
-     "category": "亜熱帯低気圧",
-     "lat": 18.2,
-     "lon": -122.2,
+     "lat": 19.2,
+     "lon": -122.0,
      "windMs": 10,
      "gustMs": 15,
      "pressure": null
@@ -709,11 +543,11 @@
      -123.6
     ],
     [
-     19.5,
-     -123.7
+     20.2,
+     -123.6
     ],
     [
-     20.2,
+     20.8,
      -123.6
     ]
    ]
@@ -723,87 +557,77 @@
    "bin": "EP2",
    "name": "Polo",
    "basin": "東太平洋",
-   "category": "ハリケーン（カテゴリ4）",
-   "issue": "2026-09-27T00:00:00.000Z",
+   "category": "ハリケーン（カテゴリ3）",
+   "issue": "2026-09-27T06:00:00.000Z",
    "analysis": {
     "hours": 0,
-    "validTime": "2026-09-26T21:00:00+00:00",
-    "category": "ハリケーン（カテゴリ4）",
-    "lat": 19.1,
-    "lon": -112.8,
-    "windMs": 62,
-    "gustMs": 77,
-    "pressure": 940
+    "validTime": "2026-09-27T03:00:00+00:00",
+    "category": "ハリケーン（カテゴリ3）",
+    "lat": 19.8,
+    "lon": -113.4,
+    "windMs": 54,
+    "gustMs": 64,
+    "pressure": 950
    },
    "forecast": [
     {
      "hours": 12,
-     "validTime": "2026-09-27T06:00:00+00:00",
-     "category": "ハリケーン（カテゴリ4）",
-     "lat": 19.8,
-     "lon": -113.4,
-     "windMs": 59,
-     "gustMs": 72,
+     "validTime": "2026-09-27T12:00:00+00:00",
+     "category": "ハリケーン（カテゴリ3）",
+     "lat": 20.7,
+     "lon": -113.8,
+     "windMs": 51,
+     "gustMs": 62,
      "pressure": null
     },
     {
      "hours": 24,
-     "validTime": "2026-09-27T18:00:00+00:00",
-     "category": "ハリケーン（カテゴリ3）",
-     "lat": 21.4,
-     "lon": -114.0,
-     "windMs": 54,
-     "gustMs": 67,
-     "pressure": null
-    },
-    {
-     "hours": 36,
-     "validTime": "2026-09-28T06:00:00+00:00",
+     "validTime": "2026-09-28T00:00:00+00:00",
      "category": "ハリケーン（カテゴリ2）",
-     "lat": 23.2,
-     "lon": -114.0,
+     "lat": 22.4,
+     "lon": -114.2,
      "windMs": 49,
      "gustMs": 59,
      "pressure": null
     },
     {
-     "hours": 48,
-     "validTime": "2026-09-28T18:00:00+00:00",
+     "hours": 36,
+     "validTime": "2026-09-28T12:00:00+00:00",
      "category": "ハリケーン（カテゴリ2）",
-     "lat": 24.8,
-     "lon": -113.3,
-     "windMs": 44,
-     "gustMs": 54,
+     "lat": 24.2,
+     "lon": -113.7,
+     "windMs": 46,
+     "gustMs": 57,
+     "pressure": null
+    },
+    {
+     "hours": 48,
+     "validTime": "2026-09-29T00:00:00+00:00",
+     "category": "ハリケーン（カテゴリ1）",
+     "lat": 25.8,
+     "lon": -112.5,
+     "windMs": 41,
+     "gustMs": 51,
      "pressure": null
     },
     {
      "hours": 60,
-     "validTime": "2026-09-29T06:00:00+00:00",
+     "validTime": "2026-09-29T12:00:00+00:00",
      "category": "ハリケーン（カテゴリ1）",
-     "lat": 26.4,
-     "lon": -111.9,
-     "windMs": 36,
-     "gustMs": 44,
+     "lat": 27.6,
+     "lon": -110.8,
+     "windMs": 33,
+     "gustMs": 41,
      "pressure": null
     },
     {
      "hours": 72,
-     "validTime": "2026-09-29T18:00:00+00:00",
-     "category": "熱帯暴風",
-     "lat": 28.0,
-     "lon": -110.2,
-     "windMs": 26,
-     "gustMs": 31,
-     "pressure": null
-    },
-    {
-     "hours": 96,
-     "validTime": "2026-09-30T18:00:00+00:00",
+     "validTime": "2026-09-30T00:00:00+00:00",
      "category": "亜熱帯低気圧",
-     "lat": 31.2,
-     "lon": -105.7,
-     "windMs": 10,
-     "gustMs": 15,
+     "lat": 29.7,
+     "lon": -108.4,
+     "windMs": 15,
+     "gustMs": 21,
      "pressure": null
     }
    ],
@@ -1003,6 +827,22 @@
     [
      18.3,
      -112.2
+    ],
+    [
+     19.0,
+     -112.9
+    ],
+    [
+     17.7,
+     -111.4
+    ],
+    [
+     18.3,
+     -112.2
+    ],
+    [
+     19.0,
+     -112.9
     ]
    ]
   },
@@ -1012,63 +852,63 @@
    "name": "Nolo",
    "basin": "中部太平洋",
    "category": "ハリケーン（カテゴリ1）",
-   "issue": "2026-09-27T00:00:00.000Z",
+   "issue": "2026-09-27T03:00:00.000Z",
    "analysis": {
     "hours": 0,
-    "validTime": "2026-09-26T21:00:00+00:00",
+    "validTime": "2026-09-27T00:00:00+00:00",
     "category": "ハリケーン（カテゴリ1）",
     "lat": 16.7,
-    "lon": -156.2,
+    "lon": -156.5,
     "windMs": 41,
     "gustMs": 51,
-    "pressure": 972
+    "pressure": 969
    },
    "forecast": [
     {
      "hours": 12,
-     "validTime": "2026-09-27T06:00:00+00:00",
+     "validTime": "2026-09-27T12:00:00+00:00",
      "category": "ハリケーン（カテゴリ2）",
-     "lat": 16.7,
-     "lon": -157.0,
+     "lat": 16.6,
+     "lon": -157.7,
      "windMs": 46,
      "gustMs": 57,
      "pressure": null
     },
     {
      "hours": 24,
-     "validTime": "2026-09-27T18:00:00+00:00",
+     "validTime": "2026-09-28T00:00:00+00:00",
      "category": "ハリケーン（カテゴリ3）",
-     "lat": 16.8,
-     "lon": -158.8,
+     "lat": 16.9,
+     "lon": -159.6,
      "windMs": 54,
      "gustMs": 67,
      "pressure": null
     },
     {
      "hours": 36,
-     "validTime": "2026-09-28T06:00:00+00:00",
+     "validTime": "2026-09-28T12:00:00+00:00",
      "category": "ハリケーン（カテゴリ4）",
-     "lat": 17.2,
-     "lon": -160.9,
+     "lat": 17.7,
+     "lon": -161.5,
      "windMs": 59,
      "gustMs": 72,
      "pressure": null
     },
     {
      "hours": 48,
-     "validTime": "2026-09-28T18:00:00+00:00",
+     "validTime": "2026-09-29T00:00:00+00:00",
      "category": "ハリケーン（カテゴリ3）",
-     "lat": 18.4,
-     "lon": -162.5,
+     "lat": 19.2,
+     "lon": -162.8,
      "windMs": 57,
      "gustMs": 69,
      "pressure": null
     },
     {
      "hours": 60,
-     "validTime": "2026-09-29T06:00:00+00:00",
+     "validTime": "2026-09-29T12:00:00+00:00",
      "category": "ハリケーン（カテゴリ2）",
-     "lat": 20.2,
+     "lat": 20.8,
      "lon": -163.8,
      "windMs": 49,
      "gustMs": 59,
@@ -1076,9 +916,9 @@
     },
     {
      "hours": 72,
-     "validTime": "2026-09-29T18:00:00+00:00",
+     "validTime": "2026-09-30T00:00:00+00:00",
      "category": "ハリケーン（カテゴリ1）",
-     "lat": 21.9,
+     "lat": 22.4,
      "lon": -164.5,
      "windMs": 41,
      "gustMs": 51,
@@ -1086,20 +926,20 @@
     },
     {
      "hours": 96,
-     "validTime": "2026-09-30T18:00:00+00:00",
+     "validTime": "2026-10-01T00:00:00+00:00",
      "category": "ハリケーン（カテゴリ1）",
-     "lat": 23.2,
-     "lon": -166.1,
+     "lat": 23.1,
+     "lon": -166.3,
      "windMs": 33,
      "gustMs": 41,
      "pressure": null
     },
     {
      "hours": 120,
-     "validTime": "2026-10-01T18:00:00+00:00",
+     "validTime": "2026-10-02T00:00:00+00:00",
      "category": "ハリケーン（カテゴリ1）",
-     "lat": 23.0,
-     "lon": -168.8,
+     "lat": 23.1,
+     "lon": -169.3,
      "windMs": 33,
      "gustMs": 41,
      "pressure": null
@@ -1381,6 +1221,34 @@
     [
      16.8,
      -155.7
+    ],
+    [
+     16.7,
+     -156.1
+    ],
+    [
+     16.3,
+     -155.4
+    ],
+    [
+     16.7,
+     -155.3
+    ],
+    [
+     16.9,
+     -155.2
+    ],
+    [
+     16.9,
+     -155.3
+    ],
+    [
+     16.8,
+     -155.7
+    ],
+    [
+     16.7,
+     -156.1
     ]
    ]
   }
