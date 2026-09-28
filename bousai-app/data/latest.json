@@ -1,7 +1,23 @@
 {
- "generatedAt": "2026-09-28T06:34:18+09:00",
+ "generatedAt": "2026-09-28T14:47:48+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20260928110535",
+   "time": "2026-09-28T11:05:00+09:00",
+   "place": "岩手県沖",
+   "magnitude": 3.3,
+   "maxIntensity": "1",
+   "depthKm": 40.0
+  },
+  {
+   "id": "20260928105004",
+   "time": "2026-09-28T10:50:00+09:00",
+   "place": "岩手県沖",
+   "magnitude": 3.4,
+   "maxIntensity": "1",
+   "depthKm": 40.0
+  },
   {
    "id": "20260928062909",
    "time": "2026-09-28T06:29:00+09:00",
@@ -105,22 +121,6 @@
    "magnitude": 2.9,
    "maxIntensity": "2",
    "depthKm": 10.0
-  },
-  {
-   "id": "20260926103120",
-   "time": "2026-09-26T10:31:00+09:00",
-   "place": "熊本県熊本地方",
-   "magnitude": 4.5,
-   "maxIntensity": "4",
-   "depthKm": 10.0
-  },
-  {
-   "id": "20260926063141",
-   "time": "2026-09-26T06:23:00+09:00",
-   "place": "南太平洋",
-   "magnitude": 7.0,
-   "maxIntensity": "",
-   "depthKm": null
   }
  ],
  "tsunami": {
