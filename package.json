@@ -1,0 +1,18 @@
+{
+  "name": "non-x2",
+  "version": "1.0.0",
+  "description": "のんラボ プロフィール — 個人開発ラボの制作物リポジトリ",
+  "private": true,
+  "scripts": {
+    "check:a11y": "node tools/check_a11y.js",
+    "check:links": "python3 tools/check_links.py",
+    "check:docstrings": "python3 tools/check_docstrings.py",
+    "check:offices": "python3 tools/check_offices.py",
+    "check:map": "python3 tools/check_map.py",
+    "check:typhoon-snapshot": "python3 tools/check_typhoon_snapshot.py",
+    "check": "npm run check:docstrings && npm run check:offices && npm run check:map"
+  },
+  "devDependencies": {
+    "playwright": "^1.56.0"
+  }
+}
