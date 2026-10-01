@@ -14,13 +14,22 @@ CLAUDE.md の構成表は、新しいセッションが毎回いちばん最初�
     tools/               … 小さな道具箱（.py / .js）
     .github/workflows/   … 自動で動くもの（.yml / .yaml）
 
+■ もう1つの地図も見張る（2026-10-01 追加＝自己改良バックログの候補47）
+`docs/README.md`（📚 docsの歩き方）も、docsフォルダの中身を手で書き写した「地図」。
+2026-09-27 に見たときは作業ログ7枚が抜け、「最新」の案内が47日前のままだった。
+そこで下の3つを照合する（材料はファイル名だけ＝中身も通信も要らない）。
+    ① ガイド・手順書が目次に載っているか（作ったあとの書き足し忘れ）
+    ② 省略の線引き（「それより古いもの(◯◯ 以前)は…」）より新しい作業ログが全部載っているか
+    ③ 「🚀 まず読むもの」が最新と呼んでいる作業ログが、本当にいちばん新しい日付か
+
 ■ 使い方
     python3 tools/check_map.py
     npm run check:map          （同じもの）
 
-■ 出力例（◯には実際の個数が入る）
+■ 出力例（◯には実際の個数、日付には実際の日付が入る）
     ✅ tools/ の◯個の道具は、すべてCLAUDE.mdの構成表に載っています。
     ✅ .github/workflows/ の◯枚の自動実行は、すべてCLAUDE.mdの構成表に載っています。
+    ✅ docs/ の◯枚の文書は、すべて docs/README.md の目次に載っています（最新の作業ログの案内も ◯◯◯◯-◯◯-◯◯ で合っています）。
 
 ズレていたときは、足りない側を ❌ で並べて表示し、終了コード1で終わる。
 ※ 直すのは人の仕事（この道具はCLAUDE.mdを書き換えない）。地図の説明文は
@@ -39,6 +48,8 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CLAUDE_MD = REPO_ROOT / "CLAUDE.md"
+DOCS_DIR = REPO_ROOT / "docs"
+DOCS_INDEX = DOCS_DIR / "README.md"
 
 # 見張る対象。新しいフォルダを足したいときは、この list に1つ書き足すだけ。
 #   path     : 実物のフォルダ（＝構成表に書かれている名前と同じつづり）
@@ -51,6 +62,15 @@ TARGETS = [
 
 # 構成表の1行から名前を取り出す（例: "│   ├── check_offices.py   #    👀 ..." → "check_offices.py"）
 ENTRY_RE = re.compile(r"^│\s+[├└]──\s+(\S+)")
+
+# docs/README.md の照合に使うもの
+# 「[作業ログ_2026-08-22.md](作業ログ_2026-08-22.md)」のような同じフォルダ内へのリンク先だけを拾う。
+# `/` と `:` を除いているので、よそのフォルダ（`docs/○○.md`）や外部のURL（`https://…`）は拾わない。
+# 「○○.md#見出し」のように見出しへ飛ばすリンクも、ファイル名のぶんだけ拾う。
+DOCS_LINK_RE = re.compile(r"\]\(([^)/:#]+\.md)(?:#[^)]*)?\)")
+WORKLOG_RE = re.compile(r"^作業ログ_(\d{4}-\d{2}-\d{2})\.md$")
+# 「それより古いもの(2026-08-01 以前)はファイル一覧から探してください。」の線引きの日付
+CUTOFF_RE = re.compile(r"それより古いもの[（(](\d{4}-\d{2}-\d{2})\s*以前[）)]")
 
 
 def read_actual(target: dict) -> set[str]:
@@ -115,16 +135,114 @@ def check(target: dict, lines: list[str]) -> bool:
     return False
 
 
+def _newest_worklog_in_section(index_text: str, heading: str) -> str | None:
+    """見出し（例：「🚀 まず読むもの」）の中にある作業ログの日付を返す。無ければ None。"""
+    inside = False
+    for line in index_text.splitlines():
+        if line.startswith("## "):
+            inside = heading in line     # 見出しに来たら「この中か」を入れ替える
+            continue
+        if not inside:
+            continue
+        for name in DOCS_LINK_RE.findall(line):
+            matched = WORKLOG_RE.match(name)
+            if matched:
+                return matched.group(1)
+    return None
+
+
+def check_docs_index() -> bool:
+    """docs/ の中身と docs/README.md（📚 docsの歩き方）の目次を照合する。
+
+    作業ログは数が多いので、目次には「ある日付より新しいぶんだけ」を並べて、
+    それより古いものは省略する約束になっている。その線引きの一文を読み取って、
+    「省略してよい作業ログ」と「載っていないといけない作業ログ」を分ける。
+    """
+    if not DOCS_INDEX.exists():
+        print("❌ docs/README.md（docsの歩き方）が見つかりません。")
+        return False
+
+    index_text = DOCS_INDEX.read_text(encoding="utf-8")
+    # 目次が目次自身（README.md）を指していても「案内し忘れ」の話ではないので、両方から外しておく
+    linked = set(DOCS_LINK_RE.findall(index_text)) - {"README.md"}
+    actual = {path.name for path in DOCS_DIR.glob("*.md")} - {"README.md"}
+
+    worklogs = {name for name in actual if WORKLOG_RE.match(name)}
+    guides = actual - worklogs
+    problems: list[str] = []
+
+    # ① ガイド・手順書（作業ログ以外）は全部が目次に載っていないといけない
+    for name in sorted(guides - linked):
+        problems.append(
+            f"❌ docs/{name} が docs/README.md の目次に載っていません（作ったあとの書き足し忘れ）"
+        )
+
+    # 目次にあるのに実物が無いもの（消したあとの消し忘れ・ファイル名の打ち間違い）
+    for name in sorted(linked - actual):
+        problems.append(
+            f"❌ docs/README.md の目次にある {name} が docs/ に見つかりません（消したあとの消し忘れ）"
+        )
+
+    # ② 省略の線引きより新しい作業ログは、全部が「📝 作業ログ(新しい順)」に並んでいないといけない
+    cutoff_matched = CUTOFF_RE.search(index_text)
+    if cutoff_matched is None:
+        problems.append(
+            "❌ docs/README.md に「それより古いもの(◯◯◯◯-◯◯-◯◯ 以前)は…」の省略の線引きが見つかりません"
+            "（どこから省略してよいのか機械が判断できません）"
+        )
+    else:
+        cutoff = cutoff_matched.group(1)
+        for name in sorted(worklogs - linked, reverse=True):
+            if WORKLOG_RE.match(name).group(1) > cutoff:
+                problems.append(
+                    f"❌ docs/{name} が docs/README.md の作業ログ一覧に載っていません"
+                    f"（省略してよいのは {cutoff} 以前のぶんだけです）"
+                )
+
+    # ③ 「🚀 まず読むもの」が最新と呼んでいる作業ログが、本当にいちばん新しい日付か
+    newest = max((WORKLOG_RE.match(n).group(1) for n in worklogs), default=None)
+    introduced = _newest_worklog_in_section(index_text, "まず読むもの")
+
+    if newest is None:
+        problems.append("❌ docs/ に作業ログ（作業ログ_YYYY-MM-DD.md）が1枚もありません。")
+    elif introduced is None:
+        problems.append(
+            "❌ docs/README.md の「🚀 まず読むもの」に、最新の作業ログへの案内が見つかりません。"
+        )
+    elif introduced != newest:
+        problems.append(
+            f"❌ docs/README.md の「🚀 まず読むもの」が案内しているのは {introduced} ですが、"
+            f"いちばん新しい作業ログは {newest} です（新しいログを足したあとの差し替え忘れ）"
+        )
+
+    if problems:
+        for problem in problems:
+            print(problem)
+        return False
+
+    print(
+        f"✅ docs/ の{len(actual)}枚の文書は、すべて docs/README.md の目次に載っています"
+        f"（最新の作業ログの案内も {newest} で合っています）。"
+    )
+    return True
+
+
 def main() -> int:
     lines = CLAUDE_MD.read_text(encoding="utf-8").splitlines()
 
     results = [check(target, lines) for target in TARGETS]
-    if all(results):
+    docs_ok = check_docs_index()
+
+    if all(results) and docs_ok:
         return 0
 
     ng = [t["path"] for t, ok in zip(TARGETS, results) if not ok]
-    print(f"\n❌ 地図（CLAUDE.mdの構成表）と実際の中身がズレています：{'、'.join(f'{p}/' for p in ng)}")
-    print("   CLAUDE.md の該当フォルダのブロックに、1行（ファイル名＋何をするかの説明）を足すか消してください。")
+    if ng:
+        print(f"\n❌ 地図（CLAUDE.mdの構成表）と実際の中身がズレています：{'、'.join(f'{p}/' for p in ng)}")
+        print("   CLAUDE.md の該当フォルダのブロックに、1行（ファイル名＋何をするかの説明）を足すか消してください。")
+    if not docs_ok:
+        print("\n❌ もう1つの地図（docs/README.md の目次）と docs/ の中身がズレています。")
+        print("   docs/README.md の該当する見出しの下に、1行（リンク＋どんなときに読むか）を足すか消してください。")
     return 1
 
 
