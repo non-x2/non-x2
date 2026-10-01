@@ -1,7 +1,31 @@
 {
- "generatedAt": "2026-10-02T01:40:27+09:00",
+ "generatedAt": "2026-10-02T06:58:59+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20261002060147",
+   "time": "2026-10-02T06:01:00+09:00",
+   "place": "茨城県南部",
+   "magnitude": 3.9,
+   "maxIntensity": "2",
+   "depthKm": 50.0
+  },
+  {
+   "id": "20261002040524",
+   "time": "2026-10-02T04:05:00+09:00",
+   "place": "トカラ列島近海",
+   "magnitude": 3.3,
+   "maxIntensity": "3",
+   "depthKm": 10.0
+  },
+  {
+   "id": "20261002021724",
+   "time": "2026-10-02T02:17:00+09:00",
+   "place": "三陸沖",
+   "magnitude": 5.0,
+   "maxIntensity": "2",
+   "depthKm": 10.0
+  },
   {
    "id": "20261002012159",
    "time": "2026-10-02T01:20:00+09:00",
@@ -97,30 +121,6 @@
    "magnitude": 2.7,
    "maxIntensity": "1",
    "depthKm": 0.0
-  },
-  {
-   "id": "20260930140037",
-   "time": "2026-09-30T14:00:00+09:00",
-   "place": "与那国島近海",
-   "magnitude": 6.0,
-   "maxIntensity": "3",
-   "depthKm": 10.0
-  },
-  {
-   "id": "20260929224843",
-   "time": "2026-09-29T22:48:00+09:00",
-   "place": "千葉県北東部",
-   "magnitude": 3.0,
-   "maxIntensity": "1",
-   "depthKm": 50.0
-  },
-  {
-   "id": "20260929181215",
-   "time": "2026-09-29T18:12:00+09:00",
-   "place": "山口県北部",
-   "magnitude": 3.2,
-   "maxIntensity": "1",
-   "depthKm": 10.0
   }
  ],
  "tsunami": {
