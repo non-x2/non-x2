@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-03T08:07:33+09:00",
+ "generatedAt": "2026-10-03T11:10:37+09:00",
  "source": "米国ハリケーンセンター（NHC/CPHC、https://www.nhc.noaa.gov/）＋米軍合同台風警報センター（JTWC、https://www.metoc.navy.mil/jtwc/）",
  "note": "日本周辺（北西太平洋）は気象庁が担当（latest.json）。このファイルは含みません。",
  "count": 2,
@@ -264,13 +264,13 @@
    "name": "Nolo",
    "basin": "中部太平洋",
    "category": "ハリケーン（カテゴリ1）",
-   "issue": "2026-10-02T21:00:00.000Z",
+   "issue": "2026-10-03T00:00:00.000Z",
    "analysis": {
     "hours": 0,
-    "validTime": "2026-10-02T18:00:00+00:00",
+    "validTime": "2026-10-02T21:00:00+00:00",
     "category": "ハリケーン（カテゴリ1）",
-    "lat": 23.3,
-    "lon": -167.8,
+    "lat": 23.5,
+    "lon": -168.3,
     "windMs": 33,
     "gustMs": 41,
     "pressure": 984
