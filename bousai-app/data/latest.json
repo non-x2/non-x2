@@ -1,7 +1,47 @@
 {
- "generatedAt": "2026-10-03T09:42:27+09:00",
+ "generatedAt": "2026-10-03T16:03:39+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20261003152118",
+   "time": "2026-10-03T15:21:00+09:00",
+   "place": "熊本県熊本地方",
+   "magnitude": 2.8,
+   "maxIntensity": "1",
+   "depthKm": 10.0
+  },
+  {
+   "id": "20261003150831",
+   "time": "2026-10-03T15:08:00+09:00",
+   "place": "熊本県天草・芦北地方",
+   "magnitude": 2.8,
+   "maxIntensity": "1",
+   "depthKm": 10.0
+  },
+  {
+   "id": "20261003150535",
+   "time": "2026-10-03T15:05:00+09:00",
+   "place": "奄美大島北東沖",
+   "magnitude": 4.5,
+   "maxIntensity": "1",
+   "depthKm": 20.0
+  },
+  {
+   "id": "20261003132605",
+   "time": "2026-10-03T13:26:00+09:00",
+   "place": "熊本県天草・芦北地方",
+   "magnitude": 3.5,
+   "maxIntensity": "2",
+   "depthKm": 0.0
+  },
+  {
+   "id": "20261003132452",
+   "time": "2026-10-03T13:24:00+09:00",
+   "place": "熊本県天草・芦北地方",
+   "magnitude": 3.0,
+   "maxIntensity": "2",
+   "depthKm": 10.0
+  },
   {
    "id": "20261003091155",
    "time": "2026-10-03T09:11:00+09:00",
@@ -81,46 +121,6 @@
    "magnitude": 3.3,
    "maxIntensity": "3",
    "depthKm": 10.0
-  },
-  {
-   "id": "20261002021724",
-   "time": "2026-10-02T02:17:00+09:00",
-   "place": "三陸沖",
-   "magnitude": 5.0,
-   "maxIntensity": "2",
-   "depthKm": 10.0
-  },
-  {
-   "id": "20261002012159",
-   "time": "2026-10-02T01:20:00+09:00",
-   "place": "茨城県北部",
-   "magnitude": 2.6,
-   "maxIntensity": "1",
-   "depthKm": 0.0
-  },
-  {
-   "id": "20261002011703",
-   "time": "2026-10-02T01:17:00+09:00",
-   "place": "茨城県北部",
-   "magnitude": 2.7,
-   "maxIntensity": "1",
-   "depthKm": 10.0
-  },
-  {
-   "id": "20261001215139",
-   "time": "2026-10-01T21:51:00+09:00",
-   "place": "千葉県北東部",
-   "magnitude": 3.3,
-   "maxIntensity": "1",
-   "depthKm": 40.0
-  },
-  {
-   "id": "20261001213147",
-   "time": "2026-10-01T21:31:00+09:00",
-   "place": "千葉県北東部",
-   "magnitude": 3.6,
-   "maxIntensity": "1",
-   "depthKm": 40.0
   }
  ],
  "tsunami": {
