@@ -57,13 +57,13 @@ jobs:
 
       - name: 変わっていればコミットして反映
         run: |
-          if [ -z "$(git status --porcelain livecam-db traffic-app world-livecam)" ]; then
+          if [ -z "$(git status --porcelain livecam-db traffic-app world-livecam typhoon-app/index.html)" ]; then
             echo "変更なし。コミットはしません。"
             exit 0
           fi
           git config user.name  'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add livecam-db traffic-app world-livecam
+          git add livecam-db traffic-app world-livecam typhoon-app/index.html
           git commit -m '📷 台帳を自動更新（ライブカメラ・交通量観測点）'
           # 同時刻に他の更新が入っていた場合に備えて、取り込んでから押す
           for i in 1 2 3; do

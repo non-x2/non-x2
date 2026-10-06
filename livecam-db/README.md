@@ -137,7 +137,7 @@ rivers = livecam.filter_cams(db, category="river", pref="新潟県", with_image=
 
 ```bash
 python3 livecam-db/build.py      # 集める → 重複をまとめる → 写真を確認 → 市区町村を付ける
-python3 livecam-db/export.py     # 各アプリに配る（traffic-app など）
+python3 livecam-db/export.py     # 各アプリに配る（traffic-app・world-livecam・typhoon-app）
 ```
 
 写真の確認は3,000台以上に1台ずつアクセスするので**15〜20分**かかります。急ぐときは:
@@ -537,7 +537,7 @@ python3 livecam-db/build_world.py --no-verify  # 写真の確認をとばす
 |---|---|
 | `build.py` | 台帳を作る司令塔（集める→まとめる→確認→保存） |
 | `build_world.py` | 🌍 世界台帳（試験）を作る司令塔（日本版とは別ファイルを作る） |
-| `export.py` | 台帳を各アプリに配る係（`traffic-app`＝日本の台帳／`world-livecam`＝世界の台帳） |
+| `export.py` | 台帳を各アプリに配る係（`traffic-app`＝日本の台帳／`world-livecam`＝世界の台帳／`typhoon-app`＝海上保安庁の海のカメラだけ） |
 | `livecam.py` | 台帳を**使う**ための小さな道具（近くを探す・ルート沿いを探す・検索） |
 | `sources/base.py` | どの情報源でも使う共通の道具（取得・https確認・市区町村） |
 | `sources/jice.py` | 情報源①：JICE の道路／河川ライブカメラ |

@@ -15,11 +15,16 @@
   - world-livecam … 🌍 世界のライブカメラのページ（世界の台帳・試験）
       ①② の考え方は traffic-app と同じ。ただし**読む台帳が別ファイル**
       （data/livecams_world.json）なので、日本のページには一切混ざりません。
+  - typhoon-app … 🌀 台風ページの「台風に近い海のライブカメラ」欄
+      日本の台帳のうち**海上保安庁の海のカメラだけ**を、index.html に埋め込みます。
+      ※ 海上保安庁のデータは PDL1.0（出典を書けば再利用可）。
+         道路・河川のカメラ（JICE）はここには配りません（利用条件の確認待ちのため）。
 
 使い方:
     python3 livecam-db/export.py                      # 全部の配り先に配る
     python3 livecam-db/export.py --target traffic-app
     python3 livecam-db/export.py --target world-livecam
+    python3 livecam-db/export.py --target typhoon-app
 
 外部のライブラリは使いません（Python 3 の標準機能だけ）。
 """
@@ -40,9 +45,11 @@ TRAFFIC_HTML = ROOT / "traffic-app" / "index.html"
 
 WORLD_JSON = ROOT / "world-livecam" / "data" / "livecams_world.json"
 WORLD_HTML = ROOT / "world-livecam" / "index.html"
+TYPHOON_HTML = ROOT / "typhoon-app" / "index.html"
 
 # index.html の中の、台帳を書き込む場所の目印
 EMBED_START = '<script id="livecam-data" type="application/json">'
+SEACAM_EMBED_START = '<script id="seacam-data" type="application/json">'
 EMBED_END = "</script>"
 
 
@@ -92,24 +99,26 @@ def to_compact(db: dict) -> dict:
     }
 
 
-def write_html_embed(db: dict, html_path: Path) -> bool:
+def write_html_embed(db: dict, html_path: Path, payload_obj: dict | None = None,
+                     marker: str = EMBED_START) -> bool:
     """index.html の中の台帳を書き換える。"""
     if not html_path.exists():
         print(f"⚠️ {html_path} が見つからないので、埋め込みは省略します", file=sys.stderr)
         return False
 
     html = html_path.read_text(encoding="utf-8")
-    start = html.find(EMBED_START)
+    start = html.find(marker)
     if start < 0:
         print(f"⚠️ {html_path.name} に台帳の目印が見つかりませんでした", file=sys.stderr)
         return False
-    body_start = start + len(EMBED_START)
+    body_start = start + len(marker)
     end = html.find(EMBED_END, body_start)
     if end < 0:
         print(f"⚠️ {html_path.name} の台帳の終わりが見つかりませんでした", file=sys.stderr)
         return False
 
-    payload = json.dumps(to_compact(db), ensure_ascii=False, separators=(",", ":"))
+    obj = payload_obj if payload_obj is not None else to_compact(db)
+    payload = json.dumps(obj, ensure_ascii=False, separators=(",", ":"))
     # </script> が混ざると途中でページが切れてしまうので、念のため無害化する
     payload = payload.replace("</", "<\\/")
 
@@ -155,10 +164,36 @@ def export_world_livecam(db: dict) -> None:
         print(f"💾 ページにも埋め込みました: {WORLD_HTML}（{WORLD_HTML.stat().st_size / 1024:.0f} KB）")
 
 
+def export_typhoon_app(db: dict) -> None:
+    """🌀 台風ページに配る（海上保安庁の海のカメラだけ）。
+
+    n=名前 / a=市区町村 / la,lo=緯度経度 / i=写真URL / p=カメラのページ / o=管理者
+    """
+    sea = [c for c in db["cams"] if c.get("src") == "kaiho"]
+    if not sea:
+        print("⚠️ 海上保安庁のカメラが台帳にないので、台風ページへの配布は省略します", file=sys.stderr)
+        return
+    src = next((s for s in db.get("sources", []) if s.get("id") == "kaiho"), {})
+    payload = {
+        "u": db["updated"][:10],
+        "attribution": src.get("attribution", ""),
+        "license": src.get("license", ""),
+        "c": [{
+            "n": c["name"], "a": c.get("place", ""),
+            "la": round(c["lat"], 4), "lo": round(c["lon"], 4),
+            "i": c.get("img") or "", "p": c.get("page", ""), "o": c.get("owner", ""),
+        } for c in sea],
+    }
+    if write_html_embed(db, TYPHOON_HTML, payload, SEACAM_EMBED_START):
+        print(f"💾 台風ページに海のカメラ {len(sea)} 台を埋め込みました: {TYPHOON_HTML}"
+              f"（{TYPHOON_HTML.stat().st_size / 1024:.0f} KB）")
+
+
 # 配り先ごとに「どの台帳を読むか」も決めておく（日本と世界は別ファイル）
 TARGETS = {
     "traffic-app": (DB_PATH, export_traffic_app),
     "world-livecam": (WORLD_DB_PATH, export_world_livecam),
+    "typhoon-app": (DB_PATH, export_typhoon_app),
 }
 
 

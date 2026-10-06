@@ -30,10 +30,10 @@ PAGE_URL = f"{BASE}/camstream/"
 SOURCE = {
     "id": "kaiho",
     "name": "海上保安庁 ライブカメラ（灯台・港・岬）",
-    "page": "https://camera.mics.kaiho.mlit.go.jp/",
+    "page": "https://camera.mics.kaiho.mlit.go.jp/camstream/",
     "data": LIST_URL,
     "license": "公共データ利用規約（第1.0版）PDL1.0",
-    "attribution": "出典：海上保安庁ホームページ（https://camera.mics.kaiho.mlit.go.jp/）",
+    "attribution": "出典：海上保安庁ホームページ（https://camera.mics.kaiho.mlit.go.jp/camstream/）",
     "note": "灯台などに設置されたライブカメラ。道路・河川のカメラとは重ならない「海」の情報",
 }
 
