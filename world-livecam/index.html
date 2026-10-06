@@ -73,6 +73,10 @@
     margin-top: 1rem;
   }
   .card h2 { font-size: 1.02rem; margin: 0 0 0.5rem; }
+  .card h3 { font-size: 0.95rem; margin: 0.9rem 0 0.3rem; }
+  .linklist { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.15rem; }
+  .linklist a { display: flex; align-items: center; min-height: 44px; padding: 0.15rem 0; }
+  .linklist small { color: var(--text-dim); display: block; margin: -0.35rem 0 0.35rem; }
   .note {
     background: var(--warn-bg);
     border: 1px solid var(--warn-line);
@@ -318,6 +322,34 @@
     <div class="more-wrap" id="more-wrap" hidden>
       <button type="button" class="btn" id="more">もっと見る</button>
     </div>
+  </section>
+
+  <section class="card" aria-labelledby="sight-h">
+    <h2 id="sight-h">🏞 観光地・自然のライブカメラ（公式サイトへ）</h2>
+    <p>観光地のカメラは、自治体・観光協会・民間が運営していて、<strong>ほかのサイトに写真を載せてよいという許可が出ていないもの</strong>がほとんどです。
+      そこで、このページには取り込まず、<strong>公式サイトへのリンク</strong>で案内しています（映像は各公式サイトでご覧ください）。</p>
+    <h3>🇯🇵 日本</h3>
+    <ul class="linklist">
+      <li><a href="https://www.data.jma.go.jp/vois/data/obs/volcam/volcam.php" target="_blank" rel="noopener">気象庁｜火山の監視カメラ（全国約95台） ↗</a><small>桜島・阿蘇山・浅間山など。火山の様子を見る国の公式カメラ</small></li>
+      <li><a href="https://www.pref.shizuoka.jp/fujisanview/" target="_blank" rel="noopener">静岡県｜ライブカメラ富士山ビュー ↗</a><small>清水・富士宮・御殿場から見た富士山</small></li>
+      <li><a href="https://livecamera.mtfuji-whc.jp/" target="_blank" rel="noopener">静岡県富士山世界遺産センター｜ライブカメラ ↗</a><small>富士宮市から見た富士山</small></li>
+      <li><a href="https://www.fujinomiya-camera.jp/livecam.htm" target="_blank" rel="noopener">富士宮市｜富士山ライブカメラ ↗</a></li>
+      <li><a href="https://www.city.kyoto.lg.jp/sankan/page/0000315511.html" target="_blank" rel="noopener">京都市｜観光地の混み具合（ライブ配信） ↗</a><small>「京都観光快適度マップ」の混み具合とライブカメラの案内。空いている時間を選ぶのに</small></li>
+      <li><a href="https://www.kyokanko.or.jp/" target="_blank" rel="noopener">京都市観光協会（DMO KYOTO） ↗</a><small>観光地の混雑ライブカメラの案内あり</small></li>
+      <li><a href="https://www.city.kagoshima.lg.jp/doga/livecamera.html" target="_blank" rel="noopener">鹿児島市｜平川動物公園・かごしま水族館 ライブカメラ ↗</a></li>
+    </ul>
+    <h3>🌍 世界</h3>
+    <ul class="linklist">
+      <li><a href="https://www.nps.gov/media/multimedia-search.htm" target="_blank" rel="noopener">🇺🇸 米国立公園局（NPS）｜ウェブカメラの検索 ↗</a><small>全米の国立公園のカメラを探せる（英語）</small></li>
+      <li><a href="https://www.nps.gov/yose/learn/photosmultimedia/webcams.htm" target="_blank" rel="noopener">🇺🇸 ヨセミテ国立公園 ↗</a></li>
+      <li><a href="https://www.nps.gov/yell/learn/photosmultimedia/webcams.htm" target="_blank" rel="noopener">🇺🇸 イエローストーン国立公園 ↗</a><small>間欠泉オールド・フェイスフルなど</small></li>
+      <li><a href="https://www.nps.gov/grca/learn/photosmultimedia/webcams.htm" target="_blank" rel="noopener">🇺🇸 グランドキャニオン国立公園 ↗</a></li>
+      <li><a href="https://www.nps.gov/havo/learn/photosmultimedia/webcams.htm" target="_blank" rel="noopener">🇺🇸 ハワイ火山国立公園 ↗</a><small>キラウエア火山</small></li>
+      <li><a href="https://www.nps.gov/katm/learn/photosmultimedia/webcams.htm" target="_blank" rel="noopener">🇺🇸 カトマイ国立公園 ↗</a><small>夏はサケをとるクマが見られる</small></li>
+      <li><a href="https://www.geonet.org.nz/volcano/cameras" target="_blank" rel="noopener">🇳🇿 GeoNet｜ニュージーランドの火山カメラ ↗</a><small>トンガリロ・ルアペフ・タラナキなど</small></li>
+      <li><a href="https://www.hko.gov.hk/en/wxinfo/ts/index_webcam.htm" target="_blank" rel="noopener">🇭🇰 香港天文台｜いまの天気の写真 ↗</a><small>香港の街と海（約26地点）</small></li>
+    </ul>
+    <p class="viewer-note">※ リンク先は国・自治体・公的な団体の公式サイトだけです。調べた記録は <code>livecam-db/README.md</code> にあります。</p>
   </section>
 
   <a class="back-link" href="../">← のんラボの入口にもどる</a>
