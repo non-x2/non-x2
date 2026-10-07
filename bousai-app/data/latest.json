@@ -1,7 +1,39 @@
 {
- "generatedAt": "2026-10-07T18:11:54+09:00",
+ "generatedAt": "2026-10-08T07:14:25+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20261008063610",
+   "time": "2026-10-08T06:36:00+09:00",
+   "place": "熊本県熊本地方",
+   "magnitude": 3.1,
+   "maxIntensity": "2",
+   "depthKm": 10.0
+  },
+  {
+   "id": "20261008043638",
+   "time": "2026-10-08T04:36:00+09:00",
+   "place": "千葉県東方沖",
+   "magnitude": 3.9,
+   "maxIntensity": "2",
+   "depthKm": 50.0
+  },
+  {
+   "id": "20261008041355",
+   "time": "2026-10-08T04:13:00+09:00",
+   "place": "千葉県北東部",
+   "magnitude": 4.8,
+   "maxIntensity": "4",
+   "depthKm": 50.0
+  },
+  {
+   "id": "20261007232313",
+   "time": "2026-10-07T23:23:00+09:00",
+   "place": "熊本県熊本地方",
+   "magnitude": 2.6,
+   "maxIntensity": "1",
+   "depthKm": 10.0
+  },
   {
    "id": "20261007170000",
    "time": "2026-10-07T17:00:00+09:00",
@@ -89,38 +121,6 @@
    "magnitude": 2.0,
    "maxIntensity": "1",
    "depthKm": 0.0
-  },
-  {
-   "id": "20261005192728",
-   "time": "2026-10-05T19:27:00+09:00",
-   "place": "愛媛県南予",
-   "magnitude": 3.1,
-   "maxIntensity": "1",
-   "depthKm": 50.0
-  },
-  {
-   "id": "20261005123857",
-   "time": "2026-10-05T12:39:00+09:00",
-   "place": "鹿児島県薩摩地方",
-   "magnitude": 2.0,
-   "maxIntensity": "1",
-   "depthKm": 0.0
-  },
-  {
-   "id": "20261005091811",
-   "time": "2026-10-05T09:18:00+09:00",
-   "place": "熊本県熊本地方",
-   "magnitude": 2.6,
-   "maxIntensity": "1",
-   "depthKm": 10.0
-  },
-  {
-   "id": "20261005083916",
-   "time": "2026-10-05T08:39:00+09:00",
-   "place": "トカラ列島近海",
-   "magnitude": 3.8,
-   "maxIntensity": "1",
-   "depthKm": 90.0
   }
  ],
  "tsunami": {
