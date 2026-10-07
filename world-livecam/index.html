@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>世界のライブカメラ（試験）｜アイオワ州・BC州の道路カメラを見る</title>
-<meta name="description" content="世界のライブカメラを見るための試験ページです。公式に再利用が許可されているアメリカ・アイオワ州とカナダ・ブリティッシュコロンビア州の道路カメラ約1,800台を、検索と地図から探せます。">
+<meta name="description" content="世界のライブカメラを見るための試験ページです。公式に再利用が許可されているアメリカ・アイオワ州とカナダ・ブリティッシュコロンビア州の道路カメラを、検索と地図から探せます。">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Ctext%20y='.9em'%20font-size='90'%3E%F0%9F%8C%8D%3C/text%3E%3C/svg%3E">
 <style>
   :root {
@@ -263,7 +263,7 @@
       国ごとの統一台帳が無く、権利のルールもばらばらで、カメラは毎日増えたり減ったりするためです。</p>
     <p>そこでこのページは、<strong>「公式に再利用が許可されている」ものだけ</strong>を1つずつ増やしていく方式にしました。
       いまは <strong>🇺🇸 アメリカ・アイオワ州</strong>と <strong>🇨🇦 カナダ・ブリティッシュコロンビア州</strong>の
-      道路カメラが入っています（あわせて約1,800台）。</p>
+      道路カメラが入っています（<span id="intro-count">あわせて台数を確認中…</span>）。</p>
     <p>👉 日本のカメラは <a href="../traffic-app/">🚗 交通・ライブカメラのページ</a>（ルート沿いのカメラを探せます）。
       その他の国は、同じページの「🌍 世界のライブカメラ」欄から各国の公式サイトへどうぞ。</p>
   </div>
@@ -339,6 +339,8 @@
     （州のライセンスの外にある可能性があるため）。それらは DriveBC の公式サイトでご覧ください。</p>
   <p>台帳の大もとは <code>livecam-db/data/livecams_world.json</code> です。
     このページのデータは <code>livecam-db/export.py</code> が配っています（直接編集しないでください）。</p>
+  <p><a href="https://non-x2.github.io/non-x2/world-livecam/" target="_blank" rel="noopener noreferrer">🌐 公開ページ（いつでも最新）</a>
+    ——このファイルを直接開いているときは、ネット上のこちらが最新です。</p>
 </footer>
 
 <div class="viewer-back" id="viewer-back" hidden>
@@ -424,6 +426,20 @@
     var parts = DATA_UPDATED.split('-');
     el.textContent = '台帳の更新日：' + parts[0] + '年' + Number(parts[1]) + '月' + Number(parts[2]) + '日'
       + '（カメラ ' + CAMS.length + ' 台）';
+  })();
+
+  // ------------------------------------------------------------------
+  // 本文の台数（手で書かずに台帳の件数から出す）
+  //   毎週の台帳更新でカメラが増えても減っても、ここは自動で正しくなる。
+  // ------------------------------------------------------------------
+  (function showIntroCount() {
+    var el = $('intro-count');
+    if (!el) return;
+    if (!CAMS.length) {
+      el.textContent = '台数は台帳のファイルをご覧ください';
+      return;
+    }
+    el.textContent = 'あわせて' + CAMS.length.toLocaleString('ja-JP') + '台';
   })();
 
   // ------------------------------------------------------------------
