@@ -13,6 +13,8 @@ CLAUDE.md の構成表は、新しいセッションが毎回いちばん最初�
 ■ 見張っているフォルダ（下の TARGETS に1つ足すだけで増やせる）
     tools/               … 小さな道具箱（.py / .js）
     .github/workflows/   … 自動で動くもの（.yml / .yaml）
+    .claude/skills/      … 型（スキル）。中身がファイルではなく**フォルダ**なので
+                            `kind: "dir"` を付ける（2026-10-07 追加＝候補30の残り）
 
 ■ もう1つの地図も見張る（2026-10-01 追加＝自己改良バックログの候補47）
 `docs/README.md`（📚 docsの歩き方）も、docsフォルダの中身を手で書き写した「地図」。
@@ -29,6 +31,7 @@ CLAUDE.md の構成表は、新しいセッションが毎回いちばん最初�
 ■ 出力例（◯には実際の個数、日付には実際の日付が入る）
     ✅ tools/ の◯個の道具は、すべてCLAUDE.mdの構成表に載っています。
     ✅ .github/workflows/ の◯枚の自動実行は、すべてCLAUDE.mdの構成表に載っています。
+    ✅ .claude/skills/ の◯つの型（スキル）は、すべてCLAUDE.mdの構成表に載っています。
     ✅ docs/ の◯枚の文書は、すべて docs/README.md の目次に載っています（最新の作業ログの案内も ◯◯◯◯-◯◯-◯◯ で合っています）。
 
 ズレていたときは、足りない側を ❌ で並べて表示し、終了コード1で終わる。
@@ -52,12 +55,17 @@ DOCS_DIR = REPO_ROOT / "docs"
 DOCS_INDEX = DOCS_DIR / "README.md"
 
 # 見張る対象。新しいフォルダを足したいときは、この list に1つ書き足すだけ。
-#   path     : 実物のフォルダ（＝構成表に書かれている名前と同じつづり）
-#   suffixes : 地図に載せる対象の拡張子（README などを除くため）
-#   unit     : 報告文の数え方（「3個の道具」「9枚の自動実行」）
+#   path     : 実物のフォルダ（リポジトリの根っこから見た場所）
+#   suffixes : 地図に載せる対象の拡張子（README などを除くため。kind="dir" のときは不要）
+#   unit     : 報告文の数え方（「10個の道具」「9枚の自動実行」「7つの型（スキル）」）
+#   kind     : "file"（既定）＝中身はファイル／"dir"＝中身はフォルダ
+#   label    : 構成表に書かれているつづり（既定は path と同じ）。
+#              構成表が入れ子になっていて途中のフォルダ名だけが書かれているときに使う
+#              （例：`.claude/skills` は構成表では `│   └── skills/` と1段下がって書かれている）
 TARGETS = [
     {"path": "tools", "suffixes": (".py", ".js"), "unit": "個の道具"},
     {"path": ".github/workflows", "suffixes": (".yml", ".yaml"), "unit": "枚の自動実行"},
+    {"path": ".claude/skills", "unit": "つの型（スキル）", "kind": "dir", "label": "skills"},
 ]
 
 # 構成表の1行から名前を取り出す（例: "│   ├── check_offices.py   #    👀 ..." → "check_offices.py"）
@@ -74,8 +82,16 @@ CUTOFF_RE = re.compile(r"それより古いもの[（(](\d{4}-\d{2}-\d{2})\s*以
 
 
 def read_actual(target: dict) -> set[str]:
-    """実際にそのフォルダにあるファイル名を集める。"""
+    """実際にそのフォルダにある中身（ファイル名、またはフォルダ名）を集める。"""
     folder = REPO_ROOT / target["path"]
+    if target.get("kind") == "dir":
+        # 中身がフォルダのとき（例：.claude/skills/ の各スキル）。
+        # 「.」で始まるもの（.git など隠しフォルダ）は地図に載せない約束なので数えない。
+        return {
+            path.name
+            for path in folder.iterdir()
+            if path.is_dir() and not path.name.startswith(".")
+        }
     return {
         path.name
         for path in folder.iterdir()
@@ -88,26 +104,36 @@ def read_mapped(target: dict, lines: list[str]) -> set[str] | None:
 
     構成表にそのフォルダの行が無いときは None を返す（呼び出し側でエラーにする）。
     """
-    # 「├── tools/」のような、このフォルダが始まる行を探す（ここから下が中身）
+    # 「├── tools/」「│   └── skills/」のような、このフォルダが始まる行を探す
+    # （ここから下が中身。入れ子になっていて左に「│」が並ぶ形にも対応する）
+    label = target.get("label", target["path"])
+    start_re = re.compile(r"^[│\s]*[├└]──\s+" + re.escape(label) + r"/")
     start = None
     for i, line in enumerate(lines):
-        for branch in ("├── ", "└── "):
-            if line.startswith(f"{branch}{target['path']}/"):
-                start = i + 1
-                break
-        if start is not None:
+        if start_re.match(line):
+            start = i + 1
             break
     if start is None:
         return None
 
     names: set[str] = set()
+    depth = None   # このフォルダの「中身」の字下がり（＝名前が始まる位置）
     for line in lines[start:]:
-        # 「│」で始まらなくなったら、このフォルダの中身は終わり（次のフォルダに移った）
+        # 「│」で始まらなくなったら、このフォルダの中身は終わり（いちばん外側に戻った）
         if not line.startswith("│"):
             break
         matched = ENTRY_RE.match(line)
-        if matched:
-            names.add(matched.group(1))
+        if not matched:
+            continue
+        indent = matched.start(1)
+        if depth is None:
+            depth = indent
+        elif indent < depth:
+            break      # 字下がりが浅くなった＝親のフォルダに戻ったので終わり
+        elif indent > depth:
+            continue   # もっと深い階層（孫）は、このフォルダの中身として数えない
+        # フォルダは「skills/」のように末尾に「/」が付いているので外して比べる
+        names.add(matched.group(1).rstrip("/"))
     return names
 
 

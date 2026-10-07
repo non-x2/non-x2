@@ -202,7 +202,7 @@
   | `npm run check` | **まずこれ**。下の速い3つ（📚出力例・🗾予報区・🗺構成表）をまとめて実行 | なし（数秒） |
   | `npm run check:docstrings` | 📚 道具の説明書きの「出力例」が実際の出力と合っているか | なし |
   | `npm run check:offices` | 🗾 予報区リスト58件が3か所（大もと＋HTML2枚）でそろっているか | なし |
-  | `npm run check:map` | 🗺 2つの地図と実物がそろっているか（CLAUDE.mdの構成表⇔`tools/`＝道具10個・`.github/workflows/`＝自動実行9枚／`docs/README.md`の目次⇔`docs/`の文書・作業ログ・「最新」の案内） | なし |
+  | `npm run check:map` | 🗺 2つの地図と実物がそろっているか（CLAUDE.mdの構成表⇔`tools/`＝道具10個・`.github/workflows/`＝自動実行9枚・`.claude/skills/`＝型7つ／`docs/README.md`の目次⇔`docs/`の文書・作業ログ・「最新」の案内） | なし |
   | `npm run check:links` | 👀 公開5ページの外部リンクの生存確認（いま何本あるかは実行時に表示） | あり（数分） |
   | `npm run check:typhoon-snapshot` | 🌀 台風ページの④予備文章が古くないか（気象庁と照合） | あり |
   | `npm run check:a11y` | 👀 見やすさ点検（色の濃さ・押しやすさ・狭い画面） | Playwrightが要る |
