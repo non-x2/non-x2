@@ -1,7 +1,23 @@
 {
- "generatedAt": "2026-10-07T10:46:52+09:00",
+ "generatedAt": "2026-10-07T18:11:54+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20261007170000",
+   "time": "2026-10-07T17:00:00+09:00",
+   "place": "",
+   "magnitude": null,
+   "maxIntensity": "",
+   "depthKm": null
+  },
+  {
+   "id": "20261007160305",
+   "time": "2026-10-07T16:03:00+09:00",
+   "place": "奄美大島北東沖",
+   "magnitude": 3.5,
+   "maxIntensity": "1",
+   "depthKm": 60.0
+  },
   {
    "id": "20261007092251",
    "time": "2026-10-07T09:22:00+09:00",
@@ -105,22 +121,6 @@
    "magnitude": 3.8,
    "maxIntensity": "1",
    "depthKm": 90.0
-  },
-  {
-   "id": "20261005072814",
-   "time": "2026-10-05T07:28:00+09:00",
-   "place": "香川県西部",
-   "magnitude": 3.0,
-   "maxIntensity": "1",
-   "depthKm": 10.0
-  },
-  {
-   "id": "20261005050243",
-   "time": "2026-10-05T05:02:00+09:00",
-   "place": "播磨灘",
-   "magnitude": 2.5,
-   "maxIntensity": "1",
-   "depthKm": 10.0
   }
  ],
  "tsunami": {
