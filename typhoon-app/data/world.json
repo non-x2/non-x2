@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-09T07:15:40+09:00",
+ "generatedAt": "2026-10-09T11:22:21+09:00",
  "source": "米国ハリケーンセンター（NHC/CPHC、https://www.nhc.noaa.gov/）＋米軍合同台風警報センター（JTWC、https://www.metoc.navy.mil/jtwc/）",
  "note": "日本周辺（北西太平洋）は気象庁が担当（latest.json）。このファイルは含みません。",
  "count": 3,
@@ -10,16 +10,16 @@
    "name": "Isaias",
    "basin": "AT",
    "category": "ハリケーン（カテゴリ2）",
-   "issue": "2026-10-08T21:00:00.000Z",
+   "issue": "2026-10-09T00:00:00.000Z",
    "analysis": {
     "hours": 0,
-    "validTime": "2026-10-08T18:00:00+00:00",
+    "validTime": "2026-10-08T21:00:00+00:00",
     "category": "ハリケーン（カテゴリ2）",
-    "lat": 24.4,
-    "lon": -89.3,
+    "lat": 24.9,
+    "lon": -88.8,
     "windMs": 44,
     "gustMs": 54,
-    "pressure": 975
+    "pressure": 974
    },
    "forecast": [
     {
@@ -518,13 +518,13 @@
    "name": "Simon",
    "basin": "東太平洋",
    "category": "熱帯暴風",
-   "issue": "2026-10-08T21:00:00.000Z",
+   "issue": "2026-10-09T00:00:00.000Z",
    "analysis": {
     "hours": 0,
-    "validTime": "2026-10-08T18:00:00+00:00",
+    "validTime": "2026-10-08T21:00:00+00:00",
     "category": "熱帯暴風",
-    "lat": 15.7,
-    "lon": -103.9,
+    "lat": 15.8,
+    "lon": -104.2,
     "windMs": 31,
     "gustMs": 39,
     "pressure": 992
