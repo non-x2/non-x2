@@ -11,25 +11,82 @@
 // ------------------------------------------------------------------
 // 使い方（クラウドの作業部屋でもローカルでも同じ）
 //
-//   1) ページを配る係を動かす（リポジトリのいちばん上で）
-//        python3 -m http.server 8898
-//   2) 道具を動かす
-//        npm install playwright          # 初回だけ。ブラウザ本体は落とさなくてOK
-//        node tools/check_a11y.js
+//   npm install playwright          # 初回だけ。ブラウザ本体は落とさなくてOK
+//   npm run check:a11y              # これだけ（= node tools/check_a11y.js）
+//
+//   🚚 **ページを配る係は、この道具が自分で立てて、終わったら片づけます**。
+//      以前は先に「python3 -m http.server 8898」を手で動かしておく必要があり、
+//      忘れると4ページとも「開けませんでした」で全部❌になりました（2026-10-03 に実際に発生）。
+//      いまは何も要りません。もし自分で配る係を動かしていたら、そちらをそのまま使います
+//      （番号が使用中なら立てずに相乗りする＝GitHub Actions もこの形で動いています）。
 //
 //   ☁️ クラウドの作業部屋には Chromium が最初から入っています。
 //      その場合は自動で /opt/pw-browsers/chromium を使います（追加のダウンロード不要）。
 //   ページを足したいときは、下の ALL_PAGES に1行足すだけです。
 //
-//   3) 1ページだけ測りたいとき（直したページだけ測り直す）
-//        ONLY=world node tools/check_a11y.js     # 🌍 世界のライブカメラだけ
-//        ONLY=bousai node tools/check_a11y.js    # 🛟 防災情報だけ
+//   1ページだけ測りたいとき（直したページだけ測り直す）
+//        ONLY=world npm run check:a11y     # 🌍 世界のライブカメラだけ
+//        ONLY=bousai npm run check:a11y    # 🛟 防災情報だけ
+//
+//   別の場所に配ってあるものを測りたいとき（めったに使いません）
+//        BASE=http://localhost:9999 npm run check:a11y   # 自分で立てた係を使う
+//        PORT=9000 npm run check:a11y                    # 立てる番号だけ変える
 // ------------------------------------------------------------------
 
 const fs = require('fs');
+const http = require('http');
+const nodePath = require('path');
 const { chromium } = require('playwright');
 
-const BASE = process.env.BASE || 'http://localhost:8898';
+const PORT = Number(process.env.PORT) || 8898;
+// BASE を自分で指定したときは、その場所を測ります（配る係は立てません）。
+const BASE = process.env.BASE || `http://localhost:${PORT}`;
+const ROOT = nodePath.resolve(__dirname, '..');   // リポジトリのいちばん上
+
+// ---- 🚚 ページを配る小さな係（この道具の中だけで使う簡易サーバー） ----
+// 役目は「リポジトリの中のファイルを、ブラウザから見えるようにする」だけです。
+// 外には出さず（127.0.0.1 = この機械の中だけ）、点検が終わったら片づけます。
+const MIME = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.svg': 'image/svg+xml',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.ico': 'image/x-icon',
+  '.txt': 'text/plain; charset=utf-8',
+};
+const startServer = () => new Promise((resolve) => {
+  const server = http.createServer((req, res) => {
+    let rel;
+    try {
+      rel = decodeURIComponent(String(req.url).split('?')[0]);
+    } catch (e) {
+      res.writeHead(400); res.end(); return;
+    }
+    if (rel.endsWith('/')) rel += 'index.html';          // 「/typhoon-app/」→ index.html
+    const file = nodePath.join(ROOT, nodePath.normalize(rel));
+    if (file !== ROOT && !file.startsWith(ROOT + nodePath.sep)) {  // リポジトリの外は出さない
+      res.writeHead(403); res.end(); return;
+    }
+    fs.readFile(file, (err, buf) => {
+      if (err) { res.writeHead(404); res.end('not found'); return; }
+      res.writeHead(200, {
+        'Content-Type': MIME[nodePath.extname(file).toLowerCase()] || 'application/octet-stream',
+      });
+      res.end(buf);
+    });
+  });
+  // すでに同じ番号で誰かが配っているとき（手で動かした・GitHub Actions が動かした）は、
+  // 立てずにそちらへ相乗りします。昔からの使い方をこわさないための気配りです。
+  server.on('error', () => resolve(null));
+  server.listen(PORT, '127.0.0.1', () => {
+    server.unref();      // この係のせいでプログラムが終われなくならないように
+    resolve(server);
+  });
+});
 const ALL_PAGES = [
   ['🌀 台風情報', 'typhoon-app/'],
   ['🛟 防災情報', 'bousai-app/'],
@@ -143,6 +200,12 @@ const collect = (sel) => {
 };
 
 (async () => {
+  // 🚚 まずページを配る係を用意します（BASE 指定のときは何もしません）
+  const server = process.env.BASE ? null : await startServer();
+  console.log(server
+    ? `🚚 ページを配る係を立てました（${BASE}／点検が終わったら片づけます）`
+    : `🚚 すでに動いている配る係を使います（${BASE}）`);
+
   const exe = fs.existsSync('/opt/pw-browsers/chromium') ? '/opt/pw-browsers/chromium' : undefined;
   const browser = await chromium.launch(exe ? { executablePath: exe } : {});
   let ng = 0;
@@ -153,7 +216,9 @@ const collect = (sel) => {
       await page.goto(BASE + '/' + path, { waitUntil: 'domcontentloaded', timeout: 20000 });
     } catch (e) {
       console.log(`\n===== ${name} =====\n  ❌ ページを開けませんでした（${BASE}/${path}）`);
-      console.log('     「python3 -m http.server 8898」を動かしましたか？');
+      console.log(server
+        ? '     配る係は立っているので、ページのファイルが見つからないのかもしれません。'
+        : `     ${PORT} 番は別のものが使っているようです。PORT=9000 npm run check:a11y で番号を変えられます。`);
       await page.close();
       ng++;
       continue;
@@ -223,6 +288,7 @@ const collect = (sel) => {
   }
 
   await browser.close();
+  if (server) { server.closeAllConnections?.(); server.close(); }   // 🚚 配る係を片づける
   console.log(ng === 0
     ? '\n✅ すべて基準を満たしています（⚠️ の押しやすさは「読むためのリンク」なら問題ありません）'
     : `\n❌ 気になるところが ${ng} 件ありました。上の行をご覧ください`);
