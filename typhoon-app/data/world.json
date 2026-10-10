@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-10T06:48:50+09:00",
+ "generatedAt": "2026-10-10T10:50:45+09:00",
  "source": "米国ハリケーンセンター（NHC/CPHC、https://www.nhc.noaa.gov/）＋米軍合同台風警報センター（JTWC、https://www.metoc.navy.mil/jtwc/）",
  "note": "日本周辺（北西太平洋）は気象庁が担当（latest.json）。このファイルは含みません。",
  "count": 3,
@@ -9,17 +9,17 @@
    "bin": "AT4",
    "name": "Isaias",
    "basin": "AT",
-   "category": "ハリケーン（カテゴリ3）",
-   "issue": "2026-10-09T21:00:00.000Z",
+   "category": "ハリケーン（カテゴリ2）",
+   "issue": "2026-10-10T01:30:00.000Z",
    "analysis": {
     "hours": 0,
-    "validTime": "2026-10-09T18:00:00+00:00",
-    "category": "ハリケーン（カテゴリ3）",
-    "lat": 29.2,
-    "lon": -87.0,
-    "windMs": 51,
+    "validTime": "2026-10-09T21:00:00+00:00",
+    "category": "ハリケーン（カテゴリ2）",
+    "lat": 30.1,
+    "lon": -86.6,
+    "windMs": 49,
     "gustMs": 67,
-    "pressure": 959
+    "pressure": 967
    },
    "forecast": [
     {
@@ -164,13 +164,13 @@
    "name": "Rachel",
    "basin": "東太平洋",
    "category": "熱帯暴風",
-   "issue": "2026-10-09T21:00:00.000Z",
+   "issue": "2026-10-10T00:00:00.000Z",
    "analysis": {
     "hours": 0,
-    "validTime": "2026-10-09T18:00:00+00:00",
+    "validTime": "2026-10-09T21:00:00+00:00",
     "category": "熱帯暴風",
-    "lat": 23.3,
-    "lon": -124.0,
+    "lat": 23.6,
+    "lon": -123.7,
     "windMs": 21,
     "gustMs": 26,
     "pressure": 995
@@ -506,16 +506,16 @@
    "name": "Simon",
    "basin": "東太平洋",
    "category": "ハリケーン（カテゴリ2）",
-   "issue": "2026-10-09T21:00:00.000Z",
+   "issue": "2026-10-10T00:00:00.000Z",
    "analysis": {
     "hours": 0,
-    "validTime": "2026-10-09T18:00:00+00:00",
+    "validTime": "2026-10-09T21:00:00+00:00",
     "category": "ハリケーン（カテゴリ2）",
-    "lat": 16.2,
-    "lon": -104.7,
-    "windMs": 46,
+    "lat": 16.4,
+    "lon": -104.6,
+    "windMs": 49,
     "gustMs": 57,
-    "pressure": 966
+    "pressure": 964
    },
    "forecast": [
     {
