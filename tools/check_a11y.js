@@ -11,8 +11,11 @@
 // ------------------------------------------------------------------
 // 使い方（クラウドの作業部屋でもローカルでも同じ）
 //
-//   npm install playwright          # 初回だけ。ブラウザ本体は落とさなくてOK
-//   npm run check:a11y              # これだけ（= node tools/check_a11y.js）
+//   npm install --no-save playwright   # ブラウザを動かす部品。クラウドではセッションごとに1回
+//   npm run check:a11y                 # これだけ（= node tools/check_a11y.js）
+//
+//   🎭 playwright が入っていないときは、英語のエラーではなく
+//      「先に npm install --no-save playwright を動かしてください」と日本語で案内して止まります。
 //
 //   🚚 **ページを配る係は、この道具が自分で立てて、終わったら片づけます**。
 //      以前は先に「python3 -m http.server 8898」を手で動かしておく必要があり、
@@ -36,7 +39,29 @@
 const fs = require('fs');
 const http = require('http');
 const nodePath = require('path');
-const { chromium } = require('playwright');
+// 🎭 playwright（ブラウザを動かす部品）を読み込みます。
+// 入っていないと英語のエラーで止まってしまうので、やさしい日本語で案内して終わります
+// （クラウドの作業部屋は使い捨てなので、セッションごとに入れ直しが必要です）。
+let chromium;
+try {
+  chromium = require('playwright').chromium;
+} catch (e) {
+  if (e && e.code === 'MODULE_NOT_FOUND' && /'playwright'/.test(e.message || '')) {
+    console.error('');
+    console.error('🎭 この点検には playwright（ブラウザを動かす部品）が必要ですが、見つかりませんでした。');
+    console.error('');
+    console.error('   先にこれを1回だけ動かしてください（30秒ほどで終わります）:');
+    console.error('');
+    console.error('     npm install --no-save playwright');
+    console.error('');
+    console.error('   そのあと、もう一度 `npm run check:a11y` を動かせば点検できます。');
+    console.error('   ☁️ クラウドの作業部屋は使い捨てなので、新しいセッションでは毎回この1回が必要です。');
+    console.error('   💡 ブラウザ本体（Chromium）は最初から入っているので、追加のダウンロードは要りません。');
+    console.error('');
+    process.exit(1);
+  }
+  throw e;   // それ以外の読み込みエラーは、隠さずそのまま出します
+}
 
 const PORT = Number(process.env.PORT) || 8898;
 // BASE を自分で指定したときは、その場所を測ります（配る係は立てません）。
