@@ -24,6 +24,15 @@ CLAUDE.md の構成表は、新しいセッションが毎回いちばん最初�
     ② 省略の線引き（「それより古いもの(◯◯ 以前)は…」）より新しい作業ログが全部載っているか
     ③ 「🚀 まず読むもの」が最新と呼んでいる作業ログが、本当にいちばん新しい日付か
 
+■ 身内どうしのリンクも見張る（2026-10-12 追加＝自己改良バックログの候補39）
+文書の中の「[こちら](docs/○○.md)」の形のリンクは、ファイルを引っ越したり
+名前を変えたりすると**黙って切れる**（押しても何も出ない）。
+外のサイトへのリンクは `tools/check_links.py` が見張っているが、
+のんラボの中どうしのリンクは誰も見ていなかった。そこで全Markdownを読んで、
+リンク先の実物があるか確かめる（材料は手元のファイル名だけ＝通信は要らない）。
+※ `docs/◯◯.md` や `作業ログ_....md` のような**書き方の見本**は、実物が無くて
+   当たり前なので数えない（◯・○・…・* が入っているリンク先は見本とみなす）。
+
 ■ 使い方
     python3 tools/check_map.py
     npm run check:map          （同じもの）
@@ -33,6 +42,7 @@ CLAUDE.md の構成表は、新しいセッションが毎回いちばん最初�
     ✅ .github/workflows/ の◯枚の自動実行は、すべてCLAUDE.mdの構成表に載っています。
     ✅ .claude/skills/ の◯つの型（スキル）は、すべてCLAUDE.mdの構成表に載っています。
     ✅ docs/ の◯枚の文書は、すべて docs/README.md の目次に載っています（最新の作業ログの案内も ◯◯◯◯-◯◯-◯◯ で合っています）。
+    ✅ Markdown ◯枚の中の内部リンク◯本は、すべて実物にたどり着けます。
 
 ズレていたときは、足りない側を ❌ で並べて表示し、終了コード1で終わる。
 ※ 直すのは人の仕事（この道具はCLAUDE.mdを書き換えない）。地図の説明文は
@@ -77,6 +87,16 @@ ENTRY_RE = re.compile(r"^│\s+[├└]──\s+(\S+)")
 # 「○○.md#見出し」のように見出しへ飛ばすリンクも、ファイル名のぶんだけ拾う。
 DOCS_LINK_RE = re.compile(r"\]\(([^)/:#]+\.md)(?:#[^)]*)?\)")
 WORKLOG_RE = re.compile(r"^作業ログ_(\d{4}-\d{2}-\d{2})\.md$")
+# 全Markdownの内部リンク照合に使うもの（2026-10-12 追加＝自己改良バックログの候補39）
+# 「[こちら](docs/○○.md)」の形から、リンク先のファイル名だけを拾う（見出し `#…` は切り落とす）。
+MD_LINK_RE = re.compile(r"\]\((?!https?://|mailto:)([^)\s]+?\.md)(?:#[^)]*)?\)")
+# 読みに行かないフォルダ（Gitの内部・取ってきただけの部品置き場）
+SKIP_DIR_NAMES = {".git", "node_modules", ".venv", "__pycache__"}
+# リンク先が「実在するファイル」ではなく**書き方の見本**のときの目印。
+# 例：`docs/◯◯.md`（アイデア帳）／`作業ログ_....md`（/handoffの型）。
+# これを除かないと、健全なのに3件ズレたと誤報する（2026-09-21 の手計測でも同じ3件だった）。
+PLACEHOLDER_MARKS = ("◯", "○", "〇", "…", "...", "*")
+
 # 「それより古いもの(2026-08-01 以前)はファイル一覧から探してください。」の線引きの日付
 CUTOFF_RE = re.compile(r"それより古いもの[（(](\d{4}-\d{2}-\d{2})\s*以前[）)]")
 
@@ -253,13 +273,64 @@ def check_docs_index() -> bool:
     return True
 
 
+def _markdown_files() -> list[Path]:
+    """リポジトリの中のMarkdownを全部集める（Gitの内部や部品置き場は見ない）。"""
+    found = []
+    for path in sorted(REPO_ROOT.rglob("*.md")):
+        if any(part in SKIP_DIR_NAMES for part in path.relative_to(REPO_ROOT).parts):
+            continue
+        found.append(path)
+    return found
+
+
+def check_md_links() -> bool:
+    """Markdownどうしの内部リンクが、ちゃんと実物にたどり着けるか照合する。
+
+    文書の中の「[こちら](docs/○○.md)」は、ファイルを引っ越したり名前を変えたりすると
+    黙って切れる（押しても何も出ない）。外のサイトへのリンクは
+    `tools/check_links.py` が見張っているが、**身内どうしのリンク**は誰も見ていなかった。
+    材料は手元のファイル名だけなので、通信は要らない。
+    """
+    files = _markdown_files()
+    total = 0
+    problems: list[str] = []
+
+    for path in files:
+        text = path.read_text(encoding="utf-8")
+        here = path.relative_to(REPO_ROOT)
+        for target in MD_LINK_RE.findall(text):
+            if any(mark in target for mark in PLACEHOLDER_MARKS):
+                continue  # 書き方の見本なので、実物が無くて当たり前
+            total += 1
+            if target.startswith("/"):
+                destination = REPO_ROOT / target.lstrip("/")
+            else:
+                destination = path.parent / target
+            if not destination.exists():
+                problems.append(
+                    f"❌ {here} のリンク先 {target} が見つかりません"
+                    "（引っ越し・名前変えのあとの書き替え忘れ）"
+                )
+
+    if problems:
+        for problem in problems:
+            print(problem)
+        return False
+
+    print(
+        f"✅ Markdown {len(files)}枚の中の内部リンク{total}本は、すべて実物にたどり着けます。"
+    )
+    return True
+
+
 def main() -> int:
     lines = CLAUDE_MD.read_text(encoding="utf-8").splitlines()
 
     results = [check(target, lines) for target in TARGETS]
     docs_ok = check_docs_index()
+    links_ok = check_md_links()
 
-    if all(results) and docs_ok:
+    if all(results) and docs_ok and links_ok:
         return 0
 
     ng = [t["path"] for t, ok in zip(TARGETS, results) if not ok]
@@ -269,6 +340,9 @@ def main() -> int:
     if not docs_ok:
         print("\n❌ もう1つの地図（docs/README.md の目次）と docs/ の中身がズレています。")
         print("   docs/README.md の該当する見出しの下に、1行（リンク＋どんなときに読むか）を足すか消してください。")
+    if not links_ok:
+        print("\n❌ Markdownどうしの内部リンクが切れています（押しても何も出ない状態）。")
+        print("   リンク先の正しい場所に書き替えるか、相手のファイルを元の場所に戻してください。")
     return 1
 
 
