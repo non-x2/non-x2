@@ -113,6 +113,8 @@
   }
   /* ボタンに添える台数（台帳から自動で出す）。色は変えないので見やすさはそのまま */
   .chip-n { font-size: 0.92em; margin-left: 0.15em; }
+  /* 台数の意味をそえる一言（「ボタンの数」と「結果の数」が違う理由の説明） */
+  .chip-note { margin: 0.4rem 0 0; font-size: 0.82rem; color: var(--text-dim); }
   .chip[aria-pressed="true"] {
     background: var(--accent);
     border-color: var(--accent);
@@ -281,6 +283,7 @@
       <button type="button" class="chip" id="reg-us-iowa" aria-pressed="false">🇺🇸 アイオワ州<span class="chip-n" id="reg-n-us-iowa"></span></button>
       <button type="button" class="chip" id="reg-ca-bc" aria-pressed="false">🇨🇦 BC州<span class="chip-n" id="reg-n-ca-bc"></span></button>
     </div>
+    <p class="chip-note" id="reg-note"></p>
 
     <div class="chips" role="group" aria-label="種類でしぼりこむ">
       <button type="button" class="chip" id="cat-all" aria-pressed="true">すべて</button>
@@ -444,6 +447,10 @@
     el.textContent = 'あわせて' + CAMS.length.toLocaleString('ja-JP') + '台';
   })();
 
+  // 台数の書き方をそろえる小さな係（ボタンは「1,892台」なのに結果が「1532 台」だと
+  // 見くらべにくいため、どちらも3桁区切りにする）
+  function jp(n) { return n.toLocaleString('ja-JP'); }
+
   // ------------------------------------------------------------------
   // 地域ボタンの台数（手で書かずに台帳の件数から出す）
   //   毎週の台帳更新でカメラが増えても減っても、ここは自動で正しくなる。
@@ -462,6 +469,15 @@
       if (!el || !n[reg]) return; // 情報源の欄が無い古いデータでも壊れない
       el.textContent = '（' + n[reg].toLocaleString('ja-JP') + '台）';
     });
+    // ボタンの台数（地域ぜんぶ）と、下に出る結果の台数は一致しない。
+    // 開いた直後は「映像が見えるものだけ」に✅が入っているため結果のほうが少なくなり、
+    // 「どっちが本当？」と迷うので、その理由をここで1行だけ説明する。
+    var note = $('reg-note');
+    if (note) {
+      note.textContent = 'ボタンの（　）内は、その地域ぜんぶの台数です。'
+        + '下の「このページで映像が見えるものだけ」に✅が入っているあいだは、'
+        + '結果の台数はこれより少なくなります。';
+    }
   })();
 
   // ------------------------------------------------------------------
@@ -487,9 +503,15 @@
     drawMap();
 
     var withImg = filtered.filter(function (c) { return c.img; }).length;
-    $('result-count').textContent = filtered.length === 0
-      ? '0 台'
-      : filtered.length + ' 台が見つかりました（このページで映像が見えるもの ' + withImg + ' 台）';
+    if (filtered.length === 0) {
+      $('result-count').textContent = '0 台';
+    } else if (state.onlyImg) {
+      // ✅が入っているときは「見つかった数」＝「映像が見える数」なので、
+      // 同じ数字を2回ならべない（「1,532台（映像が見えるもの1,532台）」は迷いのもと）。
+      $('result-count').textContent = jp(filtered.length) + ' 台が見つかりました（映像が見えるものだけを数えています）';
+    } else {
+      $('result-count').textContent = jp(filtered.length) + ' 台が見つかりました（うち、このページで映像が見えるもの ' + jp(withImg) + ' 台）';
+    }
   }
 
   // ------------------------------------------------------------------
@@ -547,7 +569,7 @@
 
     $('empty').hidden = filtered.length !== 0;
     $('more-wrap').hidden = shown >= filtered.length;
-    $('more').textContent = 'もっと見る（あと ' + (filtered.length - shown) + ' 台）';
+    $('more').textContent = 'もっと見る（あと ' + jp(filtered.length - shown) + ' 台）';
   }
 
   function makeCard(cam, idx) {
