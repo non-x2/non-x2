@@ -1,7 +1,23 @@
 {
- "generatedAt": "2026-10-12T05:32:33+09:00",
+ "generatedAt": "2026-10-12T15:27:42+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20261012124510",
+   "time": "2026-10-12T12:45:00+09:00",
+   "place": "釧路沖",
+   "magnitude": 4.0,
+   "maxIntensity": "2",
+   "depthKm": 70.0
+  },
+  {
+   "id": "20261012095423",
+   "time": "2026-10-12T09:53:00+09:00",
+   "place": "硫黄島近海",
+   "magnitude": 5.0,
+   "maxIntensity": "1",
+   "depthKm": 180.0
+  },
   {
    "id": "20261012050528",
    "time": "2026-10-12T05:05:00+09:00",
@@ -104,22 +120,6 @@
    "place": "宮城県沖",
    "magnitude": 3.6,
    "maxIntensity": "1",
-   "depthKm": 60.0
-  },
-  {
-   "id": "20261010025608",
-   "time": "2026-10-10T02:56:00+09:00",
-   "place": "中米",
-   "magnitude": 7.6,
-   "maxIntensity": "",
-   "depthKm": null
-  },
-  {
-   "id": "20261010014626",
-   "time": "2026-10-10T01:46:00+09:00",
-   "place": "根室半島南東沖",
-   "magnitude": 3.7,
-   "maxIntensity": "2",
    "depthKm": 60.0
   }
  ],
