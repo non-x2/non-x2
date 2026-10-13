@@ -33,6 +33,20 @@ CLAUDE.md の構成表は、新しいセッションが毎回いちばん最初�
 ※ `docs/◯◯.md` や `作業ログ_....md` のような**書き方の見本**は、実物が無くて
    当たり前なので数えない（◯・○・…・* が入っているリンク先は見本とみなす）。
 
+■ 🌐 公開ページどうしのリンクも見張る（2026-10-13 追加＝自己改良バックログの候補75）
+Markdownの身内リンクは上で見張れるようになったが、**HTMLの `href` / `src`** は
+まだ誰も見ていなかった。入口ページ `index.html` は公開4ページへのリンクを持っていて、
+フォルダ名が変わると**公開サイトでいちばん目立つ場所がリンク切れ**になる。
+そこで「Webに出しているページ」の中のリンクだけを拾って、次の3つを確かめる。
+    ① 行き先の実物があるか（引っ越し・名前変えのあとの書き替え忘れ）
+    ② フォルダを指すリンク（例：`../world-livecam/`）の中に `index.html` があるか
+       （無いとWebでは真っ白になる。手元でファイルを開くぶんには気づけない）
+    ③ 行き先が**Webに公開している範囲の中**か（手元にはあるのに公開していない
+       `docs/` などを指していると、公開サイトだけで404になる）
+※ どのページを見張るかは `.github/workflows/pages-deploy.yml` の `cp` の行
+   （＝実際にWebへ出している一覧そのもの）から読むので、公開ページが増えても
+   この道具を直す必要はない。外のサイトへのリンクは `tools/check_links.py` の担当。
+
 ■ 使い方
     python3 tools/check_map.py
     npm run check:map          （同じもの）
@@ -43,6 +57,7 @@ CLAUDE.md の構成表は、新しいセッションが毎回いちばん最初�
     ✅ .claude/skills/ の◯つの型（スキル）は、すべてCLAUDE.mdの構成表に載っています。
     ✅ docs/ の◯枚の文書は、すべて docs/README.md の目次に載っています（最新の作業ログの案内も ◯◯◯◯-◯◯-◯◯ で合っています）。
     ✅ Markdown ◯枚の中の内部リンク◯本は、すべて実物にたどり着けます。
+    ✅ 公開ページ◯枚の中のリンク◯本は、すべて公開しているファイルにたどり着けます。
 
 ズレていたときは、足りない側を ❌ で並べて表示し、終了コード1で終わる。
 ※ 直すのは人の仕事（この道具はCLAUDE.mdを書き換えない）。地図の説明文は
@@ -96,6 +111,17 @@ SKIP_DIR_NAMES = {".git", "node_modules", ".venv", "__pycache__"}
 # 例：`docs/◯◯.md`（アイデア帳）／`作業ログ_....md`（/handoffの型）。
 # これを除かないと、健全なのに3件ズレたと誤報する（2026-09-21 の手計測でも同じ3件だった）。
 PLACEHOLDER_MARKS = ("◯", "○", "〇", "…", "...", "*")
+
+# 🌐 公開ページ（HTML）のリンク照合に使うもの（2026-10-13 追加＝自己改良バックログの候補75）
+# 「href="../world-livecam/"」「src="data/livecams.json"」の形から、行き先だけを拾う。
+HTML_LINK_RE = re.compile(r'(?:href|src)\s*=\s*"([^"]+)"')
+# この道具の担当ではない行き先。
+#   https://… ・mailto: → 外のサイト（`tools/check_links.py` が見張っている）
+#   #tab-map             → 同じページの中のしるしへ飛ぶだけ（ファイルではない）
+OUTSIDE_LINK_RE = re.compile(r"^(?:https?:|mailto:|tel:|data:|javascript:|//|#)")
+# Webに出しているものを決めている大もと（この中の `cp` の行が公開の一覧そのもの）
+PAGES_DEPLOY = REPO_ROOT / ".github/workflows/pages-deploy.yml"
+PUBLISH_RE = re.compile(r"^\s*cp\s+(?:-r\s+)?(\S+)\s+_site/", re.MULTILINE)
 
 # 「それより古いもの(2026-08-01 以前)はファイル一覧から探してください。」の線引きの日付
 CUTOFF_RE = re.compile(r"それより古いもの[（(](\d{4}-\d{2}-\d{2})\s*以前[）)]")
@@ -323,14 +349,101 @@ def check_md_links() -> bool:
     return True
 
 
+def _published_paths() -> list[Path]:
+    """Webに出しているファイル・フォルダの一覧を pages-deploy.yml から読む。
+
+    手で書き写した一覧を持つと、ページが増えたときに必ず置いていかれる
+    （＝アイデア帳の候補51と同じワナ）。実際に公開を実行している
+    ワークフローの `cp` の行をそのまま材料にするので、ページが増えても
+    この道具を直す必要はない。
+    """
+    text = PAGES_DEPLOY.read_text(encoding="utf-8")
+    return [REPO_ROOT / name for name in PUBLISH_RE.findall(text)]
+
+
+def _is_published(path: Path, published: list[Path]) -> bool:
+    """その行き先が「Webに出している範囲の中」かどうか。"""
+    if path == REPO_ROOT:
+        return True  # 根っこは入口ページ（index.html）として公開している
+    for entry in published:
+        if path == entry or entry in path.parents:
+            return True
+    return False
+
+
+def check_html_links() -> bool:
+    """公開ページ（HTML）の中のリンクが、公開しているファイルにたどり着けるか照合する。
+
+    入口ページ `index.html` は公開4ページへのリンクを持っているので、フォルダ名が
+    変わると**公開サイトでいちばん目立つ場所がリンク切れ**になる。外のサイトは
+    `tools/check_links.py`、文書どうしは `check_md_links()` が見張っているので、
+    残っていた隙間がここ。材料は手元のファイル名だけ＝通信は要らない。
+    """
+    published = _published_paths()
+    pages = sorted(
+        page
+        for entry in published
+        for page in ([entry] if entry.suffix == ".html" else entry.rglob("*.html"))
+    )
+    total = 0
+    problems: list[str] = []
+
+    for page in pages:
+        here = page.relative_to(REPO_ROOT)
+        for raw in HTML_LINK_RE.findall(page.read_text(encoding="utf-8")):
+            if OUTSIDE_LINK_RE.match(raw):
+                continue  # 外のサイト／同じページの中のしるし＝この道具の担当ではない
+            total += 1
+            target = raw.split("#")[0].split("?")[0]
+            if target.startswith("/"):
+                destination = REPO_ROOT / target.lstrip("/")
+            else:
+                destination = page.parent / target
+            destination = destination.resolve()
+
+            if destination.is_dir():
+                # フォルダを指すリンク（例：../world-livecam/）は、中の index.html が
+                # 表示される。無いとWebでは真っ白（手元でファイルを開くと気づけない）。
+                if not (destination / "index.html").exists():
+                    problems.append(
+                        f"❌ {here} のリンク先 {raw} に index.html がありません"
+                        "（Webでは真っ白になります）"
+                    )
+                    continue
+            elif not destination.exists():
+                problems.append(
+                    f"❌ {here} のリンク先 {raw} が見つかりません"
+                    "（引っ越し・名前変えのあとの書き替え忘れ）"
+                )
+                continue
+
+            if not _is_published(destination, published):
+                problems.append(
+                    f"❌ {here} のリンク先 {raw} は、手元にはあるのにWebへ公開していない場所です"
+                    "（公開ページからは開けません）"
+                )
+
+    if problems:
+        for problem in problems:
+            print(problem)
+        return False
+
+    print(
+        f"✅ 公開ページ{len(pages)}枚の中のリンク{total}本は、"
+        "すべて公開しているファイルにたどり着けます。"
+    )
+    return True
+
+
 def main() -> int:
     lines = CLAUDE_MD.read_text(encoding="utf-8").splitlines()
 
     results = [check(target, lines) for target in TARGETS]
     docs_ok = check_docs_index()
     links_ok = check_md_links()
+    html_ok = check_html_links()
 
-    if all(results) and docs_ok and links_ok:
+    if all(results) and docs_ok and links_ok and html_ok:
         return 0
 
     ng = [t["path"] for t, ok in zip(TARGETS, results) if not ok]
@@ -343,6 +456,9 @@ def main() -> int:
     if not links_ok:
         print("\n❌ Markdownどうしの内部リンクが切れています（押しても何も出ない状態）。")
         print("   リンク先の正しい場所に書き替えるか、相手のファイルを元の場所に戻してください。")
+    if not html_ok:
+        print("\n❌ 公開ページ（HTML）の中のリンクが、公開しているファイルにたどり着けません。")
+        print("   そのままWebに出すと、公開サイトでリンク切れ（404や真っ白）になります。")
     return 1
 
 
