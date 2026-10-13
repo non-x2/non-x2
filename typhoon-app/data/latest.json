@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-14T02:41:29+09:00",
+ "generatedAt": "2026-10-14T07:59:00+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
  "count": 1,
  "typhoons": [
@@ -10,48 +10,48 @@
    "name": "コグマ",
    "nameEn": "Koguma",
    "category": "台風",
-   "issue": "2026-10-14T00:45:00+09:00",
+   "issue": "2026-10-14T06:45:00+09:00",
    "analysis": {
     "hours": 0,
     "label": "実況",
-    "validTime": "2026-10-14T00:00:00+09:00",
+    "validTime": "2026-10-14T06:00:00+09:00",
     "category": "台風",
     "intensity": "-",
     "scale": "",
     "location": "日本のはるか東",
     "course": "北東",
-    "speedKmh": "30",
+    "speedKmh": "40",
     "pressure": 985.0,
     "windMs": 30.0,
     "gustMs": 40.0,
-    "lat": 37.3,
-    "lon": 156.0,
+    "lat": 38.7,
+    "lon": 158.2,
     "circleKm": null,
-    "stormRadiusKm": 130.0,
-    "galeRadiusKm": 330.0
+    "stormRadiusKm": 165.0,
+    "galeRadiusKm": 390.0
    },
    "forecast": [
     {
      "hours": 12,
      "label": "予報　１２時間後",
-     "validTime": "2026-10-14T12:00:00+09:00",
-     "category": "台風",
+     "validTime": "2026-10-14T18:00:00+09:00",
+     "category": "温帯低気圧",
      "intensity": "-",
      "scale": "",
      "location": "日本のはるか東",
      "course": "北東",
-     "speedKmh": "35",
-     "pressure": 985.0,
+     "speedKmh": "30",
+     "pressure": 986.0,
      "windMs": 25.0,
      "gustMs": 35.0,
-     "lat": 40.1,
-     "lon": 159.4,
-     "circleKm": 45.0
+     "lat": 41.0,
+     "lon": 161.3,
+     "circleKm": 55.0
     },
     {
      "hours": 24,
      "label": "予報　２４時間後",
-     "validTime": "2026-10-15T00:00:00+09:00",
+     "validTime": "2026-10-15T06:00:00+09:00",
      "category": "温帯低気圧",
      "intensity": "-",
      "scale": "",
@@ -59,11 +59,11 @@
      "course": "東北東",
      "speedKmh": "35",
      "pressure": 988.0,
-     "windMs": 20.0,
-     "gustMs": 30.0,
-     "lat": 41.9,
-     "lon": 163.8,
-     "circleKm": 65.0
+     "windMs": 23.0,
+     "gustMs": 35.0,
+     "lat": 42.3,
+     "lon": 166.4,
+     "circleKm": 80.0
     }
    ],
    "track": [
@@ -346,6 +346,14 @@
     [
      37.3,
      156.0
+    ],
+    [
+     38.0,
+     157.2
+    ],
+    [
+     38.7,
+     158.2
     ]
    ]
   }
