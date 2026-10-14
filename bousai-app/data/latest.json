@@ -1,7 +1,23 @@
 {
- "generatedAt": "2026-10-15T03:51:07+09:00",
+ "generatedAt": "2026-10-15T07:34:49+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20261015070107",
+   "time": "2026-10-15T07:01:00+09:00",
+   "place": "熊本県天草・芦北地方",
+   "magnitude": 3.5,
+   "maxIntensity": "2",
+   "depthKm": 0.0
+  },
+  {
+   "id": "20261015065809",
+   "time": "2026-10-15T06:58:00+09:00",
+   "place": "熊本県天草・芦北地方",
+   "magnitude": 1.6,
+   "maxIntensity": "1",
+   "depthKm": 0.0
+  },
   {
    "id": "20261015020254",
    "time": "2026-10-15T02:02:00+09:00",
@@ -105,22 +121,6 @@
    "magnitude": 2.9,
    "maxIntensity": "2",
    "depthKm": 10.0
-  },
-  {
-   "id": "20261012124510",
-   "time": "2026-10-12T12:45:00+09:00",
-   "place": "釧路沖",
-   "magnitude": 4.0,
-   "maxIntensity": "2",
-   "depthKm": 70.0
-  },
-  {
-   "id": "20261012095423",
-   "time": "2026-10-12T09:53:00+09:00",
-   "place": "硫黄島近海",
-   "magnitude": 5.0,
-   "maxIntensity": "1",
-   "depthKm": 180.0
   }
  ],
  "tsunami": {
