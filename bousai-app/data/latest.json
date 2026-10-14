@@ -1,7 +1,23 @@
 {
- "generatedAt": "2026-10-14T22:59:25+09:00",
+ "generatedAt": "2026-10-15T03:51:07+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20261015020254",
+   "time": "2026-10-15T02:02:00+09:00",
+   "place": "宮崎県南部山沿い",
+   "magnitude": 2.6,
+   "maxIntensity": "1",
+   "depthKm": 0.0
+  },
+  {
+   "id": "20261015015135",
+   "time": "2026-10-15T01:51:00+09:00",
+   "place": "トカラ列島近海",
+   "magnitude": 3.1,
+   "maxIntensity": "1",
+   "depthKm": 10.0
+  },
   {
    "id": "20261014221915",
    "time": "2026-10-14T22:19:00+09:00",
@@ -105,22 +121,6 @@
    "magnitude": 5.0,
    "maxIntensity": "1",
    "depthKm": 180.0
-  },
-  {
-   "id": "20261012050528",
-   "time": "2026-10-12T05:05:00+09:00",
-   "place": "熊本県天草・芦北地方",
-   "magnitude": 1.9,
-   "maxIntensity": "1",
-   "depthKm": 10.0
-  },
-  {
-   "id": "20261012012430",
-   "time": "2026-10-12T01:24:00+09:00",
-   "place": "千葉県東方沖",
-   "magnitude": 4.3,
-   "maxIntensity": "2",
-   "depthKm": 50.0
   }
  ],
  "tsunami": {
