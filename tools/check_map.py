@@ -47,6 +47,20 @@ Markdownの身内リンクは上で見張れるようになったが、**HTMLの
    （＝実際にWebへ出している一覧そのもの）から読むので、公開ページが増えても
    この道具を直す必要はない。外のサイトへのリンクは `tools/check_links.py` の担当。
 
+■ 🧭 公開ページの「一覧を持つ文書」も見張る（2026-10-14 追加＝自己改良バックログの候補51）
+公開ページの一覧は**4つの文書**（表紙 `README.md`・入口ページ `index.html`・
+`docs/クラウドとローカルの使い分け.md`・この `CLAUDE.md`）が別々に持っている。
+そのためページが増えるたびに、このうちどれか1つが必ず書き漏れていた
+（2026-09-25＝表紙に公開4ページが1行も無い／2026-09-28＝入口ページがカナダBC州ぶんを
+  40日間欠落／2026-09-30＝使い分けガイドが45日間3ページのまま）。
+そこで「`pages-deploy.yml` が実際に配っているページ」が、4つの文書すべてに
+出てくるかを照合する（材料は文字列だけ＝通信も要らない）。
+※ **どの文書が一覧を持っているか**だけは手で書いている（機械には決められないため）。
+   そこは増えることが少ないうえ、下の DOC_LIST に1行足すだけで増やせる。
+※ 照合は「ページのフォルダ名が、その文書の中に出てくるか」という素朴な方法。
+   別の用途でその名前が出ているだけでも ✅ になる（＝見落としはあり得るが、
+   嘘の ❌ は出さない安全側の作り）。
+
 ■ 使い方
     python3 tools/check_map.py
     npm run check:map          （同じもの）
@@ -58,6 +72,7 @@ Markdownの身内リンクは上で見張れるようになったが、**HTMLの
     ✅ docs/ の◯枚の文書は、すべて docs/README.md の目次に載っています（最新の作業ログの案内も ◯◯◯◯-◯◯-◯◯ で合っています）。
     ✅ Markdown ◯枚の中の内部リンク◯本は、すべて実物にたどり着けます。
     ✅ 公開ページ◯枚の中のリンク◯本は、すべて公開しているファイルにたどり着けます。
+    ✅ 公開ページ◯つは、一覧を持つ◯つの文書すべてに載っています。
 
 ズレていたときは、足りない側を ❌ で並べて表示し、終了コード1で終わる。
 ※ 直すのは人の仕事（この道具はCLAUDE.mdを書き換えない）。地図の説明文は
@@ -122,6 +137,16 @@ OUTSIDE_LINK_RE = re.compile(r"^(?:https?:|mailto:|tel:|data:|javascript:|//|#)"
 # Webに出しているものを決めている大もと（この中の `cp` の行が公開の一覧そのもの）
 PAGES_DEPLOY = REPO_ROOT / ".github/workflows/pages-deploy.yml"
 PUBLISH_RE = re.compile(r"^\s*cp\s+(?:-r\s+)?(\S+)\s+_site/", re.MULTILINE)
+
+# 🧭 公開ページの一覧を持っている文書（2026-10-14 追加＝自己改良バックログの候補51）
+# ここだけは手で書いている（「一覧を持っているか」は機械には決められないため）。
+# 増えたときは1行足すだけ。※ ページそのものの一覧は pages-deploy.yml から読む。
+DOC_LIST = [
+    ("README.md", "表紙"),
+    ("index.html", "入口ページ"),
+    ("docs/クラウドとローカルの使い分け.md", "使い分けガイド"),
+    ("CLAUDE.md", "この案内"),
+]
 
 # 「それより古いもの(2026-08-01 以前)はファイル一覧から探してください。」の線引きの日付
 CUTOFF_RE = re.compile(r"それより古いもの[（(](\d{4}-\d{2}-\d{2})\s*以前[）)]")
@@ -435,6 +460,42 @@ def check_html_links() -> bool:
     return True
 
 
+def check_page_lists() -> bool:
+    """公開ページの一覧を持つ文書に、いまWebへ出しているページが全部載っているか照合する。
+
+    一覧を**4つの文書が別々に持っている**ので、ページが増えるたびに
+    どれか1つが必ず書き漏れていた（2026-09-25・09-28・09-30 の3回）。
+    ページの一覧は `pages-deploy.yml`（＝実際に配っているもの）から読むので、
+    ページが増えてもこの道具を直す必要はない。
+    """
+    # 入口ページ（根っこの index.html）そのものは「一覧に載せる相手」ではないので外す。
+    pages = [entry.name for entry in _published_paths() if entry.is_dir()]
+    problems: list[str] = []
+
+    for path_text, label in DOC_LIST:
+        doc = REPO_ROOT / path_text
+        if not doc.exists():
+            problems.append(f"❌ {label}（{path_text}）が見つかりません（引っ越し・名前変え？）")
+            continue
+        text = doc.read_text(encoding="utf-8")
+        missing = [name for name in pages if name not in text]
+        if missing:
+            problems.append(
+                f"❌ {label}（{path_text}）に {'・'.join(missing)} の案内がありません"
+                "（ページを増やしたときの書き足し忘れ）"
+            )
+
+    if problems:
+        for problem in problems:
+            print(problem)
+        return False
+
+    print(
+        f"✅ 公開ページ{len(pages)}つは、一覧を持つ{len(DOC_LIST)}つの文書すべてに載っています。"
+    )
+    return True
+
+
 def main() -> int:
     lines = CLAUDE_MD.read_text(encoding="utf-8").splitlines()
 
@@ -442,8 +503,9 @@ def main() -> int:
     docs_ok = check_docs_index()
     links_ok = check_md_links()
     html_ok = check_html_links()
+    pages_ok = check_page_lists()
 
-    if all(results) and docs_ok and links_ok and html_ok:
+    if all(results) and docs_ok and links_ok and html_ok and pages_ok:
         return 0
 
     ng = [t["path"] for t, ok in zip(TARGETS, results) if not ok]
@@ -459,6 +521,9 @@ def main() -> int:
     if not html_ok:
         print("\n❌ 公開ページ（HTML）の中のリンクが、公開しているファイルにたどり着けません。")
         print("   そのままWebに出すと、公開サイトでリンク切れ（404や真っ白）になります。")
+    if not pages_ok:
+        print("\n❌ 公開ページの一覧を持つ文書に、載っていないページがあります。")
+        print("   その文書に1行（ページの名前・公開URL・どんなときに見るか）を足してください。")
     return 1
 
 
