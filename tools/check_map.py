@@ -61,6 +61,17 @@ Markdownの身内リンクは上で見張れるようになったが、**HTMLの
    別の用途でその名前が出ているだけでも ✅ になる（＝見落としはあり得るが、
    嘘の ❌ は出さない安全側の作り）。
 
+■ 🌐 公開ページのフッターのリンクも見張る（2026-10-15 追加＝自己改良バックログの候補59・79）
+公開ページは**手元でファイルを直接ひらいても読める**作りなので、フッターに
+「🌐 公開ページ（いつでも最新）」＝自分のネット上の最新版へのリンクを置いてある。
+ところがページを増やしたとき、このリンクを足すのを忘れやすい
+（🌍世界のライブカメラは**約2か月間ずっと無かった**＝候補48。2026-10-03 に発見して追加）。
+そこで「`pages-deploy.yml` が配っているページ」ごとに、その `index.html` の中に
+**自分の公開URL**（`https://non-x2.github.io/non-x2/<フォルダ名>/`）が書かれているかを確かめる。
+※ 上の🧭（文書4つ）と見る相手が違うだけで、材料は同じ（文字列だけ＝通信も要らない）。
+※ 「フォルダ名が出てくるか」ではなく**公開URLそのもの**で照合するので、
+   よその公開URLを貼り間違えたとき（コピーして直し忘れ）にも気づける。
+
 ■ 使い方
     python3 tools/check_map.py
     npm run check:map          （同じもの）
@@ -73,6 +84,7 @@ Markdownの身内リンクは上で見張れるようになったが、**HTMLの
     ✅ Markdown ◯枚の中の内部リンク◯本は、すべて実物にたどり着けます。
     ✅ 公開ページ◯枚の中のリンク◯本は、すべて公開しているファイルにたどり着けます。
     ✅ 公開ページ◯つは、一覧を持つ◯つの文書すべてに載っています。
+    ✅ 公開ページ◯つとも、フッターに自分の公開URLへのリンクがあります。
 
 ズレていたときは、足りない側を ❌ で並べて表示し、終了コード1で終わる。
 ※ 直すのは人の仕事（この道具はCLAUDE.mdを書き換えない）。地図の説明文は
@@ -147,6 +159,11 @@ DOC_LIST = [
     ("docs/クラウドとローカルの使い分け.md", "使い分けガイド"),
     ("CLAUDE.md", "この案内"),
 ]
+
+# 🌐 公開ページのフッターのリンク照合に使うもの（2026-10-15 追加＝自己改良バックログの候補59・79）
+# GitHub Pages の住所の土台。ここだけは手で書いている（リポジトリの設定の話で、
+# ファイルの中からは分からないため）。変わることはほぼ無い＋変われば4ページとも ❌ で気づける。
+PAGES_BASE_URL = "https://non-x2.github.io/non-x2/"
 
 # 「それより古いもの(2026-08-01 以前)はファイル一覧から探してください。」の線引きの日付
 CUTOFF_RE = re.compile(r"それより古いもの[（(](\d{4}-\d{2}-\d{2})\s*以前[）)]")
@@ -496,6 +513,45 @@ def check_page_lists() -> bool:
     return True
 
 
+def check_page_footers() -> bool:
+    """公開ページのフッターに「🌐 公開ページ（いつでも最新）」のリンクがあるか照合する。
+
+    公開ページは手元でファイルを直接ひらいても読める作りなので、
+    フッターに自分のネット上の最新版へのリンクを置いてある。
+    ところがページを増やしたときに足すのを忘れやすく、🌍世界のライブカメラは
+    約2か月間ずっと無かった（＝候補48。2026-10-03 に発見して追加）。
+    上の `check_page_lists()` と見る相手が違うだけ（あちらは文書4つ・こちらは
+    公開ページのフッター）なので、材料も同じ＝文字列だけで通信は要らない。
+    """
+    pages = [entry for entry in _published_paths() if entry.is_dir()]
+    problems: list[str] = []
+
+    for page in pages:
+        name = page.name
+        html = page / "index.html"
+        if not html.exists():
+            problems.append(
+                f"❌ {name}/ に index.html がありません（Webでは真っ白になります）"
+            )
+            continue
+        url = f"{PAGES_BASE_URL}{name}/"
+        if url not in html.read_text(encoding="utf-8"):
+            problems.append(
+                f"❌ {name}/index.html のフッターに、自分の公開URL（{url}）への"
+                "リンクがありません（手元でひらいた人が最新版へ移れません）"
+            )
+
+    if problems:
+        for problem in problems:
+            print(problem)
+        return False
+
+    print(
+        f"✅ 公開ページ{len(pages)}つとも、フッターに自分の公開URLへのリンクがあります。"
+    )
+    return True
+
+
 def main() -> int:
     lines = CLAUDE_MD.read_text(encoding="utf-8").splitlines()
 
@@ -504,8 +560,9 @@ def main() -> int:
     links_ok = check_md_links()
     html_ok = check_html_links()
     pages_ok = check_page_lists()
+    footers_ok = check_page_footers()
 
-    if all(results) and docs_ok and links_ok and html_ok and pages_ok:
+    if all(results) and docs_ok and links_ok and html_ok and pages_ok and footers_ok:
         return 0
 
     ng = [t["path"] for t, ok in zip(TARGETS, results) if not ok]
@@ -524,6 +581,9 @@ def main() -> int:
     if not pages_ok:
         print("\n❌ 公開ページの一覧を持つ文書に、載っていないページがあります。")
         print("   その文書に1行（ページの名前・公開URL・どんなときに見るか）を足してください。")
+    if not footers_ok:
+        print("\n❌ 公開ページのフッターに、自分の公開URLへのリンクがありません。")
+        print("   そのページの最後に『🌐 公開ページ（いつでも最新）』のリンクを1行足してください。")
     return 1
 
 
