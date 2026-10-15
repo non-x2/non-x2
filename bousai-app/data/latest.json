@@ -1,7 +1,15 @@
 {
- "generatedAt": "2026-10-15T09:51:51+09:00",
+ "generatedAt": "2026-10-15T15:22:47+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20261015141019",
+   "time": "2026-10-15T14:10:00+09:00",
+   "place": "千葉県北西部",
+   "magnitude": 3.2,
+   "maxIntensity": "1",
+   "depthKm": 70.0
+  },
   {
    "id": "20261015074108",
    "time": "2026-10-15T07:41:00+09:00",
@@ -113,14 +121,6 @@
    "magnitude": 4.3,
    "maxIntensity": "1",
    "depthKm": 20.0
-  },
-  {
-   "id": "20261012203309",
-   "time": "2026-10-12T20:33:00+09:00",
-   "place": "釧路地方中南部",
-   "magnitude": 3.3,
-   "maxIntensity": "1",
-   "depthKm": 80.0
   }
  ],
  "tsunami": {
