@@ -146,6 +146,14 @@ HTML_LINK_RE = re.compile(r'(?:href|src)\s*=\s*"([^"]+)"')
 #   https://… ・mailto: → 外のサイト（`tools/check_links.py` が見張っている）
 #   #tab-map             → 同じページの中のしるしへ飛ぶだけ（ファイルではない）
 OUTSIDE_LINK_RE = re.compile(r"^(?:https?:|mailto:|tel:|data:|javascript:|//|#)")
+# 🧩 JS（ページの中の小さなプログラム）が読みに行く控えのデータ
+#    （2026-10-16 追加＝自己改良バックログの候補76）
+# 例：`fetch('data/road_status.json')`・`const SNAPSHOT_URL = './data/latest.json'`
+# これは `href` / `src` には出てこないので、上の HTML_LINK_RE では拾えない。
+# 拾うのは「`data/○○.json`」「`./data/○○.json`」と書かれた**手元のデータ**だけ。
+# `/quake/data/list.json` のように `/` で始まるものは気象庁など**よそのサイト**の
+# 住所の切れはし（土台のURLとつなげて使う）なので、わざと拾わない。
+JS_DATA_RE = re.compile(r"""['"]((?:\./)?data/[A-Za-z0-9_.-]+\.json)['"]""")
 # Webに出しているものを決めている大もと（この中の `cp` の行が公開の一覧そのもの）
 PAGES_DEPLOY = REPO_ROOT / ".github/workflows/pages-deploy.yml"
 PUBLISH_RE = re.compile(r"^\s*cp\s+(?:-r\s+)?(\S+)\s+_site/", re.MULTILINE)
@@ -414,12 +422,20 @@ def _is_published(path: Path, published: list[Path]) -> bool:
 
 
 def check_html_links() -> bool:
-    """公開ページ（HTML）の中のリンクが、公開しているファイルにたどり着けるか照合する。
+    """公開ページ（HTML）の行き先が、公開しているファイルにたどり着けるか照合する。
 
     入口ページ `index.html` は公開4ページへのリンクを持っているので、フォルダ名が
     変わると**公開サイトでいちばん目立つ場所がリンク切れ**になる。外のサイトは
     `tools/check_links.py`、文書どうしは `check_md_links()` が見張っているので、
     残っていた隙間がここ。材料は手元のファイル名だけ＝通信は要らない。
+
+    見るのは2種類（2026-10-16 に②を追加＝アイデア帳の候補76）。
+
+    1. `href` / `src` … 人が押すリンク・画像の行き先
+    2. JSが読みに行く控えのデータ（`data/○○.json`）… ②の段のデータそのもの
+
+    ②は**壊れても画面が真っ白にならない**（ページが次の段へそっと落ちるだけ）ので、
+    人の目では気づきにくい。だから機械に見張ってもらう値打ちがいちばん大きい。
     """
     published = _published_paths()
     pages = sorted(
@@ -432,9 +448,15 @@ def check_html_links() -> bool:
 
     for page in pages:
         here = page.relative_to(REPO_ROOT)
-        for raw in HTML_LINK_RE.findall(page.read_text(encoding="utf-8")):
-            if OUTSIDE_LINK_RE.match(raw):
-                continue  # 外のサイト／同じページの中のしるし＝この道具の担当ではない
+        text = page.read_text(encoding="utf-8")
+        # 外のサイト／同じページの中のしるしは、この道具の担当ではないので外す
+        targets = [
+            raw for raw in HTML_LINK_RE.findall(text) if not OUTSIDE_LINK_RE.match(raw)
+        ]
+        # JSが読みに行く控えのデータ。同じ行き先が何度も書かれていることがある
+        # （変数に入れてから使うなど）ので、ここだけ重複をまとめて数える。
+        targets += sorted(set(JS_DATA_RE.findall(text)))
+        for raw in targets:
             total += 1
             target = raw.split("#")[0].split("?")[0]
             if target.startswith("/"):
@@ -448,20 +470,20 @@ def check_html_links() -> bool:
                 # 表示される。無いとWebでは真っ白（手元でファイルを開くと気づけない）。
                 if not (destination / "index.html").exists():
                     problems.append(
-                        f"❌ {here} のリンク先 {raw} に index.html がありません"
+                        f"❌ {here} の行き先 {raw} に index.html がありません"
                         "（Webでは真っ白になります）"
                     )
                     continue
             elif not destination.exists():
                 problems.append(
-                    f"❌ {here} のリンク先 {raw} が見つかりません"
+                    f"❌ {here} の行き先 {raw} が見つかりません"
                     "（引っ越し・名前変えのあとの書き替え忘れ）"
                 )
                 continue
 
             if not _is_published(destination, published):
                 problems.append(
-                    f"❌ {here} のリンク先 {raw} は、手元にはあるのにWebへ公開していない場所です"
+                    f"❌ {here} の行き先 {raw} は、手元にはあるのにWebへ公開していない場所です"
                     "（公開ページからは開けません）"
                 )
 
@@ -471,8 +493,8 @@ def check_html_links() -> bool:
         return False
 
     print(
-        f"✅ 公開ページ{len(pages)}枚の中のリンク{total}本は、"
-        "すべて公開しているファイルにたどり着けます。"
+        f"✅ 公開ページ{len(pages)}枚の中の行き先{total}本"
+        "（リンク＋JSが読む控えのデータ）は、すべて公開しているファイルにたどり着けます。"
     )
     return True
 
@@ -576,7 +598,7 @@ def main() -> int:
         print("\n❌ Markdownどうしの内部リンクが切れています（押しても何も出ない状態）。")
         print("   リンク先の正しい場所に書き替えるか、相手のファイルを元の場所に戻してください。")
     if not html_ok:
-        print("\n❌ 公開ページ（HTML）の中のリンクが、公開しているファイルにたどり着けません。")
+        print("\n❌ 公開ページ（HTML）の中の行き先が、公開しているファイルにたどり着けません。")
         print("   そのままWebに出すと、公開サイトでリンク切れ（404や真っ白）になります。")
     if not pages_ok:
         print("\n❌ 公開ページの一覧を持つ文書に、載っていないページがあります。")
