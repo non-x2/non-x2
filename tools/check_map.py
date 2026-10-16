@@ -71,6 +71,10 @@ Markdownの身内リンクは上で見張れるようになったが、**HTMLの
 ※ 上の🧭（文書4つ）と見る相手が違うだけで、材料は同じ（文字列だけ＝通信も要らない）。
 ※ 「フォルダ名が出てくるか」ではなく**公開URLそのもの**で照合するので、
    よその公開URLを貼り間違えたとき（コピーして直し忘れ）にも気づける。
+※ 見るのは `<footer>…</footer>` の**中だけ**（2026-10-17 に厳しくした＝候補81）。
+   前は「ページのどこかに公開URLがあれば ✅」だったので、本文の途中に書いてあるだけでも
+   通ってしまった（＝フッターから消しても気づけない）。公開4ページとも `<footer>` を
+   ちょうど1つずつ持っていることを実測したうえで、その中だけを見る形にした。
 
 ■ 使い方
     python3 tools/check_map.py
@@ -172,6 +176,12 @@ DOC_LIST = [
 # GitHub Pages の住所の土台。ここだけは手で書いている（リポジトリの設定の話で、
 # ファイルの中からは分からないため）。変わることはほぼ無い＋変われば4ページとも ❌ で気づける。
 PAGES_BASE_URL = "https://non-x2.github.io/non-x2/"
+# 🦶 フッター（ページの最後の案内欄）だけを切り出すしるし
+#    （2026-10-17 追加＝自己改良バックログの候補81）
+# 「ページのどこかに公開URLがあるか」だと本文の途中に書いてあっても ✅ になってしまうので、
+# `<footer>…</footer>` のあいだだけを取り出して、その中を見る。
+# 📏 公開4ページとも `<footer>` はちょうど1つずつ（2026-10-17 に実測）。
+FOOTER_RE = re.compile(r"<footer[^>]*>.*?</footer>", re.DOTALL)
 
 # 「それより古いもの(2026-08-01 以前)はファイル一覧から探してください。」の線引きの日付
 CUTOFF_RE = re.compile(r"それより古いもの[（(](\d{4}-\d{2}-\d{2})\s*以前[）)]")
@@ -557,10 +567,22 @@ def check_page_footers() -> bool:
             )
             continue
         url = f"{PAGES_BASE_URL}{name}/"
-        if url not in html.read_text(encoding="utf-8"):
+        text = html.read_text(encoding="utf-8")
+        footers = FOOTER_RE.findall(text)
+        if not footers:
+            problems.append(
+                f"❌ {name}/index.html に <footer>…</footer> が見当たりません"
+                "（ページの最後の案内欄ごと無い状態です）"
+            )
+        elif not any(url in footer for footer in footers):
+            hint = (
+                "（ページの別の場所には書かれていますが、フッターの中ではありません）"
+                if url in text
+                else "（手元でひらいた人が最新版へ移れません）"
+            )
             problems.append(
                 f"❌ {name}/index.html のフッターに、自分の公開URL（{url}）への"
-                "リンクがありません（手元でひらいた人が最新版へ移れません）"
+                f"リンクがありません{hint}"
             )
 
     if problems:
