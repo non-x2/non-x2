@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-18T02:23:56+09:00",
+ "generatedAt": "2026-10-18T04:38:11+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
  "count": 1,
  "typhoons": [
@@ -10,22 +10,22 @@
    "name": "チャンパー",
    "nameEn": "Champi",
    "category": "台風",
-   "issue": "2026-10-18T00:45:00+09:00",
+   "issue": "2026-10-18T03:45:00+09:00",
    "analysis": {
     "hours": 0,
     "label": "実況",
-    "validTime": "2026-10-18T00:00:00+09:00",
+    "validTime": "2026-10-18T03:00:00+09:00",
     "category": "台風",
     "intensity": "非常に強い",
     "scale": "",
     "location": "マリアナ諸島",
-    "course": "西",
-    "speedKmh": "20",
+    "course": "西北西",
+    "speedKmh": "25",
     "pressure": 945.0,
     "windMs": 50.0,
     "gustMs": 70.0,
-    "lat": 12.9,
-    "lon": 145.7,
+    "lat": 13.1,
+    "lon": 144.9,
     "circleKm": null,
     "stormRadiusKm": 140.0,
     "galeRadiusKm": 440.0
@@ -34,7 +34,7 @@
     {
      "hours": 12,
      "label": "予報　１２時間後",
-     "validTime": "2026-10-18T12:00:00+09:00",
+     "validTime": "2026-10-18T15:00:00+09:00",
      "category": "台風",
      "intensity": "非常に強い",
      "scale": "",
@@ -44,15 +44,15 @@
      "pressure": 935.0,
      "windMs": 50.0,
      "gustMs": 70.0,
-     "lat": 13.1,
-     "lon": 143.4,
+     "lat": 13.2,
+     "lon": 142.8,
      "circleKm": 45.0,
      "stormRadiusKm": 185.0
     },
     {
      "hours": 24,
      "label": "予報　２４時間後",
-     "validTime": "2026-10-19T00:00:00+09:00",
+     "validTime": "2026-10-19T03:00:00+09:00",
      "category": "台風",
      "intensity": "非常に強い",
      "scale": "",
@@ -62,15 +62,15 @@
      "pressure": 935.0,
      "windMs": 50.0,
      "gustMs": 70.0,
-     "lat": 13.8,
-     "lon": 141.5,
+     "lat": 14.0,
+     "lon": 140.8,
      "circleKm": 65.0,
      "stormRadiusKm": 200.0
     },
     {
-     "hours": 45,
-     "label": "予報　４５時間後",
-     "validTime": "2026-10-19T21:00:00+09:00",
+     "hours": 48,
+     "label": "予報　４８時間後",
+     "validTime": "2026-10-20T03:00:00+09:00",
      "category": "台風",
      "intensity": "非常に強い",
      "scale": "",
@@ -80,15 +80,15 @@
      "pressure": 935.0,
      "windMs": 50.0,
      "gustMs": 70.0,
-     "lat": 15.5,
-     "lon": 138.0,
+     "lat": 15.9,
+     "lon": 136.8,
      "circleKm": 100.0,
      "stormRadiusKm": 250.0
     },
     {
-     "hours": 69,
-     "label": "予報　６９時間後",
-     "validTime": "2026-10-20T21:00:00+09:00",
+     "hours": 72,
+     "label": "予報　７２時間後",
+     "validTime": "2026-10-21T03:00:00+09:00",
      "category": "台風",
      "intensity": "非常に強い",
      "scale": "",
@@ -98,33 +98,33 @@
      "pressure": 935.0,
      "windMs": 50.0,
      "gustMs": 70.0,
-     "lat": 17.6,
-     "lon": 133.7,
+     "lat": 17.7,
+     "lon": 132.0,
      "circleKm": 150.0,
-     "stormRadiusKm": 310.0
+     "stormRadiusKm": 330.0
     },
     {
-     "hours": 93,
-     "label": "予報　９３時間後",
-     "validTime": "2026-10-21T21:00:00+09:00",
+     "hours": 96,
+     "label": "予報　９６時間後",
+     "validTime": "2026-10-22T03:00:00+09:00",
      "category": "台風",
      "intensity": "非常に強い",
      "scale": "",
      "location": "フィリピンの東",
      "course": "西北西",
-     "speedKmh": "25",
+     "speedKmh": "20",
      "pressure": 935.0,
      "windMs": 50.0,
      "gustMs": 70.0,
-     "lat": 19.8,
-     "lon": 128.9,
+     "lat": 19.1,
+     "lon": 127.4,
      "circleKm": 185.0,
-     "stormRadiusKm": 370.0
+     "stormRadiusKm": 390.0
     },
     {
-     "hours": 117,
-     "label": "予報　１１７時間後",
-     "validTime": "2026-10-22T21:00:00+09:00",
+     "hours": 120,
+     "label": "予報　１２０時間後",
+     "validTime": "2026-10-23T03:00:00+09:00",
      "category": "台風",
      "intensity": "非常に強い",
      "scale": "",
@@ -134,10 +134,10 @@
      "pressure": 935.0,
      "windMs": 50.0,
      "gustMs": 70.0,
-     "lat": 20.8,
-     "lon": 126.5,
+     "lat": 20.3,
+     "lon": 125.0,
      "circleKm": 220.0,
-     "stormRadiusKm": 430.0
+     "stormRadiusKm": 440.0
     }
    ],
    "track": [
@@ -220,6 +220,10 @@
     [
      12.9,
      145.7
+    ],
+    [
+     13.1,
+     144.9
     ]
    ]
   }
