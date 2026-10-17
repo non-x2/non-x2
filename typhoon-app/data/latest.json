@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-17T06:27:30+09:00",
+ "generatedAt": "2026-10-17T09:39:16+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
  "count": 1,
  "typhoons": [
@@ -10,22 +10,22 @@
    "name": "チャンパー",
    "nameEn": "Champi",
    "category": "台風",
-   "issue": "2026-10-17T03:45:00+09:00",
+   "issue": "2026-10-17T06:45:00+09:00",
    "analysis": {
     "hours": 0,
     "label": "実況",
-    "validTime": "2026-10-17T03:00:00+09:00",
+    "validTime": "2026-10-17T06:00:00+09:00",
     "category": "台風",
     "intensity": "強い",
     "scale": "",
-    "location": "トラック諸島近海",
+    "location": "マリアナ諸島",
     "course": "西北西",
     "speedKmh": "25",
     "pressure": 980.0,
     "windMs": 35.0,
     "gustMs": 50.0,
-    "lat": 11.9,
-    "lon": 150.2,
+    "lat": 12.2,
+    "lon": 149.6,
     "circleKm": null,
     "stormRadiusKm": 75.0,
     "galeRadiusKm": 440.0
@@ -34,7 +34,7 @@
     {
      "hours": 12,
      "label": "予報　１２時間後",
-     "validTime": "2026-10-17T15:00:00+09:00",
+     "validTime": "2026-10-17T18:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
      "scale": "",
@@ -44,15 +44,15 @@
      "pressure": 975.0,
      "windMs": 35.0,
      "gustMs": 50.0,
-     "lat": 12.5,
-     "lon": 148.0,
+     "lat": 12.8,
+     "lon": 147.3,
      "circleKm": 65.0,
      "stormRadiusKm": 155.0
     },
     {
      "hours": 24,
      "label": "予報　２４時間後",
-     "validTime": "2026-10-18T03:00:00+09:00",
+     "validTime": "2026-10-18T06:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
      "scale": "",
@@ -62,14 +62,14 @@
      "pressure": 955.0,
      "windMs": 40.0,
      "gustMs": 60.0,
-     "lat": 12.9,
-     "lon": 145.7,
+     "lat": 13.2,
+     "lon": 145.1,
      "circleKm": 95.0,
      "stormRadiusKm": 230.0
     },
     {
-     "hours": 48,
-     "label": "予報　４８時間後",
+     "hours": 45,
+     "label": "予報　４５時間後",
      "validTime": "2026-10-19T03:00:00+09:00",
      "category": "台風",
      "intensity": "非常に強い",
@@ -86,8 +86,8 @@
      "stormRadiusKm": 300.0
     },
     {
-     "hours": 72,
-     "label": "予報　７２時間後",
+     "hours": 69,
+     "label": "予報　６９時間後",
      "validTime": "2026-10-20T03:00:00+09:00",
      "category": "台風",
      "intensity": "非常に強い",
@@ -104,8 +104,8 @@
      "stormRadiusKm": 360.0
     },
     {
-     "hours": 96,
-     "label": "予報　９６時間後",
+     "hours": 93,
+     "label": "予報　９３時間後",
      "validTime": "2026-10-21T03:00:00+09:00",
      "category": "台風",
      "intensity": "非常に強い",
@@ -122,8 +122,8 @@
      "stormRadiusKm": 410.0
     },
     {
-     "hours": 120,
-     "label": "予報　１２０時間後",
+     "hours": 117,
+     "label": "予報　１１７時間後",
      "validTime": "2026-10-22T03:00:00+09:00",
      "category": "台風",
      "intensity": "非常に強い",
@@ -192,6 +192,10 @@
     [
      11.9,
      150.2
+    ],
+    [
+     12.2,
+     149.6
     ]
    ]
   }
