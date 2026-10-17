@@ -15,6 +15,11 @@ CLAUDE.md の構成表は、新しいセッションが毎回いちばん最初�
     .github/workflows/   … 自動で動くもの（.yml / .yaml）
     .claude/skills/      … 型（スキル）。中身がファイルではなく**フォルダ**なので
                             `kind: "dir"` を付ける（2026-10-07 追加＝候補30の残り）
+                            さらに `must_have: "SKILL.md"` で「そのフォルダの中に
+                            SKILL.md が1枚あるか」も確かめる（2026-10-17 追加＝候補63）。
+                            SKILL.md が無いスキルは**呼んでも動かない**のに、
+                            構成表には載っているので見た目では気づけないため。
+                            ※ よそのファイル（参考資料など）の有無は責めない。
 
 ■ もう1つの地図も見張る（2026-10-01 追加＝自己改良バックログの候補47）
 `docs/README.md`（📚 docsの歩き方）も、docsフォルダの中身を手で書き写した「地図」。
@@ -61,6 +66,21 @@ Markdownの身内リンクは上で見張れるようになったが、**HTMLの
    別の用途でその名前が出ているだけでも ✅ になる（＝見落としはあり得るが、
    嘘の ❌ は出さない安全側の作り）。
 
+■ 🌐 公開ページのフッターのリンクも見張る（2026-10-15 追加＝自己改良バックログの候補59・79）
+公開ページは**手元でファイルを直接ひらいても読める**作りなので、フッターに
+「🌐 公開ページ（いつでも最新）」＝自分のネット上の最新版へのリンクを置いてある。
+ところがページを増やしたとき、このリンクを足すのを忘れやすい
+（🌍世界のライブカメラは**約2か月間ずっと無かった**＝候補48。2026-10-03 に発見して追加）。
+そこで「`pages-deploy.yml` が配っているページ」ごとに、その `index.html` の中に
+**自分の公開URL**（`https://non-x2.github.io/non-x2/<フォルダ名>/`）が書かれているかを確かめる。
+※ 上の🧭（文書4つ）と見る相手が違うだけで、材料は同じ（文字列だけ＝通信も要らない）。
+※ 「フォルダ名が出てくるか」ではなく**公開URLそのもの**で照合するので、
+   よその公開URLを貼り間違えたとき（コピーして直し忘れ）にも気づける。
+※ 見るのは `<footer>…</footer>` の**中だけ**（2026-10-17 に厳しくした＝候補81）。
+   前は「ページのどこかに公開URLがあれば ✅」だったので、本文の途中に書いてあるだけでも
+   通ってしまった（＝フッターから消しても気づけない）。公開4ページとも `<footer>` を
+   ちょうど1つずつ持っていることを実測したうえで、その中だけを見る形にした。
+
 ■ 使い方
     python3 tools/check_map.py
     npm run check:map          （同じもの）
@@ -68,11 +88,12 @@ Markdownの身内リンクは上で見張れるようになったが、**HTMLの
 ■ 出力例（◯には実際の個数、日付には実際の日付が入る）
     ✅ tools/ の◯個の道具は、すべてCLAUDE.mdの構成表に載っています。
     ✅ .github/workflows/ の◯枚の自動実行は、すべてCLAUDE.mdの構成表に載っています。
-    ✅ .claude/skills/ の◯つの型（スキル）は、すべてCLAUDE.mdの構成表に載っています。
+    ✅ .claude/skills/ の◯つの型（スキル）は、すべてCLAUDE.mdの構成表に載っています（SKILL.md も◯つとも1枚ずつあります）。
     ✅ docs/ の◯枚の文書は、すべて docs/README.md の目次に載っています（最新の作業ログの案内も ◯◯◯◯-◯◯-◯◯ で合っています）。
     ✅ Markdown ◯枚の中の内部リンク◯本は、すべて実物にたどり着けます。
     ✅ 公開ページ◯枚の中のリンク◯本は、すべて公開しているファイルにたどり着けます。
     ✅ 公開ページ◯つは、一覧を持つ◯つの文書すべてに載っています。
+    ✅ 公開ページ◯つとも、フッターに自分の公開URLへのリンクがあります。
 
 ズレていたときは、足りない側を ❌ で並べて表示し、終了コード1で終わる。
 ※ 直すのは人の仕事（この道具はCLAUDE.mdを書き換えない）。地図の説明文は
@@ -99,13 +120,20 @@ DOCS_INDEX = DOCS_DIR / "README.md"
 #   suffixes : 地図に載せる対象の拡張子（README などを除くため。kind="dir" のときは不要）
 #   unit     : 報告文の数え方（「10個の道具」「9枚の自動実行」「7つの型（スキル）」）
 #   kind     : "file"（既定）＝中身はファイル／"dir"＝中身はフォルダ
+#   must_have: そのフォルダの中に必ずあるべきファイル名（kind="dir" のときだけ使う）
 #   label    : 構成表に書かれているつづり（既定は path と同じ）。
 #              構成表が入れ子になっていて途中のフォルダ名だけが書かれているときに使う
 #              （例：`.claude/skills` は構成表では `│   └── skills/` と1段下がって書かれている）
 TARGETS = [
     {"path": "tools", "suffixes": (".py", ".js"), "unit": "個の道具"},
     {"path": ".github/workflows", "suffixes": (".yml", ".yaml"), "unit": "枚の自動実行"},
-    {"path": ".claude/skills", "unit": "つの型（スキル）", "kind": "dir", "label": "skills"},
+    {
+        "path": ".claude/skills",
+        "unit": "つの型（スキル）",
+        "kind": "dir",
+        "label": "skills",
+        "must_have": "SKILL.md",
+    },
 ]
 
 # 構成表の1行から名前を取り出す（例: "│   ├── check_offices.py   #    👀 ..." → "check_offices.py"）
@@ -134,6 +162,14 @@ HTML_LINK_RE = re.compile(r'(?:href|src)\s*=\s*"([^"]+)"')
 #   https://… ・mailto: → 外のサイト（`tools/check_links.py` が見張っている）
 #   #tab-map             → 同じページの中のしるしへ飛ぶだけ（ファイルではない）
 OUTSIDE_LINK_RE = re.compile(r"^(?:https?:|mailto:|tel:|data:|javascript:|//|#)")
+# 🧩 JS（ページの中の小さなプログラム）が読みに行く控えのデータ
+#    （2026-10-16 追加＝自己改良バックログの候補76）
+# 例：`fetch('data/road_status.json')`・`const SNAPSHOT_URL = './data/latest.json'`
+# これは `href` / `src` には出てこないので、上の HTML_LINK_RE では拾えない。
+# 拾うのは「`data/○○.json`」「`./data/○○.json`」と書かれた**手元のデータ**だけ。
+# `/quake/data/list.json` のように `/` で始まるものは気象庁など**よそのサイト**の
+# 住所の切れはし（土台のURLとつなげて使う）なので、わざと拾わない。
+JS_DATA_RE = re.compile(r"""['"]((?:\./)?data/[A-Za-z0-9_.-]+\.json)['"]""")
 # Webに出しているものを決めている大もと（この中の `cp` の行が公開の一覧そのもの）
 PAGES_DEPLOY = REPO_ROOT / ".github/workflows/pages-deploy.yml"
 PUBLISH_RE = re.compile(r"^\s*cp\s+(?:-r\s+)?(\S+)\s+_site/", re.MULTILINE)
@@ -147,6 +183,17 @@ DOC_LIST = [
     ("docs/クラウドとローカルの使い分け.md", "使い分けガイド"),
     ("CLAUDE.md", "この案内"),
 ]
+
+# 🌐 公開ページのフッターのリンク照合に使うもの（2026-10-15 追加＝自己改良バックログの候補59・79）
+# GitHub Pages の住所の土台。ここだけは手で書いている（リポジトリの設定の話で、
+# ファイルの中からは分からないため）。変わることはほぼ無い＋変われば4ページとも ❌ で気づける。
+PAGES_BASE_URL = "https://non-x2.github.io/non-x2/"
+# 🦶 フッター（ページの最後の案内欄）だけを切り出すしるし
+#    （2026-10-17 追加＝自己改良バックログの候補81）
+# 「ページのどこかに公開URLがあるか」だと本文の途中に書いてあっても ✅ になってしまうので、
+# `<footer>…</footer>` のあいだだけを取り出して、その中を見る。
+# 📏 公開4ページとも `<footer>` はちょうど1つずつ（2026-10-17 に実測）。
+FOOTER_RE = re.compile(r"<footer[^>]*>.*?</footer>", re.DOTALL)
 
 # 「それより古いもの(2026-08-01 以前)はファイル一覧から探してください。」の線引きの日付
 CUTOFF_RE = re.compile(r"それより古いもの[（(](\d{4}-\d{2}-\d{2})\s*以前[）)]")
@@ -221,14 +268,36 @@ def check(target: dict, lines: list[str]) -> bool:
     missing = sorted(actual - mapped)   # 実物はあるのに地図に無い
     ghosts = sorted(mapped - actual)    # 地図にあるのに実物が無い
 
-    if not missing and not ghosts:
-        print(f"✅ {folder}/ の{len(actual)}{target['unit']}は、すべてCLAUDE.mdの構成表に載っています。")
+    # 中身がフォルダのときだけ：そのフォルダに「必ずあるべき1枚」があるか
+    # （2026-10-17 追加＝候補63。スキルは SKILL.md が無いと呼んでも動かない）
+    required = target.get("must_have")
+    hollow = (
+        sorted(
+            name
+            for name in actual
+            if not (REPO_ROOT / folder / name / required).is_file()
+        )
+        if required
+        else []
+    )
+
+    if not missing and not ghosts and not hollow:
+        extra = f"（{required} も{len(actual)}つとも1枚ずつあります）" if required else ""
+        print(
+            f"✅ {folder}/ の{len(actual)}{target['unit']}は、"
+            f"すべてCLAUDE.mdの構成表に載っています{extra}。"
+        )
         return True
 
     for name in missing:
         print(f"❌ {folder}/{name} が CLAUDE.md の構成表に載っていません（作ったあとの書き足し忘れ）")
     for name in ghosts:
         print(f"❌ CLAUDE.md の構成表にある {folder}/{name} が実際には見つかりません（消したあとの消し忘れ）")
+    for name in hollow:
+        print(
+            f"❌ {folder}/{name}/ に {required} がありません"
+            "（この型は呼んでも動きません。ファイル名の打ち間違いか、入れ忘れです）"
+        )
     return False
 
 
@@ -397,12 +466,20 @@ def _is_published(path: Path, published: list[Path]) -> bool:
 
 
 def check_html_links() -> bool:
-    """公開ページ（HTML）の中のリンクが、公開しているファイルにたどり着けるか照合する。
+    """公開ページ（HTML）の行き先が、公開しているファイルにたどり着けるか照合する。
 
     入口ページ `index.html` は公開4ページへのリンクを持っているので、フォルダ名が
     変わると**公開サイトでいちばん目立つ場所がリンク切れ**になる。外のサイトは
     `tools/check_links.py`、文書どうしは `check_md_links()` が見張っているので、
     残っていた隙間がここ。材料は手元のファイル名だけ＝通信は要らない。
+
+    見るのは2種類（2026-10-16 に②を追加＝アイデア帳の候補76）。
+
+    1. `href` / `src` … 人が押すリンク・画像の行き先
+    2. JSが読みに行く控えのデータ（`data/○○.json`）… ②の段のデータそのもの
+
+    ②は**壊れても画面が真っ白にならない**（ページが次の段へそっと落ちるだけ）ので、
+    人の目では気づきにくい。だから機械に見張ってもらう値打ちがいちばん大きい。
     """
     published = _published_paths()
     pages = sorted(
@@ -415,9 +492,15 @@ def check_html_links() -> bool:
 
     for page in pages:
         here = page.relative_to(REPO_ROOT)
-        for raw in HTML_LINK_RE.findall(page.read_text(encoding="utf-8")):
-            if OUTSIDE_LINK_RE.match(raw):
-                continue  # 外のサイト／同じページの中のしるし＝この道具の担当ではない
+        text = page.read_text(encoding="utf-8")
+        # 外のサイト／同じページの中のしるしは、この道具の担当ではないので外す
+        targets = [
+            raw for raw in HTML_LINK_RE.findall(text) if not OUTSIDE_LINK_RE.match(raw)
+        ]
+        # JSが読みに行く控えのデータ。同じ行き先が何度も書かれていることがある
+        # （変数に入れてから使うなど）ので、ここだけ重複をまとめて数える。
+        targets += sorted(set(JS_DATA_RE.findall(text)))
+        for raw in targets:
             total += 1
             target = raw.split("#")[0].split("?")[0]
             if target.startswith("/"):
@@ -431,20 +514,20 @@ def check_html_links() -> bool:
                 # 表示される。無いとWebでは真っ白（手元でファイルを開くと気づけない）。
                 if not (destination / "index.html").exists():
                     problems.append(
-                        f"❌ {here} のリンク先 {raw} に index.html がありません"
+                        f"❌ {here} の行き先 {raw} に index.html がありません"
                         "（Webでは真っ白になります）"
                     )
                     continue
             elif not destination.exists():
                 problems.append(
-                    f"❌ {here} のリンク先 {raw} が見つかりません"
+                    f"❌ {here} の行き先 {raw} が見つかりません"
                     "（引っ越し・名前変えのあとの書き替え忘れ）"
                 )
                 continue
 
             if not _is_published(destination, published):
                 problems.append(
-                    f"❌ {here} のリンク先 {raw} は、手元にはあるのにWebへ公開していない場所です"
+                    f"❌ {here} の行き先 {raw} は、手元にはあるのにWebへ公開していない場所です"
                     "（公開ページからは開けません）"
                 )
 
@@ -454,8 +537,8 @@ def check_html_links() -> bool:
         return False
 
     print(
-        f"✅ 公開ページ{len(pages)}枚の中のリンク{total}本は、"
-        "すべて公開しているファイルにたどり着けます。"
+        f"✅ 公開ページ{len(pages)}枚の中の行き先{total}本"
+        "（リンク＋JSが読む控えのデータ）は、すべて公開しているファイルにたどり着けます。"
     )
     return True
 
@@ -496,6 +579,57 @@ def check_page_lists() -> bool:
     return True
 
 
+def check_page_footers() -> bool:
+    """公開ページのフッターに「🌐 公開ページ（いつでも最新）」のリンクがあるか照合する。
+
+    公開ページは手元でファイルを直接ひらいても読める作りなので、
+    フッターに自分のネット上の最新版へのリンクを置いてある。
+    ところがページを増やしたときに足すのを忘れやすく、🌍世界のライブカメラは
+    約2か月間ずっと無かった（＝候補48。2026-10-03 に発見して追加）。
+    上の `check_page_lists()` と見る相手が違うだけ（あちらは文書4つ・こちらは
+    公開ページのフッター）なので、材料も同じ＝文字列だけで通信は要らない。
+    """
+    pages = [entry for entry in _published_paths() if entry.is_dir()]
+    problems: list[str] = []
+
+    for page in pages:
+        name = page.name
+        html = page / "index.html"
+        if not html.exists():
+            problems.append(
+                f"❌ {name}/ に index.html がありません（Webでは真っ白になります）"
+            )
+            continue
+        url = f"{PAGES_BASE_URL}{name}/"
+        text = html.read_text(encoding="utf-8")
+        footers = FOOTER_RE.findall(text)
+        if not footers:
+            problems.append(
+                f"❌ {name}/index.html に <footer>…</footer> が見当たりません"
+                "（ページの最後の案内欄ごと無い状態です）"
+            )
+        elif not any(url in footer for footer in footers):
+            hint = (
+                "（ページの別の場所には書かれていますが、フッターの中ではありません）"
+                if url in text
+                else "（手元でひらいた人が最新版へ移れません）"
+            )
+            problems.append(
+                f"❌ {name}/index.html のフッターに、自分の公開URL（{url}）への"
+                f"リンクがありません{hint}"
+            )
+
+    if problems:
+        for problem in problems:
+            print(problem)
+        return False
+
+    print(
+        f"✅ 公開ページ{len(pages)}つとも、フッターに自分の公開URLへのリンクがあります。"
+    )
+    return True
+
+
 def main() -> int:
     lines = CLAUDE_MD.read_text(encoding="utf-8").splitlines()
 
@@ -504,14 +638,21 @@ def main() -> int:
     links_ok = check_md_links()
     html_ok = check_html_links()
     pages_ok = check_page_lists()
+    footers_ok = check_page_footers()
 
-    if all(results) and docs_ok and links_ok and html_ok and pages_ok:
+    if all(results) and docs_ok and links_ok and html_ok and pages_ok and footers_ok:
         return 0
 
-    ng = [t["path"] for t, ok in zip(TARGETS, results) if not ok]
+    ng_targets = [t for t, ok in zip(TARGETS, results) if not ok]
+    ng = [t["path"] for t in ng_targets]
     if ng:
         print(f"\n❌ 地図（CLAUDE.mdの構成表）と実際の中身がズレています：{'、'.join(f'{p}/' for p in ng)}")
         print("   CLAUDE.md の該当フォルダのブロックに、1行（ファイル名＋何をするかの説明）を足すか消してください。")
+        # 「中に SKILL.md が無い」ときだけは、直す場所がCLAUDE.mdではないので書き添える
+        # （2026-10-17 追加＝候補63）
+        if any(t.get("must_have") for t in ng_targets):
+            print("   ※ ただし「… に SKILL.md がありません」と出ているときの直し場所は CLAUDE.md ではなく")
+            print("      そのフォルダです（SKILL.md を入れる／ファイル名の大文字小文字を直す）。")
     if not docs_ok:
         print("\n❌ もう1つの地図（docs/README.md の目次）と docs/ の中身がズレています。")
         print("   docs/README.md の該当する見出しの下に、1行（リンク＋どんなときに読むか）を足すか消してください。")
@@ -519,11 +660,14 @@ def main() -> int:
         print("\n❌ Markdownどうしの内部リンクが切れています（押しても何も出ない状態）。")
         print("   リンク先の正しい場所に書き替えるか、相手のファイルを元の場所に戻してください。")
     if not html_ok:
-        print("\n❌ 公開ページ（HTML）の中のリンクが、公開しているファイルにたどり着けません。")
+        print("\n❌ 公開ページ（HTML）の中の行き先が、公開しているファイルにたどり着けません。")
         print("   そのままWebに出すと、公開サイトでリンク切れ（404や真っ白）になります。")
     if not pages_ok:
         print("\n❌ 公開ページの一覧を持つ文書に、載っていないページがあります。")
         print("   その文書に1行（ページの名前・公開URL・どんなときに見るか）を足してください。")
+    if not footers_ok:
+        print("\n❌ 公開ページのフッターに、自分の公開URLへのリンクがありません。")
+        print("   そのページの最後に『🌐 公開ページ（いつでも最新）』のリンクを1行足してください。")
     return 1
 
 
