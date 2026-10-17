@@ -15,6 +15,11 @@ CLAUDE.md の構成表は、新しいセッションが毎回いちばん最初�
     .github/workflows/   … 自動で動くもの（.yml / .yaml）
     .claude/skills/      … 型（スキル）。中身がファイルではなく**フォルダ**なので
                             `kind: "dir"` を付ける（2026-10-07 追加＝候補30の残り）
+                            さらに `must_have: "SKILL.md"` で「そのフォルダの中に
+                            SKILL.md が1枚あるか」も確かめる（2026-10-17 追加＝候補63）。
+                            SKILL.md が無いスキルは**呼んでも動かない**のに、
+                            構成表には載っているので見た目では気づけないため。
+                            ※ よそのファイル（参考資料など）の有無は責めない。
 
 ■ もう1つの地図も見張る（2026-10-01 追加＝自己改良バックログの候補47）
 `docs/README.md`（📚 docsの歩き方）も、docsフォルダの中身を手で書き写した「地図」。
@@ -83,7 +88,7 @@ Markdownの身内リンクは上で見張れるようになったが、**HTMLの
 ■ 出力例（◯には実際の個数、日付には実際の日付が入る）
     ✅ tools/ の◯個の道具は、すべてCLAUDE.mdの構成表に載っています。
     ✅ .github/workflows/ の◯枚の自動実行は、すべてCLAUDE.mdの構成表に載っています。
-    ✅ .claude/skills/ の◯つの型（スキル）は、すべてCLAUDE.mdの構成表に載っています。
+    ✅ .claude/skills/ の◯つの型（スキル）は、すべてCLAUDE.mdの構成表に載っています（SKILL.md も◯つとも1枚ずつあります）。
     ✅ docs/ の◯枚の文書は、すべて docs/README.md の目次に載っています（最新の作業ログの案内も ◯◯◯◯-◯◯-◯◯ で合っています）。
     ✅ Markdown ◯枚の中の内部リンク◯本は、すべて実物にたどり着けます。
     ✅ 公開ページ◯枚の中のリンク◯本は、すべて公開しているファイルにたどり着けます。
@@ -115,13 +120,20 @@ DOCS_INDEX = DOCS_DIR / "README.md"
 #   suffixes : 地図に載せる対象の拡張子（README などを除くため。kind="dir" のときは不要）
 #   unit     : 報告文の数え方（「10個の道具」「9枚の自動実行」「7つの型（スキル）」）
 #   kind     : "file"（既定）＝中身はファイル／"dir"＝中身はフォルダ
+#   must_have: そのフォルダの中に必ずあるべきファイル名（kind="dir" のときだけ使う）
 #   label    : 構成表に書かれているつづり（既定は path と同じ）。
 #              構成表が入れ子になっていて途中のフォルダ名だけが書かれているときに使う
 #              （例：`.claude/skills` は構成表では `│   └── skills/` と1段下がって書かれている）
 TARGETS = [
     {"path": "tools", "suffixes": (".py", ".js"), "unit": "個の道具"},
     {"path": ".github/workflows", "suffixes": (".yml", ".yaml"), "unit": "枚の自動実行"},
-    {"path": ".claude/skills", "unit": "つの型（スキル）", "kind": "dir", "label": "skills"},
+    {
+        "path": ".claude/skills",
+        "unit": "つの型（スキル）",
+        "kind": "dir",
+        "label": "skills",
+        "must_have": "SKILL.md",
+    },
 ]
 
 # 構成表の1行から名前を取り出す（例: "│   ├── check_offices.py   #    👀 ..." → "check_offices.py"）
@@ -256,14 +268,36 @@ def check(target: dict, lines: list[str]) -> bool:
     missing = sorted(actual - mapped)   # 実物はあるのに地図に無い
     ghosts = sorted(mapped - actual)    # 地図にあるのに実物が無い
 
-    if not missing and not ghosts:
-        print(f"✅ {folder}/ の{len(actual)}{target['unit']}は、すべてCLAUDE.mdの構成表に載っています。")
+    # 中身がフォルダのときだけ：そのフォルダに「必ずあるべき1枚」があるか
+    # （2026-10-17 追加＝候補63。スキルは SKILL.md が無いと呼んでも動かない）
+    required = target.get("must_have")
+    hollow = (
+        sorted(
+            name
+            for name in actual
+            if not (REPO_ROOT / folder / name / required).is_file()
+        )
+        if required
+        else []
+    )
+
+    if not missing and not ghosts and not hollow:
+        extra = f"（{required} も{len(actual)}つとも1枚ずつあります）" if required else ""
+        print(
+            f"✅ {folder}/ の{len(actual)}{target['unit']}は、"
+            f"すべてCLAUDE.mdの構成表に載っています{extra}。"
+        )
         return True
 
     for name in missing:
         print(f"❌ {folder}/{name} が CLAUDE.md の構成表に載っていません（作ったあとの書き足し忘れ）")
     for name in ghosts:
         print(f"❌ CLAUDE.md の構成表にある {folder}/{name} が実際には見つかりません（消したあとの消し忘れ）")
+    for name in hollow:
+        print(
+            f"❌ {folder}/{name}/ に {required} がありません"
+            "（この型は呼んでも動きません。ファイル名の打ち間違いか、入れ忘れです）"
+        )
     return False
 
 
@@ -609,10 +643,16 @@ def main() -> int:
     if all(results) and docs_ok and links_ok and html_ok and pages_ok and footers_ok:
         return 0
 
-    ng = [t["path"] for t, ok in zip(TARGETS, results) if not ok]
+    ng_targets = [t for t, ok in zip(TARGETS, results) if not ok]
+    ng = [t["path"] for t in ng_targets]
     if ng:
         print(f"\n❌ 地図（CLAUDE.mdの構成表）と実際の中身がズレています：{'、'.join(f'{p}/' for p in ng)}")
         print("   CLAUDE.md の該当フォルダのブロックに、1行（ファイル名＋何をするかの説明）を足すか消してください。")
+        # 「中に SKILL.md が無い」ときだけは、直す場所がCLAUDE.mdではないので書き添える
+        # （2026-10-17 追加＝候補63）
+        if any(t.get("must_have") for t in ng_targets):
+            print("   ※ ただし「… に SKILL.md がありません」と出ているときの直し場所は CLAUDE.md ではなく")
+            print("      そのフォルダです（SKILL.md を入れる／ファイル名の大文字小文字を直す）。")
     if not docs_ok:
         print("\n❌ もう1つの地図（docs/README.md の目次）と docs/ の中身がズレています。")
         print("   docs/README.md の該当する見出しの下に、1行（リンク＋どんなときに読むか）を足すか消してください。")
