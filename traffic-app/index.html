@@ -927,6 +927,11 @@
     return h > 0 ? h + '時間' + m + '分' : m + '分';
   }
 
+  // 台数・件数は3桁ごとに「,」を入れて読みやすくする（例：3424 → 3,424）
+  function jp(n) {
+    return Number(n).toLocaleString('ja-JP');
+  }
+
   // ============================================================ かんたん地図
   //
   // 外部の地図ライブラリは使わず、地理院タイルを並べて自前で描いています
@@ -1503,7 +1508,7 @@
         var same = list.slice(0, shown).filter(function (x) { return x.cam.road === cam.road; }).length;
         var head = document.createElement('li');
         head.className = 'cam-group';
-        head.textContent = catMark(cam) + cam.road + '（' + same + '台）';
+        head.textContent = catMark(cam) + cam.road + '（' + jp(same) + '台）';
         ol.appendChild(head);
       }
 
@@ -1553,7 +1558,7 @@
       var mb = document.createElement('button');
       mb.type = 'button';
       mb.className = 'btn-ghost';
-      mb.textContent = '▼ もっと見る（残り ' + (list.length - shown) + ' 台）';
+      mb.textContent = '▼ もっと見る（残り ' + jp(list.length - shown) + ' 台）';
       mb.addEventListener('click', function () {
         renderCamList(list, shown + LIST_STEP);
       });
@@ -1563,7 +1568,7 @@
 
     var withImg = list.filter(function (x) { return x.cam.img; }).length;
     $('cam-note').textContent = list.length
-      ? 'このページで映像が見られるカメラ: ' + withImg + ' 台／公式ページで見るカメラ: ' + (list.length - withImg) + ' 台'
+      ? 'このページで映像が見られるカメラ: ' + jp(withImg) + ' 台／公式ページで見るカメラ: ' + jp(list.length - withImg) + ' 台'
       : '';
   }
 
@@ -1583,7 +1588,7 @@
 
     $('viewer-title').textContent = cam.road + (cam.place ? '　' + cam.place : '');
     var sub = [];
-    if (routeLatLngs) sub.push((i + 1) + '台目 / 全' + viewerList.length + '台');
+    if (routeLatLngs) sub.push(jp(i + 1) + '台目 / 全' + jp(viewerList.length) + '台');
     if (viewerList[i].along != null) sub.push('出発から約 ' + fmtKm(viewerList[i].along));
     if (cam.owner) sub.push(cam.owner);
     $('viewer-sub').textContent = sub.join('　・　');
@@ -1753,7 +1758,7 @@
           '（違う場所が選ばれたときは、地名をもっと詳しく入れるか、入力欄の候補から選んでください）';
         $('sum-dist').textContent = fmtKm(r.distance);
         $('sum-time').textContent = fmtDuration(r.duration);
-        $('sum-cams').textContent = found.length + ' 台';
+        $('sum-cams').textContent = jp(found.length) + ' 台';
         $('route-card').hidden = false;
         $('cam-card').hidden = false;
         $('cam-heading').textContent = '3️⃣ 通り道のライブカメラ';
@@ -2099,8 +2104,8 @@
     if (o.cur === null) {
       parts.push('機器の故障・欠測のため、いまの台数は測れていません。');
     } else {
-      var updn = '上り' + (o.up === null ? '測れず' : o.up + '台') +
-                 '・下り' + (o.dn === null ? '測れず' : o.dn + '台');
+      var updn = '上り' + (o.up === null ? '測れず' : jp(o.up) + '台') +
+                 '・下り' + (o.dn === null ? '測れず' : jp(o.dn) + '台');
       parts.push('いま（' + (d ? fmtObsTime(d) : '') + ' ごろの5分間）は ' + o.cur + '台（' + updn + '）。');
       if (o.base === null) {
         parts.push('1週間前の同じ時刻のデータが無いため、多い少ないの判定はできません。');
@@ -2173,7 +2178,7 @@
       // ルートを調べたあとは「そのルート沿い」を出す（出発地から順）
       var near = obsNearRoute(routeLatLngs, 3000);
       rows = near.map(function (x) { return x.obs; }).slice(0, 15);
-      heading = '🚗 このルート沿いの観測点（出発地から順・3km以内 ' + near.length + ' か所）';
+      heading = '🚗 このルート沿いの観測点（出発地から順・3km以内 ' + jp(near.length) + ' か所）';
       if (!rows.length) {
         heading = '🚗 このルート沿い3km以内に観測点はありませんでした（観測点は約1,000か所だけなので、無い道も多いです）';
       }
@@ -2185,7 +2190,7 @@
         })
         .slice(0, 10);
       heading = rows.length
-        ? '🔴 いつもより車が多いところ（全国の上位' + rows.length + 'か所）'
+        ? '🔴 いつもより車が多いところ（全国の上位' + jp(rows.length) + 'か所）'
         : '✅ いま「いつもより多い」観測点は全国にありません';
     }
     title.textContent = heading;
@@ -2219,7 +2224,7 @@
       if (o.cur === null) {
         val.textContent = '測れず';
       } else {
-        val.textContent = o.cur + '台';
+        val.textContent = jp(o.cur) + '台';
         if (o.base !== null && o.base > 0) {
           val.textContent += '（' + Math.round(o.cur / o.base * 100) + '%）';
         }
@@ -2284,11 +2289,11 @@
     if (DATA_UPDATED) {
       var withImg = CAMS.filter(function (c) { return c.img; }).length;
       var water = CAMS.filter(isWater).length;
-      $('data-updated').textContent = 'カメラ台帳: 全国 ' + CAMS.length + ' 台' +
-        '（一般道 ' + CAMS.filter(function (c) { return c.cat === 'road'; }).length +
-        ' ／ 高速 ' + CAMS.filter(function (c) { return c.cat === 'expressway'; }).length +
-        ' ／ 河川・ダム・海 ' + water + '）' +
-        '／うち ' + withImg + ' 台はこのページで映像が見られます／更新 ' + DATA_UPDATED.slice(0, 10);
+      $('data-updated').textContent = 'カメラ台帳: 全国 ' + jp(CAMS.length) + ' 台' +
+        '（一般道 ' + jp(CAMS.filter(function (c) { return c.cat === 'road'; }).length) +
+        ' ／ 高速 ' + jp(CAMS.filter(function (c) { return c.cat === 'expressway'; }).length) +
+        ' ／ 河川・ダム・海 ' + jp(water) + '）' +
+        '／うち ' + jp(withImg) + ' 台はこのページで映像が見られます／更新 ' + DATA_UPDATED.slice(0, 10);
     } else {
       $('data-updated').textContent = 'カメラ台帳: まだ作られていません（livecam-db/build.py を実行してください）';
     }
