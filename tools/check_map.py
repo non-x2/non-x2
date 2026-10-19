@@ -37,6 +37,14 @@ CLAUDE.md の構成表は、新しいセッションが毎回いちばん最初�
 リンク先の実物があるか確かめる（材料は手元のファイル名だけ＝通信は要らない）。
 ※ `docs/◯◯.md` や `作業ログ_....md` のような**書き方の見本**は、実物が無くて
    当たり前なので数えない（◯・○・…・* が入っているリンク先は見本とみなす）。
+🔗 **2026-10-19 に対象を広げた（候補73）**：いままでは行き先が `.md` のときだけ
+   見ていたが、`[check_map.py](../tools/check_map.py)` のような**道具（.py）・
+   画像（.png）・フォルダ行き**のリンクも見るようにした（実測＝そのほか12本）。
+   文書から道具や画像を指すリンクも、引っ越せば同じように黙って切れるため。
+※ 「`…`」や ``` で囲んだ**コードの中のリンク**は数えない（2026-10-19 追加）。
+   囲みを外さないと、説明のために書いた見本（アイデア帳の候補73の文中にある
+   `[check_map.py](tools/check_map.py)` など）を本物のリンクと見まちがえて
+   **嘘の❌**を出す（広げる前に実測して1件見つけた）。
 
 ■ 🌐 公開ページどうしのリンクも見張る（2026-10-13 追加＝自己改良バックログの候補75）
 Markdownの身内リンクは上で見張れるようになったが、**HTMLの `href` / `src`** は
@@ -90,7 +98,7 @@ Markdownの身内リンクは上で見張れるようになったが、**HTMLの
     ✅ .github/workflows/ の◯枚の自動実行は、すべてCLAUDE.mdの構成表に載っています。
     ✅ .claude/skills/ の◯つの型（スキル）は、すべてCLAUDE.mdの構成表に載っています（SKILL.md も◯つとも1枚ずつあります）。
     ✅ docs/ の◯枚の文書は、すべて docs/README.md の目次に載っています（最新の作業ログの案内も ◯◯◯◯-◯◯-◯◯ で合っています）。
-    ✅ Markdown ◯枚の中の内部リンク◯本は、すべて実物にたどり着けます。
+    ✅ Markdown ◯枚の中の内部リンク◯本（Markdown ◯本・道具や画像など◯本）は、すべて実物にたどり着けます。
     ✅ 公開ページ◯枚の中のリンク◯本は、すべて公開しているファイルにたどり着けます。
     ✅ 公開ページ◯つは、一覧を持つ◯つの文書すべてに載っています。
     ✅ 公開ページ◯つとも、フッターに自分の公開URLへのリンクがあります。
@@ -146,8 +154,18 @@ ENTRY_RE = re.compile(r"^│\s+[├└]──\s+(\S+)")
 DOCS_LINK_RE = re.compile(r"\]\(([^)/:#]+\.md)(?:#[^)]*)?\)")
 WORKLOG_RE = re.compile(r"^作業ログ_(\d{4}-\d{2}-\d{2})\.md$")
 # 全Markdownの内部リンク照合に使うもの（2026-10-12 追加＝自己改良バックログの候補39）
-# 「[こちら](docs/○○.md)」の形から、リンク先のファイル名だけを拾う（見出し `#…` は切り落とす）。
-MD_LINK_RE = re.compile(r"\]\((?!https?://|mailto:)([^)\s]+?\.md)(?:#[^)]*)?\)")
+# 「[こちら](docs/○○.md)」の形から、リンク先だけを拾う（見出し `#…` は切り落とす）。
+# 2026-10-19（候補73）に **`.md` のしばりを外した**ので、
+# 「[check_map.py](../tools/check_map.py)」のような道具・画像・フォルダ行きも拾う。
+# 外のサイト（`https://…`）や、同じページの中のしるし（`#tab-map`）はこの道具の担当ではない。
+INNER_LINK_RE = re.compile(
+    r"\]\((?!https?://|mailto:|tel:|data:|javascript:|//|#)([^)\s]+?)(?:#[^)]*)?\)"
+)
+# 📝 書き方の見本は、文書の中では「`…`」や ``` で囲んだ**コード**として書かれている。
+#    囲みの中を外さずに数えると、説明のために書いた見本を本物のリンクと見まちがえて
+#    **嘘の❌**を出す（2026-10-19 の実測で1件あった＝アイデア帳の候補73の文中の見本）。
+CODE_FENCE_RE = re.compile(r"^```.*?^```", re.S | re.M)
+CODE_SPAN_RE = re.compile(r"`[^`\n]*`")
 # 読みに行かないフォルダ（Gitの内部・取ってきただけの部品置き場）
 SKIP_DIR_NAMES = {".git", "node_modules", ".venv", "__pycache__"}
 # リンク先が「実在するファイル」ではなく**書き方の見本**のときの目印。
@@ -403,25 +421,40 @@ def _markdown_files() -> list[Path]:
     return found
 
 
+def _without_code(text: str) -> str:
+    """文書から「コードの囲み」を取りのぞく（``` のブロックと `…` の小さな囲み）。
+
+    囲みの中は「こう書く」という**見本**なので、実物が無くて当たり前。
+    取りのぞかないと見本を本物のリンクと見まちがえて嘘の❌を出す（2026-10-19 追加）。
+    """
+    return CODE_SPAN_RE.sub("", CODE_FENCE_RE.sub("", text))
+
+
 def check_md_links() -> bool:
-    """Markdownどうしの内部リンクが、ちゃんと実物にたどり着けるか照合する。
+    """Markdownの中の内部リンクが、ちゃんと実物にたどり着けるか照合する。
 
     文書の中の「[こちら](docs/○○.md)」は、ファイルを引っ越したり名前を変えたりすると
     黙って切れる（押しても何も出ない）。外のサイトへのリンクは
     `tools/check_links.py` が見張っているが、**身内どうしのリンク**は誰も見ていなかった。
     材料は手元のファイル名だけなので、通信は要らない。
+
+    2026-10-19（候補73）に、行き先が `.md` のものだけでなく
+    **道具（`.py`）・画像（`.png`）・フォルダ（`…/`）行き**のリンクも見るようにした。
     """
     files = _markdown_files()
     total = 0
+    others = 0
     problems: list[str] = []
 
     for path in files:
-        text = path.read_text(encoding="utf-8")
+        text = _without_code(path.read_text(encoding="utf-8"))
         here = path.relative_to(REPO_ROOT)
-        for target in MD_LINK_RE.findall(text):
+        for target in INNER_LINK_RE.findall(text):
             if any(mark in target for mark in PLACEHOLDER_MARKS):
                 continue  # 書き方の見本なので、実物が無くて当たり前
             total += 1
+            if not target.endswith(".md"):
+                others += 1
             if target.startswith("/"):
                 destination = REPO_ROOT / target.lstrip("/")
             else:
@@ -438,7 +471,9 @@ def check_md_links() -> bool:
         return False
 
     print(
-        f"✅ Markdown {len(files)}枚の中の内部リンク{total}本は、すべて実物にたどり着けます。"
+        f"✅ Markdown {len(files)}枚の中の内部リンク{total}本"
+        f"（Markdown {total - others}本・道具や画像など{others}本）は、"
+        "すべて実物にたどり着けます。"
     )
     return True
 
@@ -657,7 +692,7 @@ def main() -> int:
         print("\n❌ もう1つの地図（docs/README.md の目次）と docs/ の中身がズレています。")
         print("   docs/README.md の該当する見出しの下に、1行（リンク＋どんなときに読むか）を足すか消してください。")
     if not links_ok:
-        print("\n❌ Markdownどうしの内部リンクが切れています（押しても何も出ない状態）。")
+        print("\n❌ 文書の中の内部リンクが切れています（押しても何も出ない状態）。")
         print("   リンク先の正しい場所に書き替えるか、相手のファイルを元の場所に戻してください。")
     if not html_ok:
         print("\n❌ 公開ページ（HTML）の中の行き先が、公開しているファイルにたどり着けません。")
