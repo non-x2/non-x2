@@ -148,6 +148,7 @@
    - 📄 **出典表記は2つとも消さないこと**（ライセンスの条件）：「Iowa Department of Transportation - Office of Traffic Operations（CC BY 4.0）」と「Contains information licensed under the Open Government Licence – British Columbia.」。
    - ⚠️ **`export.py` の圧縮データには `s`（情報源）の欄が必要**。無いと地域のしぼりこみが全部0台になる（一度そうなって実ブラウザで発見・修正した）。
    - 直すときは `livecam-db/build_world.py` → `export.py` の順（ページ側のデータを直接いじらない）。毎週火5:10の台帳更新に世界分も相乗り（失敗しても日本側は止めない）。
+   - 公開URL：https://non-x2.github.io/non-x2/world-livecam/
 ## のんさんへの対応の型（★どの環境でも必ず守る）
 
 > クラウドでもローカル（デスクトップアプリ）でも**同じ対応**になるよう、ここに明記しています。
