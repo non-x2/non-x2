@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-19T20:02:26+09:00",
+ "generatedAt": "2026-10-20T02:38:02+09:00",
  "source": "米国ハリケーンセンター（NHC/CPHC、https://www.nhc.noaa.gov/）＋米軍合同台風警報センター（JTWC、https://www.metoc.navy.mil/jtwc/）",
  "note": "日本周辺（北西太平洋）は気象庁が担当（latest.json）。このファイルは含みません。",
  "count": 2,
@@ -10,13 +10,13 @@
    "name": "Trudy",
    "basin": "東太平洋",
    "category": "熱帯暴風",
-   "issue": "2026-10-19T09:00:00.000Z",
+   "issue": "2026-10-19T15:00:00.000Z",
    "analysis": {
     "hours": 0,
-    "validTime": "2026-10-19T06:00:00+00:00",
+    "validTime": "2026-10-19T12:00:00+00:00",
     "category": "熱帯暴風",
-    "lat": 19.7,
-    "lon": -108.0,
+    "lat": 19.5,
+    "lon": -108.5,
     "windMs": 26,
     "gustMs": 31,
     "pressure": 999
@@ -24,50 +24,50 @@
    "forecast": [
     {
      "hours": 12,
-     "validTime": "2026-10-19T18:00:00+00:00",
+     "validTime": "2026-10-20T00:00:00+00:00",
      "category": "熱帯暴風",
-     "lat": 19.6,
-     "lon": -108.4,
+     "lat": 19.5,
+     "lon": -108.7,
      "windMs": 21,
      "gustMs": 26,
      "pressure": null
     },
     {
      "hours": 24,
-     "validTime": "2026-10-20T06:00:00+00:00",
+     "validTime": "2026-10-20T12:00:00+00:00",
      "category": "亜熱帯暴風",
-     "lat": 19.6,
-     "lon": -109.0,
+     "lat": 19.5,
+     "lon": -109.4,
      "windMs": 18,
      "gustMs": 23,
      "pressure": null
     },
     {
      "hours": 36,
-     "validTime": "2026-10-20T18:00:00+00:00",
+     "validTime": "2026-10-21T00:00:00+00:00",
      "category": "亜熱帯低気圧",
-     "lat": 19.8,
-     "lon": -109.7,
+     "lat": 19.9,
+     "lon": -110.0,
      "windMs": 15,
      "gustMs": 21,
      "pressure": null
     },
     {
      "hours": 48,
-     "validTime": "2026-10-21T06:00:00+00:00",
+     "validTime": "2026-10-21T12:00:00+00:00",
      "category": "亜熱帯低気圧",
-     "lat": 20.2,
-     "lon": -110.1,
+     "lat": 20.3,
+     "lon": -110.5,
      "windMs": 13,
      "gustMs": 18,
      "pressure": null
     },
     {
      "hours": 60,
-     "validTime": "2026-10-21T18:00:00+00:00",
+     "validTime": "2026-10-22T00:00:00+00:00",
      "category": "亜熱帯低気圧",
-     "lat": 20.7,
-     "lon": -110.6,
+     "lat": 20.9,
+     "lon": -111.0,
      "windMs": 10,
      "gustMs": 15,
      "pressure": null
@@ -243,12 +243,12 @@
      -107.8
     ],
     [
-     19.6,
-     -107.4
-    ],
-    [
      19.7,
      -107.8
+    ],
+    [
+     19.6,
+     -108.2
     ]
    ]
   },
