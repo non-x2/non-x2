@@ -2,7 +2,7 @@
 """🗺 CLAUDE.md の「ディレクトリ構成」と、実際のフォルダの中身がそろっているか照合する見張り番。
 
 ■ 📑 この道具がやる照合の一覧（目次・2026-10-20 追加＝自己改良バックログの候補83）
-照合が8種類・700行まで育ったので、「どれがどこに書いてあるか」を先に置いておく。
+照合が9種類・700行まで育ったので、「どれがどこに書いてあるか」を先に置いておく。
 やめた・足した理由などのくわしい話は、それぞれの ■ の見出しに書いてある。
     ① tools/ の道具が、CLAUDE.mdの構成表に載っているか（TARGETS ＋ check）
     ② .github/workflows/ の自動実行が、構成表に載っているか（TARGETS ＋ check）
@@ -12,9 +12,11 @@
     ⑥ 公開ページの中のリンク（href・src＋JSが読む控えのデータ）の行き先（check_html_links）
     ⑦ 公開ページが、一覧を持つ4つの文書すべてに載っているか（check_page_lists）
     ⑧ 公開ページのフッターに、自分の公開URLへのリンクがあるか（check_page_footers）
+    ⑨ この目次じたいが、実際の照合とそろっているか（check_toc）
 ※ かっこの中は、その照合を書いている**関数の名前**。
    `grep -n "def check_md_links" tools/check_map.py` のように探せば、すぐその場所に飛べる。
 ※ 新しい照合を足したときは、**この目次にも1行足す**（増えたことに気づけるように）。
+   書き足し忘れても、⑨が自分で気づいて ❌ を出す（2026-10-21 追加＝候補95）。
 
 ■ なぜ必要か
 CLAUDE.md の構成表は、新しいセッションが毎回いちばん最初に読む「のんラボの地図」。
@@ -680,6 +682,71 @@ def check_page_footers() -> bool:
     return True
 
 
+def check_toc() -> bool:
+    """この道具の先頭にある「📑 照合の一覧（目次）」が、実際の照合とそろっているか照合する。
+
+    目次（2026-10-20 追加＝候補83）は**手で書いた一覧**なので、照合を足したのに
+    書き足すのを忘れると、目次のほうが嘘になる（＝候補95）。
+    地図（CLAUDE.md）の書き足し忘れを見張る道具が、自分の地図だけ見張られていない
+    のはおかしいので、自分の目次も同じやり方で見張る。
+
+    材料は**このファイルの中身だけ**（通信もよそのファイルも要らない）。
+        ① main() から呼んでいる check_○○() が、ぜんぶ目次に載っているか
+        ② 目次に載っている check_○○() が、いまも main() から呼ばれているか
+        ③ 目次の「照合が◯種類」の数が、実際の数と合っているか
+    """
+    source = Path(__file__).read_text(encoding="utf-8")
+
+    toc_match = re.search(
+        r"■ 📑 この道具がやる照合の一覧.*?(?=\n■ )", source, re.DOTALL
+    )
+    if toc_match is None:
+        print("❌ tools/check_map.py の先頭から「📑 照合の一覧（目次）」が消えています。")
+        return False
+    toc = toc_match.group(0)
+
+    main_match = re.search(r"\ndef main\(\).*?(?=\nif __name__)", source, re.DOTALL)
+    if main_match is None:
+        print("❌ tools/check_map.py の main() が見つかりません（道具の形が壊れています）。")
+        return False
+
+    # 目次の中で「（check_○○）」と名ざしされている照合／main() が実際に呼んでいる照合
+    # ⚠️ ワナ：素朴に `check_[a-z_]+` で拾うと、目次の中の例文にある
+    #    `tools/check_map.py` の「check_map」まで照合の名前だと思って**嘘の❌**を出す
+    #    （作った日に実際に出た）。うしろに `.` が続くものは外す。
+    listed = set(re.findall(r"check_[a-z_]+(?![a-z_.])", toc))
+    called = set(re.findall(r"\b(check_[a-z_]+)\(", main_match.group(0)))
+
+    problems: list[str] = []
+    for name in sorted(called - listed):
+        problems.append(
+            f"❌ 新しい照合 {name}() が、先頭の目次に載っていません"
+            "（目次に1行足してください）"
+        )
+    for name in sorted(listed - called):
+        problems.append(
+            f"❌ 目次に載っている {name}() を、main() がもう呼んでいません"
+            "（やめた照合なら目次からも消してください）"
+        )
+
+    # ①②③のうち③だけは「数字の書き替え忘れ」。種類の数＝main() が呼ぶ照合＋TARGETS の3つ
+    expected_kinds = len(called) + len(TARGETS)
+    kinds_match = re.search(r"照合が(\d+)種類", toc)
+    if kinds_match and int(kinds_match.group(1)) != expected_kinds:
+        problems.append(
+            f"❌ 目次の「照合が{kinds_match.group(1)}種類」が、実際の"
+            f"{expected_kinds}種類とズレています（数字を書き替えてください）"
+        )
+
+    if problems:
+        for problem in problems:
+            print(problem)
+        return False
+
+    print(f"✅ 先頭の目次は、実際の照合{expected_kinds}種類とそろっています。")
+    return True
+
+
 def main() -> int:
     lines = CLAUDE_MD.read_text(encoding="utf-8").splitlines()
 
@@ -689,8 +756,17 @@ def main() -> int:
     html_ok = check_html_links()
     pages_ok = check_page_lists()
     footers_ok = check_page_footers()
+    toc_ok = check_toc()
 
-    if all(results) and docs_ok and links_ok and html_ok and pages_ok and footers_ok:
+    if (
+        all(results)
+        and docs_ok
+        and links_ok
+        and html_ok
+        and pages_ok
+        and footers_ok
+        and toc_ok
+    ):
         return 0
 
     ng_targets = [t for t, ok in zip(TARGETS, results) if not ok]
@@ -718,6 +794,9 @@ def main() -> int:
     if not footers_ok:
         print("\n❌ 公開ページのフッターに、自分の公開URLへのリンクがありません。")
         print("   そのページの最後に『🌐 公開ページ（いつでも最新）』のリンクを1行足してください。")
+    if not toc_ok:
+        print("\n❌ この道具の先頭の目次（📑 照合の一覧）が、実際の照合とズレています。")
+        print("   tools/check_map.py の先頭の目次に、足した照合の1行を書き足してください。")
     return 1
 
 
