@@ -17,6 +17,7 @@ docstringの出力例は手で書くので、道具の中身を直したとき�
 
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -47,10 +48,15 @@ TARGETS = [
 
 
 def run_tool(tool: str, args: list[str]) -> list[str]:
+    # Windows（日本語）では子の出力が cp932 になり、utf-8 で読むと絵文字で落ちる（候補97）。
+    # 子にも親にも utf-8 を指定して、どの手元でも同じ文字で受け渡す（Linux では元から同じ）。
     result = subprocess.run(
         [sys.executable, str(REPO_ROOT / tool), *args],
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        errors="replace",
+        env={**os.environ, "PYTHONIOENCODING": "utf-8"},
         cwd=REPO_ROOT,
     )
     return [line.strip() for line in result.stdout.splitlines() if line.strip()]
