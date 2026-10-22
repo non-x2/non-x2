@@ -135,6 +135,12 @@ import re
 import sys
 from pathlib import Path
 
+# Windows（日本語）の画面でも絵文字（✅など）で落ちないよう、出力を utf-8 にそろえる
+# （Linux の GitHub Actions では元から utf-8 なので変化なし）
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8")
+
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CLAUDE_MD = REPO_ROOT / "CLAUDE.md"
 DOCS_DIR = REPO_ROOT / "docs"

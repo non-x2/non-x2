@@ -8,9 +8,16 @@ from __future__ import annotations
 
 import re
 import subprocess
+import sys
 from collections import Counter, defaultdict
 from datetime import datetime, timedelta
 from pathlib import Path
+
+# Windows（日本語）の画面でも絵文字（✅など）で落ちないよう、出力を utf-8 にそろえる
+# （Linux の GitHub Actions では元から utf-8 なので変化なし）
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8")
 
 # リポジトリルートは、このスクリプト自身の位置（tools/の親）から求める。
 # カレントディレクトリに依存しない。
@@ -24,6 +31,9 @@ def run_git(args: list[str]) -> str:
         cwd=REPO_ROOT,
         capture_output=True,
         text=True,
+        # git のコミット文は utf-8。Windows（日本語）の既定の cp932 で読むと絵文字で失敗するため
+        encoding="utf-8",
+        errors="replace",
         check=True,
     )
     return result.stdout
