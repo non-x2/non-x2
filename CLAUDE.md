@@ -148,6 +148,7 @@
    - 📄 **出典表記は2つとも消さないこと**（ライセンスの条件）：「Iowa Department of Transportation - Office of Traffic Operations（CC BY 4.0）」と「Contains information licensed under the Open Government Licence – British Columbia.」。
    - ⚠️ **`export.py` の圧縮データには `s`（情報源）の欄が必要**。無いと地域のしぼりこみが全部0台になる（一度そうなって実ブラウザで発見・修正した）。
    - 直すときは `livecam-db/build_world.py` → `export.py` の順（ページ側のデータを直接いじらない）。毎週火5:10の台帳更新に世界分も相乗り（失敗しても日本側は止めない）。
+   - 公開URL：https://non-x2.github.io/non-x2/world-livecam/
 ## のんさんへの対応の型（★どの環境でも必ず守る）
 
 > クラウドでもローカル（デスクトップアプリ）でも**同じ対応**になるよう、ここに明記しています。
@@ -202,7 +203,7 @@
   | `npm run check` | **まずこれ**。下の速い3つ（📚出力例・🗾予報区・🗺構成表）をまとめて実行 | なし（数秒） |
   | `npm run check:docstrings` | 📚 道具の説明書きの「出力例」が実際の出力と合っているか | なし |
   | `npm run check:offices` | 🗾 予報区リスト58件が3か所（大もと＋HTML2枚）でそろっているか | なし |
-  | `npm run check:map` | 🗺 2つの地図＋中のリンクが実物とそろっているか（CLAUDE.mdの構成表⇔`tools/`＝道具10個・`.github/workflows/`＝自動実行9枚・`.claude/skills/`＝型7つ（＋各フォルダに `SKILL.md` が1枚あるか）／`docs/README.md`の目次⇔`docs/`の文書・作業ログ・「最新」の案内／全Markdownの内部リンク⇔実物のファイル／🌐公開ページのHTMLの`href`・`src`＋**JSが読みに行く控えのデータ**（`data/○○.json`）⇔**公開している**ファイル／🧭公開ページの一覧を持つ4つの文書（表紙・入口ページ・使い分けガイド・この案内）⇔`pages-deploy.yml`が実際に配っているページ／🌐公開ページの**フッターの中**の「🌐 公開ページ（いつでも最新）」が**自分の公開URL**を指しているか。本数は実行時に表示） | なし |
+  | `npm run check:map` | 🗺 2つの地図＋中のリンクが実物とそろっているか（CLAUDE.mdの構成表⇔`tools/`＝道具10個・`.github/workflows/`＝自動実行9枚・`.claude/skills/`＝型7つ（＋各フォルダに `SKILL.md` が1枚あるか）／`docs/README.md`の目次⇔`docs/`の文書・作業ログ・「最新」の案内／全Markdownの内部リンク（`.md` だけでなく**道具・画像・フォルダ行き**も）⇔実物のファイル／🌐公開ページのHTMLの`href`・`src`＋**JSが読みに行く控えのデータ**（`data/○○.json`）⇔**公開している**ファイル／🧭公開ページの一覧を持つ4つの文書（表紙・入口ページ・使い分けガイド・この案内）⇔`pages-deploy.yml`が実際に配っているページ／🌐公開ページの**フッターの中**の「🌐 公開ページ（いつでも最新）」が**自分の公開URL**を指しているか。本数は実行時に表示） | なし |
   | `npm run check:links` | 👀 公開5ページの外部リンクの生存確認（いま何本あるかは実行時に表示） | あり（数分） |
   | `npm run check:typhoon-snapshot` | 🌀 台風ページの④予備文章が古くないか（気象庁と照合） | あり |
   | `npm run check:a11y` | 👀 見やすさ点検（色の濃さ・押しやすさ・狭い画面）。**これ1つでOK**（ページを配る係は道具が自分で立てて片づける） | Playwrightが要る |

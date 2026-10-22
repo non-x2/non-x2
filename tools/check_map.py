@@ -1,6 +1,23 @@
 #!/usr/bin/env python3
 """🗺 CLAUDE.md の「ディレクトリ構成」と、実際のフォルダの中身がそろっているか照合する見張り番。
 
+■ 📑 この道具がやる照合の一覧（目次・2026-10-20 追加＝自己改良バックログの候補83）
+照合が9種類・700行まで育ったので、「どれがどこに書いてあるか」を先に置いておく。
+やめた・足した理由などのくわしい話は、それぞれの ■ の見出しに書いてある。
+    ① tools/ の道具が、CLAUDE.mdの構成表に載っているか（TARGETS ＋ check）
+    ② .github/workflows/ の自動実行が、構成表に載っているか（TARGETS ＋ check）
+    ③ .claude/skills/ の型が構成表に載っているか＋中に SKILL.md が1枚あるか（TARGETS ＋ check）
+    ④ docs/ の文書・作業ログが、docs/README.md の目次に載っているか（check_docs_index）
+    ⑤ Markdownの中の身内リンクが、実物にたどり着けるか（check_md_links）
+    ⑥ 公開ページの中のリンク（href・src＋JSが読む控えのデータ）の行き先（check_html_links）
+    ⑦ 公開ページが、一覧を持つ4つの文書すべてに載っているか（check_page_lists）
+    ⑧ 公開ページのフッターに、自分の公開URLへのリンクがあるか（check_page_footers）
+    ⑨ この目次じたいが、実際の照合とそろっているか（check_toc）
+※ かっこの中は、その照合を書いている**関数の名前**。
+   `grep -n "def check_md_links" tools/check_map.py` のように探せば、すぐその場所に飛べる。
+※ 新しい照合を足したときは、**この目次にも1行足す**（増えたことに気づけるように）。
+   書き足し忘れても、⑨が自分で気づいて ❌ を出す（2026-10-21 追加＝候補95）。
+
 ■ なぜ必要か
 CLAUDE.md の構成表は、新しいセッションが毎回いちばん最初に読む「のんラボの地図」。
 ところがファイルを新しく作ったとき、この表に書き足すのを**忘れやすい**
@@ -37,6 +54,14 @@ CLAUDE.md の構成表は、新しいセッションが毎回いちばん最初�
 リンク先の実物があるか確かめる（材料は手元のファイル名だけ＝通信は要らない）。
 ※ `docs/◯◯.md` や `作業ログ_....md` のような**書き方の見本**は、実物が無くて
    当たり前なので数えない（◯・○・…・* が入っているリンク先は見本とみなす）。
+🔗 **2026-10-19 に対象を広げた（候補73）**：いままでは行き先が `.md` のときだけ
+   見ていたが、`[check_map.py](../tools/check_map.py)` のような**道具（.py）・
+   画像（.png）・フォルダ行き**のリンクも見るようにした（実測＝そのほか12本）。
+   文書から道具や画像を指すリンクも、引っ越せば同じように黙って切れるため。
+※ 「`…`」や ``` で囲んだ**コードの中のリンク**は数えない（2026-10-19 追加）。
+   囲みを外さないと、説明のために書いた見本（アイデア帳の候補73の文中にある
+   `[check_map.py](tools/check_map.py)` など）を本物のリンクと見まちがえて
+   **嘘の❌**を出す（広げる前に実測して1件見つけた）。
 
 ■ 🌐 公開ページどうしのリンクも見張る（2026-10-13 追加＝自己改良バックログの候補75）
 Markdownの身内リンクは上で見張れるようになったが、**HTMLの `href` / `src`** は
@@ -90,7 +115,7 @@ Markdownの身内リンクは上で見張れるようになったが、**HTMLの
     ✅ .github/workflows/ の◯枚の自動実行は、すべてCLAUDE.mdの構成表に載っています。
     ✅ .claude/skills/ の◯つの型（スキル）は、すべてCLAUDE.mdの構成表に載っています（SKILL.md も◯つとも1枚ずつあります）。
     ✅ docs/ の◯枚の文書は、すべて docs/README.md の目次に載っています（最新の作業ログの案内も ◯◯◯◯-◯◯-◯◯ で合っています）。
-    ✅ Markdown ◯枚の中の内部リンク◯本は、すべて実物にたどり着けます。
+    ✅ Markdown ◯枚の中の内部リンク◯本（Markdown ◯本・道具や画像など◯本）は、すべて実物にたどり着けます。
     ✅ 公開ページ◯枚の中のリンク◯本は、すべて公開しているファイルにたどり着けます。
     ✅ 公開ページ◯つは、一覧を持つ◯つの文書すべてに載っています。
     ✅ 公開ページ◯つとも、フッターに自分の公開URLへのリンクがあります。
@@ -146,8 +171,18 @@ ENTRY_RE = re.compile(r"^│\s+[├└]──\s+(\S+)")
 DOCS_LINK_RE = re.compile(r"\]\(([^)/:#]+\.md)(?:#[^)]*)?\)")
 WORKLOG_RE = re.compile(r"^作業ログ_(\d{4}-\d{2}-\d{2})\.md$")
 # 全Markdownの内部リンク照合に使うもの（2026-10-12 追加＝自己改良バックログの候補39）
-# 「[こちら](docs/○○.md)」の形から、リンク先のファイル名だけを拾う（見出し `#…` は切り落とす）。
-MD_LINK_RE = re.compile(r"\]\((?!https?://|mailto:)([^)\s]+?\.md)(?:#[^)]*)?\)")
+# 「[こちら](docs/○○.md)」の形から、リンク先だけを拾う（見出し `#…` は切り落とす）。
+# 2026-10-19（候補73）に **`.md` のしばりを外した**ので、
+# 「[check_map.py](../tools/check_map.py)」のような道具・画像・フォルダ行きも拾う。
+# 外のサイト（`https://…`）や、同じページの中のしるし（`#tab-map`）はこの道具の担当ではない。
+INNER_LINK_RE = re.compile(
+    r"\]\((?!https?://|mailto:|tel:|data:|javascript:|//|#)([^)\s]+?)(?:#[^)]*)?\)"
+)
+# 📝 書き方の見本は、文書の中では「`…`」や ``` で囲んだ**コード**として書かれている。
+#    囲みの中を外さずに数えると、説明のために書いた見本を本物のリンクと見まちがえて
+#    **嘘の❌**を出す（2026-10-19 の実測で1件あった＝アイデア帳の候補73の文中の見本）。
+CODE_FENCE_RE = re.compile(r"^```.*?^```", re.S | re.M)
+CODE_SPAN_RE = re.compile(r"`[^`\n]*`")
 # 読みに行かないフォルダ（Gitの内部・取ってきただけの部品置き場）
 SKIP_DIR_NAMES = {".git", "node_modules", ".venv", "__pycache__"}
 # リンク先が「実在するファイル」ではなく**書き方の見本**のときの目印。
@@ -403,25 +438,40 @@ def _markdown_files() -> list[Path]:
     return found
 
 
+def _without_code(text: str) -> str:
+    """文書から「コードの囲み」を取りのぞく（``` のブロックと `…` の小さな囲み）。
+
+    囲みの中は「こう書く」という**見本**なので、実物が無くて当たり前。
+    取りのぞかないと見本を本物のリンクと見まちがえて嘘の❌を出す（2026-10-19 追加）。
+    """
+    return CODE_SPAN_RE.sub("", CODE_FENCE_RE.sub("", text))
+
+
 def check_md_links() -> bool:
-    """Markdownどうしの内部リンクが、ちゃんと実物にたどり着けるか照合する。
+    """Markdownの中の内部リンクが、ちゃんと実物にたどり着けるか照合する。
 
     文書の中の「[こちら](docs/○○.md)」は、ファイルを引っ越したり名前を変えたりすると
     黙って切れる（押しても何も出ない）。外のサイトへのリンクは
     `tools/check_links.py` が見張っているが、**身内どうしのリンク**は誰も見ていなかった。
     材料は手元のファイル名だけなので、通信は要らない。
+
+    2026-10-19（候補73）に、行き先が `.md` のものだけでなく
+    **道具（`.py`）・画像（`.png`）・フォルダ（`…/`）行き**のリンクも見るようにした。
     """
     files = _markdown_files()
     total = 0
+    others = 0
     problems: list[str] = []
 
     for path in files:
-        text = path.read_text(encoding="utf-8")
+        text = _without_code(path.read_text(encoding="utf-8"))
         here = path.relative_to(REPO_ROOT)
-        for target in MD_LINK_RE.findall(text):
+        for target in INNER_LINK_RE.findall(text):
             if any(mark in target for mark in PLACEHOLDER_MARKS):
                 continue  # 書き方の見本なので、実物が無くて当たり前
             total += 1
+            if not target.endswith(".md"):
+                others += 1
             if target.startswith("/"):
                 destination = REPO_ROOT / target.lstrip("/")
             else:
@@ -438,7 +488,9 @@ def check_md_links() -> bool:
         return False
 
     print(
-        f"✅ Markdown {len(files)}枚の中の内部リンク{total}本は、すべて実物にたどり着けます。"
+        f"✅ Markdown {len(files)}枚の中の内部リンク{total}本"
+        f"（Markdown {total - others}本・道具や画像など{others}本）は、"
+        "すべて実物にたどり着けます。"
     )
     return True
 
@@ -630,6 +682,71 @@ def check_page_footers() -> bool:
     return True
 
 
+def check_toc() -> bool:
+    """この道具の先頭にある「📑 照合の一覧（目次）」が、実際の照合とそろっているか照合する。
+
+    目次（2026-10-20 追加＝候補83）は**手で書いた一覧**なので、照合を足したのに
+    書き足すのを忘れると、目次のほうが嘘になる（＝候補95）。
+    地図（CLAUDE.md）の書き足し忘れを見張る道具が、自分の地図だけ見張られていない
+    のはおかしいので、自分の目次も同じやり方で見張る。
+
+    材料は**このファイルの中身だけ**（通信もよそのファイルも要らない）。
+        ① main() から呼んでいる check_○○() が、ぜんぶ目次に載っているか
+        ② 目次に載っている check_○○() が、いまも main() から呼ばれているか
+        ③ 目次の「照合が◯種類」の数が、実際の数と合っているか
+    """
+    source = Path(__file__).read_text(encoding="utf-8")
+
+    toc_match = re.search(
+        r"■ 📑 この道具がやる照合の一覧.*?(?=\n■ )", source, re.DOTALL
+    )
+    if toc_match is None:
+        print("❌ tools/check_map.py の先頭から「📑 照合の一覧（目次）」が消えています。")
+        return False
+    toc = toc_match.group(0)
+
+    main_match = re.search(r"\ndef main\(\).*?(?=\nif __name__)", source, re.DOTALL)
+    if main_match is None:
+        print("❌ tools/check_map.py の main() が見つかりません（道具の形が壊れています）。")
+        return False
+
+    # 目次の中で「（check_○○）」と名ざしされている照合／main() が実際に呼んでいる照合
+    # ⚠️ ワナ：素朴に `check_[a-z_]+` で拾うと、目次の中の例文にある
+    #    `tools/check_map.py` の「check_map」まで照合の名前だと思って**嘘の❌**を出す
+    #    （作った日に実際に出た）。うしろに `.` が続くものは外す。
+    listed = set(re.findall(r"check_[a-z_]+(?![a-z_.])", toc))
+    called = set(re.findall(r"\b(check_[a-z_]+)\(", main_match.group(0)))
+
+    problems: list[str] = []
+    for name in sorted(called - listed):
+        problems.append(
+            f"❌ 新しい照合 {name}() が、先頭の目次に載っていません"
+            "（目次に1行足してください）"
+        )
+    for name in sorted(listed - called):
+        problems.append(
+            f"❌ 目次に載っている {name}() を、main() がもう呼んでいません"
+            "（やめた照合なら目次からも消してください）"
+        )
+
+    # ①②③のうち③だけは「数字の書き替え忘れ」。種類の数＝main() が呼ぶ照合＋TARGETS の3つ
+    expected_kinds = len(called) + len(TARGETS)
+    kinds_match = re.search(r"照合が(\d+)種類", toc)
+    if kinds_match and int(kinds_match.group(1)) != expected_kinds:
+        problems.append(
+            f"❌ 目次の「照合が{kinds_match.group(1)}種類」が、実際の"
+            f"{expected_kinds}種類とズレています（数字を書き替えてください）"
+        )
+
+    if problems:
+        for problem in problems:
+            print(problem)
+        return False
+
+    print(f"✅ 先頭の目次は、実際の照合{expected_kinds}種類とそろっています。")
+    return True
+
+
 def main() -> int:
     lines = CLAUDE_MD.read_text(encoding="utf-8").splitlines()
 
@@ -639,8 +756,17 @@ def main() -> int:
     html_ok = check_html_links()
     pages_ok = check_page_lists()
     footers_ok = check_page_footers()
+    toc_ok = check_toc()
 
-    if all(results) and docs_ok and links_ok and html_ok and pages_ok and footers_ok:
+    if (
+        all(results)
+        and docs_ok
+        and links_ok
+        and html_ok
+        and pages_ok
+        and footers_ok
+        and toc_ok
+    ):
         return 0
 
     ng_targets = [t for t, ok in zip(TARGETS, results) if not ok]
@@ -657,7 +783,7 @@ def main() -> int:
         print("\n❌ もう1つの地図（docs/README.md の目次）と docs/ の中身がズレています。")
         print("   docs/README.md の該当する見出しの下に、1行（リンク＋どんなときに読むか）を足すか消してください。")
     if not links_ok:
-        print("\n❌ Markdownどうしの内部リンクが切れています（押しても何も出ない状態）。")
+        print("\n❌ 文書の中の内部リンクが切れています（押しても何も出ない状態）。")
         print("   リンク先の正しい場所に書き替えるか、相手のファイルを元の場所に戻してください。")
     if not html_ok:
         print("\n❌ 公開ページ（HTML）の中の行き先が、公開しているファイルにたどり着けません。")
@@ -668,6 +794,9 @@ def main() -> int:
     if not footers_ok:
         print("\n❌ 公開ページのフッターに、自分の公開URLへのリンクがありません。")
         print("   そのページの最後に『🌐 公開ページ（いつでも最新）』のリンクを1行足してください。")
+    if not toc_ok:
+        print("\n❌ この道具の先頭の目次（📑 照合の一覧）が、実際の照合とズレています。")
+        print("   tools/check_map.py の先頭の目次に、足した照合の1行を書き足してください。")
     return 1
 
 
