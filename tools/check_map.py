@@ -105,6 +105,8 @@ Markdownの身内リンクは上で見張れるようになったが、**HTMLの
    前は「ページのどこかに公開URLがあれば ✅」だったので、本文の途中に書いてあるだけでも
    通ってしまった（＝フッターから消しても気づけない）。公開4ページとも `<footer>` を
    ちょうど1つずつ持っていることを実測したうえで、その中だけを見る形にした。
+※ 約束：公開ページの最後の案内欄は **`<footer>` タグ**で作る（`<div class="footer">` だと
+   リンクがあっても「見当たりません」と❌になる＝候補84。CLAUDE.md の慣習欄にも同じ1行がある）。
 
 ■ 使い方
     python3 tools/check_map.py
@@ -664,7 +666,8 @@ def check_page_footers() -> bool:
         if not footers:
             problems.append(
                 f"❌ {name}/index.html に <footer>…</footer> が見当たりません"
-                "（ページの最後の案内欄ごと無い状態です）"
+                "（ページの最後の案内欄ごと無い状態です。"
+                "<div class=\"footer\"> などで作っている場合は <footer> タグに直してください）"
             )
         elif not any(url in footer for footer in footers):
             hint = (
