@@ -43,6 +43,12 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+# Windows（日本語）の画面でも絵文字（✅など）で落ちないよう、出力を utf-8 にそろえる
+# （Linux の GitHub Actions では元から utf-8 なので変化なし）
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8")
+
 ROOT = Path(__file__).resolve().parent.parent
 HTML = ROOT / "typhoon-app" / "index.html"
 FETCH_SCRIPT = ROOT / "typhoon-app" / "scripts" / "fetch_typhoon.py"

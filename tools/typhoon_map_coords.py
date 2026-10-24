@@ -45,6 +45,12 @@ from __future__ import annotations
 import math
 import sys
 
+# Windows（日本語）の画面でも絵文字（✅など）で落ちないよう、出力を utf-8 にそろえる
+# （Linux の GitHub Actions では元から utf-8 なので変化なし）
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8")
+
 # typhoon-app/index.html の同名の定数と必ず一致させること
 LON0 = 122.02
 KX = 10.163
