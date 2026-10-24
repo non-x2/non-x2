@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-25T04:37:25+09:00",
+ "generatedAt": "2026-10-25T07:36:26+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
  "count": 2,
  "typhoons": [
@@ -10,21 +10,21 @@
    "name": "インファ",
    "nameEn": "In-fa",
    "category": "台風",
-   "issue": "2026-10-25T04:10:00+09:00",
+   "issue": "2026-10-25T07:05:00+09:00",
    "analysis": {
     "hours": 0,
     "label": "実況",
-    "validTime": "2026-10-25T03:00:00+09:00",
+    "validTime": "2026-10-25T06:00:00+09:00",
     "category": "台風",
     "intensity": "-",
     "scale": "",
     "location": "マーシャル諸島",
-    "course": "北西",
-    "speedKmh": "15",
+    "course": "北",
+    "speedKmh": "10",
     "pressure": 996.0,
     "windMs": 25.0,
     "gustMs": 35.0,
-    "lat": 11.2,
+    "lat": 11.5,
     "lon": 165.4,
     "circleKm": null,
     "galeRadiusKm": 220.0
@@ -33,24 +33,24 @@
     {
      "hours": 24,
      "label": "予報　２４時間後",
-     "validTime": "2026-10-26T03:00:00+09:00",
+     "validTime": "2026-10-26T06:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
      "scale": "",
      "location": "マーシャル諸島",
      "course": "北北西",
-     "speedKmh": "10",
+     "speedKmh": null,
      "pressure": 980.0,
      "windMs": 35.0,
      "gustMs": 50.0,
-     "lat": 13.4,
-     "lon": 164.7,
+     "lat": 13.5,
+     "lon": 164.8,
      "circleKm": 95.0,
      "stormRadiusKm": 165.0
     },
     {
-     "hours": 48,
-     "label": "予報　４８時間後",
+     "hours": 45,
+     "label": "予報　４５時間後",
      "validTime": "2026-10-27T03:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
@@ -67,8 +67,8 @@
      "stormRadiusKm": 310.0
     },
     {
-     "hours": 72,
-     "label": "予報　７２時間後",
+     "hours": 69,
+     "label": "予報　６９時間後",
      "validTime": "2026-10-28T03:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
@@ -85,8 +85,8 @@
      "stormRadiusKm": 430.0
     },
     {
-     "hours": 96,
-     "label": "予報　９６時間後",
+     "hours": 93,
+     "label": "予報　９３時間後",
      "validTime": "2026-10-29T03:00:00+09:00",
      "category": "台風",
      "intensity": "非常に強い",
@@ -103,8 +103,8 @@
      "stormRadiusKm": 510.0
     },
     {
-     "hours": 120,
-     "label": "予報　１２０時間後",
+     "hours": 117,
+     "label": "予報　１１７時間後",
      "validTime": "2026-10-30T03:00:00+09:00",
      "category": "台風",
      "intensity": "非常に強い",
@@ -157,6 +157,10 @@
     [
      11.2,
      165.4
+    ],
+    [
+     11.5,
+     165.4
     ]
    ]
   },
@@ -167,22 +171,22 @@
    "name": "チャンパー",
    "nameEn": "Champi",
    "category": "台風",
-   "issue": "2026-10-25T03:45:00+09:00",
+   "issue": "2026-10-25T06:45:00+09:00",
    "analysis": {
     "hours": 0,
     "label": "実況",
-    "validTime": "2026-10-25T03:00:00+09:00",
+    "validTime": "2026-10-25T06:00:00+09:00",
     "category": "台風",
     "intensity": "-",
     "scale": "大型",
     "location": "東シナ海",
-    "course": "北北東",
-    "speedKmh": "15",
-    "pressure": 992.0,
-    "windMs": 23.0,
-    "gustMs": 35.0,
-    "lat": 27.9,
-    "lon": 123.9,
+    "course": "北東",
+    "speedKmh": "20",
+    "pressure": 996.0,
+    "windMs": 20.0,
+    "gustMs": 30.0,
+    "lat": 28.6,
+    "lon": 124.3,
     "circleKm": null,
     "galeRadiusKm": 650.0
    },
@@ -190,40 +194,40 @@
     {
      "hours": 12,
      "label": "予報　１２時間後",
-     "validTime": "2026-10-25T15:00:00+09:00",
+     "validTime": "2026-10-25T18:00:00+09:00",
      "category": "台風",
      "intensity": "-",
      "scale": "",
      "location": "東シナ海",
-     "course": "北北東",
+     "course": "北東",
      "speedKmh": "20",
      "pressure": 996.0,
      "windMs": 20.0,
      "gustMs": 30.0,
-     "lat": 30.0,
-     "lon": 125.4,
+     "lat": 30.3,
+     "lon": 125.7,
      "circleKm": 65.0
     },
     {
      "hours": 24,
      "label": "予報　２４時間後",
-     "validTime": "2026-10-26T03:00:00+09:00",
+     "validTime": "2026-10-26T06:00:00+09:00",
      "category": "台風",
      "intensity": "-",
      "scale": "",
-     "location": "五島市の南西約210km",
-     "course": "北東",
+     "location": "五島市の南南西約150km",
+     "course": "東北東",
      "speedKmh": "20",
      "pressure": 1000.0,
      "windMs": 18.0,
      "gustMs": 25.0,
-     "lat": 31.3,
-     "lon": 127.3,
+     "lat": 31.5,
+     "lon": 128.1,
      "circleKm": 95.0
     },
     {
-     "hours": 48,
-     "label": "予報　４８時間後",
+     "hours": 45,
+     "label": "予報　４５時間後",
      "validTime": "2026-10-27T03:00:00+09:00",
      "category": "温帯低気圧",
      "intensity": "-",
@@ -659,6 +663,10 @@
     [
      27.9,
      123.9
+    ],
+    [
+     28.6,
+     124.3
     ]
    ]
   }
