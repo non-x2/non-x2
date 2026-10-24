@@ -1,7 +1,15 @@
 {
- "generatedAt": "2026-10-24T16:34:25+09:00",
+ "generatedAt": "2026-10-24T21:13:26+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20261024210818",
+   "time": "2026-10-24T21:08:00+09:00",
+   "place": "薩摩半島西方沖",
+   "magnitude": 3.6,
+   "maxIntensity": "1",
+   "depthKm": 0.0
+  },
   {
    "id": "20261024124440",
    "time": "2026-10-24T12:44:00+09:00",
@@ -113,14 +121,6 @@
    "magnitude": 3.3,
    "maxIntensity": "1",
    "depthKm": 50.0
-  },
-  {
-   "id": "20261021234104",
-   "time": "2026-10-21T23:41:00+09:00",
-   "place": "日高地方中部",
-   "magnitude": 4.2,
-   "maxIntensity": "2",
-   "depthKm": 100.0
   }
  ],
  "tsunami": {
