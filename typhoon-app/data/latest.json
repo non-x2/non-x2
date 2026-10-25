@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-25T10:22:20+09:00",
+ "generatedAt": "2026-10-25T15:32:59+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
  "count": 2,
  "typhoons": [
@@ -10,48 +10,48 @@
    "name": "インファ",
    "nameEn": "In-fa",
    "category": "台風",
-   "issue": "2026-10-25T10:05:00+09:00",
+   "issue": "2026-10-25T13:00:00+09:00",
    "analysis": {
     "hours": 0,
     "label": "実況",
-    "validTime": "2026-10-25T09:00:00+09:00",
+    "validTime": "2026-10-25T12:00:00+09:00",
     "category": "台風",
     "intensity": "-",
     "scale": "",
     "location": "マーシャル諸島",
     "course": "北北西",
     "speedKmh": null,
-    "pressure": 994.0,
+    "pressure": 992.0,
     "windMs": 30.0,
-    "gustMs": 40.0,
-    "lat": 11.6,
+    "gustMs": 45.0,
+    "lat": 11.7,
     "lon": 165.2,
     "circleKm": null,
-    "stormRadiusKm": 55.0,
+    "stormRadiusKm": 75.0,
     "galeRadiusKm": 220.0
    },
    "forecast": [
     {
      "hours": 24,
      "label": "予報　２４時間後",
-     "validTime": "2026-10-26T09:00:00+09:00",
+     "validTime": "2026-10-26T12:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
      "scale": "",
      "location": "マーシャル諸島",
      "course": "北北西",
      "speedKmh": "10",
-     "pressure": 980.0,
+     "pressure": 975.0,
      "windMs": 35.0,
      "gustMs": 50.0,
-     "lat": 13.8,
-     "lon": 164.2,
+     "lat": 13.9,
+     "lon": 164.3,
      "circleKm": 105.0,
-     "stormRadiusKm": 180.0
+     "stormRadiusKm": 190.0
     },
     {
-     "hours": 48,
-     "label": "予報　４８時間後",
+     "hours": 45,
+     "label": "予報　４５時間後",
      "validTime": "2026-10-27T09:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
@@ -68,8 +68,8 @@
      "stormRadiusKm": 310.0
     },
     {
-     "hours": 72,
-     "label": "予報　７２時間後",
+     "hours": 69,
+     "label": "予報　６９時間後",
      "validTime": "2026-10-28T09:00:00+09:00",
      "category": "台風",
      "intensity": "強い",
@@ -86,8 +86,8 @@
      "stormRadiusKm": 430.0
     },
     {
-     "hours": 96,
-     "label": "予報　９６時間後",
+     "hours": 93,
+     "label": "予報　９３時間後",
      "validTime": "2026-10-29T09:00:00+09:00",
      "category": "台風",
      "intensity": "非常に強い",
@@ -104,8 +104,8 @@
      "stormRadiusKm": 510.0
     },
     {
-     "hours": 120,
-     "label": "予報　１２０時間後",
+     "hours": 117,
+     "label": "予報　１１７時間後",
      "validTime": "2026-10-30T09:00:00+09:00",
      "category": "台風",
      "intensity": "非常に強い",
@@ -166,6 +166,10 @@
     [
      11.6,
      165.2
+    ],
+    [
+     11.7,
+     165.2
     ]
    ]
   },
@@ -176,22 +180,22 @@
    "name": "チャンパー",
    "nameEn": "Champi",
    "category": "台風",
-   "issue": "2026-10-25T09:45:00+09:00",
+   "issue": "2026-10-25T12:45:00+09:00",
    "analysis": {
     "hours": 0,
     "label": "実況",
-    "validTime": "2026-10-25T09:00:00+09:00",
+    "validTime": "2026-10-25T12:00:00+09:00",
     "category": "台風",
     "intensity": "-",
-    "scale": "大型",
+    "scale": "",
     "location": "東シナ海",
     "course": "北東",
     "speedKmh": "20",
     "pressure": 996.0,
     "windMs": 20.0,
     "gustMs": 30.0,
-    "lat": 29.0,
-    "lon": 124.5,
+    "lat": 29.5,
+    "lon": 125.0,
     "circleKm": null,
     "galeRadiusKm": 560.0
    },
@@ -199,7 +203,7 @@
     {
      "hours": 12,
      "label": "予報　１２時間後",
-     "validTime": "2026-10-25T21:00:00+09:00",
+     "validTime": "2026-10-26T00:00:00+09:00",
      "category": "台風",
      "intensity": "-",
      "scale": "",
@@ -209,25 +213,25 @@
      "pressure": 998.0,
      "windMs": 20.0,
      "gustMs": 30.0,
-     "lat": 30.5,
-     "lon": 126.1,
+     "lat": 30.8,
+     "lon": 126.8,
      "circleKm": 55.0
     },
     {
      "hours": 24,
      "label": "予報　２４時間後",
-     "validTime": "2026-10-26T09:00:00+09:00",
+     "validTime": "2026-10-26T12:00:00+09:00",
      "category": "温帯低気圧",
      "intensity": "-",
      "scale": "",
-     "location": "五島市の南約120km",
+     "location": "枕崎市の西北西約70km",
      "course": "東北東",
-     "speedKmh": "20",
+     "speedKmh": "25",
      "pressure": 1002.0,
      "windMs": 18.0,
      "gustMs": 25.0,
      "lat": 31.6,
-     "lon": 128.7,
+     "lon": 129.6,
      "circleKm": 80.0
     }
    ],
@@ -659,6 +663,10 @@
     [
      29.0,
      124.5
+    ],
+    [
+     29.5,
+     125.0
     ]
    ]
   }
