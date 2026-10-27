@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-10-27T05:39:16+09:00",
+ "generatedAt": "2026-10-27T09:38:58+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
  "count": 1,
  "typhoons": [
@@ -10,11 +10,11 @@
    "name": "インファ",
    "nameEn": "In-fa",
    "category": "台風",
-   "issue": "2026-10-27T03:45:00+09:00",
+   "issue": "2026-10-27T06:45:00+09:00",
    "analysis": {
     "hours": 0,
     "label": "実況",
-    "validTime": "2026-10-27T03:00:00+09:00",
+    "validTime": "2026-10-27T06:00:00+09:00",
     "category": "台風",
     "intensity": "非常に強い",
     "scale": "",
@@ -25,7 +25,7 @@
     "windMs": 45.0,
     "gustMs": 60.0,
     "lat": 14.2,
-    "lon": 162.7,
+    "lon": 162.5,
     "circleKm": null,
     "stormRadiusKm": 75.0,
     "galeRadiusKm": 330.0
@@ -34,7 +34,7 @@
     {
      "hours": 24,
      "label": "予報　２４時間後",
-     "validTime": "2026-10-28T03:00:00+09:00",
+     "validTime": "2026-10-28T06:00:00+09:00",
      "category": "台風",
      "intensity": "非常に強い",
      "scale": "",
@@ -44,14 +44,14 @@
      "pressure": 950.0,
      "windMs": 50.0,
      "gustMs": 70.0,
-     "lat": 14.5,
-     "lon": 160.7,
+     "lat": 14.7,
+     "lon": 160.3,
      "circleKm": 95.0,
      "stormRadiusKm": 175.0
     },
     {
-     "hours": 48,
-     "label": "予報　４８時間後",
+     "hours": 45,
+     "label": "予報　４５時間後",
      "validTime": "2026-10-29T03:00:00+09:00",
      "category": "台風",
      "intensity": "非常に強い",
@@ -68,8 +68,8 @@
      "stormRadiusKm": 210.0
     },
     {
-     "hours": 72,
-     "label": "予報　７２時間後",
+     "hours": 69,
+     "label": "予報　６９時間後",
      "validTime": "2026-10-30T03:00:00+09:00",
      "category": "台風",
      "intensity": "非常に強い",
@@ -86,8 +86,8 @@
      "stormRadiusKm": 230.0
     },
     {
-     "hours": 96,
-     "label": "予報　９６時間後",
+     "hours": 93,
+     "label": "予報　９３時間後",
      "validTime": "2026-10-31T03:00:00+09:00",
      "category": "台風",
      "intensity": "非常に強い",
@@ -104,8 +104,8 @@
      "stormRadiusKm": 270.0
     },
     {
-     "hours": 120,
-     "label": "予報　１２０時間後",
+     "hours": 117,
+     "label": "予報　１１７時間後",
      "validTime": "2026-11-01T03:00:00+09:00",
      "category": "台風",
      "intensity": "非常に強い",
@@ -222,6 +222,10 @@
     [
      14.2,
      162.7
+    ],
+    [
+     14.2,
+     162.5
     ]
    ]
   }
