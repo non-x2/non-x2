@@ -1,7 +1,39 @@
 {
- "generatedAt": "2026-10-28T17:58:05+09:00",
+ "generatedAt": "2026-10-29T01:14:30+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20261029010430",
+   "time": "2026-10-29T01:04:00+09:00",
+   "place": "熊本県天草・芦北地方",
+   "magnitude": 2.4,
+   "maxIntensity": "1",
+   "depthKm": 10.0
+  },
+  {
+   "id": "20261029005006",
+   "time": "2026-10-29T00:50:00+09:00",
+   "place": "紀伊水道",
+   "magnitude": 2.5,
+   "maxIntensity": "1",
+   "depthKm": 10.0
+  },
+  {
+   "id": "20261029000759",
+   "time": "2026-10-29T00:07:00+09:00",
+   "place": "千葉県北東部",
+   "magnitude": 5.4,
+   "maxIntensity": "5-",
+   "depthKm": 50.0
+  },
+  {
+   "id": "20261028235446",
+   "time": "2026-10-28T23:54:00+09:00",
+   "place": "熊本県天草・芦北地方",
+   "magnitude": 3.0,
+   "maxIntensity": "1",
+   "depthKm": 10.0
+  },
   {
    "id": "20261028171732",
    "time": "2026-10-28T17:17:00+09:00",
@@ -89,38 +121,6 @@
    "magnitude": 3.3,
    "maxIntensity": "1",
    "depthKm": 50.0
-  },
-  {
-   "id": "20261027021559",
-   "time": "2026-10-27T02:16:00+09:00",
-   "place": "広島県南西部",
-   "magnitude": 2.7,
-   "maxIntensity": "1",
-   "depthKm": 20.0
-  },
-  {
-   "id": "20261026233416",
-   "time": "2026-10-26T23:34:00+09:00",
-   "place": "熊本県天草・芦北地方",
-   "magnitude": 2.6,
-   "maxIntensity": "3",
-   "depthKm": 0.0
-  },
-  {
-   "id": "20261026231138",
-   "time": "2026-10-26T23:11:00+09:00",
-   "place": "山口県東部",
-   "magnitude": 3.2,
-   "maxIntensity": "2",
-   "depthKm": 20.0
-  },
-  {
-   "id": "20261026184744",
-   "time": "2026-10-26T18:47:00+09:00",
-   "place": "紀伊水道",
-   "magnitude": 2.6,
-   "maxIntensity": "1",
-   "depthKm": 10.0
   }
  ],
  "tsunami": {
