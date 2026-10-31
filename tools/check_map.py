@@ -2,7 +2,7 @@
 """🗺 CLAUDE.md の「ディレクトリ構成」と、実際のフォルダの中身がそろっているか照合する見張り番。
 
 ■ 📑 この道具がやる照合の一覧（目次・2026-10-20 追加＝自己改良バックログの候補83）
-照合が9種類・700行まで育ったので、「どれがどこに書いてあるか」を先に置いておく。
+照合が11種類・800行まで育ったので、「どれがどこに書いてあるか」を先に置いておく。
 やめた・足した理由などのくわしい話は、それぞれの ■ の見出しに書いてある。
     ① tools/ の道具が、CLAUDE.mdの構成表に載っているか（TARGETS ＋ check）
     ② .github/workflows/ の自動実行が、構成表に載っているか（TARGETS ＋ check）
@@ -13,6 +13,8 @@
     ⑦ 公開ページが、一覧を持つ4つの文書すべてに載っているか（check_page_lists）
     ⑧ 公開ページのフッターに、自分の公開URLへのリンクがあるか（check_page_footers）
     ⑨ この目次じたいが、実際の照合とそろっているか（check_toc）
+    ⑩ livecam-db/ の .py（司令塔と sources/ の情報源）が、livecam-db/README.md のファイル表に載っているか（check_livecam_sources）
+    ⑪ .github/workflows/ の自動実行が、docs/自動実行の健康診断表.md の一覧にそろっているか（check_workflow_table）
 ※ かっこの中は、その照合を書いている**関数の名前**。
    `grep -n "def check_md_links" tools/check_map.py` のように探せば、すぐその場所に飛べる。
 ※ 新しい照合を足したときは、**この目次にも1行足す**（増えたことに気づけるように）。
@@ -108,6 +110,13 @@ Markdownの身内リンクは上で見張れるようになったが、**HTMLの
 ※ 約束：公開ページの最後の案内欄は **`<footer>` タグ**で作る（`<div class="footer">` だと
    リンクがあっても「見当たりません」と❌になる＝候補84。CLAUDE.md の慣習欄にも同じ1行がある）。
 
+■ 📷 ライブカメラ台帳の「ファイル表」も見張る（2026-10-29 追加＝自己改良バックログの候補103）
+`livecam-db/README.md` の最後にある「ファイル一覧の表」も、手で書き写した地図の1つ。
+2026-10-28 に見たら、🇨🇦BC州の情報源 `sources/ca_bc.py` が**約70日間**載っていなかった
+（2026-08-19 に足したとき、情報源の表＝候補102 と同じく書き足し忘れ）。
+そこで `livecam-db/` の .py（根っこの司令塔4つ＋`sources/` の情報源。`__init__.py` は除く）と、
+表の中の「| `○○.py` |」の行を見くらべる（材料はファイル名だけ＝通信も要らない）。
+
 ■ 使い方
     python3 tools/check_map.py
     npm run check:map          （同じもの）
@@ -121,6 +130,8 @@ Markdownの身内リンクは上で見張れるようになったが、**HTMLの
     ✅ 公開ページ◯枚の中のリンク◯本は、すべて公開しているファイルにたどり着けます。
     ✅ 公開ページ◯つは、一覧を持つ◯つの文書すべてに載っています。
     ✅ 公開ページ◯つとも、フッターに自分の公開URLへのリンクがあります。
+    ✅ livecam-db/ の◯つのプログラム（司令塔と情報源）は、すべて livecam-db/README.md のファイル表に載っています。
+    ✅ 自動実行の◯つは、すべて docs/自動実行の健康診断表.md の一覧に載っています。
 
 ズレていたときは、足りない側を ❌ で並べて表示し、終了コード1で終わる。
 ※ 直すのは人の仕事（この道具はCLAUDE.mdを書き換えない）。地図の説明文は
@@ -691,6 +702,90 @@ def check_page_footers() -> bool:
     return True
 
 
+def check_livecam_sources() -> bool:
+    """livecam-db/ の .py（司令塔と情報源）が、livecam-db/README.md のファイル表に載っているか照合する。
+
+    🇨🇦BC州の `sources/ca_bc.py` が約70日間この表から抜けていた（2026-10-28 に発見＝候補103）。
+    `base.py` は情報源ではなく共通の道具だが、表には載せる約束なので同じく数える。
+    """
+    livecam_dir = REPO_ROOT / "livecam-db"
+    readme = livecam_dir / "README.md"
+    if not (livecam_dir / "sources").is_dir() or not readme.exists():
+        print("❌ livecam-db/sources/ か livecam-db/README.md が見つかりません（引っ越し・名前変え？）")
+        return False
+
+    # 根っこの司令塔（build.py など）と sources/ の情報源。どちらも同じ表に並んでいる。
+    actual = {
+        p.relative_to(livecam_dir).as_posix()
+        for p in [*livecam_dir.glob("*.py"), *livecam_dir.glob("sources/*.py")]
+        if p.name != "__init__.py"
+    }
+    listed = set(
+        re.findall(r"^\|\s*`([^`]+\.py)`\s*\|", readme.read_text(encoding="utf-8"), re.M)
+    )
+
+    problems = [
+        f"❌ {name} が livecam-db/README.md のファイル表に載っていません（書き足し忘れ）"
+        for name in sorted(actual - listed)
+    ] + [
+        f"❌ ファイル表の {name} が実物にありません（消した・名前を変えたのに表が古いまま）"
+        for name in sorted(listed - actual)
+    ]
+    if problems:
+        for problem in problems:
+            print(problem)
+        return False
+
+    print(
+        f"✅ livecam-db/ の{len(actual)}つのプログラム（司令塔と情報源）は、"
+        "すべて livecam-db/README.md のファイル表に載っています。"
+    )
+    return True
+
+
+def check_workflow_table() -> bool:
+    """.github/workflows/ の自動実行が、docs/自動実行の健康診断表.md の一覧にそろっているか照合する。
+
+    健康診断表（2026-10-30 追加＝候補91）は `.yml` を**手で写した表**なので、
+    自動実行が増えたり消えたりした日に、次に書き漏れる場所になる（＝候補105）。
+    見るのは**ファイル名の有無**と、表の上の「自動で動くもの◯つ」の数だけ。
+    周期・時刻の中身までは見ない（候補53と同じく、説明文の意味は機械には測れないため）。
+    """
+    table = REPO_ROOT / "docs" / "自動実行の健康診断表.md"
+    workflows_dir = REPO_ROOT / ".github" / "workflows"
+    if not table.exists() or not workflows_dir.is_dir():
+        print("❌ docs/自動実行の健康診断表.md か .github/workflows/ が見つかりません（引っ越し・名前変え？）")
+        return False
+
+    text = table.read_text(encoding="utf-8")
+    actual = {
+        p.name for p in [*workflows_dir.glob("*.yml"), *workflows_dir.glob("*.yaml")]
+    }
+    # 一覧の表の行（`|` で始まる行）の中で、かっこ書きされたファイル名だけを拾う
+    listed = set(re.findall(r"^\|[^\n]*?`([^`]+\.ya?ml)`", text, re.M))
+
+    problems = [
+        f"❌ {name} が docs/自動実行の健康診断表.md の一覧に載っていません（書き足し忘れ）"
+        for name in sorted(actual - listed)
+    ] + [
+        f"❌ 健康診断表の {name} が .github/workflows/ にありません（消した・名前を変えたのに表が古いまま）"
+        for name in sorted(listed - actual)
+    ]
+    count_match = re.search(r"自動で動くもの\*{0,2}(\d+)つ", text)
+    if count_match and int(count_match.group(1)) != len(actual):
+        problems.append(
+            f"❌ 健康診断表の「自動で動くもの{count_match.group(1)}つ」が、実際の"
+            f"{len(actual)}個とズレています（数字を書き替えてください）"
+        )
+    if problems:
+        for problem in problems:
+            print(problem)
+        return False
+
+    print(f"✅ 自動実行の{len(actual)}つは、すべて docs/自動実行の健康診断表.md の一覧に載っています。")
+    return True
+
+
 def check_toc() -> bool:
     """この道具の先頭にある「📑 照合の一覧（目次）」が、実際の照合とそろっているか照合する。
 
@@ -765,6 +860,8 @@ def main() -> int:
     html_ok = check_html_links()
     pages_ok = check_page_lists()
     footers_ok = check_page_footers()
+    livecam_ok = check_livecam_sources()
+    workflow_table_ok = check_workflow_table()
     toc_ok = check_toc()
 
     if (
@@ -774,6 +871,8 @@ def main() -> int:
         and html_ok
         and pages_ok
         and footers_ok
+        and livecam_ok
+        and workflow_table_ok
         and toc_ok
     ):
         return 0
@@ -803,6 +902,9 @@ def main() -> int:
     if not footers_ok:
         print("\n❌ 公開ページのフッターに、自分の公開URLへのリンクがありません。")
         print("   そのページの最後に『🌐 公開ページ（いつでも最新）』のリンクを1行足してください。")
+    if not workflow_table_ok:
+        print("\n❌ docs/自動実行の健康診断表.md の一覧が、.github/workflows/ の中身とズレています。")
+        print("   その表に1行（ワークフロー・仕掛け・許される間隔・見方）を足すか消してください。")
     if not toc_ok:
         print("\n❌ この道具の先頭の目次（📑 照合の一覧）が、実際の照合とズレています。")
         print("   tools/check_map.py の先頭の目次に、足した照合の1行を書き足してください。")
