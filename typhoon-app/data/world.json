@@ -1,7 +1,85 @@
 {
- "generatedAt": "2026-10-31T01:07:00+09:00",
+ "generatedAt": "2026-11-01T18:33:43+09:00",
  "source": "米国ハリケーンセンター（NHC/CPHC、https://www.nhc.noaa.gov/）＋米軍合同台風警報センター（JTWC、https://www.metoc.navy.mil/jtwc/）",
  "note": "日本周辺（北西太平洋）は気象庁が担当（latest.json）。このファイルは含みません。",
- "count": 0,
- "storms": []
+ "count": 1,
+ "storms": [
+  {
+   "id": "jtwc-04b-2026",
+   "bin": "04B",
+   "name": "Four",
+   "basin": "北インド洋",
+   "category": "熱帯暴風",
+   "issue": "2026-11-01T06:00:00+00:00",
+   "analysis": {
+    "hours": 0,
+    "validTime": "2026-11-01T06:00:00+00:00",
+    "category": "熱帯暴風",
+    "lat": 12.2,
+    "lon": 84.8,
+    "windMs": 21,
+    "gustMs": null,
+    "pressure": null,
+    "galeRadiusKm": 65
+   },
+   "forecast": [
+    {
+     "hours": 12,
+     "validTime": "2026-11-01T18:00:00+00:00",
+     "category": "熱帯暴風",
+     "lat": 13.5,
+     "lon": 82.4,
+     "windMs": 28,
+     "gustMs": null,
+     "pressure": null,
+     "galeRadiusKm": 93
+    },
+    {
+     "hours": 24,
+     "validTime": "2026-11-02T06:00:00+00:00",
+     "category": "サイクロン",
+     "lat": 14.5,
+     "lon": 80.7,
+     "windMs": 33,
+     "gustMs": null,
+     "pressure": null,
+     "galeRadiusKm": 130
+    },
+    {
+     "hours": 36,
+     "validTime": "2026-11-02T18:00:00+00:00",
+     "category": "サイクロン",
+     "lat": 15.2,
+     "lon": 80.1,
+     "windMs": 33,
+     "gustMs": null,
+     "pressure": null,
+     "galeRadiusKm": 130
+    },
+    {
+     "hours": 48,
+     "validTime": "2026-11-03T06:00:00+00:00",
+     "category": "熱帯暴風",
+     "lat": 16.0,
+     "lon": 79.6,
+     "windMs": 23,
+     "gustMs": null,
+     "pressure": null,
+     "galeRadiusKm": 74
+    },
+    {
+     "hours": 60,
+     "validTime": "2026-11-03T18:00:00+00:00",
+     "category": "熱帯低気圧",
+     "lat": 16.4,
+     "lon": 79.1,
+     "windMs": 15,
+     "gustMs": null,
+     "pressure": null,
+     "galeRadiusKm": null
+    }
+   ],
+   "track": []
+  }
+ ]
 }
