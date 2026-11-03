@@ -2,7 +2,7 @@
 """🗺 CLAUDE.md の「ディレクトリ構成」と、実際のフォルダの中身がそろっているか照合する見張り番。
 
 ■ 📑 この道具がやる照合の一覧（目次・2026-10-20 追加＝自己改良バックログの候補83）
-照合が11種類・800行まで育ったので、「どれがどこに書いてあるか」を先に置いておく。
+照合が12種類・800行まで育ったので、「どれがどこに書いてあるか」を先に置いておく。
 やめた・足した理由などのくわしい話は、それぞれの ■ の見出しに書いてある。
     ① tools/ の道具が、CLAUDE.mdの構成表に載っているか（TARGETS ＋ check）
     ② .github/workflows/ の自動実行が、構成表に載っているか（TARGETS ＋ check）
@@ -15,6 +15,7 @@
     ⑨ この目次じたいが、実際の照合とそろっているか（check_toc）
     ⑩ livecam-db/ の .py（司令塔と sources/ の情報源）が、livecam-db/README.md のファイル表に載っているか（check_livecam_sources）
     ⑪ .github/workflows/ の自動実行が、docs/自動実行の健康診断表.md の一覧にそろっているか（check_workflow_table）
+    ⑫ アイデア帳の📦の行が案内する日付の「📗 改良の記録」に、その候補番号が書いてあるか（check_backlog_records）
 ※ かっこの中は、その照合を書いている**関数の名前**。
    `grep -n "def check_md_links" tools/check_map.py` のように探せば、すぐその場所に飛べる。
 ※ 新しい照合を足したときは、**この目次にも1行足す**（増えたことに気づけるように）。
@@ -786,6 +787,55 @@ def check_workflow_table() -> bool:
     return True
 
 
+def check_backlog_records() -> bool:
+    """アイデア帳の📦（済んだ候補）の行が案内する日付の記録に、その候補番号が書いてあるか照合する。
+
+    📦の行は「→ ✅ 2026-11-02 に実施（記録を見る）」と日付だけで「📗 改良の記録」へ案内する。
+    同じ日に2件やった日は、記録の行に**候補番号**が書いてないとどちらか分からない
+    （2026-09-13 に候補7で実際に迷った＝候補32）。材料はこのファイルの中だけ（通信なし）。
+    ⚠️ ワナ：提案文そのものに日付の例が書いてある行（候補31）があるので、
+       日付は `~~ →` より後ろ（案内の部分）だけから拾う。
+    ❌却下・🔀統合の行は日付の案内が無いので数えない。
+    """
+    backlog = REPO_ROOT / "docs" / "自己改良バックログ.md"
+    if not backlog.exists():
+        print("❌ docs/自己改良バックログ.md が見つかりません（引っ越し・名前変え？）")
+        return False
+    text = backlog.read_text(encoding="utf-8")
+    done = re.search(r"^## 📦.*?(?=^## )", text, re.M | re.S)
+    log = re.search(r"^## 📗 改良の記録.*", text, re.M | re.S)
+    if done is None or log is None:
+        print("❌ アイデア帳から「📦 済んだ候補」か「📗 改良の記録」の見出しが消えています。")
+        return False
+
+    # 記録の行ごとに「書いてある候補番号」を集める。「候補59・79」のような並べ書きも拾う
+    numbers_by_date: dict[str, set[str]] = {}
+    for date, body in re.findall(r"^\|\s*(\d{4}-\d{2}-\d{2})[^|]*\|(.*)$", log.group(0), re.M):
+        found = numbers_by_date.setdefault(date, set())
+        for group in re.findall(r"候補(\d+(?:\s*[・、,，と]\s*\d+)*)", body):
+            found.update(re.findall(r"\d+", group))
+
+    problems: list[str] = []
+    checked = 0
+    for num, tail in re.findall(r"^\|\s*~~(\d+)~~[^\n]*?~~\s*→([^\n]*)", done.group(0), re.M):
+        date = re.search(r"✅\D*?(\d{4}-\d{2}-\d{2})", tail)
+        if date is None:
+            continue
+        checked += 1
+        if num not in numbers_by_date.get(date.group(1), set()):
+            problems.append(
+                f"❌ 📦の候補{num}は「{date.group(1)}の記録を見る」と案内していますが、"
+                f"その日の「📗 改良の記録」に「候補{num}」が書いてありません"
+            )
+    if problems:
+        for problem in problems:
+            print(problem)
+        return False
+
+    print(f"✅ アイデア帳の📦の{checked}行は、すべて案内先の日付の記録に候補番号が書いてあります。")
+    return True
+
+
 def check_toc() -> bool:
     """この道具の先頭にある「📑 照合の一覧（目次）」が、実際の照合とそろっているか照合する。
 
@@ -862,6 +912,7 @@ def main() -> int:
     footers_ok = check_page_footers()
     livecam_ok = check_livecam_sources()
     workflow_table_ok = check_workflow_table()
+    backlog_ok = check_backlog_records()
     toc_ok = check_toc()
 
     if (
@@ -873,6 +924,7 @@ def main() -> int:
         and footers_ok
         and livecam_ok
         and workflow_table_ok
+        and backlog_ok
         and toc_ok
     ):
         return 0
@@ -905,6 +957,9 @@ def main() -> int:
     if not workflow_table_ok:
         print("\n❌ docs/自動実行の健康診断表.md の一覧が、.github/workflows/ の中身とズレています。")
         print("   その表に1行（ワークフロー・仕掛け・許される間隔・見方）を足すか消してください。")
+    if not backlog_ok:
+        print("\n❌ アイデア帳の📦の行が案内する日付の記録に、その候補番号がありません。")
+        print("   その日の「📗 改良の記録」の行に「候補◯」を書き足してください（同じ日に2件あると迷うため）。")
     if not toc_ok:
         print("\n❌ この道具の先頭の目次（📑 照合の一覧）が、実際の照合とズレています。")
         print("   tools/check_map.py の先頭の目次に、足した照合の1行を書き足してください。")
