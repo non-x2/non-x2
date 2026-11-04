@@ -1,7 +1,23 @@
 {
- "generatedAt": "2026-11-04T09:51:24+09:00",
+ "generatedAt": "2026-11-05T07:10:02+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20261105042852",
+   "time": "2026-11-05T04:28:00+09:00",
+   "place": "鹿児島県薩摩地方",
+   "magnitude": 3.1,
+   "maxIntensity": "2",
+   "depthKm": 10.0
+  },
+  {
+   "id": "20261105042154",
+   "time": "2026-11-05T04:21:00+09:00",
+   "place": "宮城県沖",
+   "magnitude": 4.1,
+   "maxIntensity": "1",
+   "depthKm": 50.0
+  },
   {
    "id": "20261104072834",
    "time": "2026-11-04T07:28:00+09:00",
@@ -105,22 +121,6 @@
    "magnitude": 3.6,
    "maxIntensity": "2",
    "depthKm": 40.0
-  },
-  {
-   "id": "20261101114911",
-   "time": "2026-11-01T11:49:00+09:00",
-   "place": "父島近海",
-   "magnitude": 4.3,
-   "maxIntensity": "2",
-   "depthKm": 30.0
-  },
-  {
-   "id": "20261101071547",
-   "time": "2026-11-01T07:15:00+09:00",
-   "place": "三重県南東沖",
-   "magnitude": 6.1,
-   "maxIntensity": "3",
-   "depthKm": 350.0
   }
  ],
  "tsunami": {
