@@ -175,6 +175,8 @@ python3 livecam-db/build_world.py --no-verify  # 写真の確認をとばす
 | 情報源 | 中身 | 利用条件 |
 |---|---|---|
 | 🇺🇸 アイオワ州交通局（Iowa DOT） | 高速道路（I-系）・一般道・休憩施設・道路気象カメラ 約1,200件 | **CC BY 4.0**＝出典を書けば再利用可。出典：Iowa Department of Transportation - Office of Traffic Operations |
+| 🇨🇦 ブリティッシュコロンビア州（DriveBC） | 州道のカメラ 約1,030台 | **Open Government Licence – British Columbia**。出典：Contains information licensed under the Open Government Licence – British Columbia. |
+| 🇫🇮 フィンランド（Fintraffic Digitraffic） | 道路気象カメラ 約810地点（**1地点＝写真1枚**） | **CC BY 4.0**（商用も可）。出典：Source: Fintraffic / digitraffic.fi, license CC 4.0 BY |
 
 > 🔎 **なぜアイオワ州から？** 2026-08-16 に米国5州を調査した結果、「機械で読める一括データ」と
 > 「はっきりした利用許可」の両方がそろっていたのがアイオワ州だけだったためです（下の記録を参照）。
@@ -183,9 +185,9 @@ python3 livecam-db/build_world.py --no-verify  # 写真の確認をとばす
 
 | 情報源 | 判定 | 理由 |
 |---|---|---|
-| 🇺🇸 アイオワ州 DOT | ✅ 取り込み済み | CC BY 4.0 明記・画像は最初からhttps・鍵なしGeoJSONで一括取得可（2026-08-19 再確認：**変化なし**。データポータルの表記もCC BY 4.0のまま）<br>（2026-10-20 再確認：**⚠️ URL変更**。2026年5月20日に新カメラシステムへ移行。ライセンスはCC BY 4.0継続。旧URL=data.iowa.gov（404）／新URL=ArcGIS Feature Service） |
+| 🇺🇸 アイオワ州 DOT | ✅ 取り込み済み | CC BY 4.0 明記・画像は最初からhttps・鍵なしGeoJSONで一括取得可（2026-08-19 再確認：**変化なし**。データポータルの表記もCC BY 4.0のまま）<br>（2026-10-20 再確認：CC BY 4.0のまま。**2026-11-04 訂正**：定期調査の助手が「URL変更・修正が必要」と報告したが**誤報**。うちが使っている `data.iowadot.gov/…traffic-cameras-3.geojson` は今も正常（1,260件・写真もhttps）。404だったのは別のアドレス `data.iowa.gov` で、5月の映像システム切り替えも取り込み済みの新しい写真URL側の話だった） |
 | 🇨🇦 カナダ ブリティッシュコロンビア州 DriveBC | ✅ **取り込み済み**（2026-08-19・1,026台） | Open Government Licence – British Columbia 明記・画像は最初からhttps・鍵なしJSONで一括取得可。**他所が写真を提供している34台は除外**（→ 下の「🇨🇦 BC州の取り込みの記録」） |
-| 🇫🇮 **フィンランド Digitraffic**（新規調査 2026-10-20） | ✅ **取り込み可**（まだ取り込んでいない） | **CC BY 4.0** 明記・鍵なしJSON API・https画像・**470台以上**すべて確認済み。出典表記："Source: Fintraffic / digitraffic.fi, license CC 4.0 BY"。10分ごとに更新 |
+| 🇫🇮 **フィンランド Digitraffic**（新規調査 2026-10-20） | ✅ **取り込み済み**（2026-11-04・814地点） | **CC BY 4.0**（利用規約に「商用も含め配布・改変してよい・出典を書くこと」と明記）・鍵なしGeoJSON・https画像を実測。出典表記："Source: Fintraffic / digitraffic.fi, license CC 4.0 BY"（→ 下の「🇫🇮 フィンランドの取り込みの記録」） |
 | 🇨🇦 カナダ ケベック州（新規調査 2026-10-20） | ⏸ 保留 | CC BY 4.0・GeoJSONあり・**画像URLが403エラーで確認できず** |
 | 🇺🇸 イリノイ州 IDOT（新規調査 2026-10-20） | ⏸ 保留 | CC BY-SA 2.0・GeoJSON（約3,675台）・画像URL未確認 |
 | 🇺🇸 ユタ州 UDOT（新規調査 2026-10-20） | ⏸ 保留 | ライセンス不明・JSON APIあり・画像URL未確認 |
@@ -290,6 +292,28 @@ python3 livecam-db/build_world.py --no-verify  # 写真の確認をとばす
 - `world-livecam/index.html`：地域のしぼりこみボタン・出典欄（2つの情報源）・タイトル・説明文を更新。
   検索は名前だけでなく**場所でも**引けるようにしました（例：「バンクーバー島」で182台）。
 
+### 🇫🇮 フィンランドの取り込みの記録（2026-11-04）
+
+定期調査（2026-10）で見つかったフィンランドを、実際に台帳へ入れました。**世界台帳の3つ目の情報源**です。
+
+| 確かめたこと | 結果（自分で実測） |
+|---|---|
+| ライセンス | 利用規約 https://www.digitraffic.fi/en/terms-of-service/ に「Fintraffic のオープンデータは **Creative Commons 4.0 BY**。商用も含め配布・改変してよい。出典を書くこと」 |
+| データ | `https://tie.digitraffic.fi/api/weathercam/v1/stations` から鍵なしで **816地点**（写真の向き違いを合わせると2,288枚）。動いている814地点を取り込み |
+| 写真 | `https://weathercam.digitraffic.fi/<番号>.jpg` が本物のJPEG（1280×720）。台帳づくりの確認で**814枚すべて開けた** |
+
+- **1地点＝写真1枚**：1つの地点に向きの違うカメラが2〜4枚あります。全部入れると同じ点が重なり、ページも重くなるため、
+  「道路の進行方向」を写した1枚を代表にしました（路面だけを写す番号末尾 `09` は、ほかが無いときだけ）。
+- **名前は一覧の `vt2_Karkkila_Korpi` から「Road 2 Karkkila Korpi」を作る**：自治体名などの詳しい情報は1地点ずつ聞かないと取れず、
+  毎週816回のアクセスになって相手の負担になるので、聞きにいきません。場所は「フィンランド」だけです。
+- **高速道路の区別はしていません**（全部 `road`）。路線番号の `vt`（国道）などは道路の格で、高速かどうかではないためです（BC州と同じ考え方）。
+- ⚠️ **アクセスのお作法**：Digitraffic は `Accept-Encoding: gzip` を名乗らないと **406 で断ってきます**（実際に一度失敗）。
+  また規約のお願いに従い `Digitraffic-User` という名乗りの見出しを付けています（`sources/fi_digitraffic.py`）。
+- 写真は約10分ごとに新しくなります。相手側の都合で一時的に「Image not available」の画像が返ることがあります（画像としては正しいので、台帳の確認では見分けられません）。
+
+> 📄 **出典の文言（消さないこと）**：`Source: Fintraffic / digitraffic.fi, license CC 4.0 BY`
+> → `world-livecam/index.html` のページ下部と、台帳の `sources` に入れてあります。
+
 ### 🗓 定期調査の記録（毎月20日・自動実行「🌍 世界カメラ情報源の定期調査」）
 
 #### 2026-08-16（1回目）
@@ -375,7 +399,7 @@ python3 livecam-db/build_world.py --no-verify  # 写真の確認をとばす
 
 #### 2026-10-20（3回目）
 
-**🆕 新しい候補を発見：フィンランド Digitraffic**（取り込みはまだ）
+**🆕 新しい候補を発見：フィンランド Digitraffic**（→ 2026-11-04 に取り込み済み）
 
 保留4件の再確認と、新規候補7件の調査を実施しました
 （外部AI＝Codex・Gemini・Ollama がこの環境に無かったため、Claude助手2体に手分け）。
@@ -414,15 +438,15 @@ python3 livecam-db/build_world.py --no-verify  # 写真の確認をとばす
 
 | 情報源 | 確認結果 |
 |---|---|
-| 🇺🇸 アイオワ州 DOT | ⚠️ **変化あり**：**2026年5月20日に新しいカメラ映像システムへ移行**。画像URLと動画URLが変更。ライセンスは**CC BY 4.0継続**。データ取得URLが変更：旧＝data.iowa.gov（404エラー）／新＝ArcGIS Feature Service `https://services.arcgis.com/8lRhdTsQyJpO52F1/arcgis/rest/services/Traffic_Cameras_View/FeatureServer/0` |
+| 🇺🇸 アイオワ州 DOT | 🛠 **2026-11-04 訂正：実は変化なし**（下の申し送りの訂正を参照）。〔当時の報告→〕**2026年5月20日に新しいカメラ映像システムへ移行**。画像URLと動画URLが変更。ライセンスは**CC BY 4.0継続**。データ取得URLが変更：旧＝data.iowa.gov（404エラー）／新＝ArcGIS Feature Service `https://services.arcgis.com/8lRhdTsQyJpO52F1/arcgis/rest/services/Traffic_Cameras_View/FeatureServer/0` |
 | 🇨🇦 カナダBC州 DriveBC | 変化なし（Open Government Licence – British Columbia継続） |
 | 🚢 海上保安庁 | 変化なし（PDL1.0継続） |
 | 🏞 JICE（道路・河川チェック地図） | 変化なし（国土地理院の利用規約に準拠のまま。2025年11月20日の規約改正は研究データの扱いに関するもので、ライブカメラデータには影響なし） |
 
 **次回への申し送り（更新）**
 
-- 🇫🇮 **フィンランド Digitraffic**：**取り込み可と確認済み**（CC BY 4.0・470台以上）。実装は次の作業で。
-- 🇺🇸 **アイオワ州DOT**：`livecam-db/sources/us_iowa.py` で新しいFeature Service URLを使うよう修正が必要。
+- 🇫🇮 **フィンランド Digitraffic**：✅ **2026-11-04 に取り込み済み**（実測は「470台以上」ではなく **816地点・写真2,288枚**。そのうち動いている814地点を1枚ずつ）。
+- 🇺🇸 ~~アイオワ州DOT：URL修正が必要~~ → 🛠 **2026-11-04 訂正：修正は不要でした**。実際に取得すると今のURL（`data.iowadot.gov`）で1,260件・写真もhttpsで正常。助手が404を見たのは**別のアドレス**（`data.iowa.gov`）でした。⭐ 教訓：**助手の「変わった」は、うちのコードが実際に使っているURLで確かめてから信じる**（BC州の `credit` 欄のときと同じ「調査記録は出発点であって結論ではない」）。
 - 🇨🇦 ケベック州・🇺🇸 イリノイ州：ライセンスとデータ形式はOK。画像URLの確認が残っている。
 - 🇺🇸 ユタ州・メリーランド州・ミズーリ州・🇳🇿 ニュージーランド：有望だが確認が完了せず。
 - 🇯🇵 富山県：**オープンデータポータルに道路カメラデータセットは追加されず**。道路情報サイト側は❌確定済み。
@@ -547,6 +571,8 @@ python3 livecam-db/build_world.py --no-verify  # 写真の確認をとばす
 | `sources/jice.py` | 情報源①：JICE の道路／河川ライブカメラ |
 | `sources/kaiho.py` | 情報源②：海上保安庁のライブカメラ（灯台・港・岬） |
 | `sources/us_iowa.py` | 情報源③：🌍 アイオワ州交通局の道路カメラ（世界台帳・試験） |
+| `sources/ca_bc.py` | 情報源④：🌍 カナダBC州の道路カメラ（世界台帳・試験） |
+| `sources/fi_digitraffic.py` | 情報源⑤：🌍 フィンランドの道路気象カメラ（世界台帳・試験） |
 | `data/livecams.json` | できあがった台帳（**大もと**） |
 | `data/livecams_world.json` | 🌍 世界台帳（試験・**日本のアプリには配らない**） |
 

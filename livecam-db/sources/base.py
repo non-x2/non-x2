@@ -53,9 +53,9 @@ JP_BOUNDS = (20.0, 46.6, 122.0, 154.0)  # 南, 北, 西, 東
 
 # ------------------------------------------------------------------ 通信
 
-def open_url(url: str, timeout: int = TIMEOUT):
+def open_url(url: str, timeout: int = TIMEOUT, headers: dict | None = None):
     """URLを開く。相手が古い設定でも読めるように、ゆるめの https 設定を用意する。"""
-    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT})
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, **(headers or {})})
     ctx = ssl.create_default_context()
     # 相手（各地方整備局など）のサーバーは設定が古いことがあるため、暗号の条件をゆるめる。
     # 取得するのは公開されている道路・河川の写真だけなので、これで問題ありません。
