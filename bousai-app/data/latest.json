@@ -1,7 +1,31 @@
 {
- "generatedAt": "2026-11-04T04:46:18+09:00",
+ "generatedAt": "2026-11-04T09:51:24+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20261104072834",
+   "time": "2026-11-04T07:28:00+09:00",
+   "place": "熊本県熊本地方",
+   "magnitude": 2.5,
+   "maxIntensity": "1",
+   "depthKm": 10.0
+  },
+  {
+   "id": "20261104053431",
+   "time": "2026-11-04T05:34:00+09:00",
+   "place": "千葉県東方沖",
+   "magnitude": 3.4,
+   "maxIntensity": "2",
+   "depthKm": 60.0
+  },
+  {
+   "id": "20261104051155",
+   "time": "2026-11-04T05:11:00+09:00",
+   "place": "和歌山県北部",
+   "magnitude": 1.9,
+   "maxIntensity": "1",
+   "depthKm": 10.0
+  },
   {
    "id": "20261104014852",
    "time": "2026-11-04T01:48:00+09:00",
@@ -97,30 +121,6 @@
    "magnitude": 6.1,
    "maxIntensity": "3",
    "depthKm": 350.0
-  },
-  {
-   "id": "20261101071028",
-   "time": "2026-11-01T07:10:00+09:00",
-   "place": "熊本県熊本地方",
-   "magnitude": 2.8,
-   "maxIntensity": "2",
-   "depthKm": 0.0
-  },
-  {
-   "id": "20261101062040",
-   "time": "2026-11-01T06:20:00+09:00",
-   "place": "長野県南部",
-   "magnitude": 2.5,
-   "maxIntensity": "1",
-   "depthKm": 10.0
-  },
-  {
-   "id": "20261031151957",
-   "time": "2026-10-31T15:19:00+09:00",
-   "place": "熊本県熊本地方",
-   "magnitude": 3.0,
-   "maxIntensity": "2",
-   "depthKm": 10.0
   }
  ],
  "tsunami": {
