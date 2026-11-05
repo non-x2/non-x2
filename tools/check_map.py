@@ -2,7 +2,7 @@
 """🗺 CLAUDE.md の「ディレクトリ構成」と、実際のフォルダの中身がそろっているか照合する見張り番。
 
 ■ 📑 この道具がやる照合の一覧（目次・2026-10-20 追加＝自己改良バックログの候補83）
-照合が12種類・800行まで育ったので、「どれがどこに書いてあるか」を先に置いておく。
+照合が13種類・800行まで育ったので、「どれがどこに書いてあるか」を先に置いておく。
 やめた・足した理由などのくわしい話は、それぞれの ■ の見出しに書いてある。
     ① tools/ の道具が、CLAUDE.mdの構成表に載っているか（TARGETS ＋ check）
     ② .github/workflows/ の自動実行が、構成表に載っているか（TARGETS ＋ check）
@@ -16,6 +16,7 @@
     ⑩ livecam-db/ の .py（司令塔と sources/ の情報源）が、livecam-db/README.md のファイル表に載っているか（check_livecam_sources）
     ⑪ .github/workflows/ の自動実行が、docs/自動実行の健康診断表.md の一覧にそろっているか（check_workflow_table）
     ⑫ アイデア帳の📦の行が案内する日付の「📗 改良の記録」に、その候補番号が書いてあるか（check_backlog_records）
+    ⑬ .claude/hooks/ のセッション開始フックが、bash -n（実行しない文法チェック）で通るか（check_hook_syntax）
 ※ かっこの中は、その照合を書いている**関数の名前**。
    `grep -n "def check_md_links" tools/check_map.py` のように探せば、すぐその場所に飛べる。
 ※ 新しい照合を足したときは、**この目次にも1行足す**（増えたことに気づけるように）。
@@ -146,6 +147,8 @@ Markdownの身内リンクは上で見張れるようになったが、**HTMLの
 from __future__ import annotations
 
 import re
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -836,6 +839,52 @@ def check_backlog_records() -> bool:
     return True
 
 
+def check_hook_syntax() -> bool:
+    """`.claude/hooks/*.sh`（セッション開始フック）が、文法のうえでこわれていないか照合する。
+
+    セッション開始フックは毎回いちばん最初に走るのに、これまでどの点検の相手にも
+    なっていなかった（2026-11-04 候補115）。中身のロジックまでは試さず、
+    `bash -n`（実行せずに文法だけ調べる）で「閉じ忘れ・打ち間違い」だけを見張る。
+    ⚠️ 実行はしない＝フックが何かを書き換えることは無い。材料はローカルのファイルだけ。
+    ⚠️ `bash` が見つからない環境（素のWindowsなど）は**飛ばして✅**にする
+       （点検できないのを❌にすると、道具のせいでない嘘の赤が出るため。飛ばしたことは表示する）。
+    """
+    hooks = sorted((REPO_ROOT / ".claude" / "hooks").glob("*.sh"))
+    if not hooks:
+        print("❌ .claude/hooks/ に .sh が1つも見つかりません（引っ越し・消えた？）")
+        return False
+    bash = shutil.which("bash")
+    # ⚠️ ワナ：素のWindowsの `bash` は WSL の入口（C:\Windows\System32\bash.exe）のことがあり、
+    #    ① Windowsのパス（C:\…）を渡すと「No such file」で落ちる（作った日に実際に嘘の❌が出た）
+    #    ② WSLの中身が未導入だと起動じたいに失敗する。
+    #    だから①ファイルは**パスで渡さず標準入力で渡し**、②先に `exit 0` だけ走らせて動くか試す。
+    # ⚠️ ワナ：Windowsのgitは取り出すときに改行を CRLF へ変えることがある（リポジトリ内はLF）。
+    #    そのまま bash に渡すと「unexpected token」で落ちる（これも作った日に嘘の❌が出た）ので、
+    #    CRLF は LF に戻してから渡す。
+    if bash is None or subprocess.run([bash, "-c", "exit 0"], capture_output=True).returncode != 0:
+        print("⏭ 使える bash が見つからないので、セッション開始フックの文法の点検は飛ばしました。")
+        return True
+
+    problems: list[str] = []
+    for hook in hooks:
+        done = subprocess.run(
+            [bash, "-n"],
+            input=hook.read_bytes().replace(b"\r\n", b"\n"),
+            capture_output=True,
+        )
+        done.stderr = done.stderr.decode("utf-8", errors="replace")
+        if done.returncode != 0:
+            first = (done.stderr or "").strip().splitlines()[:1]
+            problems.append(f"❌ {hook.relative_to(REPO_ROOT).as_posix()} の文法がこわれています：{''.join(first)}")
+    if problems:
+        for problem in problems:
+            print(problem)
+        return False
+
+    print(f"✅ セッション開始フック{len(hooks)}本は、文法のうえでこわれていません（bash -n）。")
+    return True
+
+
 def check_toc() -> bool:
     """この道具の先頭にある「📑 照合の一覧（目次）」が、実際の照合とそろっているか照合する。
 
@@ -913,6 +962,7 @@ def main() -> int:
     livecam_ok = check_livecam_sources()
     workflow_table_ok = check_workflow_table()
     backlog_ok = check_backlog_records()
+    hooks_ok = check_hook_syntax()
     toc_ok = check_toc()
 
     if (
@@ -925,6 +975,7 @@ def main() -> int:
         and livecam_ok
         and workflow_table_ok
         and backlog_ok
+        and hooks_ok
         and toc_ok
     ):
         return 0
