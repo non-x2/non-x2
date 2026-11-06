@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-06T03:52:39+09:00",
+ "generatedAt": "2026-11-06T09:27:09+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
  "count": 1,
  "typhoons": [
@@ -10,11 +10,11 @@
    "name": "インファ",
    "nameEn": "In-fa",
    "category": "台風",
-   "issue": "2026-11-06T03:45:00+09:00",
+   "issue": "2026-11-06T06:45:00+09:00",
    "analysis": {
     "hours": 0,
     "label": "実況",
-    "validTime": "2026-11-06T03:00:00+09:00",
+    "validTime": "2026-11-06T06:00:00+09:00",
     "category": "台風",
     "intensity": "-",
     "scale": "",
@@ -24,8 +24,8 @@
     "pressure": 985.0,
     "windMs": 25.0,
     "gustMs": 35.0,
-    "lat": 33.9,
-    "lon": 147.8,
+    "lat": 35.9,
+    "lon": 150.0,
     "circleKm": null,
     "galeRadiusKm": 390.0
    },
@@ -33,7 +33,7 @@
     {
      "hours": 12,
      "label": "予報　１２時間後",
-     "validTime": "2026-11-06T15:00:00+09:00",
+     "validTime": "2026-11-06T18:00:00+09:00",
      "category": "温帯低気圧",
      "intensity": "-",
      "scale": "",
@@ -43,25 +43,25 @@
      "pressure": 984.0,
      "windMs": 25.0,
      "gustMs": 35.0,
-     "lat": 41.9,
-     "lon": 157.9,
+     "lat": 43.7,
+     "lon": 160.8,
      "circleKm": 85.0
     },
     {
      "hours": 24,
      "label": "予報　２４時間後",
-     "validTime": "2026-11-07T03:00:00+09:00",
+     "validTime": "2026-11-07T06:00:00+09:00",
      "category": "温帯低気圧",
      "intensity": "-",
      "scale": "",
      "location": "千島の東",
      "course": "北東",
-     "speedKmh": "80",
+     "speedKmh": "60",
      "pressure": 984.0,
      "windMs": 25.0,
      "gustMs": 35.0,
-     "lat": 47.4,
-     "lon": 166.9,
+     "lat": 47.8,
+     "lon": 168.2,
      "circleKm": 120.0
     }
    ],
@@ -485,6 +485,10 @@
     [
      33.9,
      147.8
+    ],
+    [
+     35.9,
+     150.0
     ]
    ]
   }
