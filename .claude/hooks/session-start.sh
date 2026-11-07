@@ -29,6 +29,27 @@ git log --oneline -3 2>/dev/null | sed 's/^/    /'
 ahead="$(git rev-list --count '@{u}..HEAD' 2>/dev/null)"
 [ -n "$ahead" ] && [ "$ahead" != "0" ] && echo "- ⚠️ まだプッシュしていないコミットが ${ahead} 個あります"
 
+# 📅 2つの日付が何日はなれているかを数える（`date -d` も `date -v` も使わない）
+#    Linux と macOS で `date` の書き方がちがうので、awk の計算だけで出す＝どちらでも動く。
+#    形が「YYYY-MM-DD」でないときは、何も出さずに終了コード1で返る（呼んだ側が「測れなかった」と分かる）。
+days_between() {
+  awk -v a="$1" -v b="$2" '
+    function dfc(y, m, d) {   # 西暦の年月日 → 「1970-01-01 から何日目か」
+      if (m <= 2) y = y - 1
+      era = int(y / 400); yoe = y - era * 400
+      mp = (m > 2 ? m - 3 : m + 9)
+      doy = int((153 * mp + 2) / 5) + d - 1
+      doe = yoe * 365 + int(yoe / 4) - int(yoe / 100) + doy
+      return era * 146097 + doe - 719468
+    }
+    BEGIN {
+      if (a !~ /^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]$/) exit 1
+      if (b !~ /^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]$/) exit 1
+      split(a, x, "-"); split(b, y, "-")
+      print dfc(y[1] + 0, y[2] + 0, y[3] + 0) - dfc(x[1] + 0, x[2] + 0, x[3] + 0)
+    }'
+}
+
 latest_log="$(ls -1 docs/作業ログ_*.md 2>/dev/null | sort | tail -1)"
 if [ -n "$latest_log" ]; then
   echo "- 最新の作業ログ: $latest_log"
@@ -37,9 +58,15 @@ if [ -n "$latest_log" ]; then
   echo "- 💰 続きをやるなら **まず「$latest_log」だけ読む**こと"
   echo "     （リポジトリ全体を調べる必要はありません。これが節約のいちばんの近道）"
   # 🌱 作業ログは /handoff のときだけ増えるので、毎日の自己改良のぶんは載っていない。
-  #    日付が古く見えても止まっていない——「ここ数日の動き」の在りかを1行だけ添える。
-  [ -f docs/自己改良バックログ.md ] && \
+  #    日付が古く見えたときだけ「ここ数日の動き」の在りかを1行添える。
+  #    （作業ログがほんとうに新しい日は、よけいな1行を出さない）
+  #    測れなかったとき（日付の形がちがう・awkが無い）は、安全側＝今までどおり出す。
+  log_date="$(printf '%s' "$latest_log" | sed -n 's|^docs/作業ログ_\([0-9-]*\)\.md$|\1|p')"
+  days_old="$(days_between "$log_date" "$(date +%Y-%m-%d)" 2>/dev/null)"
+  if [ -f docs/自己改良バックログ.md ] \
+     && { [ -z "$days_old" ] || [ "$days_old" -ge 3 ] 2>/dev/null; }; then
     echo "- 🌱 ここ数日の動きは docs/自己改良バックログ.md の末尾「📗 改良の記録」（作業ログの日付が古く見えても止まっていません）"
+  fi
 fi
 
 # 🧠 共有メモリ（ローカル⇄クラウド共通の記憶）を読む合図

@@ -2,7 +2,7 @@
 """🗺 CLAUDE.md の「ディレクトリ構成」と、実際のフォルダの中身がそろっているか照合する見張り番。
 
 ■ 📑 この道具がやる照合の一覧（目次・2026-10-20 追加＝自己改良バックログの候補83）
-照合が12種類・800行まで育ったので、「どれがどこに書いてあるか」を先に置いておく。
+照合が14種類・900行まで育ったので、「どれがどこに書いてあるか」を先に置いておく。
 やめた・足した理由などのくわしい話は、それぞれの ■ の見出しに書いてある。
     ① tools/ の道具が、CLAUDE.mdの構成表に載っているか（TARGETS ＋ check）
     ② .github/workflows/ の自動実行が、構成表に載っているか（TARGETS ＋ check）
@@ -16,6 +16,8 @@
     ⑩ livecam-db/ の .py（司令塔と sources/ の情報源）が、livecam-db/README.md のファイル表に載っているか（check_livecam_sources）
     ⑪ .github/workflows/ の自動実行が、docs/自動実行の健康診断表.md の一覧にそろっているか（check_workflow_table）
     ⑫ アイデア帳の📦の行が案内する日付の「📗 改良の記録」に、その候補番号が書いてあるか（check_backlog_records）
+    ⑬ .claude/hooks/ のセッション開始フックが、bash -n（実行しない文法チェック）で通るか（check_hook_syntax）
+    ⑭ 文書に手で書いてあるカメラの台数が、ライブカメラ台帳の実数と合っているか（check_livecam_counts）
 ※ かっこの中は、その照合を書いている**関数の名前**。
    `grep -n "def check_md_links" tools/check_map.py` のように探せば、すぐその場所に飛べる。
 ※ 新しい照合を足したときは、**この目次にも1行足す**（増えたことに気づけるように）。
@@ -118,21 +120,44 @@ Markdownの身内リンクは上で見張れるようになったが、**HTMLの
 そこで `livecam-db/` の .py（根っこの司令塔4つ＋`sources/` の情報源。`__init__.py` は除く）と、
 表の中の「| `○○.py` |」の行を見くらべる（材料はファイル名だけ＝通信も要らない）。
 
+■ 🔢 文書に手で書いてある「カメラの台数」も見張る（2026-11-06 追加＝自己改良バックログの候補37）
+ライブカメラの台数は `livecam-db/data/livecams.json`（台帳）が持っている本物の数だが、
+説明の文書には**読みやすさのために手で書き写した数字**も置いてある
+（`livecam-db/README.md`・`traffic-app/README.md`・`CLAUDE.md` の3枚）。
+台帳は毎週火曜の自動更新で作りなおされるので、この手書きの数字は**黙って古くなる**
+（実際に「ページ内に映像を出せる2,572台」が、83日後には2,493台にズレていた）。
+そこで台帳のJSONを読んで、文書の数字と突き合わせる（材料は手元のJSONだけ＝通信は要らない）。
+※ 見るのは**台帳が落ち着いている数**だけ——全部の台数（`count`）と種類ごとの台数（`byCategory`）。
+   「ページ内に映像を出せる台数」（`withImage`）は**カメラ側の調子で毎週変わる**ので、
+   ここで見張ると毎週 ❌ が出る🐺オオカミ少年になる（＝候補108で学んだこと）。
+   そちらは数字を書くのをやめて `livecam.py info` を見てもらう形にした（＝候補36と同じ直し方）。
+※ 数字の場所は下の LIVECAM_COUNT_SPOTS に手で書いている（文のどこが台数かは機械には決められない）。
+   文書の書き方を変えたときは、しるし（`pattern`）も直す。直し忘れても「台数が見つかりません」と ❌ が出る。
+
 ■ 使い方
     python3 tools/check_map.py
     npm run check:map          （同じもの）
 
 ■ 出力例（◯には実際の個数、日付には実際の日付が入る）
+※ この出力例は `tools/check_docstrings.py` が**実際に走らせて照合**している
+   （2026-11-06 追加＝候補52。◯は「なんらかの数」として当てはめる）。
+   照合を足したときは、下に1行足す。足し忘れると書き換えのズレに気づけなくなる。
+   「または …」の行は「手元の環境によってはこちらが出る」という意味。
     ✅ tools/ の◯個の道具は、すべてCLAUDE.mdの構成表に載っています。
     ✅ .github/workflows/ の◯枚の自動実行は、すべてCLAUDE.mdの構成表に載っています。
     ✅ .claude/skills/ の◯つの型（スキル）は、すべてCLAUDE.mdの構成表に載っています（SKILL.md も◯つとも1枚ずつあります）。
     ✅ docs/ の◯枚の文書は、すべて docs/README.md の目次に載っています（最新の作業ログの案内も ◯◯◯◯-◯◯-◯◯ で合っています）。
     ✅ Markdown ◯枚の中の内部リンク◯本（Markdown ◯本・道具や画像など◯本）は、すべて実物にたどり着けます。
-    ✅ 公開ページ◯枚の中のリンク◯本は、すべて公開しているファイルにたどり着けます。
+    ✅ 公開ページ◯枚の中の行き先◯本（リンク＋JSが読む控えのデータ）は、すべて公開しているファイルにたどり着けます。
     ✅ 公開ページ◯つは、一覧を持つ◯つの文書すべてに載っています。
     ✅ 公開ページ◯つとも、フッターに自分の公開URLへのリンクがあります。
     ✅ livecam-db/ の◯つのプログラム（司令塔と情報源）は、すべて livecam-db/README.md のファイル表に載っています。
     ✅ 自動実行の◯つは、すべて docs/自動実行の健康診断表.md の一覧に載っています。
+    ✅ アイデア帳の📦の◯行は、すべて案内先の日付の記録に候補番号が書いてあります。
+    ✅ セッション開始フック◯本は、文法のうえでこわれていません（bash -n）。
+    または ⏭ 使える bash が見つからないので、セッション開始フックの文法の点検は飛ばしました。
+    ✅ 文書に書いてあるカメラの台数◯か所は、台帳（livecam-db/data/livecams.json）の実数と合っています。
+    ✅ 先頭の目次は、実際の照合◯種類とそろっています。
 
 ズレていたときは、足りない側を ❌ で並べて表示し、終了コード1で終わる。
 ※ 直すのは人の仕事（この道具はCLAUDE.mdを書き換えない）。地図の説明文は
@@ -145,7 +170,10 @@ Markdownの身内リンクは上で見張れるようになったが、**HTMLの
 
 from __future__ import annotations
 
+import json
 import re
+import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -249,6 +277,55 @@ PAGES_BASE_URL = "https://non-x2.github.io/non-x2/"
 # `<footer>…</footer>` のあいだだけを取り出して、その中を見る。
 # 📏 公開4ページとも `<footer>` はちょうど1つずつ（2026-10-17 に実測）。
 FOOTER_RE = re.compile(r"<footer[^>]*>.*?</footer>", re.DOTALL)
+
+# 📷 文書に手で書いてある「カメラの台数」の照合に使うもの
+#    （2026-11-06 追加＝自己改良バックログの候補37）
+LIVECAM_LEDGER = REPO_ROOT / "livecam-db/data/livecams.json"
+# path    : 台数が書かれている文書
+# where   : 文書のどのあたりの話か（❌ のときに人がすぐ探せるように）
+# pattern : その数字だけを取り出すしるし（( ) の中が数字）
+# keys    : ( ) の順に対応する台帳の場所。"count"＝全部の台数／"cat:○○"＝種類ごとの台数
+LIVECAM_COUNT_SPOTS = [
+    {
+        "path": "livecam-db/README.md",
+        "where": "いま入っているカメラ・全部の台数",
+        "pattern": r"いまは\*\*([\d,]+)台\*\*",
+        "keys": ["count"],
+    },
+    {
+        "path": "livecam-db/README.md",
+        "where": "いま入っているカメラ・種類ごとの台数",
+        "pattern": r"一般道([\d,]+)・高速([\d,]+)・河川([\d,]+)・ダム([\d,]+)・海([\d,]+)",
+        "keys": ["cat:road", "cat:expressway", "cat:river", "cat:dam", "cat:sea"],
+    },
+    {
+        "path": "livecam-db/README.md",
+        "where": "🛣 高速道路について",
+        "pattern": r"名阪国道など \*\*([\d,]+)台\*\*",
+        "keys": ["cat:expressway"],
+    },
+    {
+        "path": "traffic-app/README.md",
+        "where": "現在の内訳の表・全国のカメラ",
+        "pattern": r"\|\s*全国のカメラ\s*\|\s*\*\*([\d,]+)台\*\*",
+        "keys": ["count"],
+    },
+    {
+        "path": "traffic-app/README.md",
+        "where": "種類の内訳",
+        "pattern": (
+            r"一般道 ([\d,]+)／\*\*高速・自動車専用道路 ([\d,]+)\*\*／"
+            r"河川 ([\d,]+)／ダム ([\d,]+)／海（灯台・港）([\d,]+)"
+        ),
+        "keys": ["cat:road", "cat:expressway", "cat:river", "cat:dam", "cat:sea"],
+    },
+    {
+        "path": "CLAUDE.md",
+        "where": "🚗交通・ライブカメラの「高速道路は道路に含まれる」",
+        "pattern": r"高速・自動車専用道路のみ（([\d,]+)台）",
+        "keys": ["cat:expressway"],
+    },
+]
 
 # 「それより古いもの(2026-08-01 以前)はファイル一覧から探してください。」の線引きの日付
 CUTOFF_RE = re.compile(r"それより古いもの[（(](\d{4}-\d{2}-\d{2})\s*以前[）)]")
@@ -836,6 +913,126 @@ def check_backlog_records() -> bool:
     return True
 
 
+def check_hook_syntax() -> bool:
+    """`.claude/hooks/*.sh`（セッション開始フック）が、文法のうえでこわれていないか照合する。
+
+    セッション開始フックは毎回いちばん最初に走るのに、これまでどの点検の相手にも
+    なっていなかった（2026-11-04 候補115）。中身のロジックまでは試さず、
+    `bash -n`（実行せずに文法だけ調べる）で「閉じ忘れ・打ち間違い」だけを見張る。
+    ⚠️ 実行はしない＝フックが何かを書き換えることは無い。材料はローカルのファイルだけ。
+    ⚠️ `bash` が見つからない環境（素のWindowsなど）は**飛ばして✅**にする
+       （点検できないのを❌にすると、道具のせいでない嘘の赤が出るため。飛ばしたことは表示する）。
+    """
+    hooks = sorted((REPO_ROOT / ".claude" / "hooks").glob("*.sh"))
+    if not hooks:
+        print("❌ .claude/hooks/ に .sh が1つも見つかりません（引っ越し・消えた？）")
+        return False
+    bash = shutil.which("bash")
+    # ⚠️ ワナ：素のWindowsの `bash` は WSL の入口（C:\Windows\System32\bash.exe）のことがあり、
+    #    ① Windowsのパス（C:\…）を渡すと「No such file」で落ちる（作った日に実際に嘘の❌が出た）
+    #    ② WSLの中身が未導入だと起動じたいに失敗する。
+    #    だから①ファイルは**パスで渡さず標準入力で渡し**、②先に `exit 0` だけ走らせて動くか試す。
+    # ⚠️ ワナ：Windowsのgitは取り出すときに改行を CRLF へ変えることがある（リポジトリ内はLF）。
+    #    そのまま bash に渡すと「unexpected token」で落ちる（これも作った日に嘘の❌が出た）ので、
+    #    CRLF は LF に戻してから渡す。
+    if bash is None or subprocess.run([bash, "-c", "exit 0"], capture_output=True).returncode != 0:
+        print("⏭ 使える bash が見つからないので、セッション開始フックの文法の点検は飛ばしました。")
+        return True
+
+    problems: list[str] = []
+    for hook in hooks:
+        done = subprocess.run(
+            [bash, "-n"],
+            input=hook.read_bytes().replace(b"\r\n", b"\n"),
+            capture_output=True,
+        )
+        done.stderr = done.stderr.decode("utf-8", errors="replace")
+        if done.returncode != 0:
+            first = (done.stderr or "").strip().splitlines()[:1]
+            problems.append(f"❌ {hook.relative_to(REPO_ROOT).as_posix()} の文法がこわれています：{''.join(first)}")
+    if problems:
+        for problem in problems:
+            print(problem)
+        return False
+
+    print(f"✅ セッション開始フック{len(hooks)}本は、文法のうえでこわれていません（bash -n）。")
+    return True
+
+
+def _ledger_count(ledger: dict, key: str) -> int | None:
+    """台帳（JSON）から、見張りたい数を1つ取り出す。無ければ None。"""
+    if key == "count":
+        value = ledger.get("count")
+    elif key.startswith("cat:"):
+        value = (ledger.get("byCategory") or {}).get(key[4:])
+    else:
+        value = None
+    return value if isinstance(value, int) else None
+
+
+def check_livecam_counts() -> bool:
+    """文書に手で書いてあるカメラの台数が、台帳（livecams.json）の実数と合っているか照合する。
+
+    台帳は毎週火曜の自動更新で作りなおされるので、文書に書き写した数字は黙って古くなる
+    （2026-11-06 に発見＝候補37。「ページ内に映像を出せる2,572台」が83日後には2,493台）。
+    見張るのは落ち着いている数（`count`・`byCategory`）だけ。理由は先頭の■に書いてある。
+    """
+    if not LIVECAM_LEDGER.exists():
+        print("❌ livecam-db/data/livecams.json（台帳）が見つかりません（引っ越し・名前変え？）")
+        return False
+    try:
+        ledger = json.loads(LIVECAM_LEDGER.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        print("❌ livecam-db/data/livecams.json（台帳）が読めません（こわれている？）")
+        return False
+
+    problems: list[str] = []
+    checked = 0
+    for spot in LIVECAM_COUNT_SPOTS:
+        doc = REPO_ROOT / spot["path"]
+        if not doc.exists():
+            problems.append(f"❌ {spot['path']} が見つかりません（引っ越し・名前変え？）")
+            continue
+        found = re.search(spot["pattern"], doc.read_text(encoding="utf-8"))
+        if found is None:
+            problems.append(
+                f"❌ {spot['path']} の「{spot['where']}」から台数が見つかりません"
+                "（文書の書き方を変えたら、tools/check_map.py の"
+                " LIVECAM_COUNT_SPOTS のしるしも直してください）"
+            )
+            continue
+        if len(found.groups()) != len(spot["keys"]):
+            problems.append(
+                f"❌ {spot['path']} の「{spot['where']}」のしるしと台帳の対応表がズレています"
+                "（tools/check_map.py の LIVECAM_COUNT_SPOTS を見直してください）"
+            )
+            continue
+        for written, key in zip(found.groups(), spot["keys"]):
+            actual = _ledger_count(ledger, key)
+            if actual is None:
+                problems.append(
+                    f"❌ 台帳に「{key}」の数がありません（台帳の形が変わった？）"
+                )
+                continue
+            checked += 1
+            if int(written.replace(",", "")) != actual:
+                problems.append(
+                    f"❌ {spot['path']} の「{spot['where']}」が {written} になっていますが、"
+                    f"台帳の実数は {actual:,} です（文書の数字を書き替えてください）"
+                )
+
+    if problems:
+        for problem in problems:
+            print(problem)
+        return False
+
+    print(
+        f"✅ 文書に書いてあるカメラの台数{checked}か所は、"
+        "台帳（livecam-db/data/livecams.json）の実数と合っています。"
+    )
+    return True
+
+
 def check_toc() -> bool:
     """この道具の先頭にある「📑 照合の一覧（目次）」が、実際の照合とそろっているか照合する。
 
@@ -913,6 +1110,8 @@ def main() -> int:
     livecam_ok = check_livecam_sources()
     workflow_table_ok = check_workflow_table()
     backlog_ok = check_backlog_records()
+    hooks_ok = check_hook_syntax()
+    livecam_counts_ok = check_livecam_counts()
     toc_ok = check_toc()
 
     if (
@@ -925,6 +1124,8 @@ def main() -> int:
         and livecam_ok
         and workflow_table_ok
         and backlog_ok
+        and hooks_ok
+        and livecam_counts_ok
         and toc_ok
     ):
         return 0
@@ -960,6 +1161,9 @@ def main() -> int:
     if not backlog_ok:
         print("\n❌ アイデア帳の📦の行が案内する日付の記録に、その候補番号がありません。")
         print("   その日の「📗 改良の記録」の行に「候補◯」を書き足してください（同じ日に2件あると迷うため）。")
+    if not livecam_counts_ok:
+        print("\n❌ 文書に書いてあるカメラの台数が、ライブカメラ台帳の実数とズレています。")
+        print("   その文書の数字を、台帳（`python3 livecam-db/livecam.py info` で見られます）に合わせてください。")
     if not toc_ok:
         print("\n❌ この道具の先頭の目次（📑 照合の一覧）が、実際の照合とズレています。")
         print("   tools/check_map.py の先頭の目次に、足した照合の1行を書き足してください。")
