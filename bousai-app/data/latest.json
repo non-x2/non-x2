@@ -1,7 +1,47 @@
 {
- "generatedAt": "2026-11-08T00:05:04+09:00",
+ "generatedAt": "2026-11-08T04:35:20+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20261108023143",
+   "time": "2026-11-08T02:31:00+09:00",
+   "place": "渡島地方東部",
+   "magnitude": 2.9,
+   "maxIntensity": "2",
+   "depthKm": 0.0
+  },
+  {
+   "id": "20261108023059",
+   "time": "2026-11-08T02:30:00+09:00",
+   "place": "茨城県南部",
+   "magnitude": 3.2,
+   "maxIntensity": "1",
+   "depthKm": 60.0
+  },
+  {
+   "id": "20261108020357",
+   "time": "2026-11-08T02:03:00+09:00",
+   "place": "愛知県東部",
+   "magnitude": 3.3,
+   "maxIntensity": "2",
+   "depthKm": 40.0
+  },
+  {
+   "id": "20261108010441",
+   "time": "2026-11-08T01:04:00+09:00",
+   "place": "静岡県西部",
+   "magnitude": 5.7,
+   "maxIntensity": "5+",
+   "depthKm": 41.0
+  },
+  {
+   "id": "20261108004200",
+   "time": "2026-11-08T00:42:00+09:00",
+   "place": "岩手県沖",
+   "magnitude": 4.1,
+   "maxIntensity": "1",
+   "depthKm": 20.0
+  },
   {
    "id": "20261107224830",
    "time": "2026-11-07T22:48:00+09:00",
@@ -81,46 +121,6 @@
    "magnitude": 3.7,
    "maxIntensity": "1",
    "depthKm": 140.0
-  },
-  {
-   "id": "20261106030553",
-   "time": "2026-11-06T03:05:00+09:00",
-   "place": "福島県沖",
-   "magnitude": 4.3,
-   "maxIntensity": "2",
-   "depthKm": 80.0
-  },
-  {
-   "id": "20261105141648",
-   "time": "2026-11-05T14:16:00+09:00",
-   "place": "鹿児島県薩摩地方",
-   "magnitude": 2.8,
-   "maxIntensity": "2",
-   "depthKm": 10.0
-  },
-  {
-   "id": "20261105113536",
-   "time": "2026-11-05T11:35:00+09:00",
-   "place": "千葉県南東沖",
-   "magnitude": 3.4,
-   "maxIntensity": "1",
-   "depthKm": 70.0
-  },
-  {
-   "id": "20261105042852",
-   "time": "2026-11-05T04:28:00+09:00",
-   "place": "鹿児島県薩摩地方",
-   "magnitude": 3.1,
-   "maxIntensity": "2",
-   "depthKm": 10.0
-  },
-  {
-   "id": "20261105042154",
-   "time": "2026-11-05T04:21:00+09:00",
-   "place": "宮城県沖",
-   "magnitude": 4.1,
-   "maxIntensity": "1",
-   "depthKm": 50.0
   }
  ],
  "tsunami": {
