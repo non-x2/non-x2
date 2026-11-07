@@ -1,7 +1,15 @@
 {
- "generatedAt": "2026-11-07T06:01:30+09:00",
+ "generatedAt": "2026-11-07T10:09:17+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20261107063022",
+   "time": "2026-11-07T06:30:00+09:00",
+   "place": "山口県中部",
+   "magnitude": 2.9,
+   "maxIntensity": "2",
+   "depthKm": 10.0
+  },
   {
    "id": "20261107035357",
    "time": "2026-11-07T03:54:00+09:00",
@@ -113,14 +121,6 @@
    "magnitude": 3.4,
    "maxIntensity": "2",
    "depthKm": 60.0
-  },
-  {
-   "id": "20261104051155",
-   "time": "2026-11-04T05:11:00+09:00",
-   "place": "和歌山県北部",
-   "magnitude": 1.9,
-   "maxIntensity": "1",
-   "depthKm": 10.0
   }
  ],
  "tsunami": {
