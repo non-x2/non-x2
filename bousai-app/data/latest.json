@@ -1,7 +1,39 @@
 {
- "generatedAt": "2026-11-09T08:05:59+09:00",
+ "generatedAt": "2026-11-09T21:03:25+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20261109183532",
+   "time": "2026-11-09T18:35:00+09:00",
+   "place": "長野県南部",
+   "magnitude": 2.3,
+   "maxIntensity": "1",
+   "depthKm": 10.0
+  },
+  {
+   "id": "20261109170000",
+   "time": "2026-11-09T17:00:00+09:00",
+   "place": "",
+   "magnitude": null,
+   "maxIntensity": "",
+   "depthKm": null
+  },
+  {
+   "id": "20261109140157",
+   "time": "2026-11-09T14:01:00+09:00",
+   "place": "茨城県沖",
+   "magnitude": 4.5,
+   "maxIntensity": "1",
+   "depthKm": 40.0
+  },
+  {
+   "id": "20261109135259",
+   "time": "2026-11-09T13:52:00+09:00",
+   "place": "茨城県沖",
+   "magnitude": 5.9,
+   "maxIntensity": "3",
+   "depthKm": 10.0
+  },
   {
    "id": "20261109051637",
    "time": "2026-11-09T05:16:00+09:00",
@@ -89,38 +121,6 @@
    "magnitude": 3.3,
    "maxIntensity": "2",
    "depthKm": 40.0
-  },
-  {
-   "id": "20261108010441",
-   "time": "2026-11-08T01:04:00+09:00",
-   "place": "静岡県西部",
-   "magnitude": 5.7,
-   "maxIntensity": "5+",
-   "depthKm": 41.0
-  },
-  {
-   "id": "20261108004200",
-   "time": "2026-11-08T00:42:00+09:00",
-   "place": "岩手県沖",
-   "magnitude": 4.1,
-   "maxIntensity": "1",
-   "depthKm": 20.0
-  },
-  {
-   "id": "20261107224830",
-   "time": "2026-11-07T22:48:00+09:00",
-   "place": "福島県沖",
-   "magnitude": 3.6,
-   "maxIntensity": "1",
-   "depthKm": 60.0
-  },
-  {
-   "id": "20261107200747",
-   "time": "2026-11-07T20:07:00+09:00",
-   "place": "茨城県沖",
-   "magnitude": 5.6,
-   "maxIntensity": "3",
-   "depthKm": 20.0
   }
  ],
  "tsunami": {
