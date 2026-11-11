@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-11T05:55:51+09:00",
+ "generatedAt": "2026-11-11T10:20:30+09:00",
  "source": "気象庁（https://www.jma.go.jp/bosai/typhoon/）",
  "count": 1,
  "typhoons": [
@@ -10,22 +10,22 @@
    "name": "チャンパカ",
    "nameEn": "Cempaka",
    "category": "台風",
-   "issue": "2026-11-11T03:50:00+09:00",
+   "issue": "2026-11-11T09:45:00+09:00",
    "analysis": {
     "hours": 0,
     "label": "実況",
-    "validTime": "2026-11-11T03:00:00+09:00",
+    "validTime": "2026-11-11T09:00:00+09:00",
     "category": "台風",
     "intensity": "強い",
     "scale": "",
-    "location": "父島の東約210km",
+    "location": "小笠原近海",
     "course": "東北東",
-    "speedKmh": "45",
-    "pressure": 970.0,
-    "windMs": 40.0,
-    "gustMs": 55.0,
-    "lat": 26.9,
-    "lon": 144.3,
+    "speedKmh": "40",
+    "pressure": 980.0,
+    "windMs": 35.0,
+    "gustMs": 50.0,
+    "lat": 27.7,
+    "lon": 146.6,
     "circleKm": null,
     "stormRadiusKm": 75.0,
     "galeRadiusKm": 280.0
@@ -34,38 +34,38 @@
     {
      "hours": 12,
      "label": "予報　１２時間後",
-     "validTime": "2026-11-11T15:00:00+09:00",
+     "validTime": "2026-11-11T21:00:00+09:00",
      "category": "台風",
-     "intensity": "強い",
+     "intensity": "-",
      "scale": "",
      "location": "南鳥島近海",
      "course": "東北東",
-     "speedKmh": "45",
-     "pressure": 985.0,
-     "windMs": 35.0,
-     "gustMs": 50.0,
-     "lat": 28.3,
-     "lon": 149.2,
+     "speedKmh": "50",
+     "pressure": 990.0,
+     "windMs": 30.0,
+     "gustMs": 45.0,
+     "lat": 29.2,
+     "lon": 152.5,
      "circleKm": 85.0,
      "stormRadiusKm": 175.0
     },
     {
      "hours": 24,
      "label": "予報　２４時間後",
-     "validTime": "2026-11-12T03:00:00+09:00",
+     "validTime": "2026-11-12T09:00:00+09:00",
      "category": "温帯低気圧",
      "intensity": "-",
      "scale": "",
-     "location": "南鳥島近海",
+     "location": "日本のはるか東",
      "course": "東北東",
-     "speedKmh": "55",
+     "speedKmh": "60",
      "pressure": 992.0,
      "windMs": 30.0,
      "gustMs": 40.0,
-     "lat": 30.0,
-     "lon": 155.8,
+     "lat": 31.4,
+     "lon": 159.7,
      "circleKm": 120.0,
-     "stormRadiusKm": 230.0
+     "stormRadiusKm": 210.0
     }
    ],
    "track": [
@@ -220,6 +220,14 @@
     [
      26.9,
      144.3
+    ],
+    [
+     27.3,
+     145.9
+    ],
+    [
+     27.7,
+     146.6
     ]
    ]
   }
