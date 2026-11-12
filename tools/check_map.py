@@ -2,7 +2,7 @@
 """🗺 CLAUDE.md の「ディレクトリ構成」と、実際のフォルダの中身がそろっているか照合する見張り番。
 
 ■ 📑 この道具がやる照合の一覧（目次・2026-10-20 追加＝自己改良バックログの候補83）
-照合が14種類・900行まで育ったので、「どれがどこに書いてあるか」を先に置いておく。
+照合が15種類・900行まで育ったので、「どれがどこに書いてあるか」を先に置いておく。
 やめた・足した理由などのくわしい話は、それぞれの ■ の見出しに書いてある。
     ① tools/ の道具が、CLAUDE.mdの構成表に載っているか（TARGETS ＋ check）
     ② .github/workflows/ の自動実行が、構成表に載っているか（TARGETS ＋ check）
@@ -18,6 +18,7 @@
     ⑫ アイデア帳の📦の行が案内する日付の「📗 改良の記録」に、その候補番号が書いてあるか（check_backlog_records）
     ⑬ .claude/hooks/ のセッション開始フックが、bash -n（実行しない文法チェック）で通るか（check_hook_syntax）
     ⑭ 文書に手で書いてあるカメラの台数が、ライブカメラ台帳の実数と合っているか（check_livecam_counts）
+    ⑮ アイデア帳の「📗 改良の記録」のPR欄に、番号（#数字）が入っているか（未記入のまま残っていないか）（check_record_prs）
 ※ かっこの中は、その照合を書いている**関数の名前**。
    `grep -n "def check_md_links" tools/check_map.py` のように探せば、すぐその場所に飛べる。
 ※ 新しい照合を足したときは、**この目次にも1行足す**（増えたことに気づけるように）。
@@ -154,6 +155,7 @@ Markdownの身内リンクは上で見張れるようになったが、**HTMLの
     ✅ livecam-db/ の◯つのプログラム（司令塔と情報源）は、すべて livecam-db/README.md のファイル表に載っています。
     ✅ 自動実行の◯つは、すべて docs/自動実行の健康診断表.md の一覧に載っています。
     ✅ アイデア帳の📦の◯行は、すべて案内先の日付の記録に候補番号が書いてあります。
+    ✅ 📗改良の記録の◯行は、すべてPR欄に番号（#数字）が入っています。
     ✅ セッション開始フック◯本は、文法のうえでこわれていません（bash -n）。
     または ⏭ 使える bash が見つからないので、セッション開始フックの文法の点検は飛ばしました。
     ✅ 文書に書いてあるカメラの台数◯か所は、台帳（livecam-db/data/livecams.json）の実数と合っています。
@@ -913,6 +915,55 @@ def check_backlog_records() -> bool:
     return True
 
 
+def check_record_prs() -> bool:
+    """アイデア帳の「📗 改良の記録」の表で、PR欄が「未記入のまま」残っていないか照合する。
+
+    記録の行はPRを作る前に書くので、PR欄に `#（このPR）` のような目印を入れておき、
+    PRを作ったあとで番号に直す。この直し忘れが 2026-10-12 の行で**1か月**見つからなかった
+    （実際は #104＝候補133）。材料はこのファイルの中だけ（通信なし）。
+    PR欄が OK なのは次の2つだけ：
+        ① `#` ＋数字が入っている（例：`#104`・`ドラフトPR #112（6件目ではなく整理）`）
+        ② PRを作らなかった昔の行の `#—`（ダッシュ）
+    ⚠️ ワナ：「目印のまま」は `#（このPR）` のほかに、空欄や `候補58` のように
+       **別の欄の値を書き間違えた**ものもある（実測で2行あった）。だから「目印の文字を探す」
+       のではなく、**OKの形に当てはまらないものを全部**拾う。
+    ⚠️ PRを新しく作る日は、PRを作る前の一瞬だけ ❌ になる（作ったあと番号に直せば消える）。
+       それが狙い＝直し忘れをその場で知らせること。
+    """
+    backlog = REPO_ROOT / "docs" / "自己改良バックログ.md"
+    if not backlog.exists():
+        print("❌ docs/自己改良バックログ.md が見つかりません（引っ越し・名前変え？）")
+        return False
+    log = re.search(r"^## 📗 改良の記録.*", backlog.read_text(encoding="utf-8"), re.M | re.S)
+    if log is None:
+        print("❌ アイデア帳から「📗 改良の記録」の見出しが消えています。")
+        return False
+
+    problems: list[str] = []
+    checked = 0
+    # 行の先頭の日付つきセルと、行の最後のセル（PR欄）を取る
+    for first, last in re.findall(
+        r"^\|\s*(\d{4}-\d{2}-\d{2}[^|\n]*?)\s*\|[^\n]*\|([^|\n]*)\|\s*$", log.group(0), re.M
+    ):
+        checked += 1
+        cell = last.strip()
+        if cell in ("#—", "—"):
+            continue
+        if re.search(r"#\d+", cell) and "このPR" not in cell:
+            continue
+        problems.append(
+            f"❌ 📗改良の記録の「{first}」の行のPR欄が「{cell or '（空欄）'}」のままです"
+            "（PRを作ったら、番号を `#104` の形で入れてください）"
+        )
+    if problems:
+        for problem in problems:
+            print(problem)
+        return False
+
+    print(f"✅ 📗改良の記録の{checked}行は、すべてPR欄に番号（#数字）が入っています。")
+    return True
+
+
 def check_hook_syntax() -> bool:
     """`.claude/hooks/*.sh`（セッション開始フック）が、文法のうえでこわれていないか照合する。
 
@@ -1110,6 +1161,7 @@ def main() -> int:
     livecam_ok = check_livecam_sources()
     workflow_table_ok = check_workflow_table()
     backlog_ok = check_backlog_records()
+    record_prs_ok = check_record_prs()
     hooks_ok = check_hook_syntax()
     livecam_counts_ok = check_livecam_counts()
     toc_ok = check_toc()
@@ -1124,6 +1176,7 @@ def main() -> int:
         and livecam_ok
         and workflow_table_ok
         and backlog_ok
+        and record_prs_ok
         and hooks_ok
         and livecam_counts_ok
         and toc_ok
