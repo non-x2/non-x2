@@ -40,6 +40,12 @@ import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
+# Windows（日本語）の画面でも絵文字（✅など）で落ちないよう、出力を utf-8 にそろえる
+# （Linux の GitHub Actions では元から utf-8 なので変化なし）
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8")
+
 JST = timezone(timedelta(hours=9), "JST")
 
 # 画面に長々と出さないための上限（本文は削らない。道具の表示だけ短くする）

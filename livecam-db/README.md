@@ -171,12 +171,21 @@ python3 livecam-db/build_world.py --no-verify  # 写真の確認をとばす
 - 🔄 **更新は週1**（毎週火5:10の `livecam-update.yml` に相乗り）。
   世界分の取得が失敗しても日本の更新は止めません（`continue-on-error`）。
   失敗時は `build_world.py` が既存ファイルを書き換えずに終わるので、前回の台帳が残ります。
+- 🔢 **台帳の中に `count` が2種類あります（読み違えに注意）**：
+  - いちばん上の `count`＝**台帳に実際に入った台数**（ページに出る台数。重複をまとめた後）
+  - `sources[].count`＝**その情報源から集めた台数**（重複をまとめる前。各 `sources/○○.py` の `len(cams)`）。
+    前回より大きく減ったら中止する安全装置（`SOURCE_MIN_RATIO`）は、こちらで見ています。
+  - 📏 2026-10-27 に数えた時点で：🇺🇸アイオワ＝集めた **1,260** 台 → 台帳に入ったのは **860** 台（同じ写真・同じ場所のカメラが1つにまとまるため）／🇨🇦BC州＝**1,033** 台 → **1,033** 台（減らない）。
+    「アイオワは1,260台のはずなのに860台しか出ない」は**故障ではありません**。台帳での実数は `cams` の `src` ごとに数えると分かります。
 
 | 情報源 | 中身 | 利用条件 |
 |---|---|---|
-| 🇺🇸 アイオワ州交通局（Iowa DOT） | 高速道路（I-系）・一般道・休憩施設・道路気象カメラ 約1,200件 | **CC BY 4.0**＝出典を書けば再利用可。出典：Iowa Department of Transportation - Office of Traffic Operations |
-| 🇨🇦 ブリティッシュコロンビア州（DriveBC） | 州道のカメラ 約1,030台 | **Open Government Licence – British Columbia**。出典：Contains information licensed under the Open Government Licence – British Columbia. |
-| 🇫🇮 フィンランド（Fintraffic Digitraffic） | 道路気象カメラ 約810地点（**1地点＝写真1枚**） | **CC BY 4.0**（商用も可）。出典：Source: Fintraffic / digitraffic.fi, license CC 4.0 BY |
+| 🇺🇸 アイオワ州交通局（Iowa DOT） | 高速道路（I-系）・一般道・休憩施設・道路気象カメラ | **CC BY 4.0**＝出典を書けば再利用可。出典：Iowa Department of Transportation - Office of Traffic Operations |
+| 🇨🇦 BC州交通省（DriveBC HighwayCams）＝2026-08-19 追加 | 州道・高速道路の道路カメラ（他所が写真を提供している分は除外＝下の「🇨🇦 BC州の取り込みの記録」） | **Open Government Licence – British Columbia**＝出典を書けば商用も含め再利用可。出典：Contains information licensed under the Open Government Licence – British Columbia. |
+| 🇫🇮 フィンランド（Fintraffic Digitraffic） | 道路気象カメラ（**1地点＝写真1枚**） | **CC BY 4.0**（商用も可）。出典：Source: Fintraffic / digitraffic.fi, license CC 4.0 BY |
+
+
+> 🔢 台数はこの表に書きません（時間とともに嘘になるため）。最新の台数は台帳の `count`（全体）と、`cams` を `src` ごとに数えた数を見てください（上の📏の行）。
 
 > 🔎 **なぜアイオワ州から？** 2026-08-16 に米国5州を調査した結果、「機械で読める一括データ」と
 > 「はっきりした利用許可」の両方がそろっていたのがアイオワ州だけだったためです（下の記録を参照）。
@@ -571,7 +580,7 @@ python3 livecam-db/build_world.py --no-verify  # 写真の確認をとばす
 | `sources/jice.py` | 情報源①：JICE の道路／河川ライブカメラ |
 | `sources/kaiho.py` | 情報源②：海上保安庁のライブカメラ（灯台・港・岬） |
 | `sources/us_iowa.py` | 情報源③：🌍 アイオワ州交通局の道路カメラ（世界台帳・試験） |
-| `sources/ca_bc.py` | 情報源④：🌍 カナダBC州の道路カメラ（世界台帳・試験） |
+| `sources/ca_bc.py` | 情報源④：🌍 カナダ BC州の道路カメラ DriveBC（世界台帳・試験） |
 | `sources/fi_digitraffic.py` | 情報源⑤：🌍 フィンランドの道路気象カメラ（世界台帳・試験） |
 | `data/livecams.json` | できあがった台帳（**大もと**） |
 | `data/livecams_world.json` | 🌍 世界台帳（試験・**日本のアプリには配らない**） |

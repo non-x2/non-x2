@@ -1,6 +1,26 @@
 #!/usr/bin/env python3
 """🗺 CLAUDE.md の「ディレクトリ構成」と、実際のフォルダの中身がそろっているか照合する見張り番。
 
+■ 📑 この道具がやる照合の一覧（目次・2026-10-20 追加＝自己改良バックログの候補83）
+照合が12種類・800行まで育ったので、「どれがどこに書いてあるか」を先に置いておく。
+やめた・足した理由などのくわしい話は、それぞれの ■ の見出しに書いてある。
+    ① tools/ の道具が、CLAUDE.mdの構成表に載っているか（TARGETS ＋ check）
+    ② .github/workflows/ の自動実行が、構成表に載っているか（TARGETS ＋ check）
+    ③ .claude/skills/ の型が構成表に載っているか＋中に SKILL.md が1枚あるか（TARGETS ＋ check）
+    ④ docs/ の文書・作業ログが、docs/README.md の目次に載っているか（check_docs_index）
+    ⑤ Markdownの中の身内リンクが、実物にたどり着けるか（check_md_links）
+    ⑥ 公開ページの中のリンク（href・src＋JSが読む控えのデータ）の行き先（check_html_links）
+    ⑦ 公開ページが、一覧を持つ4つの文書すべてに載っているか（check_page_lists）
+    ⑧ 公開ページのフッターに、自分の公開URLへのリンクがあるか（check_page_footers）
+    ⑨ この目次じたいが、実際の照合とそろっているか（check_toc）
+    ⑩ livecam-db/ の .py（司令塔と sources/ の情報源）が、livecam-db/README.md のファイル表に載っているか（check_livecam_sources）
+    ⑪ .github/workflows/ の自動実行が、docs/自動実行の健康診断表.md の一覧にそろっているか（check_workflow_table）
+    ⑫ アイデア帳の📦の行が案内する日付の「📗 改良の記録」に、その候補番号が書いてあるか（check_backlog_records）
+※ かっこの中は、その照合を書いている**関数の名前**。
+   `grep -n "def check_md_links" tools/check_map.py` のように探せば、すぐその場所に飛べる。
+※ 新しい照合を足したときは、**この目次にも1行足す**（増えたことに気づけるように）。
+   書き足し忘れても、⑨が自分で気づいて ❌ を出す（2026-10-21 追加＝候補95）。
+
 ■ なぜ必要か
 CLAUDE.md の構成表は、新しいセッションが毎回いちばん最初に読む「のんラボの地図」。
 ところがファイルを新しく作ったとき、この表に書き足すのを**忘れやすい**
@@ -37,6 +57,14 @@ CLAUDE.md の構成表は、新しいセッションが毎回いちばん最初�
 リンク先の実物があるか確かめる（材料は手元のファイル名だけ＝通信は要らない）。
 ※ `docs/◯◯.md` や `作業ログ_....md` のような**書き方の見本**は、実物が無くて
    当たり前なので数えない（◯・○・…・* が入っているリンク先は見本とみなす）。
+🔗 **2026-10-19 に対象を広げた（候補73）**：いままでは行き先が `.md` のときだけ
+   見ていたが、`[check_map.py](../tools/check_map.py)` のような**道具（.py）・
+   画像（.png）・フォルダ行き**のリンクも見るようにした（実測＝そのほか12本）。
+   文書から道具や画像を指すリンクも、引っ越せば同じように黙って切れるため。
+※ 「`…`」や ``` で囲んだ**コードの中のリンク**は数えない（2026-10-19 追加）。
+   囲みを外さないと、説明のために書いた見本（アイデア帳の候補73の文中にある
+   `[check_map.py](tools/check_map.py)` など）を本物のリンクと見まちがえて
+   **嘘の❌**を出す（広げる前に実測して1件見つけた）。
 
 ■ 🌐 公開ページどうしのリンクも見張る（2026-10-13 追加＝自己改良バックログの候補75）
 Markdownの身内リンクは上で見張れるようになったが、**HTMLの `href` / `src`** は
@@ -80,6 +108,15 @@ Markdownの身内リンクは上で見張れるようになったが、**HTMLの
    前は「ページのどこかに公開URLがあれば ✅」だったので、本文の途中に書いてあるだけでも
    通ってしまった（＝フッターから消しても気づけない）。公開4ページとも `<footer>` を
    ちょうど1つずつ持っていることを実測したうえで、その中だけを見る形にした。
+※ 約束：公開ページの最後の案内欄は **`<footer>` タグ**で作る（`<div class="footer">` だと
+   リンクがあっても「見当たりません」と❌になる＝候補84。CLAUDE.md の慣習欄にも同じ1行がある）。
+
+■ 📷 ライブカメラ台帳の「ファイル表」も見張る（2026-10-29 追加＝自己改良バックログの候補103）
+`livecam-db/README.md` の最後にある「ファイル一覧の表」も、手で書き写した地図の1つ。
+2026-10-28 に見たら、🇨🇦BC州の情報源 `sources/ca_bc.py` が**約70日間**載っていなかった
+（2026-08-19 に足したとき、情報源の表＝候補102 と同じく書き足し忘れ）。
+そこで `livecam-db/` の .py（根っこの司令塔4つ＋`sources/` の情報源。`__init__.py` は除く）と、
+表の中の「| `○○.py` |」の行を見くらべる（材料はファイル名だけ＝通信も要らない）。
 
 ■ 使い方
     python3 tools/check_map.py
@@ -90,10 +127,12 @@ Markdownの身内リンクは上で見張れるようになったが、**HTMLの
     ✅ .github/workflows/ の◯枚の自動実行は、すべてCLAUDE.mdの構成表に載っています。
     ✅ .claude/skills/ の◯つの型（スキル）は、すべてCLAUDE.mdの構成表に載っています（SKILL.md も◯つとも1枚ずつあります）。
     ✅ docs/ の◯枚の文書は、すべて docs/README.md の目次に載っています（最新の作業ログの案内も ◯◯◯◯-◯◯-◯◯ で合っています）。
-    ✅ Markdown ◯枚の中の内部リンク◯本は、すべて実物にたどり着けます。
+    ✅ Markdown ◯枚の中の内部リンク◯本（Markdown ◯本・道具や画像など◯本）は、すべて実物にたどり着けます。
     ✅ 公開ページ◯枚の中のリンク◯本は、すべて公開しているファイルにたどり着けます。
     ✅ 公開ページ◯つは、一覧を持つ◯つの文書すべてに載っています。
     ✅ 公開ページ◯つとも、フッターに自分の公開URLへのリンクがあります。
+    ✅ livecam-db/ の◯つのプログラム（司令塔と情報源）は、すべて livecam-db/README.md のファイル表に載っています。
+    ✅ 自動実行の◯つは、すべて docs/自動実行の健康診断表.md の一覧に載っています。
 
 ズレていたときは、足りない側を ❌ で並べて表示し、終了コード1で終わる。
 ※ 直すのは人の仕事（この道具はCLAUDE.mdを書き換えない）。地図の説明文は
@@ -109,6 +148,12 @@ from __future__ import annotations
 import re
 import sys
 from pathlib import Path
+
+# Windows（日本語）の画面でも絵文字（✅など）で落ちないよう、出力を utf-8 にそろえる
+# （Linux の GitHub Actions では元から utf-8 なので変化なし）
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8")
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CLAUDE_MD = REPO_ROOT / "CLAUDE.md"
@@ -146,8 +191,18 @@ ENTRY_RE = re.compile(r"^│\s+[├└]──\s+(\S+)")
 DOCS_LINK_RE = re.compile(r"\]\(([^)/:#]+\.md)(?:#[^)]*)?\)")
 WORKLOG_RE = re.compile(r"^作業ログ_(\d{4}-\d{2}-\d{2})\.md$")
 # 全Markdownの内部リンク照合に使うもの（2026-10-12 追加＝自己改良バックログの候補39）
-# 「[こちら](docs/○○.md)」の形から、リンク先のファイル名だけを拾う（見出し `#…` は切り落とす）。
-MD_LINK_RE = re.compile(r"\]\((?!https?://|mailto:)([^)\s]+?\.md)(?:#[^)]*)?\)")
+# 「[こちら](docs/○○.md)」の形から、リンク先だけを拾う（見出し `#…` は切り落とす）。
+# 2026-10-19（候補73）に **`.md` のしばりを外した**ので、
+# 「[check_map.py](../tools/check_map.py)」のような道具・画像・フォルダ行きも拾う。
+# 外のサイト（`https://…`）や、同じページの中のしるし（`#tab-map`）はこの道具の担当ではない。
+INNER_LINK_RE = re.compile(
+    r"\]\((?!https?://|mailto:|tel:|data:|javascript:|//|#)([^)\s]+?)(?:#[^)]*)?\)"
+)
+# 📝 書き方の見本は、文書の中では「`…`」や ``` で囲んだ**コード**として書かれている。
+#    囲みの中を外さずに数えると、説明のために書いた見本を本物のリンクと見まちがえて
+#    **嘘の❌**を出す（2026-10-19 の実測で1件あった＝アイデア帳の候補73の文中の見本）。
+CODE_FENCE_RE = re.compile(r"^```.*?^```", re.S | re.M)
+CODE_SPAN_RE = re.compile(r"`[^`\n]*`")
 # 読みに行かないフォルダ（Gitの内部・取ってきただけの部品置き場）
 SKIP_DIR_NAMES = {".git", "node_modules", ".venv", "__pycache__"}
 # リンク先が「実在するファイル」ではなく**書き方の見本**のときの目印。
@@ -403,25 +458,40 @@ def _markdown_files() -> list[Path]:
     return found
 
 
+def _without_code(text: str) -> str:
+    """文書から「コードの囲み」を取りのぞく（``` のブロックと `…` の小さな囲み）。
+
+    囲みの中は「こう書く」という**見本**なので、実物が無くて当たり前。
+    取りのぞかないと見本を本物のリンクと見まちがえて嘘の❌を出す（2026-10-19 追加）。
+    """
+    return CODE_SPAN_RE.sub("", CODE_FENCE_RE.sub("", text))
+
+
 def check_md_links() -> bool:
-    """Markdownどうしの内部リンクが、ちゃんと実物にたどり着けるか照合する。
+    """Markdownの中の内部リンクが、ちゃんと実物にたどり着けるか照合する。
 
     文書の中の「[こちら](docs/○○.md)」は、ファイルを引っ越したり名前を変えたりすると
     黙って切れる（押しても何も出ない）。外のサイトへのリンクは
     `tools/check_links.py` が見張っているが、**身内どうしのリンク**は誰も見ていなかった。
     材料は手元のファイル名だけなので、通信は要らない。
+
+    2026-10-19（候補73）に、行き先が `.md` のものだけでなく
+    **道具（`.py`）・画像（`.png`）・フォルダ（`…/`）行き**のリンクも見るようにした。
     """
     files = _markdown_files()
     total = 0
+    others = 0
     problems: list[str] = []
 
     for path in files:
-        text = path.read_text(encoding="utf-8")
+        text = _without_code(path.read_text(encoding="utf-8"))
         here = path.relative_to(REPO_ROOT)
-        for target in MD_LINK_RE.findall(text):
+        for target in INNER_LINK_RE.findall(text):
             if any(mark in target for mark in PLACEHOLDER_MARKS):
                 continue  # 書き方の見本なので、実物が無くて当たり前
             total += 1
+            if not target.endswith(".md"):
+                others += 1
             if target.startswith("/"):
                 destination = REPO_ROOT / target.lstrip("/")
             else:
@@ -438,7 +508,9 @@ def check_md_links() -> bool:
         return False
 
     print(
-        f"✅ Markdown {len(files)}枚の中の内部リンク{total}本は、すべて実物にたどり着けます。"
+        f"✅ Markdown {len(files)}枚の中の内部リンク{total}本"
+        f"（Markdown {total - others}本・道具や画像など{others}本）は、"
+        "すべて実物にたどり着けます。"
     )
     return True
 
@@ -606,7 +678,8 @@ def check_page_footers() -> bool:
         if not footers:
             problems.append(
                 f"❌ {name}/index.html に <footer>…</footer> が見当たりません"
-                "（ページの最後の案内欄ごと無い状態です）"
+                "（ページの最後の案内欄ごと無い状態です。"
+                "<div class=\"footer\"> などで作っている場合は <footer> タグに直してください）"
             )
         elif not any(url in footer for footer in footers):
             hint = (
@@ -630,6 +703,204 @@ def check_page_footers() -> bool:
     return True
 
 
+def check_livecam_sources() -> bool:
+    """livecam-db/ の .py（司令塔と情報源）が、livecam-db/README.md のファイル表に載っているか照合する。
+
+    🇨🇦BC州の `sources/ca_bc.py` が約70日間この表から抜けていた（2026-10-28 に発見＝候補103）。
+    `base.py` は情報源ではなく共通の道具だが、表には載せる約束なので同じく数える。
+    """
+    livecam_dir = REPO_ROOT / "livecam-db"
+    readme = livecam_dir / "README.md"
+    if not (livecam_dir / "sources").is_dir() or not readme.exists():
+        print("❌ livecam-db/sources/ か livecam-db/README.md が見つかりません（引っ越し・名前変え？）")
+        return False
+
+    # 根っこの司令塔（build.py など）と sources/ の情報源。どちらも同じ表に並んでいる。
+    actual = {
+        p.relative_to(livecam_dir).as_posix()
+        for p in [*livecam_dir.glob("*.py"), *livecam_dir.glob("sources/*.py")]
+        if p.name != "__init__.py"
+    }
+    listed = set(
+        re.findall(r"^\|\s*`([^`]+\.py)`\s*\|", readme.read_text(encoding="utf-8"), re.M)
+    )
+
+    problems = [
+        f"❌ {name} が livecam-db/README.md のファイル表に載っていません（書き足し忘れ）"
+        for name in sorted(actual - listed)
+    ] + [
+        f"❌ ファイル表の {name} が実物にありません（消した・名前を変えたのに表が古いまま）"
+        for name in sorted(listed - actual)
+    ]
+    if problems:
+        for problem in problems:
+            print(problem)
+        return False
+
+    print(
+        f"✅ livecam-db/ の{len(actual)}つのプログラム（司令塔と情報源）は、"
+        "すべて livecam-db/README.md のファイル表に載っています。"
+    )
+    return True
+
+
+def check_workflow_table() -> bool:
+    """.github/workflows/ の自動実行が、docs/自動実行の健康診断表.md の一覧にそろっているか照合する。
+
+    健康診断表（2026-10-30 追加＝候補91）は `.yml` を**手で写した表**なので、
+    自動実行が増えたり消えたりした日に、次に書き漏れる場所になる（＝候補105）。
+    見るのは**ファイル名の有無**と、表の上の「自動で動くもの◯つ」の数だけ。
+    周期・時刻の中身までは見ない（候補53と同じく、説明文の意味は機械には測れないため）。
+    """
+    table = REPO_ROOT / "docs" / "自動実行の健康診断表.md"
+    workflows_dir = REPO_ROOT / ".github" / "workflows"
+    if not table.exists() or not workflows_dir.is_dir():
+        print("❌ docs/自動実行の健康診断表.md か .github/workflows/ が見つかりません（引っ越し・名前変え？）")
+        return False
+
+    text = table.read_text(encoding="utf-8")
+    actual = {
+        p.name for p in [*workflows_dir.glob("*.yml"), *workflows_dir.glob("*.yaml")]
+    }
+    # 一覧の表の行（`|` で始まる行）の中で、かっこ書きされたファイル名だけを拾う
+    listed = set(re.findall(r"^\|[^\n]*?`([^`]+\.ya?ml)`", text, re.M))
+
+    problems = [
+        f"❌ {name} が docs/自動実行の健康診断表.md の一覧に載っていません（書き足し忘れ）"
+        for name in sorted(actual - listed)
+    ] + [
+        f"❌ 健康診断表の {name} が .github/workflows/ にありません（消した・名前を変えたのに表が古いまま）"
+        for name in sorted(listed - actual)
+    ]
+    count_match = re.search(r"自動で動くもの\*{0,2}(\d+)つ", text)
+    if count_match and int(count_match.group(1)) != len(actual):
+        problems.append(
+            f"❌ 健康診断表の「自動で動くもの{count_match.group(1)}つ」が、実際の"
+            f"{len(actual)}個とズレています（数字を書き替えてください）"
+        )
+    if problems:
+        for problem in problems:
+            print(problem)
+        return False
+
+    print(f"✅ 自動実行の{len(actual)}つは、すべて docs/自動実行の健康診断表.md の一覧に載っています。")
+    return True
+
+
+def check_backlog_records() -> bool:
+    """アイデア帳の📦（済んだ候補）の行が案内する日付の記録に、その候補番号が書いてあるか照合する。
+
+    📦の行は「→ ✅ 2026-11-02 に実施（記録を見る）」と日付だけで「📗 改良の記録」へ案内する。
+    同じ日に2件やった日は、記録の行に**候補番号**が書いてないとどちらか分からない
+    （2026-09-13 に候補7で実際に迷った＝候補32）。材料はこのファイルの中だけ（通信なし）。
+    ⚠️ ワナ：提案文そのものに日付の例が書いてある行（候補31）があるので、
+       日付は `~~ →` より後ろ（案内の部分）だけから拾う。
+    ❌却下・🔀統合の行は日付の案内が無いので数えない。
+    """
+    backlog = REPO_ROOT / "docs" / "自己改良バックログ.md"
+    if not backlog.exists():
+        print("❌ docs/自己改良バックログ.md が見つかりません（引っ越し・名前変え？）")
+        return False
+    text = backlog.read_text(encoding="utf-8")
+    done = re.search(r"^## 📦.*?(?=^## )", text, re.M | re.S)
+    log = re.search(r"^## 📗 改良の記録.*", text, re.M | re.S)
+    if done is None or log is None:
+        print("❌ アイデア帳から「📦 済んだ候補」か「📗 改良の記録」の見出しが消えています。")
+        return False
+
+    # 記録の行ごとに「書いてある候補番号」を集める。「候補59・79」のような並べ書きも拾う
+    numbers_by_date: dict[str, set[str]] = {}
+    for date, body in re.findall(r"^\|\s*(\d{4}-\d{2}-\d{2})[^|]*\|(.*)$", log.group(0), re.M):
+        found = numbers_by_date.setdefault(date, set())
+        for group in re.findall(r"候補(\d+(?:\s*[・、,，と]\s*\d+)*)", body):
+            found.update(re.findall(r"\d+", group))
+
+    problems: list[str] = []
+    checked = 0
+    for num, tail in re.findall(r"^\|\s*~~(\d+)~~[^\n]*?~~\s*→([^\n]*)", done.group(0), re.M):
+        date = re.search(r"✅\D*?(\d{4}-\d{2}-\d{2})", tail)
+        if date is None:
+            continue
+        checked += 1
+        if num not in numbers_by_date.get(date.group(1), set()):
+            problems.append(
+                f"❌ 📦の候補{num}は「{date.group(1)}の記録を見る」と案内していますが、"
+                f"その日の「📗 改良の記録」に「候補{num}」が書いてありません"
+            )
+    if problems:
+        for problem in problems:
+            print(problem)
+        return False
+
+    print(f"✅ アイデア帳の📦の{checked}行は、すべて案内先の日付の記録に候補番号が書いてあります。")
+    return True
+
+
+def check_toc() -> bool:
+    """この道具の先頭にある「📑 照合の一覧（目次）」が、実際の照合とそろっているか照合する。
+
+    目次（2026-10-20 追加＝候補83）は**手で書いた一覧**なので、照合を足したのに
+    書き足すのを忘れると、目次のほうが嘘になる（＝候補95）。
+    地図（CLAUDE.md）の書き足し忘れを見張る道具が、自分の地図だけ見張られていない
+    のはおかしいので、自分の目次も同じやり方で見張る。
+
+    材料は**このファイルの中身だけ**（通信もよそのファイルも要らない）。
+        ① main() から呼んでいる check_○○() が、ぜんぶ目次に載っているか
+        ② 目次に載っている check_○○() が、いまも main() から呼ばれているか
+        ③ 目次の「照合が◯種類」の数が、実際の数と合っているか
+    """
+    source = Path(__file__).read_text(encoding="utf-8")
+
+    toc_match = re.search(
+        r"■ 📑 この道具がやる照合の一覧.*?(?=\n■ )", source, re.DOTALL
+    )
+    if toc_match is None:
+        print("❌ tools/check_map.py の先頭から「📑 照合の一覧（目次）」が消えています。")
+        return False
+    toc = toc_match.group(0)
+
+    main_match = re.search(r"\ndef main\(\).*?(?=\nif __name__)", source, re.DOTALL)
+    if main_match is None:
+        print("❌ tools/check_map.py の main() が見つかりません（道具の形が壊れています）。")
+        return False
+
+    # 目次の中で「（check_○○）」と名ざしされている照合／main() が実際に呼んでいる照合
+    # ⚠️ ワナ：素朴に `check_[a-z_]+` で拾うと、目次の中の例文にある
+    #    `tools/check_map.py` の「check_map」まで照合の名前だと思って**嘘の❌**を出す
+    #    （作った日に実際に出た）。うしろに `.` が続くものは外す。
+    listed = set(re.findall(r"check_[a-z_]+(?![a-z_.])", toc))
+    called = set(re.findall(r"\b(check_[a-z_]+)\(", main_match.group(0)))
+
+    problems: list[str] = []
+    for name in sorted(called - listed):
+        problems.append(
+            f"❌ 新しい照合 {name}() が、先頭の目次に載っていません"
+            "（目次に1行足してください）"
+        )
+    for name in sorted(listed - called):
+        problems.append(
+            f"❌ 目次に載っている {name}() を、main() がもう呼んでいません"
+            "（やめた照合なら目次からも消してください）"
+        )
+
+    # ①②③のうち③だけは「数字の書き替え忘れ」。種類の数＝main() が呼ぶ照合＋TARGETS の3つ
+    expected_kinds = len(called) + len(TARGETS)
+    kinds_match = re.search(r"照合が(\d+)種類", toc)
+    if kinds_match and int(kinds_match.group(1)) != expected_kinds:
+        problems.append(
+            f"❌ 目次の「照合が{kinds_match.group(1)}種類」が、実際の"
+            f"{expected_kinds}種類とズレています（数字を書き替えてください）"
+        )
+
+    if problems:
+        for problem in problems:
+            print(problem)
+        return False
+
+    print(f"✅ 先頭の目次は、実際の照合{expected_kinds}種類とそろっています。")
+    return True
+
+
 def main() -> int:
     lines = CLAUDE_MD.read_text(encoding="utf-8").splitlines()
 
@@ -639,8 +910,23 @@ def main() -> int:
     html_ok = check_html_links()
     pages_ok = check_page_lists()
     footers_ok = check_page_footers()
+    livecam_ok = check_livecam_sources()
+    workflow_table_ok = check_workflow_table()
+    backlog_ok = check_backlog_records()
+    toc_ok = check_toc()
 
-    if all(results) and docs_ok and links_ok and html_ok and pages_ok and footers_ok:
+    if (
+        all(results)
+        and docs_ok
+        and links_ok
+        and html_ok
+        and pages_ok
+        and footers_ok
+        and livecam_ok
+        and workflow_table_ok
+        and backlog_ok
+        and toc_ok
+    ):
         return 0
 
     ng_targets = [t for t, ok in zip(TARGETS, results) if not ok]
@@ -657,7 +943,7 @@ def main() -> int:
         print("\n❌ もう1つの地図（docs/README.md の目次）と docs/ の中身がズレています。")
         print("   docs/README.md の該当する見出しの下に、1行（リンク＋どんなときに読むか）を足すか消してください。")
     if not links_ok:
-        print("\n❌ Markdownどうしの内部リンクが切れています（押しても何も出ない状態）。")
+        print("\n❌ 文書の中の内部リンクが切れています（押しても何も出ない状態）。")
         print("   リンク先の正しい場所に書き替えるか、相手のファイルを元の場所に戻してください。")
     if not html_ok:
         print("\n❌ 公開ページ（HTML）の中の行き先が、公開しているファイルにたどり着けません。")
@@ -668,6 +954,15 @@ def main() -> int:
     if not footers_ok:
         print("\n❌ 公開ページのフッターに、自分の公開URLへのリンクがありません。")
         print("   そのページの最後に『🌐 公開ページ（いつでも最新）』のリンクを1行足してください。")
+    if not workflow_table_ok:
+        print("\n❌ docs/自動実行の健康診断表.md の一覧が、.github/workflows/ の中身とズレています。")
+        print("   その表に1行（ワークフロー・仕掛け・許される間隔・見方）を足すか消してください。")
+    if not backlog_ok:
+        print("\n❌ アイデア帳の📦の行が案内する日付の記録に、その候補番号がありません。")
+        print("   その日の「📗 改良の記録」の行に「候補◯」を書き足してください（同じ日に2件あると迷うため）。")
+    if not toc_ok:
+        print("\n❌ この道具の先頭の目次（📑 照合の一覧）が、実際の照合とズレています。")
+        print("   tools/check_map.py の先頭の目次に、足した照合の1行を書き足してください。")
     return 1
 
 

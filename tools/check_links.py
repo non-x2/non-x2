@@ -39,6 +39,12 @@ import urllib.error
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
+# Windows（日本語）の画面でも絵文字（✅など）で落ちないよう、出力を utf-8 にそろえる
+# （Linux の GitHub Actions では元から utf-8 なので変化なし）
+for _stream in (sys.stdout, sys.stderr):
+    if hasattr(_stream, "reconfigure"):
+        _stream.reconfigure(encoding="utf-8")
+
 # 公開しているページ（Webに出しているのはこの5つだけ）
 PAGES = [
     "index.html",
