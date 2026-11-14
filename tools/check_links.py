@@ -19,12 +19,31 @@
     ↪️ 引っ越している    … 別のURLに飛ばされる。リンクを書き換えたほうが親切
     ❌ 切れている        … 404/410。**直すべきもの**（このときだけ終了コード1）
     ⚠️ 返事が変          … 403/500など。相手側の一時的な不調かもしれない
+    🤖 機械おことわり    … 何度も調べて「機械からは断られる」と分かっているもの（下の表）
     🌐 ここから届かない  … この部屋のネットが海外を遮断しているだけ。**切れている証拠ではない**
 
 ⚠️ 大事な考え方：「届かない」と「切れている」は違います。
    クラウドの作業部屋からは韓国・台湾などに接続できないことが分かっています。
    それを「リンク切れ」と報告すると、生きているリンクを消してしまいます。
    だからこの道具は、その2つを**はっきり分けて**表示します。
+
+🤖 「調べ済み」を覚えておく（2026-11-14 追加＝自己改良バックログの候補42）
+   ⚠️ の欄に出る何本かは、**毎回おなじ顔ぶれ**です。
+   そのままだと、次に見た人が**また同じリンクを一から調べ直す**ことになります。
+   そこで、調べて答えが出たものは下の `KNOWN_BLOCKED` に書いておき、
+   ⚠️ とは別の **🤖 枠**に分けて出すようにしました（責めない別枠）。
+   「切れている」の判定（❌＝終了コード1）は**まったく変えていません**。
+
+   📏 2026-11-14 の実測でわかったこと：
+   この4本は、本物のブラウザ（Chromium）で開いても**同じ403／429**でした。
+   つまり「素っ気ないUser-Agentだから断られている」のではなく、
+   **クラウドの作業部屋そのものが断られている**ようです。
+   だから 🤖 の説明は「ブラウザなら開ける」とは書きません（確かめられていないため）。
+   のんさんのご自宅のパソコンで開けるかどうかは、**人の目で見るのがいちばん確実**です。
+
+   ⏰ この表は**手書き**なので、放っておくと古くなります（＝候補33「時間とともに嘘になる数字」の仲間）。
+   そこで、表に書いた相手の返事が変わったときは、道具のほうから
+   「表を見直してください」と知らせます（黙って隠さない）。
 
 Python の標準機能だけで動きます（追加インストール不要）。
 """
@@ -66,6 +85,29 @@ HREF = re.compile(r'href="(https?://[^"]+)"')
 
 # 判定の記号
 OK, MOVED, DEAD, ODD, UNREACHABLE = "✅", "↪️", "❌", "⚠️", "🌐"
+KNOWN = "🤖"          # 調べ済み＝「機械からのアクセスは断られる」と分かっているもの
+
+# 🤖 調べ済みのリンク（URL → いつ調べたか・どんな返事か・ひとこと）
+#    ここに書いたURLが「書いてある番号と同じ返事」を返したときだけ、⚠️ ではなく 🤖 に分けます。
+#    ちがう番号（例：404）になったら、ごまかさず ❌／⚠️ のほうに出ます。
+KNOWN_BLOCKED = {
+    "https://teideninfo.tepco.co.jp/": {
+        "code": 403, "checked": "2026-11-14",
+        "note": "東京電力の停電情報。403＝おことわり（ブラウザでも同じ返事でした）",
+    },
+    "https://traininfo.jreast.co.jp/train_info/": {
+        "code": 403, "checked": "2026-11-14",
+        "note": "JR東日本の運行情報。403＝おことわり（ブラウザでも同じ返事でした）",
+    },
+    "https://www.c-ihighway.jp/cgi/camera.cgi": {
+        "code": 403, "checked": "2026-11-14",
+        "note": "中日本高速のカメラ一覧。403＝おことわり（ブラウザでも同じ返事でした）",
+    },
+    "https://www.shutoko.jp/traffic/": {
+        "code": 429, "checked": "2026-11-14",
+        "note": "首都高の交通状況。429＝混みすぎ（人かどうかを確かめる画面が出ます）",
+    },
+}
 
 
 def collect_links(pages):
@@ -139,18 +181,29 @@ def main():
             time.sleep(1.0)
             results[i] = check(urls[i])
 
-    buckets = {OK: [], MOVED: [], DEAD: [], ODD: [], UNREACHABLE: []}
+    buckets = {OK: [], MOVED: [], DEAD: [], ODD: [], KNOWN: [], UNREACHABLE: []}
+    stale = []   # 調べ済みの表と、きょうの返事が食い違ったもの（表の見直しをお願いする）
     for url, (mark, detail, _final) in zip(urls, results):
+        known = KNOWN_BLOCKED.get(url)
+        if known:
+            if mark is ODD and detail.strip().startswith(str(known["code"])):
+                # 表どおりの返事＝調べ済み。⚠️ ではなく責めない別枠へ
+                buckets[KNOWN].append(
+                    (url, f'{detail}（{known["checked"]} に調査）{known["note"]}', where[url]))
+                continue
+            # 表とちがう返事になった＝表が古いかもしれない。隠さず元の欄に出したうえで知らせる
+            stale.append((url, mark, detail, known))
         buckets[mark].append((url, detail, where[url]))
 
     titles = {
         DEAD:        "❌ 切れている（直すべきもの）",
         MOVED:       "↪️ 引っ越している（書き換えると親切）",
         ODD:         "⚠️ 返事が変（相手の一時的な不調かも）",
+        KNOWN:       "🤖 機械おことわり（調べ済み・直す必要はありません）",
         UNREACHABLE: "🌐 この部屋から届かない（切れている証拠ではない）",
         OK:          "✅ 生きている",
     }
-    for mark in (DEAD, MOVED, ODD, UNREACHABLE, OK):
+    for mark in (DEAD, MOVED, ODD, KNOWN, UNREACHABLE, OK):
         items = buckets[mark]
         if not items:
             continue
@@ -165,11 +218,24 @@ def main():
             print(f"      載っている場所: {', '.join(pages_of)}")
         print()
 
+    # 表に書いた相手の返事が変わったら、黙って隠さずお知らせする（表は手書きなので古くなる）
+    if stale:
+        print(f"⏰ 調べ済みの表（KNOWN_BLOCKED）と返事が食い違ったリンクが {len(stale)} 本あります。"
+              "表を見直してください：")
+        for url, mark, detail, known in sorted(stale):
+            print(f"   {url}")
+            print(f"      → 表では {known['code']}（{known['checked']} に調査）／"
+                  f"きょうは {mark} {detail}")
+        print()
+
     dead = len(buckets[DEAD])
     if dead:
         print(f"❌ 切れているリンクが {dead} 本あります。直してください。")
         return 1
     print("✅ 切れているリンクはありませんでした。")
+    if buckets[KNOWN]:
+        print(f"（{len(buckets[KNOWN])}本は「機械おことわり」と調べ済みのものです。"
+              "調べ直さなくて大丈夫です）")
     if buckets[UNREACHABLE]:
         print(f"（{len(buckets[UNREACHABLE])}本は、この部屋のネットの都合で確かめられませんでした。"
               "実機やローカルで開いてみてください）")

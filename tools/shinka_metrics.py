@@ -215,6 +215,14 @@ def build_report(
     lines.append(f"| 🌐 公開ページ数 | {metrics['public_pages']} |")
     lines.append("")
     lines.append(
+        f"> 📚 ドキュメント数は `docs/` の `.md` を全部数えた枚数で、"
+        f"**目次そのもの（`docs/README.md`）も入っています**。"
+        f"いっぽう `npm run check:map` は「目次に載せる相手」だけを数えるので"
+        f"**1枚少なく（いまは{max(metrics['docs'] - 1, 0)}枚）**表示されます。"
+        "数字が食い違って見えても、どちらも正しいです。"
+    )
+    lines.append("")
+    lines.append(
         "> 🌐 公開ページ数は、公開ワークフロー（`pages-deploy.yml`）が"
         "実際に配置しているものを数えています。"
         "Webに出しているのは入口ページと各アプリだけで、"
