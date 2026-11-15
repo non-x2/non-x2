@@ -1,5 +1,5 @@
 {
- "generatedAt": "2026-11-16T00:45:45+09:00",
+ "generatedAt": "2026-11-16T06:08:22+09:00",
  "source": "米国ハリケーンセンター（NHC/CPHC、https://www.nhc.noaa.gov/）＋米軍合同台風警報センター（JTWC、https://www.metoc.navy.mil/jtwc/）",
  "note": "日本周辺（北西太平洋）は気象庁が担当（latest.json）。このファイルは含みません。",
  "count": 1,
@@ -7,28 +7,28 @@
   {
    "id": "jtwc-04p-2026",
    "bin": "04P",
-   "name": "Four",
+   "name": "Xavier",
    "basin": "南半球",
    "category": "熱帯暴風",
-   "issue": "2026-11-15T06:00:00+00:00",
+   "issue": "2026-11-15T18:00:00+00:00",
    "analysis": {
     "hours": 0,
-    "validTime": "2026-11-15T06:00:00+00:00",
+    "validTime": "2026-11-15T18:00:00+00:00",
     "category": "熱帯暴風",
-    "lat": -8.4,
-    "lon": -158.9,
-    "windMs": 18,
+    "lat": -8.1,
+    "lon": -160.1,
+    "windMs": 21,
     "gustMs": null,
     "pressure": null,
-    "galeRadiusKm": 167
+    "galeRadiusKm": 176
    },
    "forecast": [
     {
      "hours": 12,
-     "validTime": "2026-11-15T18:00:00+00:00",
+     "validTime": "2026-11-16T06:00:00+00:00",
      "category": "熱帯暴風",
-     "lat": -8.5,
-     "lon": -160.1,
+     "lat": -8.4,
+     "lon": -161.2,
      "windMs": 26,
      "gustMs": null,
      "pressure": null,
@@ -36,65 +36,65 @@
     },
     {
      "hours": 24,
-     "validTime": "2026-11-16T06:00:00+00:00",
-     "category": "熱帯暴風",
-     "lat": -8.8,
-     "lon": -161.3,
-     "windMs": 31,
+     "validTime": "2026-11-16T18:00:00+00:00",
+     "category": "サイクロン",
+     "lat": -8.7,
+     "lon": -162.5,
+     "windMs": 36,
      "gustMs": null,
      "pressure": null,
      "galeRadiusKm": 185
     },
     {
      "hours": 36,
-     "validTime": "2026-11-16T18:00:00+00:00",
+     "validTime": "2026-11-17T06:00:00+00:00",
      "category": "サイクロン",
-     "lat": -9.1,
-     "lon": -162.5,
-     "windMs": 39,
+     "lat": -9.0,
+     "lon": -163.4,
+     "windMs": 44,
      "gustMs": null,
      "pressure": null,
-     "galeRadiusKm": 185
+     "galeRadiusKm": 204
     },
     {
      "hours": 48,
-     "validTime": "2026-11-17T06:00:00+00:00",
+     "validTime": "2026-11-17T18:00:00+00:00",
      "category": "サイクロン",
-     "lat": -9.4,
-     "lon": -163.5,
-     "windMs": 41,
+     "lat": -9.5,
+     "lon": -163.9,
+     "windMs": 46,
      "gustMs": null,
      "pressure": null,
-     "galeRadiusKm": 185
+     "galeRadiusKm": 222
     },
     {
      "hours": 60,
-     "validTime": "2026-11-17T18:00:00+00:00",
+     "validTime": "2026-11-18T06:00:00+00:00",
      "category": "サイクロン",
-     "lat": -9.7,
-     "lon": -164.3,
-     "windMs": 41,
+     "lat": -9.9,
+     "lon": -164.1,
+     "windMs": 46,
      "gustMs": null,
      "pressure": null,
-     "galeRadiusKm": 204
+     "galeRadiusKm": 222
     },
     {
      "hours": 72,
-     "validTime": "2026-11-18T06:00:00+00:00",
+     "validTime": "2026-11-18T18:00:00+00:00",
      "category": "サイクロン",
-     "lat": -10.0,
-     "lon": -164.6,
-     "windMs": 39,
+     "lat": -10.3,
+     "lon": -164.1,
+     "windMs": 41,
      "gustMs": null,
      "pressure": null,
-     "galeRadiusKm": 204
+     "galeRadiusKm": 222
     },
     {
      "hours": 96,
-     "validTime": "2026-11-19T06:00:00+00:00",
+     "validTime": "2026-11-19T18:00:00+00:00",
      "category": "サイクロン",
-     "lat": -10.3,
-     "lon": -164.7,
+     "lat": -10.5,
+     "lon": -163.9,
      "windMs": 33,
      "gustMs": null,
      "pressure": null,
@@ -102,14 +102,14 @@
     },
     {
      "hours": 120,
-     "validTime": "2026-11-20T06:00:00+00:00",
+     "validTime": "2026-11-20T18:00:00+00:00",
      "category": "熱帯暴風",
-     "lat": -10.6,
-     "lon": -165.0,
+     "lat": -10.7,
+     "lon": -164.1,
      "windMs": 26,
      "gustMs": null,
      "pressure": null,
-     "galeRadiusKm": 204
+     "galeRadiusKm": 185
     }
    ],
    "track": []
