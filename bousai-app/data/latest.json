@@ -1,7 +1,15 @@
 {
- "generatedAt": "2026-11-16T20:59:12+09:00",
+ "generatedAt": "2026-11-17T07:28:24+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20261117014549",
+   "time": "2026-11-17T01:45:00+09:00",
+   "place": "宮古島近海",
+   "magnitude": 3.9,
+   "maxIntensity": "1",
+   "depthKm": 30.0
+  },
   {
    "id": "20261116132858",
    "time": "2026-11-16T13:28:00+09:00",
@@ -113,14 +121,6 @@
    "magnitude": 2.9,
    "maxIntensity": "2",
    "depthKm": 10.0
-  },
-  {
-   "id": "20261114153905",
-   "time": "2026-11-14T15:39:00+09:00",
-   "place": "根室半島南東沖",
-   "magnitude": 4.2,
-   "maxIntensity": "1",
-   "depthKm": 30.0
   }
  ],
  "tsunami": {
