@@ -484,7 +484,12 @@ python3 livecam-db/build_world.py --no-verify  # 写真の確認をとばす
 | 🔄 再確認 | 🇺🇸 ワシントン州・フロリダ州・ミネソタ州・🇯🇵 富山県 | **変化なし**（WA＝ArcGISの説明に「low volume use」「アクセスは理由なく制限しうる」とあるだけで再配布許可なし／富山＝オープンデータに道路カメラなし） |
 | ✅ 既存 | アイオワ・BC州・フィンランド | 疎通OK（アイオワ・フィンランドは今回の実測で200応答。ライセンス表記の変化は見つからず）。海上保安庁・JICEは今回は再確認していない（前回から変化の報告なし） |
 
-⭐ **次回への申し送り**：ノルウェーは `https://dataut.vegvesen.no/en/dataset/webkamera`（DATEX II／WFSの資料ページ）から実際の取得先URLを探し、鍵なしで取れて写真のhttps URLがあれば候補に格上げ。DGT（スペイン）は問い合わせ待ちのまま。
+🔎 **ノルウェーの追加確認（同日）**：資料ページ（DATEX II／WFS）には説明文と仕様書のリンク（`git.vegvesen.no`）しかなく、**取得先URLは載っていません**。
+道路庁の地図画面 `webkamera.atlas.vegvesen.no` はJavaScriptで組む画面で、一覧APIは返りませんでした（HTMLが返るだけ）。
+画面の裏側の写真置き場 `kamera.atlas.vegvesen.no/api/images/` を使うことはできますが、**公式の一括データではなく画面専用の口**なので使いません（「情報源を選ぶときの約束」）。
+→ 結論：**⏸ 保留のまま**。DATEX II の仕様書（`git.vegvesen.no/projects/DATEX2/repos/datex2-spesifications`）で、公式の取得先と認証の要否が分かったときだけ再開。
+
+⭐ **次回への申し送り**：ノルウェーは上の仕様書で取得先と認証の要否が分かれば候補に格上げ（それまで同じ調査は繰り返さない）。DGT（スペイン）は問い合わせ待ちのまま。
 
 ### 安全装置
 
