@@ -10,7 +10,7 @@ import re
 import subprocess
 import sys
 from collections import Counter, defaultdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 # Windows（日本語）の画面でも絵文字（✅など）で落ちないよう、出力を utf-8 にそろえる
@@ -22,6 +22,13 @@ for _stream in (sys.stdout, sys.stderr):
 # リポジトリルートは、このスクリプト自身の位置（tools/の親）から求める。
 # カレントディレクトリに依存しない。
 REPO_ROOT = Path(__file__).resolve().parent.parent
+
+# 日本時間（JST＝世界時+9時間）に固定する。
+# このスクリプトはクラウド（部屋の時計が世界時）でもローカル（日本時間）でも走るので、
+# 時計をそのまま使うと「生成日時」が回によって9時間ズレ、グラフの日の区切りも1日ぶんズレる。
+# 読む人はのんさん（日本）なので、どこで走っても日本時間で数える。
+# （④の見張り番 tools/check_typhoon_snapshot.py と同じ書き方）
+JST = timezone(timedelta(hours=9))
 
 
 def run_git(args: list[str]) -> str:
@@ -143,17 +150,25 @@ def daily_commit_counts(days: int = 14) -> tuple[list[tuple[str, int]], str | No
     コミットが無い日は0。
     浅いクローンでは古い日が「実際は有るのに0」に見えて誤解を招くため、
     履歴が存在する最古の日より前は表示しない。2番目の戻り値は履歴の開始日（YYYY-MM-DD）。"""
-    out = run_git(["log", "--date=short", "--format=%cd"])
+    # %cd を --date=iso-strict で受け取り、日本時間に直してから「何日のコミットか」を数える。
+    # （--date=short は走った部屋の時計で切るので、部屋によって日の境目が9時間ズレる）
+    out = run_git(["log", "--date=iso-strict", "--format=%cd"])
     counts: Counter[str] = Counter()
     dates: list[str] = []
     for line in out.splitlines():
         line = line.strip()
-        if line:
-            counts[line] += 1
-            dates.append(line)
+        if not line:
+            continue
+        try:
+            stamp = datetime.fromisoformat(line)
+        except ValueError:
+            continue
+        key = stamp.astimezone(JST).strftime("%Y-%m-%d")
+        counts[key] += 1
+        dates.append(key)
     oldest = min(dates) if dates else None
 
-    today = datetime.now().date()
+    today = datetime.now(JST).date()
     start = today - timedelta(days=days - 1)
     if oldest is not None:
         oldest_date = datetime.strptime(oldest, "%Y-%m-%d").date()
@@ -176,7 +191,7 @@ def build_report(
     history_start: str | None,
     shallow: bool,
 ) -> str:
-    now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
+    now_str = datetime.now(JST).strftime("%Y-%m-%d %H:%M")
 
     x_axis_labels = ", ".join(f'"{label}"' for label, _ in daily_counts)
     bar_values = ", ".join(str(count) for _, count in daily_counts)
@@ -197,7 +212,7 @@ def build_report(
         "> このファイルは `tools/shinka_metrics.py` が自動生成します（🔁グラフのループ）。"
         "手で編集しないでください。"
     )
-    lines.append(f"> 生成日時: {now_str}")
+    lines.append(f"> 生成日時: {now_str}（日本時間）")
     lines.append("")
     lines.append("# 🌱 のんラボ 進化レポート")
     lines.append("")
@@ -213,6 +228,14 @@ def build_report(
     lines.append(f"| 💾 総コミット数 | {metrics['total_commits']} |")
     lines.append(f"| 🔀 マージ済みPR数（推定） | {metrics['merged_prs']} |")
     lines.append(f"| 🌐 公開ページ数 | {metrics['public_pages']} |")
+    lines.append("")
+    lines.append(
+        f"> 📚 ドキュメント数は `docs/` の `.md` を全部数えた枚数で、"
+        f"**目次そのもの（`docs/README.md`）も入っています**。"
+        f"いっぽう `npm run check:map` は「目次に載せる相手」だけを数えるので"
+        f"**1枚少なく（いまは{max(metrics['docs'] - 1, 0)}枚）**表示されます。"
+        "数字が食い違って見えても、どちらも正しいです。"
+    )
     lines.append("")
     lines.append(
         "> 🌐 公開ページ数は、公開ワークフロー（`pages-deploy.yml`）が"
