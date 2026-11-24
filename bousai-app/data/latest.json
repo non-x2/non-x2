@@ -1,7 +1,55 @@
 {
- "generatedAt": "2026-11-24T21:54:45+09:00",
+ "generatedAt": "2026-11-25T08:14:30+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20261125072004",
+   "time": "2026-11-25T07:20:00+09:00",
+   "place": "福島県会津",
+   "magnitude": 3.4,
+   "maxIntensity": "1",
+   "depthKm": 10.0
+  },
+  {
+   "id": "20261125064641",
+   "time": "2026-11-25T06:46:00+09:00",
+   "place": "福島県会津",
+   "magnitude": 3.8,
+   "maxIntensity": "2",
+   "depthKm": 10.0
+  },
+  {
+   "id": "20261125053255",
+   "time": "2026-11-25T05:32:00+09:00",
+   "place": "福島県会津",
+   "magnitude": 3.2,
+   "maxIntensity": "2",
+   "depthKm": 10.0
+  },
+  {
+   "id": "20261125041942",
+   "time": "2026-11-25T04:19:00+09:00",
+   "place": "神奈川県西部",
+   "magnitude": 2.5,
+   "maxIntensity": "1",
+   "depthKm": 20.0
+  },
+  {
+   "id": "20261125014053",
+   "time": "2026-11-25T01:40:00+09:00",
+   "place": "大隅半島東方沖",
+   "magnitude": 3.9,
+   "maxIntensity": "1",
+   "depthKm": 30.0
+  },
+  {
+   "id": "20261125001757",
+   "time": "2026-11-25T00:17:00+09:00",
+   "place": "薩摩半島西方沖",
+   "magnitude": 1.8,
+   "maxIntensity": "1",
+   "depthKm": 0.0
+  },
   {
    "id": "20261124210714",
    "time": "2026-11-24T21:07:00+09:00",
@@ -73,54 +121,6 @@
    "magnitude": 3.9,
    "maxIntensity": "2",
    "depthKm": 0.0
-  },
-  {
-   "id": "20261123130228",
-   "time": "2026-11-23T13:02:00+09:00",
-   "place": "天草灘",
-   "magnitude": 2.6,
-   "maxIntensity": "1",
-   "depthKm": 10.0
-  },
-  {
-   "id": "20261123085028",
-   "time": "2026-11-23T08:50:00+09:00",
-   "place": "沖縄本島近海",
-   "magnitude": 3.5,
-   "maxIntensity": "1",
-   "depthKm": 50.0
-  },
-  {
-   "id": "20261123074929",
-   "time": "2026-11-23T07:49:00+09:00",
-   "place": "天草灘",
-   "magnitude": 4.1,
-   "maxIntensity": "3",
-   "depthKm": 0.0
-  },
-  {
-   "id": "20261123063519",
-   "time": "2026-11-23T06:35:00+09:00",
-   "place": "熊本県熊本地方",
-   "magnitude": 2.8,
-   "maxIntensity": "1",
-   "depthKm": 10.0
-  },
-  {
-   "id": "20261123043246",
-   "time": "2026-11-23T04:32:00+09:00",
-   "place": "鳥取県東部",
-   "magnitude": 2.7,
-   "maxIntensity": "1",
-   "depthKm": 10.0
-  },
-  {
-   "id": "20261123043134",
-   "time": "2026-11-23T04:31:00+09:00",
-   "place": "熊本県熊本地方",
-   "magnitude": 3.0,
-   "maxIntensity": "1",
-   "depthKm": 10.0
   }
  ],
  "tsunami": {
