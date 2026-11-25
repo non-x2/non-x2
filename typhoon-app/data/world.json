@@ -1,63 +1,7 @@
 {
- "generatedAt": "2026-11-23T07:39:04+09:00",
+ "generatedAt": "2026-11-26T04:29:45+09:00",
  "source": "米国ハリケーンセンター（NHC/CPHC、https://www.nhc.noaa.gov/）＋米軍合同台風警報センター（JTWC、https://www.metoc.navy.mil/jtwc/）",
  "note": "日本周辺（北西太平洋）は気象庁が担当（latest.json）。このファイルは含みません。",
- "count": 1,
- "storms": [
-  {
-   "id": "jtwc-04p-2026",
-   "bin": "04P",
-   "name": "Xavier",
-   "basin": "南半球",
-   "category": "熱帯暴風",
-   "issue": "2026-11-22T18:00:00+00:00",
-   "analysis": {
-    "hours": 0,
-    "validTime": "2026-11-22T18:00:00+00:00",
-    "category": "熱帯暴風",
-    "lat": -11.8,
-    "lon": -168.4,
-    "windMs": 18,
-    "gustMs": null,
-    "pressure": null,
-    "galeRadiusKm": 111
-   },
-   "forecast": [
-    {
-     "hours": 12,
-     "validTime": "2026-11-23T06:00:00+00:00",
-     "category": "熱帯暴風",
-     "lat": -12.0,
-     "lon": -169.1,
-     "windMs": 18,
-     "gustMs": null,
-     "pressure": null,
-     "galeRadiusKm": 111
-    },
-    {
-     "hours": 24,
-     "validTime": "2026-11-23T18:00:00+00:00",
-     "category": "熱帯暴風",
-     "lat": -12.0,
-     "lon": -170.0,
-     "windMs": 18,
-     "gustMs": null,
-     "pressure": null,
-     "galeRadiusKm": 111
-    },
-    {
-     "hours": 36,
-     "validTime": "2026-11-24T06:00:00+00:00",
-     "category": "熱帯低気圧",
-     "lat": -11.7,
-     "lon": -170.9,
-     "windMs": 15,
-     "gustMs": null,
-     "pressure": null,
-     "galeRadiusKm": null
-    }
-   ],
-   "track": []
-  }
- ]
+ "count": 0,
+ "storms": []
 }
