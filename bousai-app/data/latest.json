@@ -1,7 +1,23 @@
 {
- "generatedAt": "2026-11-28T07:17:47+09:00",
+ "generatedAt": "2026-11-28T13:11:41+09:00",
  "source": "気象庁（https://www.jma.go.jp/）",
  "quakes": [
+  {
+   "id": "20261128115713",
+   "time": "2026-11-28T11:57:00+09:00",
+   "place": "熊本県天草・芦北地方",
+   "magnitude": 2.4,
+   "maxIntensity": "1",
+   "depthKm": 10.0
+  },
+  {
+   "id": "20261128095450",
+   "time": "2026-11-28T09:54:00+09:00",
+   "place": "高知県西部",
+   "magnitude": 3.2,
+   "maxIntensity": "1",
+   "depthKm": 30.0
+  },
   {
    "id": "20261128043207",
    "time": "2026-11-28T04:32:00+09:00",
@@ -105,22 +121,6 @@
    "magnitude": 2.8,
    "maxIntensity": "2",
    "depthKm": 10.0
-  },
-  {
-   "id": "20261126075935",
-   "time": "2026-11-26T07:59:00+09:00",
-   "place": "熊本県天草・芦北地方",
-   "magnitude": 1.2,
-   "maxIntensity": "1",
-   "depthKm": 0.0
-  },
-  {
-   "id": "20261126075248",
-   "time": "2026-11-26T07:52:00+09:00",
-   "place": "高知県中部",
-   "magnitude": 3.4,
-   "maxIntensity": "1",
-   "depthKm": 30.0
   }
  ],
  "tsunami": {
